@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Trash2, DoorOpen, Edit3, Box } from "lucide-react";
+import { Plus, Trash2, DoorOpen, Edit3, Box, Grid3x3 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +43,7 @@ interface RoomEditorProps {
 
 export const RoomEditor = ({ room, open, onClose, onSave }: RoomEditorProps) => {
   const [editedRoom, setEditedRoom] = useState<Room | null>(room);
+  const [shapeEditMode, setShapeEditMode] = useState(false);
 
   const handleAddSection = () => {
     if (!editedRoom) return;
@@ -153,6 +154,10 @@ export const RoomEditor = ({ room, open, onClose, onSave }: RoomEditorProps) => 
                   <SelectItem value="storage">Storage</SelectItem>
                   <SelectItem value="medical">Medical</SelectItem>
                   <SelectItem value="engineering">Engineering</SelectItem>
+                  <SelectItem value="security">Security</SelectItem>
+                  <SelectItem value="laboratory">Laboratory</SelectItem>
+                  <SelectItem value="observation">Observation</SelectItem>
+                  <SelectItem value="decontamination">Decontamination</SelectItem>
                   <SelectItem value="custom">Custom</SelectItem>
                 </SelectContent>
               </Select>
@@ -177,6 +182,26 @@ export const RoomEditor = ({ room, open, onClose, onSave }: RoomEditorProps) => 
                 onChange={(e) => setEditedRoom({ ...editedRoom, height: parseInt(e.target.value) || 0 })}
               />
             </div>
+          </div>
+
+          {/* Custom Shape Editor */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <Label>Custom Shape Editor</Label>
+              <Button 
+                size="sm" 
+                variant={shapeEditMode ? "default" : "outline"}
+                onClick={() => setShapeEditMode(!shapeEditMode)}
+              >
+                <Grid3x3 className="w-4 h-4 mr-1" />
+                {shapeEditMode ? "Exit Shape Editor" : "Edit Shape"}
+              </Button>
+            </div>
+            {shapeEditMode && (
+              <div className="p-3 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+                <p>Shape editor coming soon - create custom room shapes by clicking grid squares.</p>
+              </div>
+            )}
           </div>
 
           {/* Additional Sections for L-shaped rooms */}
@@ -210,10 +235,10 @@ export const RoomEditor = ({ room, open, onClose, onSave }: RoomEditorProps) => 
             </div>
           </div>
 
-          {/* Doors */}
+          {/* Doors & Internal Rooms */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <Label>Doors</Label>
+              <Label>Doors & Access Points</Label>
               <Button size="sm" onClick={handleAddDoor}>
                 <Plus className="w-4 h-4 mr-1" />
                 Add Door

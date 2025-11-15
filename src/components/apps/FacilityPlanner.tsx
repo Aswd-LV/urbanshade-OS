@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { Grid3x3, Plus, Trash2, Move, Save, FolderOpen, Settings, Route, Pen, Eraser, Square, ZoomIn, ZoomOut, Maximize2, Link } from "lucide-react";
+import { Grid3x3, Plus, Trash2, Move, Save, FolderOpen, Settings as SettingsIcon, Route, Pen, Eraser, Square, ZoomIn, ZoomOut, Maximize2, Link } from "lucide-react";
 import { toast } from "sonner";
 import { saveState, loadState } from "@/lib/persistence";
 import { RoomEditor } from "./RoomEditor";
 import { HallwayTool } from "./HallwayTool";
+import { RoomProperties } from "./RoomProperties";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface PlannerRoom {
   id: string;
@@ -44,11 +47,6 @@ export const FacilityPlanner = () => {
   const [hallwayMode, setHallwayMode] = useState(false);
   const [hallwayPoints, setHallwayPoints] = useState<HallwayPoint[]>([]);
   const [clickCount, setClickCount] = useState<{ [key: string]: number }>({});
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [currentPath, setCurrentPath] = useState<{ x: number; y: number }[]>([]);
-  const [drawColor, setDrawColor] = useState("#00d9ff");
-  const [drawWidth, setDrawWidth] = useState(3);
-  const [eraserMode, setEraserMode] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -56,7 +54,19 @@ export const FacilityPlanner = () => {
   const [snapToGrid, setSnapToGrid] = useState(() => loadState('facility_planner_snap', true));
   const [showConnections, setShowConnections] = useState(() => loadState('facility_planner_connections', true));
   const [selectedRoomForConnect, setSelectedRoomForConnect] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [placingRoomType, setPlacingRoomType] = useState<string | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [draggingRoom, setDraggingRoom] = useState<string | null>(null);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, roomX: 0, roomY: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    toast.info("Facility Planner - BETA", {
+      description: "This feature is in beta. Some features may be unstable.",
+      duration: 5000,
+    });
+  }, []);
 
   useEffect(() => {
     saveState('facility_planner_rooms', rooms);
@@ -117,23 +127,77 @@ export const FacilityPlanner = () => {
     }
   };
 
-  const handleRoomClick = (room: PlannerRoom) => {
+  const handleRoomClick = (room: PlannerRoom, e: React.MouseEvent) => {
+    if (draggingRoom) return;
+    setSelectedRoomId(room.id);
     const key = room.id;
     const count = (clickCount[key] || 0) + 1;
     setClickCount({ ...clickCount, [key]: count });
     if (count === 2) {
       setEditingRoom(room);
       setClickCount({});
+      setSelectedRoomId(null);
     }
     setTimeout(() => setClickCount(prev => ({ ...prev, [key]: 0 })), 500);
   };
 
+  const handleRoomDragStart = (room: PlannerRoom, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDraggingRoom(room.id);
+    setDragStart({
+      x: e.clientX,
+      y: e.clientY,
+      roomX: room.x,
+      roomY: room.y,
+    });
+  };
+
+  const handleRoomDrag = (e: React.MouseEvent) => {
+    if (!draggingRoom) return;
+    const dx = (e.clientX - dragStart.x) / zoom;
+    const dy = (e.clientY - dragStart.y) / zoom;
+    setRooms(rooms.map(r => 
+      r.id === draggingRoom 
+        ? { ...r, x: snapValue(dragStart.roomX + dx), y: snapValue(dragStart.roomY + dy) }
+        : r
+    ));
+  };
+
+  const handleRoomDragEnd = () => {
+    setDraggingRoom(null);
+  };
+
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!hallwayMode) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = snapValue((e.clientX - rect.left - pan.x) / zoom);
-    const y = snapValue((e.clientY - rect.top - pan.y) / zoom);
-    setHallwayPoints([...hallwayPoints, { x, y }]);
+    if (hallwayMode) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = snapValue((e.clientX - rect.left - pan.x) / zoom);
+      const y = snapValue((e.clientY - rect.top - pan.y) / zoom);
+      setHallwayPoints([...hallwayPoints, { x, y }]);
+      return;
+    }
+    
+    if (placingRoomType) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = snapValue((e.clientX - rect.left - pan.x) / zoom);
+      const y = snapValue((e.clientY - rect.top - pan.y) / zoom);
+      setRooms([...rooms, {
+        id: `room-${Date.now()}`,
+        name: `${placingRoomType} ${rooms.length + 1}`,
+        type: placingRoomType,
+        x,
+        y,
+        width: 120,
+        height: 80,
+        sections: [],
+        doors: [],
+        connections: []
+      }]);
+      setPlacingRoomType(null);
+      toast.success("Room placed - double-click to edit");
+      return;
+    }
+    
+    setSelectedRoomId(null);
   };
 
   const completeHallway = () => {
@@ -153,15 +217,11 @@ export const FacilityPlanner = () => {
   };
 
   const addRoom = (type: string) => {
-    const x = snapValue(100);
-    const y = snapValue(100);
-    setRooms([...rooms, {
-      id: `room-${Date.now()}`, name: `${type} ${rooms.length + 1}`, type,
-      x, y, width: 120, height: 80,
-      sections: [], doors: [], connections: []
-    }]);
-    toast.success("Room added - double-click to edit");
+    setPlacingRoomType(type);
+    toast.info("Click on canvas to place room");
   };
+
+  const selectedRoom = selectedRoomId ? rooms.find(r => r.id === selectedRoomId) : null;
 
   const getRoomCenter = (room: PlannerRoom) => ({
     x: room.x + room.width / 2,
@@ -171,9 +231,24 @@ export const FacilityPlanner = () => {
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="p-4 border-b flex gap-2 flex-wrap items-center">
-        <Button onClick={() => addRoom("control")} size="sm"><Plus className="w-4 h-4 mr-1" />Control</Button>
-        <Button onClick={() => addRoom("research")} size="sm"><Plus className="w-4 h-4 mr-1" />Research</Button>
-        <Button onClick={() => addRoom("containment")} size="sm"><Plus className="w-4 h-4 mr-1" />Containment</Button>
+        <Select value={placingRoomType || ""} onValueChange={addRoom}>
+          <SelectTrigger className="w-[180px] h-8">
+            <SelectValue placeholder="Add Room..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="control">Control Room</SelectItem>
+            <SelectItem value="research">Research Lab</SelectItem>
+            <SelectItem value="containment">Containment Cell</SelectItem>
+            <SelectItem value="storage">Storage</SelectItem>
+            <SelectItem value="medical">Medical Bay</SelectItem>
+            <SelectItem value="engineering">Engineering</SelectItem>
+            <SelectItem value="security">Security</SelectItem>
+            <SelectItem value="laboratory">Laboratory</SelectItem>
+            <SelectItem value="observation">Observation</SelectItem>
+            <SelectItem value="decontamination">Decontamination</SelectItem>
+            <SelectItem value="custom">Custom Room</SelectItem>
+          </SelectContent>
+        </Select>
         <Button onClick={() => { setHallwayMode(true); toast.info("Click points to create hallway"); }} size="sm" variant={hallwayMode ? "default" : "outline"}>
           <Route className="w-4 h-4 mr-1" />Hallway Tool
         </Button>
@@ -191,16 +266,22 @@ export const FacilityPlanner = () => {
           <Switch checked={showConnections} onCheckedChange={setShowConnections} id="connections" />
           <Label htmlFor="connections" className="text-xs cursor-pointer">Show Connections</Label>
         </div>
+        <Button onClick={() => setSettingsOpen(true)} size="sm" variant="outline">
+          <SettingsIcon className="w-4 h-4" />
+        </Button>
       </div>
       <div 
         ref={canvasRef}
-        className="flex-1 relative overflow-hidden cursor-move" 
-        style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 19px, hsl(var(--border)) 19px, hsl(var(--border)) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, hsl(var(--border)) 19px, hsl(var(--border)) 20px)' }} 
+        className="flex-1 relative overflow-hidden" 
+        style={{ 
+          background: 'repeating-linear-gradient(0deg, transparent, transparent 19px, hsl(var(--border)) 19px, hsl(var(--border)) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, hsl(var(--border)) 19px, hsl(var(--border)) 20px)',
+          cursor: placingRoomType ? 'crosshair' : isPanning ? 'grabbing' : 'grab'
+        }} 
         onClick={handleCanvasClick}
         onMouseDown={handlePanStart}
-        onMouseMove={handlePanMove}
-        onMouseUp={handlePanEnd}
-        onMouseLeave={handlePanEnd}
+        onMouseMove={(e) => { handlePanMove(e); handleRoomDrag(e); }}
+        onMouseUp={() => { handlePanEnd(); handleRoomDragEnd(); }}
+        onMouseLeave={() => { handlePanEnd(); handleRoomDragEnd(); }}
       >
         <div style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, transformOrigin: '0 0' }}>
           {showConnections && rooms.map(room => 
@@ -219,9 +300,14 @@ export const FacilityPlanner = () => {
           {rooms.map(room => (
             <div 
               key={room.id} 
-              className={`absolute border-2 cursor-pointer transition-colors ${selectedRoomForConnect === room.id ? 'border-accent bg-accent/20' : 'border-primary bg-primary/10 hover:bg-primary/20'}`}
+              className={`absolute border-2 cursor-move transition-colors ${
+                selectedRoomId === room.id ? 'border-accent bg-accent/30' : 
+                selectedRoomForConnect === room.id ? 'border-accent bg-accent/20' : 
+                'border-primary bg-primary/10 hover:bg-primary/20'
+              }`}
               style={{ left: room.x, top: room.y, width: room.width, height: room.height }}
-              onClick={(e) => { e.stopPropagation(); handleRoomClick(room); }}
+              onClick={(e) => { e.stopPropagation(); handleRoomClick(room, e); }}
+              onMouseDown={(e) => { e.stopPropagation(); handleRoomDragStart(room, e); }}
               onContextMenu={(e) => { e.preventDefault(); toggleConnection(room.id); }}
             >
               <div className="p-2 text-xs font-semibold">{room.name}</div>
@@ -240,8 +326,48 @@ export const FacilityPlanner = () => {
           ))}
         </div>
       </div>
+      
       {hallwayMode && <HallwayTool points={hallwayPoints} onAddPoint={() => {}} onComplete={completeHallway} onCancel={() => { setHallwayMode(false); setHallwayPoints([]); }} />}
-      <RoomEditor room={editingRoom} open={!!editingRoom} onClose={() => setEditingRoom(null)} onSave={(updated) => setRooms(rooms.map(r => r.id === updated.id ? updated : r))} />
+      
+      <RoomEditor 
+        room={editingRoom} 
+        open={!!editingRoom} 
+        onClose={() => setEditingRoom(null)} 
+        onSave={(updated) => setRooms(rooms.map(r => r.id === updated.id ? updated : r))} 
+      />
+
+      <RoomProperties
+        room={selectedRoom}
+        onClose={() => setSelectedRoomId(null)}
+        onChange={(updates) => {
+          if (selectedRoomId) {
+            setRooms(rooms.map(r => r.id === selectedRoomId ? { ...r, ...updates } : r));
+          }
+        }}
+      />
+
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Facility Planner Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Snap to Grid</Label>
+              <Switch checked={snapToGrid} onCheckedChange={setSnapToGrid} />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label>Show Connections</Label>
+              <Switch checked={showConnections} onCheckedChange={setShowConnections} />
+            </div>
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                <strong>Beta Features:</strong> Custom room shapes, advanced door placement, and multi-section rooms are currently in development.
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
