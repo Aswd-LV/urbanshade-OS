@@ -1,419 +1,301 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { Terminal, RotateCcw, HardDrive, Image, Settings, ArrowLeft } from "lucide-react";
 
 interface RecoveryModeProps {
   onExit: () => void;
 }
 
 export const RecoveryMode = ({ onExit }: RecoveryModeProps) => {
-  const [output, setOutput] = useState<string[]>([
-    "URBANSHADE RECOVERY ENVIRONMENT v3.7",
-    "================================================",
-    "",
-    "[SYSTEM] Entering recovery mode...",
-    "[OK] File system mounted",
-    "[OK] Core modules loaded",
-    "",
+  const [view, setView] = useState<"menu" | "restore" | "flash" | "cmd" | "advanced">("menu");
+  const [cmdOutput, setCmdOutput] = useState<string[]>([
+    "URBANSHADE Recovery Console v3.7",
     "Type 'help' for available commands",
     ""
   ]);
-  const [input, setInput] = useState("");
-  const [history, setHistory] = useState<string[]>([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
-  const consoleEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [cmdInput, setCmdInput] = useState("");
+  const [restorePoints, setRestorePoints] = useState<string[]>(() => {
+    const saved = localStorage.getItem('recovery_restore_points');
+    return saved ? JSON.parse(saved) : ['2025-01-15 14:30:00 - Initial Setup', '2025-01-14 09:15:00 - System Update'];
+  });
+  const [systemImages, setSystemImages] = useState<string[]>(() => {
+    const saved = localStorage.getItem('recovery_system_images');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  useEffect(() => {
-    consoleEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [output]);
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  const commands: Record<string, () => string[]> = {
-    help: () => [
-      "Available commands:",
-      "  help       - Show this help message",
-      "  list       - List files in directory",
-      "  ls         - Alias for list",
-      "  diag       - Run diagnostics",
-      "  repair     - Attempt system repair",
-      "  restore    - Restore from backup",
-      "  virus      - Scan and remove viruses",
-      "  clearvirus - Remove virus infection",
-      "  logs       - View system logs",
-      "  network    - Network diagnostics",
-      "  disk       - Disk check",
-      "  memory     - Memory test",
-      "  boot       - Boot sector check",
-      "  registry   - Registry repair",
-      "  drivers    - Check drivers",
-      "  permissions- Fix permissions",
-      "  cleanup    - Clean temp files",
-      "  optimize   - Optimize system",
-      "  reboot     - Reboot system",
-      "  shutdown   - Power off system",
-      "  exit       - Exit recovery mode",
-      "  clear      - Clear screen",
-      "  status     - Show system status",
-      "  scan       - Scan for errors",
-      ""
-    ],
-    list: () => [
-      "/system/",
-      "  urbcore.dll",
-      "  bootmgr.sys",
-      "  recovery.dat",
-      "/archive/",
-      "  pressure_001.txt",
-      "  experiment_log.dat",
-      "/user/",
-      "  session.tmp",
-      ""
-    ],
-    ls: () => commands.list(),
-    diag: () => {
-      const isInfected = localStorage.getItem('system_virus_infected') === 'true';
-      return [
-        "[DIAG] Running diagnostics...",
-        "[OK] Memory check passed",
-        "[OK] Disk integrity verified",
-        "[WARNING] 3 deleted files detected",
-        "[OK] Network connection stable",
-        isInfected ? "[CRITICAL] VIRUS INFECTION DETECTED" : "[OK] No malware detected",
-        ""
-      ];
-    },
-    virus: () => {
-      const isInfected = localStorage.getItem('system_virus_infected') === 'true';
-      if (!isInfected) {
-        return [
-          "[VIRUS SCAN]",
-          "Scanning system...",
-          "",
-          "[OK] No threats detected",
-          "System is clean.",
-          ""
-        ];
-      }
-      return [
-        "[VIRUS SCAN]",
-        "Scanning system...",
-        "",
-        "[!!!] CRITICAL THREAT DETECTED",
-        "Type: Trojan.Hadal.Blacksite",
-        "Location: /archive/VIRUS_SCANNER.exe",
-        "Severity: CRITICAL",
-        "",
-        "Run 'clearvirus' to remove infection.",
-        ""
-      ];
-    },
-    clearvirus: () => {
-      const isInfected = localStorage.getItem('system_virus_infected') === 'true';
-      if (!isInfected) {
-        return [
-          "[ANTIVIRUS]",
-          "System is already clean.",
-          ""
-        ];
-      }
-      
-      localStorage.removeItem('system_virus_infected');
-      return [
-        "[ANTIVIRUS]",
-        "Removing malware...",
-        "",
-        "Quarantining infected files...",
-        "Cleaning registry entries...",
-        "Repairing system files...",
-        "Removing malicious processes...",
-        "",
-        "[SUCCESS] Virus removed successfully",
-        "System has been cleaned.",
-        "Safe to reboot.",
-        ""
-      ];
-    },
-    repair: () => {
-      // Clear the needs recovery flag
-      localStorage.removeItem('needs_recovery');
-      return [
-        "[REPAIR] Initiating repair sequence...",
-        "[OK] Scanning file system",
-        "[OK] Checking core modules",
-        "[OK] Verifying checksums",
-        "[OK] Repairing corrupted sectors",
-        "[OK] Rebuilding boot configuration",
-        "[COMPLETE] System repair successful",
-        "[INFO] System can now boot normally",
-        ""
-      ];
-    },
-    restore: () => [
-      "[RESTORE] Loading backup snapshot...",
-      "[OK] Snapshot found: 2024-03-15 14:30:22",
-      "[OK] Restoring files...",
-      "[OK] 3 files restored",
-      "[COMPLETE] Restore successful",
-      ""
-    ],
-    status: () => [
-      "SYSTEM STATUS:",
-      "  Version: Urbanshade OS v3.7",
-      "  Uptime: 14:23:45",
-      "  Memory: 87% available",
-      "  Disk: 234 GB free",
-      "  Network: Connected",
-      ""
-    ],
-    scan: () => [
-      "[SCAN] Scanning for errors...",
-      "[OK] File system: Clean",
-      "[OK] Registry: Clean",
-      "[WARNING] Found 2 corrupted sectors",
-      "[OK] Network stack: Operational",
-      ""
-    ],
-    logs: () => [
-      "[SYSTEM LOGS]",
-      "Loading recent system events...",
-      "",
-      "[16:32:18] BOOT: System started successfully",
-      "[16:20:45] WARNING: Pressure anomaly Zone 4",
-      "[16:10:30] ERROR: Failed login attempt T-07",
-      "[15:45:12] INFO: Backup completed",
-      "[14:30:00] WARNING: High CPU usage detected",
-      "",
-      "End of logs.",
-      ""
-    ],
-    network: () => [
-      "[NETWORK DIAGNOSTICS]",
-      "Testing network connectivity...",
-      "",
-      "Main Server:       [OK] 2ms",
-      "Backup Server:     [OK] 3ms",
-      "DNS Resolution:    [OK]",
-      "External Gateway:  [FAIL] Timeout",
-      "Local Network:     [OK]",
-      "",
-      "Local network operational.",
-      "External connection unavailable.",
-      ""
-    ],
-    disk: () => [
-      "[DISK CHECK]",
-      "Scanning file system...",
-      "",
-      "Disk 0: /system    [OK] 78% used",
-      "Disk 1: /data      [OK] 45% used",
-      "Disk 2: /backup    [OK] 67% used",
-      "Disk 3: /logs      [WARNING] 92% used",
-      "",
-      "Recommendation: Clear old logs",
-      "No errors detected.",
-      ""
-    ],
-    memory: () => [
-      "[MEMORY TEST]",
-      "Testing RAM modules...",
-      "",
-      "Module 0 (8GB):    [PASS]",
-      "Module 1 (8GB):    [PASS]",
-      "Module 2 (8GB):    [PASS]",
-      "Module 3 (8GB):    [PASS]",
-      "",
-      "Total: 32GB",
-      "Available: 18GB",
-      "",
-      "Memory test passed.",
-      ""
-    ],
-    boot: () => [
-      "[BOOT SECTOR CHECK]",
-      "Analyzing boot configuration...",
-      "",
-      "Boot loader:       [OK]",
-      "Boot partition:    [OK]",
-      "Kernel image:      [OK]",
-      "Init system:       [OK]",
-      "Boot sequence:     [OK]",
-      "",
-      "Boot sector is healthy.",
-      ""
-    ],
-    registry: () => [
-      "[REGISTRY REPAIR]",
-      "Scanning system registry...",
-      "",
-      "Checking keys:     [OK]",
-      "Verifying values:  [OK]",
-      "Orphan entries:    3 found",
-      "Cleaning orphans:  [OK]",
-      "Compacting:        [OK]",
-      "",
-      "Registry repaired successfully.",
-      ""
-    ],
-    drivers: () => [
-      "[DRIVER CHECK]",
-      "Verifying system drivers...",
-      "",
-      "Display driver:    v3.2.1 [OK]",
-      "Network driver:    v2.8.4 [OK]",
-      "Storage driver:    v4.1.0 [OK]",
-      "Security driver:   v5.0.2 [OK]",
-      "",
-      "All drivers up to date.",
-      ""
-    ],
-    permissions: () => [
-      "[PERMISSION FIX]",
-      "Repairing file permissions...",
-      "",
-      "/system:           [FIXED]",
-      "/data:             [OK]",
-      "/user:             [FIXED]",
-      "/logs:             [OK]",
-      "",
-      "Permissions corrected.",
-      ""
-    ],
-    cleanup: () => [
-      "[SYSTEM CLEANUP]",
-      "Removing temporary files...",
-      "",
-      "Temp files:        247 MB freed",
-      "Old logs:          1.2 GB freed",
-      "Cache:             89 MB freed",
-      "Recycle bin:       0 MB",
-      "",
-      "Total freed: 1.53 GB",
-      ""
-    ],
-    optimize: () => [
-      "[SYSTEM OPTIMIZATION]",
-      "Optimizing system performance...",
-      "",
-      "Defragmenting:     [OK]",
-      "Indexing:          [OK]",
-      "Cache rebuild:     [OK]",
-      "Registry compact:  [OK]",
-      "Startup optimize:  [OK]",
-      "",
-      "System optimized.",
-      ""
-    ],
-    shutdown: () => {
-      setTimeout(onExit, 2000);
-      return [
-        "[SHUTDOWN]",
-        "Preparing to power off...",
-        "",
-        "Closing applications...",
-        "Unmounting disks...",
-        "Powering down...",
-        "",
-        "[SYSTEM HALTED]",
-        ""
-      ];
-    },
-    reboot: () => {
-      setTimeout(onExit, 1500);
-      return [
-        "[SYSTEM] Initiating reboot sequence...",
-        "[OK] Unmounting file systems",
-        "[OK] Stopping services",
-        "[OK] Rebooting...",
-        ""
-      ];
-    },
-    exit: () => {
-      setTimeout(onExit, 1000);
-      return [
-        "[SYSTEM] Exiting recovery mode...",
-        ""
-      ];
-    },
-    clear: () => {
-      setOutput([]);
-      return [];
-    }
-  };
-
-  const handleCommand = (cmd: string) => {
-    const trimmed = cmd.trim().toLowerCase();
+  const handleCmdCommand = (cmd: string) => {
+    const newOutput = [...cmdOutput, `> ${cmd}`];
     
-    if (!trimmed) {
-      setOutput(prev => [...prev, ""]);
-      return;
-    }
+    const commands: Record<string, () => string[]> = {
+      help: () => [
+        "Available commands:",
+        "  help     - Show this help",
+        "  sfc      - System File Checker",
+        "  chkdsk   - Check disk",
+        "  bootrec  - Boot recovery",
+        "  clear    - Clear screen",
+        "  exit     - Exit console",
+        ""
+      ],
+      sfc: () => [
+        "System File Checker...",
+        "Scanning system files...",
+        "[OK] All protected system files are intact.",
+        ""
+      ],
+      chkdsk: () => [
+        "Checking disk C:...",
+        "[OK] No errors found.",
+        "Disk check complete.",
+        ""
+      ],
+      bootrec: () => [
+        "Boot Configuration Data Store...",
+        "Rebuilding boot records...",
+        "[OK] Boot files successfully repaired.",
+        ""
+      ],
+      clear: () => [""],
+      exit: () => {
+        setView("menu");
+        return ["Exiting console..."];
+      }
+    };
 
-    setHistory(prev => [...prev, cmd]);
-    setHistoryIndex(-1);
-
-    setOutput(prev => [...prev, `> ${cmd}`, ""]);
-
-    if (commands[trimmed]) {
-      const result = commands[trimmed]();
-      setOutput(prev => [...prev, ...result]);
+    if (cmd.toLowerCase() === 'clear') {
+      setCmdOutput(["URBANSHADE Recovery Console v3.7", "Type 'help' for available commands", ""]);
+    } else if (commands[cmd.toLowerCase()]) {
+      setCmdOutput([...newOutput, ...commands[cmd.toLowerCase()]()]);
     } else {
-      setOutput(prev => [...prev, `Command not found: ${trimmed}`, `Type 'help' for available commands`, ""]);
+      setCmdOutput([...newOutput, `'${cmd}' is not recognized as a command.`, ""]);
     }
+    setCmdInput("");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleCommand(input);
-      setInput("");
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (history.length > 0) {
-        const newIndex = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex - 1);
-        setHistoryIndex(newIndex);
-        setInput(history[newIndex]);
-      }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (historyIndex !== -1) {
-        const newIndex = Math.min(history.length - 1, historyIndex + 1);
-        setHistoryIndex(newIndex);
-        setInput(newIndex === history.length - 1 && historyIndex === history.length - 1 ? "" : history[newIndex]);
-      }
-    }
+  const createRestorePoint = () => {
+    const timestamp = new Date().toLocaleString();
+    const newPoint = `${timestamp} - Manual Restore Point`;
+    const updated = [newPoint, ...restorePoints];
+    setRestorePoints(updated);
+    localStorage.setItem('recovery_restore_points', JSON.stringify(updated));
   };
 
-  return (
-    <div 
-      className="fixed inset-0 bg-black text-[#00f0e0] font-mono overflow-hidden z-[9999]"
-      onClick={() => inputRef.current?.focus()}
-    >
-      <div className="h-full overflow-y-auto p-4 pb-20">
-        {output.map((line, i) => (
-          <div key={i} className="whitespace-pre-wrap">
-            {line}
-          </div>
-        ))}
-        <div ref={consoleEndRef} />
+  const handleImportImage = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.img,.iso';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file) {
+        const newImage = `${file.name} - ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+        const updated = [...systemImages, newImage];
+        setSystemImages(updated);
+        localStorage.setItem('recovery_system_images', JSON.stringify(updated));
+      }
+    };
+    input.click();
+  };
+
+  const renderMenu = () => (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-bold mb-2">Recovery</h1>
+        <p className="text-lg opacity-80">Choose an option to continue</p>
       </div>
+
+      <div className="grid gap-4 w-full max-w-2xl px-8">
+        <button
+          onClick={onExit}
+          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
+              <ArrowLeft className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="font-bold text-lg">Continue</div>
+              <div className="text-sm opacity-70">Exit recovery and continue to system</div>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setView("restore")}
+          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
+              <RotateCcw className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="font-bold text-lg">System Restore</div>
+              <div className="text-sm opacity-70">Restore system to a previous restore point</div>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setView("flash")}
+          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
+              <Image className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="font-bold text-lg">Flash System Image</div>
+              <div className="text-sm opacity-70">Install or restore from system image</div>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setView("cmd")}
+          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
+              <Terminal className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="font-bold text-lg">Command Prompt</div>
+              <div className="text-sm opacity-70">Open command line for advanced tasks</div>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setView("advanced")}
+          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
+              <Settings className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="font-bold text-lg">Advanced Options</div>
+              <div className="text-sm opacity-70">Startup settings, safe mode, and more</div>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderRestore = () => (
+    <div className="p-8 max-w-4xl mx-auto">
+      <button onClick={() => setView("menu")} className="mb-6 flex items-center gap-2 hover:opacity-70">
+        <ArrowLeft className="w-4 h-4" />
+        Back to menu
+      </button>
+      <h2 className="text-3xl font-bold mb-4">System Restore</h2>
+      <p className="mb-6 opacity-80">Select a restore point to restore your system to a previous state</p>
       
-      {/* Command input at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-[#00f0e0]/20 p-4">
-        <div className="flex items-center gap-2">
-          <span className="text-[#00f0e0]">&gt;</span>
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent border-none outline-none text-[#00f0e0] font-mono"
-            autoComplete="off"
-            spellCheck={false}
-          />
+      <div className="bg-white/10 border border-white/30 rounded-lg p-6 mb-4">
+        <button
+          onClick={createRestorePoint}
+          className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded mb-4"
+        >
+          + Create New Restore Point
+        </button>
+        <div className="space-y-2">
+          {restorePoints.map((point, i) => (
+            <div key={i} className="bg-white/5 border border-white/20 rounded p-3 hover:bg-white/10 cursor-pointer">
+              {point}
+            </div>
+          ))}
         </div>
       </div>
+    </div>
+  );
+
+  const renderFlash = () => (
+    <div className="p-8 max-w-4xl mx-auto">
+      <button onClick={() => setView("menu")} className="mb-6 flex items-center gap-2 hover:opacity-70">
+        <ArrowLeft className="w-4 h-4" />
+        Back to menu
+      </button>
+      <h2 className="text-3xl font-bold mb-4">Flash System Image</h2>
+      <p className="mb-6 opacity-80">Restore your system from a complete system image backup</p>
+      
+      <div className="bg-white/10 border border-white/30 rounded-lg p-6">
+        <button
+          onClick={handleImportImage}
+          className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded mb-4"
+        >
+          + Import Image File
+        </button>
+        <div className="space-y-2">
+          {systemImages.length === 0 ? (
+            <div className="text-center py-8 opacity-50">No system images available</div>
+          ) : (
+            systemImages.map((img, i) => (
+              <div key={i} className="bg-white/5 border border-white/20 rounded p-3 hover:bg-white/10 cursor-pointer">
+                {img}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderCmd = () => (
+    <div className="fixed inset-0 bg-black text-white font-mono p-4 flex flex-col">
+      <button onClick={() => setView("menu")} className="mb-2 text-sm hover:opacity-70 self-start">
+        ← Back to menu
+      </button>
+      <div className="flex-1 overflow-auto mb-2">
+        {cmdOutput.map((line, i) => (
+          <div key={i} className="whitespace-pre-wrap">{line}</div>
+        ))}
+      </div>
+      <div className="flex items-center gap-2">
+        <span>&gt;</span>
+        <input
+          type="text"
+          value={cmdInput}
+          onChange={(e) => setCmdInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && cmdInput.trim()) {
+              handleCmdCommand(cmdInput.trim());
+            }
+          }}
+          className="flex-1 bg-transparent border-none outline-none"
+          autoFocus
+        />
+      </div>
+    </div>
+  );
+
+  const renderAdvanced = () => (
+    <div className="p-8 max-w-4xl mx-auto">
+      <button onClick={() => setView("menu")} className="mb-6 flex items-center gap-2 hover:opacity-70">
+        <ArrowLeft className="w-4 h-4" />
+        Back to menu
+      </button>
+      <h2 className="text-3xl font-bold mb-4">Advanced Options</h2>
+      
+      <div className="space-y-3">
+        <div className="bg-white/10 border border-white/30 rounded-lg p-4 hover:bg-white/20 cursor-pointer">
+          Startup Repair - Fix problems that prevent system from loading
+        </div>
+        <div className="bg-white/10 border border-white/30 rounded-lg p-4 hover:bg-white/20 cursor-pointer">
+          Startup Settings - Change Windows startup behavior
+        </div>
+        <div className="bg-white/10 border border-white/30 rounded-lg p-4 hover:bg-white/20 cursor-pointer">
+          UEFI Firmware Settings - Change settings in your PC's firmware
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-gradient-to-br from-[#0078D7] to-[#0063B1] text-white">
+      {view === "menu" && renderMenu()}
+      {view === "restore" && renderRestore()}
+      {view === "flash" && renderFlash()}
+      {view === "cmd" && renderCmd()}
+      {view === "advanced" && renderAdvanced()}
     </div>
   );
 };
