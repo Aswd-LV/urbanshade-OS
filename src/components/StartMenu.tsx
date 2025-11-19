@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { App } from "./Desktop";
-import { LogOut, Activity, RotateCcw, Power } from "lucide-react";
+import { LogOut, Activity, RotateCcw, Power, ChevronUp, Shield, HardDrive } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface StartMenuProps {
   open: boolean;
@@ -14,6 +15,7 @@ interface StartMenuProps {
 
 export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown, onLogout }: StartMenuProps) => {
   const [search, setSearch] = useState("");
+  const [rebootMenuOpen, setRebootMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -121,16 +123,70 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown
               >
                 <Power className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
               </button>
-              <button 
-                onClick={() => {
-                  onReboot();
-                  onClose();
-                }}
-                className="w-10 h-10 rounded-lg hover:bg-muted/50 flex items-center justify-center transition-all group"
-                title="Restart"
-              >
-                <RotateCcw className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              </button>
+              
+              <Popover open={rebootMenuOpen} onOpenChange={setRebootMenuOpen}>
+                <PopoverTrigger asChild>
+                  <button 
+                    className="w-10 h-10 rounded-lg hover:bg-muted/50 flex items-center justify-center transition-all group"
+                    title="Reboot options"
+                  >
+                    <RotateCcw className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="top" 
+                  align="end"
+                  className="w-56 p-2 bg-background/95 backdrop-blur-xl border border-border/50 shadow-2xl animate-scale-in"
+                >
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => {
+                        onReboot();
+                        onClose();
+                        setRebootMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-all text-left group"
+                    >
+                      <RotateCcw className="w-4 h-4 text-primary group-hover:text-primary/80" />
+                      <div>
+                        <div className="text-sm font-medium text-foreground">Restart</div>
+                        <div className="text-xs text-muted-foreground">Standard reboot</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // TODO: Implement restart to BIOS
+                        console.log("Restart to BIOS");
+                        setRebootMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-all text-left group"
+                    >
+                      <Shield className="w-4 h-4 text-primary group-hover:text-primary/80" />
+                      <div>
+                        <div className="text-sm font-medium text-foreground">Restart to BIOS</div>
+                        <div className="text-xs text-muted-foreground">Enter system setup</div>
+                      </div>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        // TODO: Implement restart to Recovery
+                        console.log("Restart to Recovery");
+                        setRebootMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/50 transition-all text-left group"
+                    >
+                      <HardDrive className="w-4 h-4 text-primary group-hover:text-primary/80" />
+                      <div>
+                        <div className="text-sm font-medium text-foreground">Restart to Recovery</div>
+                        <div className="text-xs text-muted-foreground">Advanced options</div>
+                      </div>
+                    </button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
               <button 
                 onClick={() => {
                   onLogout();
