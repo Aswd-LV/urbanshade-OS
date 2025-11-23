@@ -150,7 +150,7 @@ export const ContainmentMonitor = () => {
 
               <div className="pt-4 border-t border-white/5">
                 <div className="text-xs text-muted-foreground mb-2 font-bold">CONTAINMENT ACTIONS</div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-2">
                   <button className="flex-1 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-bold hover:bg-primary/20 transition-colors">
                     View Logs
                   </button>
@@ -158,6 +158,15 @@ export const ContainmentMonitor = () => {
                     Alert
                   </button>
                 </div>
+                <button 
+                  className="w-full px-3 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold hover:bg-cyan-500/20 transition-colors"
+                  onClick={() => {
+                    // This would trigger opening specimen data in File Reader
+                    console.log("Open specimen data in File Reader:", selected.code);
+                  }}
+                >
+                  Open Data in File Reader
+                </button>
               </div>
             </div>
           </>

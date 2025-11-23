@@ -69,7 +69,7 @@ interface WindowData {
 
 import { UrbanshadeInstaller } from "./apps/UrbanshadeInstaller";
 
-export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWindow, onCriticalKill, onOpenAdminPanel, onLockdown, onUpdate }: WindowManagerProps) => {
+export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindows, onCloseWindow, onCriticalKill, onOpenAdminPanel, onLockdown, onUpdate }: WindowManagerProps) => {
   const getAppContent = (appId: string) => {
     switch (appId) {
       case "app-store":
@@ -241,7 +241,7 @@ export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWi
           zIndex={window.zIndex}
           onClose={() => onClose(window.id)}
           onFocus={() => onFocus(window.id)}
-          onMinimize={() => onMinimize?.(window.id)}
+          onMinimize={() => onMinimize && onMinimize(window.id)}
         >
           {getAppContent(window.app.id)}
         </Window>

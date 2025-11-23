@@ -5,9 +5,11 @@ interface BiosScreenProps {
 }
 
 export const BiosScreen = ({ onExit }: BiosScreenProps) => {
-  const [selectedTab, setSelectedTab] = useState<"main" | "boot" | "advanced" | "security" | "exit">("main");
+  const [selectedTab, setSelectedTab] = useState<"main" | "advanced" | "boot" | "security" | "exit" | "custom">("main");
   const [selectedOption, setSelectedOption] = useState(0);
-  const [countdown, setCountdown] = useState(3);
+  const [showingExit, setShowingExit] = useState(false);
+  const [exitCountdown, setExitCountdown] = useState<number | null>(null);
+  const [oemUnlocked] = useState(true);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -15,12 +17,17 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
         setShowingExit(true);
         setExitCountdown(3);
       } else if (e.key === 'ArrowLeft' && !showingExit) {
-        setSelectedTab(prev => Math.max(0, prev - 1));
-        setSelectedOption(0);
+        const currentIndex = tabs.findIndex(t => t.key === selectedTab);
+        if (currentIndex > 0) {
+          setSelectedTab(tabs[currentIndex - 1].key);
+          setSelectedOption(0);
+        }
       } else if (e.key === 'ArrowRight' && !showingExit) {
-        const maxTab = oemUnlocked ? 5 : 4;
-        setSelectedTab(prev => Math.min(maxTab, prev + 1));
-        setSelectedOption(0);
+        const currentIndex = tabs.findIndex(t => t.key === selectedTab);
+        if (currentIndex < tabs.length - 1) {
+          setSelectedTab(tabs[currentIndex + 1].key);
+          setSelectedOption(0);
+        }
       } else if (e.key === 'ArrowUp' && !showingExit) {
         setSelectedOption(prev => Math.max(0, prev - 1));
       } else if (e.key === 'ArrowDown' && !showingExit) {
@@ -44,18 +51,24 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
 
   const getMaxOptions = () => {
     switch (selectedTab) {
-      case 0: return 5; // Main
-      case 1: return 4; // Advanced
-      case 2: return 3; // Boot
-      case 3: return 2; // Security
-      case 4: return 3; // Exit
-      case 5: return oemUnlocked ? 2 : 0; // Custom Apps
+      case "main": return 5;
+      case "advanced": return 4;
+      case "boot": return 3;
+      case "security": return 2;
+      case "exit": return 3;
+      case "custom": return oemUnlocked ? 2 : 0;
       default: return 0;
     }
   };
 
-  const tabs = ["Main", "Advanced", "Boot", "Security", "Exit"];
-  if (oemUnlocked) tabs.push("Custom Apps");
+  const tabs: Array<{ key: typeof selectedTab; label: string }> = [
+    { key: "main", label: "Main" },
+    { key: "advanced", label: "Advanced" },
+    { key: "boot", label: "Boot" },
+    { key: "security", label: "Security" },
+    { key: "exit", label: "Exit" }
+  ];
+  if (oemUnlocked) tabs.push({ key: "custom", label: "Custom Apps" });
 
   const renderMainTab = () => (
     <div className="grid grid-cols-2 gap-8 h-full animate-fade-in">
@@ -194,12 +207,12 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
 
   const renderContent = () => {
     switch (selectedTab) {
-      case 0: return renderMainTab();
-      case 1: return renderAdvancedTab();
-      case 2: return renderBootTab();
-      case 3: return renderSecurityTab();
-      case 4: return renderExitTab();
-      case 5: return oemUnlocked ? renderCustomAppsTab() : null;
+      case "main": return renderMainTab();
+      case "advanced": return renderAdvancedTab();
+      case "boot": return renderBootTab();
+      case "security": return renderSecurityTab();
+      case "exit": return renderExitTab();
+      case "custom": return oemUnlocked ? renderCustomAppsTab() : null;
       default: return null;
     }
   };
@@ -225,20 +238,20 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
 
       {/* Tab Navigation */}
       <div className="flex border-b border-white mb-4 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-        {tabs.map((tab, i) => (
+        {tabs.map((tab) => (
           <button
-            key={tab}
+            key={tab.key}
             onClick={() => {
-              setSelectedTab(i);
+              setSelectedTab(tab.key);
               setSelectedOption(0);
             }}
             className={`px-4 py-2 transition-colors ${
-              selectedTab === i 
+              selectedTab === tab.key 
                 ? 'bg-cyan-400 text-black font-bold' 
                 : 'hover:bg-white/10'
             }`}
           >
-            {tab}
+            {tab.label}
           </button>
         ))}
       </div>

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
 
 interface FileContent {
   path: string;
@@ -171,6 +172,8 @@ export const FileReader = () => {
   const [selectedFile, setSelectedFile] = useState<FileContent | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [recentFiles, setRecentFiles] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("file_reader_recent");
@@ -189,7 +192,18 @@ export const FileReader = () => {
     const file = FILE_DATABASE[filename];
     if (file) {
       setSelectedFile(file);
+      setEditedContent(file.content);
+      setIsEditing(false);
       addToRecent(filename);
+    }
+  };
+
+  const handleSave = () => {
+    if (selectedFile) {
+      FILE_DATABASE[selectedFile.name].content = editedContent;
+      setSelectedFile({ ...selectedFile, content: editedContent });
+      setIsEditing(false);
+      toast.success("File saved successfully!");
     }
   };
 
@@ -204,32 +218,35 @@ export const FileReader = () => {
   return (
     <div className="h-full flex bg-background">
       {/* Sidebar */}
-      <div className="w-64 border-r bg-muted/30 flex flex-col">
-        <div className="p-4 border-b">
-          <h2 className="font-bold text-lg flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
+      <div className="w-72 border-r bg-gradient-to-b from-muted/40 to-muted/20 flex flex-col shadow-lg">
+        <div className="p-4 border-b bg-gradient-to-r from-primary/10 to-primary/5">
+          <h2 className="font-bold text-xl flex items-center gap-2">
+            <FileText className="w-6 h-6 text-primary" />
             File Reader
           </h2>
-          <p className="text-xs text-muted-foreground mt-1">View file contents</p>
+          <p className="text-xs text-muted-foreground mt-1">View and edit file contents</p>
         </div>
 
         {/* Search */}
-        <div className="p-3 border-b">
+        <div className="p-3 border-b bg-background/50">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search files..."
-              className="pl-9 h-9"
+              className="pl-9 h-9 bg-background border-primary/20 focus:border-primary"
             />
           </div>
         </div>
 
         {/* Recent Files */}
         {recentFiles.length > 0 && !searchQuery && (
-          <div className="p-3 border-b">
-            <div className="text-xs font-bold text-muted-foreground mb-2">RECENT</div>
+          <div className="p-3 border-b bg-primary/5">
+            <div className="text-xs font-bold text-primary mb-2 flex items-center gap-2">
+              <div className="w-1 h-4 bg-primary rounded-full" />
+              RECENT FILES
+            </div>
             <div className="space-y-1">
               {recentFiles.map(filename => {
                 const file = FILE_DATABASE[filename];
@@ -238,10 +255,10 @@ export const FileReader = () => {
                   <button
                     key={filename}
                     onClick={() => openFile(filename)}
-                    className="w-full flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors text-left"
+                    className="w-full flex items-center gap-2 p-2 rounded-lg text-sm hover:bg-primary/10 transition-all hover:translate-x-1 text-left border border-transparent hover:border-primary/20"
                   >
                     <FileText className="w-4 h-4 text-primary shrink-0" />
-                    <span className="truncate">{filename}</span>
+                    <span className="truncate font-medium">{filename}</span>
                   </button>
                 );
               })}
@@ -251,25 +268,28 @@ export const FileReader = () => {
 
         {/* File List */}
         <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
-            <div className="text-xs font-bold text-muted-foreground px-2 py-1">
+          <div className="p-3 space-y-1">
+            <div className="text-xs font-bold text-muted-foreground px-2 py-2 flex items-center gap-2">
+              <div className="w-1 h-4 bg-muted-foreground/50 rounded-full" />
               ALL FILES ({filteredFiles.length})
             </div>
             {filteredFiles.map(file => (
               <button
                 key={file.name}
                 onClick={() => openFile(file.name)}
-                className={`w-full flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors text-left ${
-                  selectedFile?.name === file.name ? 'bg-primary text-primary-foreground' : ''
+                className={`w-full flex items-center gap-2 p-3 rounded-lg text-sm transition-all text-left border ${
+                  selectedFile?.name === file.name 
+                    ? 'bg-primary text-primary-foreground shadow-lg scale-[1.02] border-primary' 
+                    : 'hover:bg-muted/50 hover:translate-x-1 border-transparent hover:border-border'
                 }`}
               >
-                <FileText className="w-4 h-4 shrink-0" />
+                <FileText className="w-5 h-5 shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="truncate font-medium">{file.name}</div>
+                  <div className="truncate font-semibold">{file.name}</div>
                   <div className="text-xs opacity-70 truncate">{file.path}</div>
                 </div>
-                {file.encrypted && <Lock className="w-3 h-3 text-amber-500 shrink-0" />}
-                {file.dangerous && <AlertTriangle className="w-3 h-3 text-destructive shrink-0" />}
+                {file.encrypted && <Lock className="w-4 h-4 text-amber-500 shrink-0" />}
+                {file.dangerous && <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />}
               </button>
             ))}
           </div>
@@ -280,56 +300,101 @@ export const FileReader = () => {
       <div className="flex-1 flex flex-col">
         {selectedFile ? (
           <>
-            <div className="border-b bg-muted/30 p-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <div className="border-b bg-gradient-to-r from-muted/50 to-muted/30 p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
                 <Folder className="w-4 h-4" />
                 {selectedFile.path.split('/').slice(0, -1).join('/')}
                 <ChevronRight className="w-3 h-3" />
               </div>
-              <h2 className="font-bold text-xl flex items-center gap-3">
-                {selectedFile.name}
-                {selectedFile.encrypted && (
-                  <span className="text-xs bg-amber-500/20 text-amber-500 px-2 py-1 rounded border border-amber-500/30">
-                    <Lock className="w-3 h-3 inline mr-1" />
-                    ENCRYPTED
-                  </span>
-                )}
-                {selectedFile.dangerous && (
-                  <span className="text-xs bg-destructive/20 text-destructive px-2 py-1 rounded border border-destructive/30">
-                    <AlertTriangle className="w-3 h-3 inline mr-1" />
-                    DANGEROUS
-                  </span>
-                )}
-              </h2>
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-2xl flex items-center gap-3">
+                  {selectedFile.name}
+                  {selectedFile.encrypted && (
+                    <span className="text-xs bg-amber-500/20 text-amber-500 px-3 py-1.5 rounded-lg border border-amber-500/30 font-semibold">
+                      <Lock className="w-3 h-3 inline mr-1" />
+                      ENCRYPTED
+                    </span>
+                  )}
+                  {selectedFile.dangerous && (
+                    <span className="text-xs bg-destructive/20 text-destructive px-3 py-1.5 rounded-lg border border-destructive/30 font-semibold">
+                      <AlertTriangle className="w-3 h-3 inline mr-1" />
+                      DANGEROUS
+                    </span>
+                  )}
+                </h2>
+                <div className="flex gap-2">
+                  {!selectedFile.encrypted && !isEditing && (
+                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                      Edit
+                    </Button>
+                  )}
+                  {isEditing && (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setIsEditing(false);
+                        setEditedContent(selectedFile.content);
+                      }}>
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleSave}>
+                        Save
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <ScrollArea className="flex-1">
               <div className="p-6">
-                <Card className="p-6 bg-muted/50">
-                  <pre className="font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                    {selectedFile.content}
-                  </pre>
+                <Card className="p-6 bg-gradient-to-br from-muted/60 to-muted/30 shadow-lg border-2">
+                  {isEditing ? (
+                    <textarea
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                      className="w-full h-[500px] font-mono text-sm bg-background/50 p-4 rounded border border-border focus:border-primary focus:outline-none resize-none"
+                    />
+                  ) : (
+                    <pre className="font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                      {selectedFile.content}
+                    </pre>
+                  )}
                 </Card>
               </div>
             </ScrollArea>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-center p-8">
-            <div className="max-w-md">
-              <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-bold mb-2">No File Selected</h3>
-              <p className="text-sm text-muted-foreground">
-                Select a file from the sidebar to view its contents
+          <div className="flex-1 flex items-center justify-center text-center p-8 bg-gradient-to-br from-background to-muted/20">
+            <div className="max-w-md animate-fade-in">
+              <FileText className="w-20 h-20 mx-auto mb-6 text-primary/60 animate-pulse" />
+              <h3 className="text-2xl font-bold mb-3">No File Selected</h3>
+              <p className="text-sm text-muted-foreground mb-8">
+                Select a file from the sidebar to view and edit its contents
               </p>
-              <div className="mt-6 p-4 bg-muted/50 rounded-lg text-xs text-left">
-                <div className="font-bold mb-2">Available Files:</div>
-                <ul className="space-y-1 text-muted-foreground">
-                  <li>• System files (urbcore.dll, bootmgr.sys)</li>
-                  <li>• Experiment logs and research data</li>
-                  <li>• Personal notes and documents</li>
-                  <li>• Encrypted classified files</li>
+              <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 text-left border-2 border-primary/20">
+                <div className="font-bold mb-3 text-lg flex items-center gap-2">
+                  <div className="w-1 h-6 bg-primary rounded-full" />
+                  Available Files:
+                </div>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    <span>System files (urbcore.dll, bootmgr.sys)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    <span>Experiment logs and research data</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    <span>Personal notes and documents</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary">•</span>
+                    <span>Encrypted classified files</span>
+                  </li>
                 </ul>
-              </div>
+              </Card>
             </div>
           </div>
         )}
