@@ -186,85 +186,89 @@ export const RecoveryMode = ({ onExit }: RecoveryModeProps) => {
   };
 
   const renderMenu = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-black">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#0a1929] to-[#001f3f]">
       <div className="mb-8 text-center animate-fade-in">
-        <h1 className="text-4xl font-bold mb-2 text-cyan-400">URBANSHADE Recovery</h1>
-        <p className="text-lg opacity-80 text-gray-400">Advanced System Recovery Environment</p>
+        <h1 className="text-4xl font-bold mb-2 text-[#0078D7]">URBANSHADE Recovery</h1>
+        <p className="text-lg opacity-80 text-gray-300">Advanced System Recovery Environment</p>
       </div>
 
       <div className="grid gap-4 w-full max-w-2xl px-8">
         <button
           onClick={onExit}
-          className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 hover:from-cyan-800/50 hover:to-blue-800/50 border border-cyan-600/50 rounded-lg p-6 text-left transition-all hover-scale animate-fade-in"
+          className="bg-gradient-to-r from-[#0078D7]/20 to-[#0063B1]/20 hover:from-[#0078D7]/30 hover:to-[#0063B1]/30 border border-[#0078D7]/50 rounded-lg p-6 text-left transition-all hover-scale animate-fade-in"
           style={{ animationDelay: '50ms' }}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-cyan-600/30 rounded flex items-center justify-center">
-              <ArrowLeft className="w-6 h-6 text-cyan-400" />
+            <div className="w-12 h-12 bg-[#0078D7]/30 rounded flex items-center justify-center">
+              <ArrowLeft className="w-6 h-6 text-[#0078D7]" />
             </div>
             <div>
-              <div className="font-bold text-lg">Continue</div>
-              <div className="text-sm opacity-70">Exit recovery and continue to system</div>
+              <div className="font-bold text-lg text-white">Continue</div>
+              <div className="text-sm opacity-70 text-gray-300">Exit recovery and continue to system</div>
             </div>
           </div>
         </button>
 
         <button
           onClick={() => setView("restore")}
-          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+          className="bg-[#0078D7]/10 hover:bg-[#0078D7]/20 border border-[#0078D7]/30 rounded-lg p-6 text-left transition-all hover-scale animate-fade-in"
+          style={{ animationDelay: '100ms' }}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
-              <RotateCcw className="w-6 h-6" />
+            <div className="w-12 h-12 bg-[#0078D7]/20 rounded flex items-center justify-center">
+              <RotateCcw className="w-6 h-6 text-[#0078D7]" />
             </div>
             <div>
-              <div className="font-bold text-lg">System Restore</div>
-              <div className="text-sm opacity-70">Restore system to a previous restore point</div>
+              <div className="font-bold text-lg text-white">System Restore</div>
+              <div className="text-sm opacity-70 text-gray-300">Restore system to a previous restore point</div>
             </div>
           </div>
         </button>
 
         <button
           onClick={() => setView("flash")}
-          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+          className="bg-[#0078D7]/10 hover:bg-[#0078D7]/20 border border-[#0078D7]/30 rounded-lg p-6 text-left transition-all hover-scale animate-fade-in"
+          style={{ animationDelay: '150ms' }}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
-              <Image className="w-6 h-6" />
+            <div className="w-12 h-12 bg-[#0078D7]/20 rounded flex items-center justify-center">
+              <Image className="w-6 h-6 text-[#0078D7]" />
             </div>
             <div>
-              <div className="font-bold text-lg">Flash System Image</div>
-              <div className="text-sm opacity-70">Install or restore from system image</div>
+              <div className="font-bold text-lg text-white">Flash System Image</div>
+              <div className="text-sm opacity-70 text-gray-300">Install or restore from system image</div>
             </div>
           </div>
         </button>
 
         <button
           onClick={() => setView("cmd")}
-          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+          className="bg-[#0078D7]/10 hover:bg-[#0078D7]/20 border border-[#0078D7]/30 rounded-lg p-6 text-left transition-all hover-scale animate-fade-in"
+          style={{ animationDelay: '200ms' }}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
-              <Terminal className="w-6 h-6" />
+            <div className="w-12 h-12 bg-[#0078D7]/20 rounded flex items-center justify-center">
+              <Terminal className="w-6 h-6 text-[#0078D7]" />
             </div>
             <div>
-              <div className="font-bold text-lg">Command Prompt</div>
-              <div className="text-sm opacity-70">Open command line for advanced tasks</div>
+              <div className="font-bold text-lg text-white">Command Prompt</div>
+              <div className="text-sm opacity-70 text-gray-300">Open command line for advanced tasks</div>
             </div>
           </div>
         </button>
 
         <button
           onClick={() => setView("advanced")}
-          className="bg-white/10 hover:bg-white/20 border border-white/30 rounded-lg p-6 text-left transition-all"
+          className="bg-[#0078D7]/10 hover:bg-[#0078D7]/20 border border-[#0078D7]/30 rounded-lg p-6 text-left transition-all hover-scale animate-fade-in"
+          style={{ animationDelay: '250ms' }}
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded flex items-center justify-center">
-              <Settings className="w-6 h-6" />
+            <div className="w-12 h-12 bg-[#0078D7]/20 rounded flex items-center justify-center">
+              <Settings className="w-6 h-6 text-[#0078D7]" />
             </div>
             <div>
-              <div className="font-bold text-lg">Advanced Options</div>
-              <div className="text-sm opacity-70">Startup settings, safe mode, and more</div>
+              <div className="font-bold text-lg text-white">Advanced Options</div>
+              <div className="text-sm opacity-70 text-gray-300">Startup settings, safe mode, and more</div>
             </div>
           </div>
         </button>
@@ -406,7 +410,7 @@ export const RecoveryMode = ({ onExit }: RecoveryModeProps) => {
   );
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-[#0078D7] to-[#0063B1] text-white">
+    <div className="fixed inset-0 bg-gradient-to-br from-[#0a1929] to-[#001f3f] text-white">
       {view === "menu" && renderMenu()}
       {view === "restore" && renderRestore()}
       {view === "flash" && renderFlash()}

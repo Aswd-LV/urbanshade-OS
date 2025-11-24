@@ -5,7 +5,7 @@ import { Sparkles, Check } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const currentVersion = "2.0.0";
+  const currentVersion = "2.1";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -20,35 +20,33 @@ export const ChangelogDialog = () => {
   };
 
   const changelog = {
-    "Major Features": [
-      "Enhanced Facility Planner",
-      "Urbanshade Installer: actually does stuff that an installer would do",
-      "About System: Github stuff and what not",
-      "Working Updates: System can now update i hope (only visual :D)"
+    "New Features": [
+      "Redesigned BIOS to modern UEFI interface",
+      "Added proper app installer with configuration options",
+      "File Reader now supports editing files",
+      "Enhanced Task Manager with more detailed process information",
+      "Improved Emergency Protocols with additional options",
+      "Added 'Open with File Reader' integration in File Explorer"
     ],
-    "OOBE Improvements": [
-      "Extended to 18 bcuz yes",
-      "Configure OEM unlock, works i hope"
+    "Improvements": [
+      "Recovery Mode now uses consistent Urbanshade theme",
+      "Settings now have more functional options",
+      "Enhanced hallway visuals in Facility Planner",
+      "Better UI consistency across all applications",
+      "Improved contributor attribution (Aswdbatch)",
+      "Better facility plan export functionality"
     ],
-    "Account & Recovery": [
-      "New accounts are now existing i think",
-      "Recovery mode options now perform actual system operations (Should've fixed years ago-)"
+    "Bug Fixes": [
+      "Fixed File Reader not appearing in app list",
+      "Fixed Facility Planner room selection issues",
+      "Corrected version numbers throughout system",
+      "Various stability improvements"
     ],
-    "UI/UX Enhancements": [
-      "Enhanced animations throughout the system",
-      "Improved visual feedback and transitions"
-    ],
-    "Settings": [
-      "Added more settings",
-      "Made it actually do stuff :fire:"
-    ],
-    "Installer": [
-      "Its actually somewhat an installer",
-      "smth smth :D"
-    ],
-    "Made installer work i hope": [
-      "yea u gotta install apps to use them (WOW NO WAY)",
-      "i hope it works :/"
+    "System Updates": [
+      "Updated to Urbanshade OS v2.1",
+      "Improved performance and responsiveness",
+      "Better error handling throughout the system",
+      "Enhanced animations and transitions"
     ]
   };
 

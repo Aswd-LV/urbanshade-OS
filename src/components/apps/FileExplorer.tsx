@@ -363,11 +363,27 @@ export const FileExplorer = ({ onLog, onVirusDetected }: FileExplorerProps) => {
                     )}
                   </div>
                   {selectedFile.content && (
-                    <div className="pt-4 border-t">
+                    <div className="pt-4 border-t space-y-2">
                       <div className="text-xs font-bold mb-2 text-muted-foreground">CONTENT:</div>
                       <pre className="text-xs font-mono bg-muted p-3 rounded whitespace-pre-wrap">
                         {selectedFile.content}
                       </pre>
+                      {selectedFile.type === 'file' && !selectedFile.virus && !selectedFile.critical && (
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            // Open File Reader with this file
+                            const event = new CustomEvent('openFileReader', { detail: selectedFile.name });
+                            window.dispatchEvent(event);
+                            toast.success(`Opening ${selectedFile.name} in File Reader`);
+                          }}
+                        >
+                          <FileText className="w-3 h-3 mr-2" />
+                          Open with File Reader
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

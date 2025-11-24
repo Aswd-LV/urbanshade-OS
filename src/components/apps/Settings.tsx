@@ -228,7 +228,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">OS Version:</span>
-                  <span className="font-mono">Urbanshade OS v3.7.2</span>
+                  <span className="font-mono">Urbanshade OS v2.1</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">System Type:</span>
@@ -265,7 +265,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                 <Button 
                   className="w-full" 
                   onClick={() => {
-                    toast.success("Update available! Installing v2.0.0");
+                    toast.success("Update available! Installing v2.2");
                     setTimeout(() => onUpdate?.(), 2000);
                   }}
                 >
