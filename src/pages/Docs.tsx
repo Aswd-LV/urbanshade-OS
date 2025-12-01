@@ -1,13 +1,79 @@
-import { ArrowLeft, Terminal, Monitor, Settings, Folder, Shield, Keyboard, HelpCircle, Zap, Users, Map, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Waves } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Docs = () => {
+  const sections = [
+    {
+      icon: Rocket,
+      title: "Getting Started",
+      description: "New to the facility? Start here! We promise the onboarding won't take as long as actual deep-sea training.",
+      link: "/docs/getting-started",
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+      borderColor: "border-green-500/30"
+    },
+    {
+      icon: Folder,
+      title: "Core Applications",
+      description: "Your digital toolbox. File Explorer, Notepad, Calculator, and other apps you'll pretend to use productively.",
+      link: "/docs/applications",
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      borderColor: "border-blue-500/30"
+    },
+    {
+      icon: Map,
+      title: "Facility Applications",
+      description: "The fun stuff! Security cameras, containment monitors, and other apps for managing your totally-not-haunted underwater base.",
+      link: "/docs/facility",
+      color: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+      borderColor: "border-purple-500/30"
+    },
+    {
+      icon: Terminal,
+      title: "Terminal Guide",
+      description: "Feel like a hacker with our command line interface. Green text on black background included, no extra charge.",
+      link: "/docs/terminal",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      borderColor: "border-primary/30"
+    },
+    {
+      icon: Zap,
+      title: "Advanced Features",
+      description: "BIOS, Recovery Mode, Admin Panel, and other ways to break things. Power users only! (Just kidding, anyone can break things.)",
+      link: "/docs/advanced",
+      color: "text-yellow-500",
+      bgColor: "bg-yellow-500/10",
+      borderColor: "border-yellow-500/30"
+    },
+    {
+      icon: Keyboard,
+      title: "Keyboard Shortcuts",
+      description: "Because real pros don't use mice. Learn all the key combos and impress absolutely no one.",
+      link: "/docs/shortcuts",
+      color: "text-orange-500",
+      bgColor: "bg-orange-500/10",
+      borderColor: "border-orange-500/30"
+    },
+    {
+      icon: HelpCircle,
+      title: "Troubleshooting",
+      description: "Something broke? Forgot your password? Accidentally triggered a containment breach? We've got you covered.",
+      link: "/docs/troubleshooting",
+      color: "text-red-500",
+      bgColor: "bg-red-500/10",
+      borderColor: "border-red-500/30"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary">URBANSHADE OS Documentation</h1>
+          <h1 className="text-xl font-bold text-primary">URBANSHADE Documentation</h1>
           <Link 
             to="/" 
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
@@ -20,240 +86,130 @@ const Docs = () => {
 
       {/* Content */}
       <main className="max-w-4xl mx-auto px-6 py-12 space-y-16">
-        {/* Intro */}
-        <section className="text-center space-y-4">
-          <Terminal className="w-16 h-16 mx-auto text-primary" />
-          <h2 className="text-4xl font-bold">Welcome to URBANSHADE OS</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            A fictional deep-sea facility management operating system. This documentation covers all features, applications, and hidden secrets within the simulation.
+        {/* Hero */}
+        <section className="text-center space-y-6">
+          <div className="relative inline-block">
+            <Waves className="w-20 h-20 mx-auto text-primary animate-pulse" />
+            <div className="absolute -inset-4 bg-primary/20 blur-xl rounded-full -z-10" />
+          </div>
+          
+          <h2 className="text-5xl font-bold">
+            Welcome to <span className="text-primary">URBANSHADE OS</span>
+          </h2>
+          
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            The only operating system designed for managing fictional underwater research facilities 
+            that definitely don't contain any eldritch horrors.
           </p>
+
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              🌊 8,247m Below Sea Level
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              🔬 100% Fictional
+            </span>
+            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
+              🎮 0% Actual OS
+            </span>
+          </div>
         </section>
 
-        {/* Getting Started */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Monitor className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-bold">Getting Started</h3>
-          </div>
+        {/* What is this */}
+        <section className="p-6 rounded-xl bg-gradient-to-r from-primary/10 to-blue-500/10 border border-primary/30">
+          <h3 className="text-2xl font-bold mb-4">So, what exactly is this?</h3>
           <div className="space-y-4 text-muted-foreground">
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">First Boot</h4>
-              <p>When you first launch URBANSHADE OS, you'll go through the installation process, OOBE (Out of Box Experience), and create your admin account. Your data is stored locally in your browser.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">Login</h4>
-              <p>After setup, you'll be presented with a user selection screen. Select your account and enter your password to access the desktop.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">Desktop Navigation</h4>
-              <p>The desktop features icons for quick access to applications, a taskbar at the bottom with the Start Menu, and window management for open applications.</p>
-            </div>
+            <p>
+              <strong className="text-foreground">URBANSHADE OS</strong> is a web-based simulation of a 
+              retro-futuristic operating system, inspired by the game Pressure. It's like playing pretend, 
+              but with more terminal commands and fewer actual responsibilities.
+            </p>
+            <p>
+              Everything here runs in your browser. Your "files" aren't real files. Your "passwords" 
+              are stored in localStorage (please don't use real passwords). The containment units 
+              contain nothing but your imagination. And the crushing pressure of the deep ocean? 
+              That's just Monday.
+            </p>
+            <p className="text-primary font-semibold">
+              TL;DR: It's a fun, interactive experience. Click things, explore, and try not to 
+              trigger too many simulated emergencies. 🐙
+            </p>
           </div>
         </section>
 
-        {/* Core Applications */}
+        {/* Documentation Sections */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Folder className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-bold">Core Applications</h3>
-          </div>
+          <h3 className="text-2xl font-bold text-center">Choose Your Adventure</h3>
+          <p className="text-center text-muted-foreground">
+            Pick a topic and dive in. Get it? Dive? Because we're underwater? ...I'll see myself out.
+          </p>
+          
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">📁 File Explorer</h4>
-              <p className="text-sm text-muted-foreground">Browse the simulated file system, view documents, and navigate facility directories.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">💻 Terminal</h4>
-              <p className="text-sm text-muted-foreground">Command-line interface with various commands. Type <code className="bg-black/50 px-1 rounded">help</code> to see available commands.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">📊 Task Manager</h4>
-              <p className="text-sm text-muted-foreground">View running processes and system resource usage.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">⚙️ Settings</h4>
-              <p className="text-sm text-muted-foreground">Configure system preferences, manage accounts, and export/import system data.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">🌐 Browser</h4>
-              <p className="text-sm text-muted-foreground">Access the facility intranet with documentation and internal resources.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">📝 Notepad</h4>
-              <p className="text-sm text-muted-foreground">Simple text editor for notes and documents.</p>
-            </div>
+            {sections.map((section, index) => (
+              <Link
+                key={index}
+                to={section.link}
+                className={`p-6 rounded-xl ${section.bgColor} border ${section.borderColor} hover:scale-[1.02] transition-all group`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center flex-shrink-0`}>
+                    <section.icon className={`w-6 h-6 ${section.color}`} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className={`font-bold text-lg ${section.color} group-hover:underline`}>
+                      {section.title}
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      {section.description}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
           </div>
         </section>
 
-        {/* Facility Applications */}
+        {/* Quick Tips */}
         <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Map className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-bold">Facility Applications</h3>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">📹 Security Cameras</h4>
-              <p className="text-sm text-muted-foreground">Monitor facility areas through the camera system.</p>
+          <h3 className="text-2xl font-bold">Quick Tips for New Recruits</h3>
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
+              <div className="text-3xl mb-2">🔑</div>
+              <p className="text-sm text-muted-foreground">
+                Press <kbd className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">DEL</kbd> during 
+                boot to access BIOS
+              </p>
             </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">🔒 Containment Monitor</h4>
-              <p className="text-sm text-muted-foreground">Track containment status and specimen information.</p>
+            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
+              <div className="text-3xl mb-2">🔄</div>
+              <p className="text-sm text-muted-foreground">
+                Press <kbd className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">F2</kbd> during 
+                boot for Recovery Mode
+              </p>
             </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">⚡ Power Grid</h4>
-              <p className="text-sm text-muted-foreground">Manage facility power distribution and systems.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">🗺️ Facility Planner</h4>
-              <p className="text-sm text-muted-foreground">View and edit facility layout and room configurations.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">👥 Personnel Directory</h4>
-              <p className="text-sm text-muted-foreground">Access staff information and contact details.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">🚨 Emergency Protocols</h4>
-              <p className="text-sm text-muted-foreground">Initiate and manage emergency procedures.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Advanced Features */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Zap className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-bold">Advanced Features</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
-              <h4 className="font-bold text-primary mb-2">🔧 BIOS Access</h4>
-              <p className="text-sm text-muted-foreground mb-2">Press <kbd className="px-2 py-1 bg-black/50 rounded border border-white/20">DEL</kbd> during boot to access BIOS settings.</p>
-              <p className="text-xs text-muted-foreground">Configure boot order, system settings, and hardware options.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
-              <h4 className="font-bold text-primary mb-2">🔄 Recovery Mode</h4>
-              <p className="text-sm text-muted-foreground mb-2">Press <kbd className="px-2 py-1 bg-black/50 rounded border border-white/20">F2</kbd> during boot to enter Recovery Mode.</p>
-              <p className="text-xs text-muted-foreground">Reset passwords, repair system, or perform factory reset.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
-              <h4 className="font-bold text-primary mb-2">🛡️ Admin Panel</h4>
-              <p className="text-sm text-muted-foreground mb-2">Access administrative controls for system management.</p>
-              <p className="text-xs text-muted-foreground">Hint: Try typing <code className="bg-black/50 px-1 rounded">secret</code> in the Terminal...</p>
-            </div>
-            <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-              <h4 className="font-bold text-yellow-500 mb-2">⚠️ Maintenance Mode</h4>
-              <p className="text-sm text-muted-foreground">System maintenance state for administrative tasks.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30">
-              <h4 className="font-bold text-destructive mb-2">🔐 Lockdown Mode</h4>
-              <p className="text-sm text-muted-foreground">Emergency lockdown state that restricts system access.</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Terminal Commands */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Terminal className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-bold">Terminal Commands</h3>
-          </div>
-          <div className="p-4 rounded-lg bg-black/60 border border-white/10 font-mono text-sm space-y-2">
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">help</span>
-              <span className="text-muted-foreground">Display available commands</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">clear</span>
-              <span className="text-muted-foreground">Clear terminal screen</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">status</span>
-              <span className="text-muted-foreground">Show system status</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">whoami</span>
-              <span className="text-muted-foreground">Display current user</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">date</span>
-              <span className="text-muted-foreground">Show current date/time</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">ls</span>
-              <span className="text-muted-foreground">List directory contents</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">cd</span>
-              <span className="text-muted-foreground">Change directory</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">cat</span>
-              <span className="text-muted-foreground">Display file contents</span>
-            </div>
-            <div className="grid grid-cols-[120px_1fr] gap-2">
-              <span className="text-primary">secret</span>
-              <span className="text-muted-foreground">???</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Keyboard Shortcuts */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Keyboard className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-bold">Keyboard Shortcuts</h3>
-          </div>
-          <div className="p-4 rounded-lg bg-black/40 border border-white/10 space-y-3">
-            <div className="flex justify-between items-center py-2 border-b border-white/10">
-              <span className="text-muted-foreground">Access BIOS</span>
-              <kbd className="px-3 py-1 bg-black/50 rounded border border-white/20 text-sm">DEL</kbd>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-white/10">
-              <span className="text-muted-foreground">Recovery Mode</span>
-              <kbd className="px-3 py-1 bg-black/50 rounded border border-white/20 text-sm">F2</kbd>
-            </div>
-            <div className="flex justify-between items-center py-2 border-b border-white/10">
-              <span className="text-muted-foreground">Open Start Menu</span>
-              <kbd className="px-3 py-1 bg-black/50 rounded border border-white/20 text-sm">Win</kbd>
-            </div>
-            <div className="flex justify-between items-center py-2">
-              <span className="text-muted-foreground">Close Window</span>
-              <kbd className="px-3 py-1 bg-black/50 rounded border border-white/20 text-sm">Alt + F4</kbd>
-            </div>
-          </div>
-        </section>
-
-        {/* Troubleshooting */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <HelpCircle className="w-6 h-6 text-primary" />
-            <h3 className="text-2xl font-bold">Troubleshooting</h3>
-          </div>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">Forgot Password?</h4>
-              <p className="text-sm text-muted-foreground">Press F2 during boot to enter Recovery Mode and reset your password.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">System Not Loading?</h4>
-              <p className="text-sm text-muted-foreground">Try clearing your browser's localStorage for this site, or use the Recovery Mode factory reset option.</p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-foreground mb-2">Lost All Data?</h4>
-              <p className="text-sm text-muted-foreground">If you have an exported system image, you can import it via Settings → System → Import System Image.</p>
+            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
+              <div className="text-3xl mb-2">🤫</div>
+              <p className="text-sm text-muted-foreground">
+                Type <code className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">secret</code> in 
+                Terminal for... secrets
+              </p>
             </div>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="text-center pt-8 border-t border-white/10">
+        <footer className="text-center pt-8 border-t border-white/10 space-y-4">
           <p className="text-sm text-muted-foreground">
             URBANSHADE OS Documentation • v3.2.1 • © 2024 Urbanshade Corporation
           </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            This is a fictional simulation for entertainment purposes only.
+          <p className="text-xs text-muted-foreground">
+            This is a fictional simulation for entertainment purposes. No actual deep-sea facilities 
+            were harmed in the making of this software. Any resemblance to real underwater research 
+            stations containing anomalous entities is purely coincidental. 🐙
           </p>
+          <Link to="/" className="inline-block text-primary hover:underline text-sm">
+            ← Return to Simulation
+          </Link>
         </footer>
       </main>
     </div>
