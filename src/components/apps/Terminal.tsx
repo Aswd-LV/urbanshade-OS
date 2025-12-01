@@ -22,6 +22,14 @@ export const Terminal = ({ onCrash }: TerminalProps = {}) => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [history]);
 
+  // Load plugin commands and add to command list
+  const pluginCommands = JSON.parse(localStorage.getItem('plugin_commands') || '[]');
+  
+  // Add plugin commands to help text dynamically
+  const pluginCommandsText = pluginCommands.length > 0
+    ? `\n\n  [PLUGIN COMMANDS]\n${pluginCommands.map((cmd: any) => `  ${cmd.name.padEnd(14)} - ${cmd.description}`).join('\n')}`
+    : '';
+
   const commands: Record<string, string> = {
   help: `Available commands:
   help          - Show this help message
@@ -57,7 +65,7 @@ export const Terminal = ({ onCrash }: TerminalProps = {}) => {
   echo          - Echo text
   history       - Show command history
   depth         - Facility depth info
-  reality       - Reality check
+  reality       - Reality check${pluginCommandsText}
   
   [HIDDEN COMMANDS]
   admin         - Administrator menu (Level 5)
@@ -570,7 +578,13 @@ Use for testing purposes only.`
     } else if (commands[cmd]) {
       output = commands[cmd];
     } else {
-      output = `Command not found: ${cmd}\nType 'help' for available commands.`;
+      // Check plugin commands
+      const pluginCmd = pluginCommands.find((pc: any) => pc.name === cmd);
+      if (pluginCmd) {
+        output = `━━━━━━━━━━━━━━━━━━━━━━━━━━\n${pluginCmd.name.toUpperCase()} (Plugin Command)\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${pluginCmd.description}\n\nPlugin ID: ${pluginCmd.id}\n\nThis is a simulated plugin command.\nFull functionality coming soon!`;
+      } else {
+        output = `Command not found: ${cmd}\nType 'help' for available commands.`;
+      }
     }
 
     setHistory(prev => [...prev, { input: cmd, output }]);

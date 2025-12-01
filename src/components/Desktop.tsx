@@ -4,7 +4,9 @@ import { DesktopIcon } from "./DesktopIcon";
 import { StartMenu } from "./StartMenu";
 import { WindowManager } from "./WindowManager";
 import { RecoveryMode } from "./RecoveryMode";
+import { ContextMenu, getDesktopMenuItems } from "./ContextMenu";
 import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull } from "lucide-react";
+import { toast } from "sonner";
 
 export interface App {
   id: string;
@@ -35,6 +37,7 @@ export const Desktop = ({
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [windows, setWindows] = useState<Array<{ id: string; app: App; zIndex: number; minimized?: boolean }>>([]);
   const [nextZIndex, setNextZIndex] = useState(100);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   
   // Load background gradient from settings
   const [bgGradient, setBgGradient] = useState(() => {
@@ -638,12 +641,20 @@ export const Desktop = ({
     setDraggedIcon(null);
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  };
+
+  const settingsApp = allApps.find(app => app.id === 'settings');
+
   return (
     <div 
       className="relative h-screen w-full overflow-hidden"
       style={{
         background: `linear-gradient(135deg, ${bgGradient.start} 0%, ${bgGradient.end} 100%)`
       }}
+      onContextMenu={handleContextMenu}
     >
       {/* Desktop Icons */}
       <div className="relative z-10 p-7">
@@ -708,6 +719,19 @@ export const Desktop = ({
         windows={windows}
         onRestoreWindow={restoreWindow}
       />
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={getDesktopMenuItems(
+            () => toast.info("Folder creation coming soon!"),
+            () => settingsApp && openWindow(settingsApp)
+          )}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 };

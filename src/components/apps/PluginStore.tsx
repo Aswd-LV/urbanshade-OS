@@ -56,11 +56,48 @@ export const PluginStore = () => {
     setInstalledPlugins(prev => [...prev, plugin.id]);
     toast.success(`${plugin.name} installed!`);
     
-    // Apply theme immediately if it's a theme plugin
-    if (plugin.category === "theme" && plugin.config) {
-      localStorage.setItem('active_theme', JSON.stringify(plugin));
-      toast.info("Restart required for theme changes");
+    // Apply plugin based on category
+    if (plugin.category === "theme") {
+      applyTheme(plugin);
+    } else if (plugin.category === "command") {
+      registerCommand(plugin);
+    } else if (plugin.category === "utility") {
+      activateUtility(plugin);
     }
+  };
+
+  const applyTheme = (plugin: Plugin) => {
+    const themeMap: Record<string, any> = {
+      'dark-neon': { primary: '180 100% 50%', accent: '300 100% 50%', background: '240 100% 5%' },
+      'ocean-blue': { primary: '200 100% 50%', accent: '210 100% 60%', background: '210 80% 10%' },
+      'blood-red': { primary: '0 100% 50%', accent: '10 100% 60%', background: '0 50% 5%' }
+    };
+    
+    const theme = themeMap[plugin.id];
+    if (theme) {
+      Object.entries(theme).forEach(([key, value]) => {
+        document.documentElement.style.setProperty(`--${key}`, String(value));
+        localStorage.setItem(`theme_${key}`, String(value));
+      });
+      localStorage.setItem('active_theme', plugin.id);
+      toast.success(`${plugin.name} applied! Refresh to see all changes.`);
+    }
+  };
+
+  const registerCommand = (plugin: Plugin) => {
+    const commands = JSON.parse(localStorage.getItem('plugin_commands') || '[]');
+    commands.push({
+      id: plugin.id,
+      name: plugin.name.toLowerCase().replace(/\s/g, ''),
+      description: plugin.description
+    });
+    localStorage.setItem('plugin_commands', JSON.stringify(commands));
+    toast.success(`Command registered! Use in Terminal.`);
+  };
+
+  const activateUtility = (plugin: Plugin) => {
+    localStorage.setItem(`utility_${plugin.id}`, 'active');
+    toast.success(`${plugin.name} activated!`);
   };
 
   const handleUninstall = (pluginId: string) => {

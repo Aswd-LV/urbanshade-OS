@@ -28,6 +28,7 @@ export const Taskbar = ({ onStartClick, pinnedApps, onPinnedClick, windows = [],
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
+  const openWindows = windows.filter(w => !w.minimized);
   const minimizedWindows = windows.filter(w => w.minimized);
 
   return (
@@ -57,9 +58,21 @@ export const Taskbar = ({ onStartClick, pinnedApps, onPinnedClick, windows = [],
           ))}
         </div>
 
-        {/* Minimized Windows */}
-        {minimizedWindows.length > 0 && (
+        {/* Open & Minimized Windows */}
+        {(openWindows.length > 0 || minimizedWindows.length > 0) && (
           <div className="flex gap-2 ml-2 pl-2 border-l border-white/10">
+            {/* Open Windows */}
+            {openWindows.map(window => (
+              <button
+                key={window.id}
+                onClick={() => onRestoreWindow?.(window.id)}
+                className="w-11 h-11 rounded-lg flex items-center justify-center text-primary bg-primary/10 hover:bg-primary/20 transition-all duration-200 hover-scale border border-primary/30"
+                title={window.app.name}
+              >
+                {window.app.icon}
+              </button>
+            ))}
+            {/* Minimized Windows */}
             {minimizedWindows.map(window => (
               <button
                 key={window.id}
