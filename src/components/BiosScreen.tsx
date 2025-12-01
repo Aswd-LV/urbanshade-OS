@@ -239,7 +239,26 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
     </div>
   );
 
-  const renderBoot = () => (
+  const renderBoot = () => {
+    const [fastBoot, setFastBoot] = useState(() => 
+      localStorage.getItem('bios_fast_boot') === 'true'
+    );
+    const [bootOrder, setBootOrder] = useState(() => 
+      localStorage.getItem('bios_boot_order') || 'hdd'
+    );
+
+    const handleFastBootToggle = () => {
+      const newValue = !fastBoot;
+      setFastBoot(newValue);
+      localStorage.setItem('bios_fast_boot', String(newValue));
+    };
+
+    const handleBootOrderChange = (order: string) => {
+      setBootOrder(order);
+      localStorage.setItem('bios_boot_order', order);
+    };
+
+    return (
     <div className="space-y-6 animate-fade-in">
       <div className="bg-gradient-to-br from-[#0078D7]/20 to-[#0063B1]/20 border border-[#0078D7]/50 rounded-lg p-6">
         <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -276,10 +295,15 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
         <div className="bg-gradient-to-br from-[#0078D7]/20 to-[#0063B1]/20 border border-[#0078D7]/50 rounded-lg p-6">
           <h3 className="text-lg font-bold mb-4">Boot Options</h3>
           <div className="space-y-3 text-sm">
-            <div className="flex justify-between items-center p-2 hover:bg-[#0078D7]/10 rounded cursor-pointer">
+            <button
+              onClick={handleFastBootToggle}
+              className="w-full flex justify-between items-center p-2 hover:bg-[#0078D7]/10 rounded cursor-pointer transition-colors"
+            >
               <span>Fast Boot</span>
-              <span className="text-green-400">Enabled</span>
-            </div>
+              <span className={fastBoot ? "text-green-400" : "text-gray-400"}>
+                {fastBoot ? "Enabled" : "Disabled"}
+              </span>
+            </button>
             <div className="flex justify-between items-center p-2 hover:bg-[#0078D7]/10 rounded cursor-pointer">
               <span>Boot Logo</span>
               <span className="text-green-400">Enabled</span>
@@ -302,7 +326,8 @@ export const BiosScreen = ({ onExit }: BiosScreenProps) => {
         </div>
       </div>
     </div>
-  );
+    );
+  };
 
   const renderSecurity = () => (
     <div className="space-y-6 animate-fade-in">
