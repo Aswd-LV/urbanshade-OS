@@ -363,7 +363,16 @@ const Index = () => {
     />;
   }
 
+  // Skip login on first boot after installation
+  const isFirstBoot = localStorage.getItem("urbanshade_first_boot") === "true";
+  
   if (!loggedIn) {
+    if (isFirstBoot) {
+      // Auto-login on first boot, then clear the flag
+      localStorage.removeItem("urbanshade_first_boot");
+      setLoggedIn(true);
+      return null;
+    }
     return <UserSelectionScreen onLogin={() => setLoggedIn(true)} />;
   }
 
