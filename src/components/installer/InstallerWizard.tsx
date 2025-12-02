@@ -79,21 +79,30 @@ export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
     if (stage === "installing" && !installComplete) {
       const files = getInstallFiles();
       let fileIndex = 0;
+      let isCancelled = false;
       
       const interval = setInterval(() => {
-        if (fileIndex < files.length) {
-          setCurrentFile(files[fileIndex].file);
-          setInstallLogs(prev => [...prev.slice(-12), `[${files[fileIndex].action}] ${files[fileIndex].file}`]);
+        if (isCancelled) return;
+        
+        const currentFileData = files[fileIndex];
+        if (currentFileData && fileIndex < files.length) {
+          setCurrentFile(currentFileData.file);
+          setInstallLogs(prev => [...prev.slice(-12), `[${currentFileData.action}] ${currentFileData.file}`]);
           setInstallProgress(((fileIndex + 1) / files.length) * 100);
           fileIndex++;
         } else {
           clearInterval(interval);
-          setInstallComplete(true);
-          setInstallLogs(prev => [...prev, "", "═══════════════════════════════════════", "  INSTALLATION COMPLETE - SYSTEM READY", "═══════════════════════════════════════"]);
+          if (!isCancelled) {
+            setInstallComplete(true);
+            setInstallLogs(prev => [...prev, "", "═══════════════════════════════════════", "  INSTALLATION COMPLETE - SYSTEM READY", "═══════════════════════════════════════"]);
+          }
         }
       }, getInstallSpeed());
       
-      return () => clearInterval(interval);
+      return () => {
+        isCancelled = true;
+        clearInterval(interval);
+      };
     }
   }, [stage, installType]);
 
@@ -102,6 +111,7 @@ export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
       case "minimal": return 180;
       case "standard": return 140;
       case "full": return 100;
+      default: return 150;
     }
   };
 
