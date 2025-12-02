@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Save, FileText, FolderOpen, File, Plus } from "lucide-react";
+import { Save, FileText, FolderOpen, File, Plus, Sparkles } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -18,9 +18,8 @@ export const Notepad = () => {
   const [newFileName, setNewFileName] = useState("Untitled.txt");
   const [selectedFolder, setSelectedFolder] = useState("documents");
 
-  const { files, getChildren, createFile, updateFile, getFile, getPath } = useVirtualFileSystem();
+  const { files, createFile, updateFile, getPath } = useVirtualFileSystem();
 
-  // Get text files for open dialog
   const textFiles = files.filter(f => f.type === "file" && (f.extension === "txt" || f.extension === "md" || f.extension === "log"));
   const folders = files.filter(f => f.type === "folder" && f.id !== "root");
 
@@ -35,22 +34,17 @@ export const Notepad = () => {
     setFileName("Untitled.txt");
     setCurrentFileId(null);
     setModified(false);
+    toast.success("✨ New file created!");
   };
 
   const handleSave = () => {
     if (currentFileId) {
-      // Update existing file
       updateFile(currentFileId, content);
       setModified(false);
-      toast.success(`${fileName} saved!`);
+      toast.success(`💾 ${fileName} saved!`);
     } else {
-      // Show save dialog for new file
       setShowSaveDialog(true);
     }
-  };
-
-  const handleSaveAs = () => {
-    setShowSaveDialog(true);
   };
 
   const handleSaveConfirm = () => {
@@ -60,7 +54,7 @@ export const Notepad = () => {
     setFileName(name);
     setModified(false);
     setShowSaveDialog(false);
-    toast.success(`${name} saved to ${folders.find(f => f.id === selectedFolder)?.name || 'Documents'}!`);
+    toast.success(`✅ ${name} saved successfully!`);
   };
 
   const handleOpen = (file: VirtualFile) => {
@@ -70,51 +64,97 @@ export const Notepad = () => {
     setCurrentFileId(file.id);
     setModified(false);
     setShowOpenDialog(false);
-    toast.success(`Opened ${file.name}`);
+    toast.success(`📂 Opened ${file.name}`);
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-background to-muted/10">
-      {/* Toolbar */}
-      <div className="border-b border-border/50 p-3 flex items-center gap-2 bg-background/50 backdrop-blur-sm">
-        <FileText className="w-5 h-5 text-primary" />
-        <span className="text-sm font-mono font-semibold text-foreground">
-          {fileName}{modified ? " •" : ""}
-        </span>
-        <div className="flex-1" />
-        <Button size="sm" variant="ghost" onClick={handleNew} title="New">
-          <Plus className="w-4 h-4" />
-        </Button>
-        <Button size="sm" variant="ghost" onClick={() => setShowOpenDialog(true)} title="Open">
-          <FolderOpen className="w-4 h-4" />
-        </Button>
-        <Button size="sm" className="bg-primary hover:bg-primary/90 gap-2" onClick={handleSave}>
-          <Save className="w-4 h-4" />
-          Save
-        </Button>
+    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-primary/5">
+      {/* Modern Toolbar */}
+      <div className="border-b border-border bg-gradient-to-r from-card/80 to-card/60 backdrop-blur-sm p-3 flex items-center gap-3 shadow-sm">
+        <div className="flex items-center gap-2 flex-1">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <FileText className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+              {fileName}
+              {modified && <span className="text-xs text-primary">● unsaved</span>}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {currentFileId ? getPath(currentFileId) : "Not saved yet"}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={handleNew} 
+            title="New file"
+            className="hover:bg-primary/10"
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            New
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => setShowOpenDialog(true)} 
+            title="Open file"
+            className="hover:bg-primary/10"
+          >
+            <FolderOpen className="w-4 h-4 mr-1" />
+            Open
+          </Button>
+          <Button 
+            size="sm" 
+            className="bg-primary hover:bg-primary/90 gap-2 shadow-lg" 
+            onClick={handleSave}
+          >
+            <Save className="w-4 h-4" />
+            Save
+          </Button>
+        </div>
       </div>
 
-      {/* Editor */}
-      <div className="flex-1 p-4">
+      {/* Editor Area */}
+      <div className="flex-1 p-6">
         <Textarea
           value={content}
           onChange={(e) => handleContentChange(e.target.value)}
-          placeholder="Start typing your notes..."
-          className="h-full border border-border/30 rounded-lg resize-none focus-visible:ring-2 focus-visible:ring-primary/50 font-mono text-base bg-background/50 backdrop-blur-sm"
+          placeholder="Start typing your notes... ✨"
+          className="h-full border-2 border-border/50 rounded-2xl resize-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary font-mono text-base bg-card/30 backdrop-blur-sm shadow-inner"
         />
       </div>
 
       {/* Status Bar */}
-      <div className="border-t border-border/50 px-4 py-1 text-xs text-muted-foreground flex justify-between bg-muted/30">
-        <span>{content.length} characters | {content.split('\n').length} lines</span>
-        <span>{currentFileId ? getPath(currentFileId) : "Unsaved"}</span>
+      <div className="border-t border-border px-4 py-2 bg-muted/50 backdrop-blur-sm flex justify-between items-center text-xs text-muted-foreground">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1">
+            <FileText className="w-3 h-3" />
+            {content.length} characters
+          </span>
+          <span>•</span>
+          <span>{content.split('\n').length} lines</span>
+          <span>•</span>
+          <span className="flex items-center gap-1">
+            {modified ? "📝 Modified" : "✅ Saved"}
+          </span>
+        </div>
+        <div className="text-xs">
+          {currentFileId ? "📁 " + getPath(currentFileId) : "💾 Save to keep your work"}
+        </div>
       </div>
 
       {/* Save Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Save File</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Save className="w-5 h-5 text-primary" />
+              Save Your File
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -122,20 +162,24 @@ export const Notepad = () => {
               <Input
                 value={newFileName}
                 onChange={(e) => setNewFileName(e.target.value)}
-                placeholder="filename.txt"
+                placeholder="my-document.txt"
+                className="focus-visible:ring-primary"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium">Save to folder</label>
+              <label className="text-sm font-medium flex items-center gap-2">
+                <FolderOpen className="w-4 h-4 text-primary" />
+                Choose folder
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {folders.map(folder => (
                   <button
                     key={folder.id}
                     onClick={() => setSelectedFolder(folder.id)}
-                    className={`p-3 rounded-lg border text-left transition-all ${
+                    className={`p-3 rounded-xl border-2 text-left transition-all ${
                       selectedFolder === folder.id 
-                        ? "border-primary bg-primary/10" 
-                        : "border-border hover:bg-muted/50"
+                        ? "border-primary bg-primary/10 shadow-lg scale-105" 
+                        : "border-border hover:bg-muted/50 hover:border-primary/30"
                     }`}
                   >
                     <div className="text-sm font-medium">{folder.name}</div>
@@ -146,32 +190,44 @@ export const Notepad = () => {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSaveDialog(false)}>Cancel</Button>
-            <Button onClick={handleSaveConfirm}>Save</Button>
+            <Button onClick={handleSaveConfirm} className="gap-2">
+              <Save className="w-4 h-4" />
+              Save File
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Open Dialog */}
       <Dialog open={showOpenDialog} onOpenChange={setShowOpenDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Open File</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-primary" />
+              Open a File
+            </DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-64">
+          <ScrollArea className="h-80">
             <div className="space-y-2 p-1">
               {textFiles.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No text files found</p>
+                <div className="text-center py-12">
+                  <Sparkles className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                  <p className="text-sm text-muted-foreground">No text files yet</p>
+                  <p className="text-xs text-muted-foreground/70">Create one by saving your work!</p>
+                </div>
               ) : (
                 textFiles.map(file => (
                   <button
                     key={file.id}
                     onClick={() => handleOpen(file)}
-                    className="w-full p-3 rounded-lg border border-border hover:bg-muted/50 text-left transition-all flex items-center gap-3"
+                    className="w-full p-4 rounded-xl border border-border hover:bg-muted/50 hover:border-primary/50 text-left transition-all flex items-center gap-3 group"
                   >
-                    <File className="w-4 h-4 text-primary" />
-                    <div>
-                      <div className="text-sm font-medium">{file.name}</div>
-                      <div className="text-xs text-muted-foreground">{getPath(file.id)}</div>
+                    <File className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{file.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        📁 {getPath(file.id)}
+                      </div>
                     </div>
                   </button>
                 ))

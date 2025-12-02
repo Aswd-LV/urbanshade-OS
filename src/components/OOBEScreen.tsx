@@ -179,20 +179,25 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white flex items-center justify-center p-8 animate-fade-in">
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 text-foreground flex items-center justify-center p-8 animate-fade-in">
       <div className="max-w-2xl w-full">
         {step === "welcome" && (
           <div className="text-center space-y-8 animate-fade-in">
-            <Settings className="w-24 h-24 mx-auto text-primary animate-pulse" />
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-primary/20 to-primary/30 rounded-full flex items-center justify-center animate-scale-in">
+              <Settings className="w-12 h-12 text-primary" />
+            </div>
             <div>
-              <h1 className="text-5xl font-bold mb-4">Welcome to UrbanShade OS</h1>
-              <p className="text-xl text-muted-foreground">Let's set up your system in 21 easy steps</p>
+              <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Welcome! 🎉
+              </h1>
+              <p className="text-xl text-muted-foreground">Let's personalize your experience in a few quick steps</p>
+              <p className="text-sm text-muted-foreground/70 mt-2">This will only take a couple of minutes</p>
             </div>
             <button
               onClick={handleNext}
-              className="px-8 py-4 rounded-lg bg-primary hover:bg-primary/80 transition-colors text-lg font-bold"
+              className="px-8 py-4 rounded-xl bg-primary hover:bg-primary/90 transition-all text-lg font-bold text-primary-foreground shadow-lg hover:scale-105"
             >
-              Get Started
+              Let's Go! →
             </button>
           </div>
         )}
@@ -200,8 +205,13 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
         {step === "region" && (
           <div className="space-y-8 animate-fade-in">
             <div className="flex items-center gap-4 mb-8">
-              <Globe className="w-12 h-12 text-primary" />
-              <h2 className="text-4xl font-bold">Choose Your Region</h2>
+              <div className="p-3 rounded-xl bg-primary/20">
+                <Globe className="w-8 h-8 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-bold">Choose Your Region 🌍</h2>
+                <p className="text-sm text-muted-foreground mt-1">This helps with time zones and formats</p>
+              </div>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -209,10 +219,10 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
                 <button
                   key={r}
                   onClick={() => setRegion(r)}
-                  className={`p-6 rounded-lg border-2 transition-all ${
+                  className={`p-6 rounded-xl border-2 transition-all ${
                     region === r 
-                      ? "bg-primary/20 border-primary" 
-                      : "bg-black/40 border-white/10 hover:border-white/30"
+                      ? "bg-primary/20 border-primary shadow-lg scale-105" 
+                      : "bg-card/50 border-border hover:border-primary/50 hover:scale-102"
                   }`}
                 >
                   <div className="text-lg font-bold">{r}</div>
@@ -221,17 +231,16 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
             </div>
 
             <div className="flex gap-4 justify-between">
-              <button onClick={handleBack} className="px-6 py-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
-                Back
+              <button onClick={handleBack} className="px-6 py-3 rounded-xl bg-muted/50 hover:bg-muted transition-all">
+                ← Back
               </button>
-              <button onClick={handleNext} className="px-6 py-3 rounded-lg bg-primary hover:bg-primary/80 transition-colors">
-                Continue
+              <button onClick={handleNext} className="px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold transition-all shadow-lg">
+                Continue →
               </button>
             </div>
-            <div className="text-center text-sm text-muted-foreground">Step {(() => {
-              const steps = ["welcome", "region", "time", "display", "sound", "network", "power", "accessibility", "notifications", "background", "storage", "security", "accounts", "developer", "privacy", "advanced", "survey", "review", "finish"];
-              return steps.indexOf(step) + 1;
-            })()} of 18</div>
+            <div className="text-center text-sm text-muted-foreground/70">
+              Step 2 of many • You're doing great! ✨
+            </div>
           </div>
         )}
 

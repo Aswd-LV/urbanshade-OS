@@ -80,17 +80,17 @@ export const TaskManager = ({ windows, onCloseWindow, onCriticalKill }: TaskMana
   const memoryPercent = ((18.4 / 32) * 100).toFixed(0);
 
   return (
-    <div className="flex h-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
+    <div className="flex h-full bg-gradient-to-br from-background via-background to-primary/5">
       {/* Sidebar Navigation */}
-      <div className="w-56 border-r border-white/10 bg-slate-900/50 backdrop-blur-sm">
-        <div className="p-4 border-b border-white/10">
+      <div className="w-64 border-r border-border bg-card/50 backdrop-blur-sm">
+        <div className="p-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-500/20">
-              <Activity className="w-5 h-5 text-cyan-400" />
+            <div className="p-2 rounded-xl bg-primary/20">
+              <Activity className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <div className="font-bold text-sm">Task Manager</div>
-              <div className="text-xs text-gray-400">Urbanshade OS</div>
+              <div className="font-bold">Task Manager</div>
+              <div className="text-xs text-muted-foreground">System Monitor</div>
             </div>
           </div>
         </div>

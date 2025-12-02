@@ -140,12 +140,14 @@ export const FileExplorer = ({ onLog, onVirusDetected }: FileExplorerProps) => {
   const pathParts = currentPath.split("/").filter(p => p);
 
   return (
-    <div className="h-full flex bg-background">
+    <div className="h-full flex bg-gradient-to-br from-background to-primary/5">
       {/* Sidebar */}
-      <div className="w-56 border-r bg-gradient-to-b from-muted/50 to-muted/30 flex flex-col">
-        <div className="p-4 border-b">
-          <h3 className="font-bold flex items-center gap-2">
-            <Home className="w-4 h-4 text-primary" />
+      <div className="w-64 border-r border-border bg-card/50 backdrop-blur-sm flex flex-col shadow-sm">
+        <div className="p-4 border-b border-border">
+          <h3 className="font-bold flex items-center gap-2 text-lg">
+            <div className="p-1.5 rounded-lg bg-primary/20">
+              <Home className="w-4 h-4 text-primary" />
+            </div>
             Quick Access
           </h3>
         </div>
