@@ -43,7 +43,7 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown
   return (
     <div
       ref={menuRef}
-      className="fixed left-3 bottom-[78px] w-[680px] h-[740px] rounded-2xl backdrop-blur-2xl bg-background/95 border border-border/50 z-[900] shadow-2xl overflow-hidden animate-slide-in-right"
+      className="fixed left-3 bottom-[78px] w-[680px] h-[740px] rounded-2xl backdrop-blur-2xl bg-background/95 border border-border/50 z-[9999] shadow-2xl overflow-hidden animate-slide-in-right"
     >
       {/* Search Bar at Top */}
       <div className="p-6 border-b border-border/30">
