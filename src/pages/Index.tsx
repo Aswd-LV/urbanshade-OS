@@ -6,7 +6,7 @@ import { BootScreen } from "@/components/BootScreen";
 import { BiosScreen } from "@/components/BiosScreen";
 import { ShutdownScreen } from "@/components/ShutdownScreen";
 import { RebootScreen } from "@/components/RebootScreen";
-import { CrashScreen } from "@/components/CrashScreen";
+import { CrashScreen, CrashType, CrashData, triggerCrash } from "@/components/CrashScreen";
 import { InstallationScreen } from "@/components/InstallationScreen";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
 import { LockdownScreen } from "@/components/LockdownScreen";
@@ -19,6 +19,8 @@ import { UpdateScreen } from "@/components/UpdateScreen";
 import { AdminPanel } from "@/components/AdminPanel";
 import { LogoutScreen } from "@/components/LogoutScreen";
 import { DevModeConsole } from "@/components/DevModeConsole";
+import { BugcheckScreen, createBugcheck, BugcheckData } from "@/components/BugcheckScreen";
+import { actionDispatcher } from "@/lib/actionDispatcher";
 
 const Index = () => {
   const [adminSetupComplete, setAdminSetupComplete] = useState(false);
@@ -40,12 +42,14 @@ const Index = () => {
   const [rebooting, setRebooting] = useState(false);
   const [blackScreen, setBlackScreen] = useState(false);
   const [crashed, setCrashed] = useState(false);
+  const [crashData, setCrashData] = useState<CrashData | null>(null);
   const [killedProcess, setKilledProcess] = useState<string>("");
   const [crashType, setCrashType] = useState<"kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload">("kernel");
   const [loggingOut, setLoggingOut] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [customCrashData, setCustomCrashData] = useState<{ title: string; message: string } | null>(null);
+  const [bugcheckData, setBugcheckData] = useState<BugcheckData | null>(null);
   const [lockdownMode, setLockdownMode] = useState(false);
   const [lockdownProtocol, setLockdownProtocol] = useState<string>("");
   const [showTour, setShowTour] = useState(false);
@@ -187,6 +191,36 @@ const Index = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [loggedIn, lockdownMode, crashed, shuttingDown, rebooting, booted, biosComplete, inRecoveryMode, keyBuffer]);
+
+  // Check for pending crashes/bugchecks from DEF-DEV admin
+  useEffect(() => {
+    const pendingCrash = localStorage.getItem('urbanshade_pending_crash');
+    if (pendingCrash) {
+      localStorage.removeItem('urbanshade_pending_crash');
+      try {
+        const data = JSON.parse(pendingCrash);
+        actionDispatcher.system(`Processing pending crash: ${data.type}`);
+        const crash = triggerCrash(data.type as CrashType, { process: data.process || 'admin.exe' });
+        setCrashData(crash);
+        setCrashed(true);
+      } catch (e) {
+        console.error("Failed to parse pending crash", e);
+      }
+    }
+
+    const pendingBugcheck = localStorage.getItem('urbanshade_pending_bugcheck');
+    if (pendingBugcheck) {
+      localStorage.removeItem('urbanshade_pending_bugcheck');
+      try {
+        const data = JSON.parse(pendingBugcheck);
+        actionDispatcher.system(`Processing pending bugcheck: ${data.code}`);
+        const bugcheck = createBugcheck(data.code, data.description, 'DEF-DEV Admin');
+        setBugcheckData(bugcheck);
+      } catch (e) {
+        console.error("Failed to parse pending bugcheck", e);
+      }
+    }
+  }, []);
 
   // Check for first time tour
   useEffect(() => {
@@ -381,8 +415,23 @@ const Index = () => {
     return <LockdownScreen onAuthorized={handleLockdownAuthorized} protocolName={lockdownProtocol} />;
   }
 
+  if (bugcheckData) {
+    return <BugcheckScreen 
+      bugcheck={bugcheckData} 
+      onRestart={() => {
+        setBugcheckData(null);
+        setBooted(false);
+        setLoggedIn(false);
+      }}
+      onReportToDev={() => {
+        setBugcheckData(null);
+        window.open('/def-dev', '_blank');
+      }}
+    />;
+  }
+
   if (crashed) {
-    return <CrashScreen onReboot={handleCrashReboot} killedProcess={killedProcess} crashType={crashType} customData={customCrashData} />;
+    return <CrashScreen onReboot={handleCrashReboot} crashData={crashData || undefined} killedProcess={killedProcess} crashType={crashType} customData={customCrashData} />;
   }
 
   if (loggingOut) {

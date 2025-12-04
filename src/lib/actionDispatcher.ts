@@ -28,6 +28,61 @@ class ActionDispatcher {
   private listeners: Set<(action: ActionEvent) => void> = new Set();
   private actionHistory: ActionEvent[] = [];
   private maxHistory = 500;
+  private persistToStorage = false;
+  private storageKey = 'def-dev-actions';
+
+  constructor() {
+    // Check if persistence is enabled
+    this.persistToStorage = localStorage.getItem('def_dev_actions_consent') === 'true';
+    
+    // Load existing actions from storage
+    if (this.persistToStorage) {
+      this.loadFromStorage();
+    }
+  }
+
+  // Enable/disable persistence
+  setPersistence(enabled: boolean) {
+    this.persistToStorage = enabled;
+    localStorage.setItem('def_dev_actions_consent', enabled ? 'true' : 'false');
+    if (enabled) {
+      this.saveToStorage();
+    }
+  }
+
+  isPersistenceEnabled(): boolean {
+    return this.persistToStorage;
+  }
+
+  // Load actions from localStorage
+  private loadFromStorage() {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        this.actionHistory = parsed.map((a: any) => ({
+          ...a,
+          timestamp: new Date(a.timestamp)
+        }));
+      }
+    } catch (e) {
+      console.error("Failed to load action history from storage");
+    }
+  }
+
+  // Save actions to localStorage
+  private saveToStorage() {
+    if (!this.persistToStorage) return;
+    try {
+      const toSave = this.actionHistory.slice(-this.maxHistory).map(a => ({
+        ...a,
+        timestamp: a.timestamp.toISOString()
+      }));
+      localStorage.setItem(this.storageKey, JSON.stringify(toSave));
+    } catch (e) {
+      console.error("Failed to save action history to storage");
+    }
+  }
 
   // Subscribe to actions
   subscribe(callback: (action: ActionEvent) => void): () => void {
@@ -49,6 +104,11 @@ class ActionDispatcher {
       this.actionHistory = this.actionHistory.slice(-this.maxHistory);
     }
 
+    // Save to localStorage if enabled
+    if (this.persistToStorage) {
+      this.saveToStorage();
+    }
+
     // Notify all listeners
     this.listeners.forEach(listener => listener(action));
 
@@ -56,6 +116,18 @@ class ActionDispatcher {
     window.dispatchEvent(new CustomEvent('defdev-action', { 
       detail: { type, message, details } 
     }));
+  }
+
+  // Refresh from storage
+  refreshFromStorage(): ActionEvent[] {
+    this.loadFromStorage();
+    return this.actionHistory;
+  }
+
+  // Clear stored actions
+  clearStorage() {
+    localStorage.removeItem(this.storageKey);
+    this.actionHistory = [];
   }
 
   // Dispatch error with formatted type

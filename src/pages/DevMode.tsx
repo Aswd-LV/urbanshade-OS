@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Bug, AlertTriangle, Info, CheckCircle, Trash2, Download, Copy, Upload, Database, RefreshCw, HardDrive, FileText, X, Eye, EyeOff, Play, Terminal, Zap, Shield, Activity, ExternalLink, BookOpen } from "lucide-react";
+import { Bug, AlertTriangle, Info, CheckCircle, Trash2, Download, Copy, Upload, Database, RefreshCw, HardDrive, FileText, X, Eye, EyeOff, Play, Terminal, Zap, Shield, Activity, ExternalLink, BookOpen, Skull, MonitorX, Cpu, MemoryStick, AlertOctagon, Power, Bomb } from "lucide-react";
 import { toast } from "sonner";
 import { loadState } from "@/lib/persistence";
 import { Link } from "react-router-dom";
+import { actionDispatcher } from "@/lib/actionDispatcher";
 
 interface LogEntry {
   id: number;
@@ -61,18 +62,21 @@ const simplifyError = (message: string): string => {
 const DevMode = () => {
   const [devModeEnabled, setDevModeEnabled] = useState(false);
   const [showWarning, setShowWarning] = useState(true);
+  const [showActionConsent, setShowActionConsent] = useState(false);
+  const [actionConsentChecked, setActionConsentChecked] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [actions, setActions] = useState<ActionEntry[]>([]);
   const [filter, setFilter] = useState<"all" | "error" | "warn" | "info" | "system">("all");
   const [actionFilter, setActionFilter] = useState<"ALL" | "SYSTEM" | "APP" | "FILE" | "USER" | "SECURITY" | "WINDOW">("ALL");
   const [showTechnical, setShowTechnical] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<"console" | "actions" | "storage" | "images" | "bugchecks">("console");
+  const [selectedTab, setSelectedTab] = useState<"console" | "actions" | "storage" | "images" | "bugchecks" | "admin">("console");
   const [recoveryImages, setRecoveryImages] = useState<RecoveryImage[]>([]);
   const [bugchecks, setBugchecks] = useState<BugcheckEntry[]>([]);
   const [selectedImage, setSelectedImage] = useState<RecoveryImage | null>(null);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [storageSearch, setStorageSearch] = useState("");
+  const [actionPersistenceEnabled, setActionPersistenceEnabled] = useState(false);
   const logIdRef = useRef(0);
   const actionIdRef = useRef(0);
   const logsEndRef = useRef<HTMLDivElement>(null);
@@ -82,6 +86,10 @@ const DevMode = () => {
   useEffect(() => {
     const devEnabled = loadState("settings_developer_mode", false) || loadState("urbanshade_dev_mode_install", false);
     setDevModeEnabled(devEnabled);
+    
+    // Check if action persistence consent exists
+    const hasConsent = localStorage.getItem('def_dev_actions_consent') === 'true';
+    setActionPersistenceEnabled(hasConsent);
     
     // Load recovery images
     const saved = localStorage.getItem('urbanshade_recovery_images_data');
@@ -226,6 +234,7 @@ const DevMode = () => {
                   <li>LocalStorage inspection and management</li>
                   <li>Recovery image creation, editing, and restoration</li>
                   <li>Bugcheck reports and crash diagnostics</li>
+                  <li><strong className="text-amber-400">Admin commands</strong> (crash triggers, system controls)</li>
                 </ul>
               </div>
             </div>
@@ -236,6 +245,24 @@ const DevMode = () => {
                 <p className="font-semibold text-amber-400 mb-2">A Friendly Heads-Up</p>
                 <p>If you're a casual user just exploring the system, these tools are probably not what you're looking for. They're intended for developers, troubleshooters, and anyone who knows what they're doing.</p>
                 <p className="mt-2 text-amber-300/80 font-medium">Modifying values incorrectly could cause system instability, data loss, or unexpected behavior. Proceed with caution.</p>
+              </div>
+            </div>
+
+            {/* Action Logging Consent */}
+            <div className="flex items-start gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+              <Database className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-gray-300 flex-1">
+                <p className="font-semibold text-green-400 mb-2">Action Logging Storage</p>
+                <p className="mb-3">Enable persistent action logging to save OS events to <code className="bg-slate-800 px-1.5 py-0.5 rounded text-xs">def-dev-actions</code> localStorage. This allows you to review actions across sessions.</p>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={actionConsentChecked}
+                    onChange={(e) => setActionConsentChecked(e.target.checked)}
+                    className="w-5 h-5 rounded border-green-500 bg-slate-800 text-green-500 focus:ring-green-500"
+                  />
+                  <span className="text-green-300">I consent to creating <code className="bg-slate-800 px-1.5 py-0.5 rounded text-xs">def-dev-actions</code> localStorage</span>
+                </label>
               </div>
             </div>
 
@@ -268,7 +295,14 @@ const DevMode = () => {
               Go Back
             </button>
             <button
-              onClick={() => setShowWarning(false)}
+              onClick={() => {
+                if (actionConsentChecked) {
+                  actionDispatcher.setPersistence(true);
+                  setActionPersistenceEnabled(true);
+                  toast.success("Action logging enabled - events will persist to localStorage");
+                }
+                setShowWarning(false);
+              }}
               className="flex-1 px-4 py-3 bg-amber-600 hover:bg-amber-500 rounded-lg text-white font-semibold"
             >
               I Understand, Continue
@@ -444,6 +478,7 @@ const DevMode = () => {
           { id: "storage", label: "Storage", icon: <Database className="w-4 h-4" /> },
           { id: "images", label: "Recovery Images", icon: <HardDrive className="w-4 h-4" /> },
           { id: "bugchecks", label: `Bugchecks${bugchecks.length > 0 ? ` (${bugchecks.length})` : ''}`, icon: <Shield className="w-4 h-4" /> },
+          { id: "admin", label: "Admin", icon: <Skull className="w-4 h-4" /> },
         ].map(tab => (
           <button
             key={tab.id}
@@ -551,6 +586,28 @@ const DevMode = () => {
                 </button>
               ))}
               <div className="flex-1" />
+              <div className="flex items-center gap-2 mr-2">
+                <span className={`text-xs ${actionPersistenceEnabled ? 'text-green-400' : 'text-gray-500'}`}>
+                  {actionPersistenceEnabled ? '● Persisting' : '○ Not persisting'}
+                </span>
+              </div>
+              <button 
+                onClick={() => {
+                  const stored = actionDispatcher.refreshFromStorage();
+                  const converted = stored.map((a, idx) => ({
+                    id: idx,
+                    type: a.type as ActionEntry["type"],
+                    timestamp: a.timestamp,
+                    message: a.message
+                  }));
+                  setActions(converted);
+                  toast.success(`Loaded ${stored.length} actions from storage`);
+                }}
+                className="p-1.5 hover:bg-gray-800 rounded text-cyan-400"
+                title="Refresh from localStorage"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
               <button onClick={() => setActions([])} className="p-1.5 hover:bg-gray-800 rounded text-red-400">
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -559,7 +616,26 @@ const DevMode = () => {
             {/* Actions */}
             <div className="flex-1 overflow-auto p-2 space-y-1 text-xs">
               {filteredActions.length === 0 ? (
-                <div className="text-center text-gray-600 py-8">No actions recorded yet...</div>
+                <div className="text-center text-gray-600 py-8">
+                  <p>No actions recorded yet...</p>
+                  {actionPersistenceEnabled && (
+                    <button 
+                      onClick={() => {
+                        const stored = actionDispatcher.refreshFromStorage();
+                        const converted = stored.map((a, idx) => ({
+                          id: idx,
+                          type: a.type as ActionEntry["type"],
+                          timestamp: a.timestamp,
+                          message: a.message
+                        }));
+                        setActions(converted);
+                      }}
+                      className="mt-2 px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded text-cyan-400"
+                    >
+                      <RefreshCw className="w-3 h-3 inline mr-1" />Load from storage
+                    </button>
+                  )}
+                </div>
               ) : (
                 filteredActions.map(action => (
                   <div key={action.id} className="p-2 rounded bg-gray-800/50 border border-gray-700/50 flex items-center gap-3">
@@ -755,6 +831,193 @@ const DevMode = () => {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {selectedTab === "admin" && (
+          <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b border-gray-800 bg-gradient-to-r from-red-900/30 to-orange-900/30">
+              <div className="flex items-center gap-3">
+                <Skull className="w-6 h-6 text-red-400" />
+                <div>
+                  <h3 className="font-bold text-red-400">Admin Commands</h3>
+                  <p className="text-xs text-gray-500">Advanced system control and crash triggers</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Admin Controls */}
+            <div className="flex-1 overflow-auto p-4 space-y-6">
+              {/* Crash Triggers */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-amber-400 flex items-center gap-2">
+                  <MonitorX className="w-4 h-4" /> Crash Screen Triggers
+                </h4>
+                <p className="text-xs text-gray-500 mb-3">Trigger various crash screens (BSOD) for testing crash handlers</p>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { code: "CRITICAL_PROCESS_DIED", label: "Critical Process", desc: "System process terminated", icon: <AlertOctagon className="w-4 h-4" /> },
+                    { code: "KERNEL_PANIC", label: "Kernel Panic", desc: "Core system failure", icon: <Cpu className="w-4 h-4" /> },
+                    { code: "MEMORY_MANAGEMENT", label: "Memory Error", desc: "Memory allocation failed", icon: <MemoryStick className="w-4 h-4" /> },
+                    { code: "SYSTEM_SERVICE_EXCEPTION", label: "Service Exception", desc: "System service error", icon: <AlertTriangle className="w-4 h-4" /> },
+                    { code: "VIDEO_TDR_FAILURE", label: "Video Failure", desc: "Display driver timeout", icon: <MonitorX className="w-4 h-4" /> },
+                    { code: "WHEA_UNCORRECTABLE_ERROR", label: "Hardware Error", desc: "Fatal hardware failure", icon: <Bomb className="w-4 h-4" /> },
+                  ].map((crash) => (
+                    <button
+                      key={crash.code}
+                      onClick={() => {
+                        if (confirm(`Trigger ${crash.label}?\n\nThis will display a crash screen and may restart the system.`)) {
+                          actionDispatcher.system(`Admin triggered crash: ${crash.code}`);
+                          // Store crash to trigger on main page
+                          localStorage.setItem('urbanshade_pending_crash', JSON.stringify({
+                            type: crash.code,
+                            process: 'admin.exe',
+                            triggeredAt: new Date().toISOString()
+                          }));
+                          window.location.href = '/';
+                        }
+                      }}
+                      className="p-3 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 rounded-lg text-left transition-all group"
+                    >
+                      <div className="flex items-center gap-2 text-red-400 mb-1">
+                        {crash.icon}
+                        <span className="font-semibold text-sm">{crash.label}</span>
+                      </div>
+                      <p className="text-xs text-gray-500">{crash.desc}</p>
+                      <code className="text-xs text-red-400/50 mt-1 block">{crash.code}</code>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bugcheck Triggers */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-purple-400 flex items-center gap-2">
+                  <Shield className="w-4 h-4" /> Bugcheck Triggers
+                </h4>
+                <p className="text-xs text-gray-500 mb-3">Trigger system bugchecks (detailed error reports)</p>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { code: "FATAL_EXCEPTION", label: "Fatal Exception", desc: "Unhandled system exception" },
+                    { code: "SYSTEM_CORRUPTION", label: "System Corruption", desc: "Critical data integrity failure" },
+                    { code: "SECURITY_BREACH", label: "Security Breach", desc: "Security violation detected" },
+                    { code: "DRIVER_FAILURE", label: "Driver Failure", desc: "Driver crashed unexpectedly" },
+                  ].map((bug) => (
+                    <button
+                      key={bug.code}
+                      onClick={() => {
+                        if (confirm(`Trigger ${bug.label} bugcheck?`)) {
+                          actionDispatcher.system(`Admin triggered bugcheck: ${bug.code}`);
+                          localStorage.setItem('urbanshade_pending_bugcheck', JSON.stringify({
+                            code: bug.code,
+                            description: bug.desc,
+                            triggeredAt: new Date().toISOString()
+                          }));
+                          window.location.href = '/';
+                        }
+                      }}
+                      className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-lg text-left transition-all"
+                    >
+                      <div className="font-semibold text-sm text-purple-400 mb-1">{bug.label}</div>
+                      <p className="text-xs text-gray-500">{bug.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* System Controls */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
+                  <Power className="w-4 h-4" /> System Controls
+                </h4>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => {
+                      if (confirm('Force system reboot?')) {
+                        actionDispatcher.system('Admin forced reboot');
+                        window.location.href = '/';
+                      }
+                    }}
+                    className="p-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded-lg"
+                  >
+                    <Power className="w-5 h-5 text-cyan-400 mx-auto mb-1" />
+                    <span className="text-xs text-cyan-400">Force Reboot</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      actionDispatcher.clearStorage();
+                      setActions([]);
+                      toast.success('Action history cleared');
+                    }}
+                    className="p-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg"
+                  >
+                    <Trash2 className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+                    <span className="text-xs text-amber-400">Clear Actions</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      const enabled = !actionPersistenceEnabled;
+                      actionDispatcher.setPersistence(enabled);
+                      setActionPersistenceEnabled(enabled);
+                      toast.success(enabled ? 'Action persistence enabled' : 'Action persistence disabled');
+                    }}
+                    className={`p-3 border rounded-lg ${actionPersistenceEnabled ? 'bg-green-500/20 border-green-500/30' : 'bg-gray-500/10 border-gray-500/30'}`}
+                  >
+                    <Database className={`w-5 h-5 mx-auto mb-1 ${actionPersistenceEnabled ? 'text-green-400' : 'text-gray-400'}`} />
+                    <span className={`text-xs ${actionPersistenceEnabled ? 'text-green-400' : 'text-gray-400'}`}>
+                      {actionPersistenceEnabled ? 'Persist: ON' : 'Persist: OFF'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Dangerous Zone */}
+              <div className="space-y-3 pt-4 border-t border-red-500/20">
+                <h4 className="text-sm font-semibold text-red-500 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" /> Danger Zone
+                </h4>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => {
+                      if (confirm('DANGER: This will clear ALL localStorage and reset the entire system. Continue?')) {
+                        if (confirm('Are you ABSOLUTELY sure? This cannot be undone!')) {
+                          actionDispatcher.system('Admin triggered full system wipe');
+                          localStorage.clear();
+                          toast.success('System wiped. Reloading...');
+                          setTimeout(() => window.location.href = '/', 1000);
+                        }
+                      }
+                    }}
+                    className="p-3 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg"
+                  >
+                    <Bomb className="w-5 h-5 text-red-500 mx-auto mb-1" />
+                    <span className="text-xs text-red-500 font-bold">WIPE SYSTEM</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      // Dispatch multiple error types
+                      actionDispatcher.dispatchError("FILE_NOT_FOUND", "Test file missing");
+                      actionDispatcher.dispatchError("STORAGE_ERROR", "Storage access denied");
+                      actionDispatcher.dispatchError("PERMISSION_DENIED", "Admin test");
+                      actionDispatcher.dispatchError("PROCESS_CRASH", "Test process terminated");
+                      toast.info('Dispatched 4 test errors');
+                    }}
+                    className="p-3 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/30 rounded-lg"
+                  >
+                    <AlertTriangle className="w-5 h-5 text-orange-400 mx-auto mb-1" />
+                    <span className="text-xs text-orange-400">Spam Errors</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
