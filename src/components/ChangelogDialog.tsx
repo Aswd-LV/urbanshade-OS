@@ -5,8 +5,8 @@ import { Sparkles, Check } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState("2.4");
-  const currentVersion = "2.4";
+  const [selectedVersion, setSelectedVersion] = useState("2.5");
+  const currentVersion = "2.5";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -21,6 +21,37 @@ export const ChangelogDialog = () => {
   };
 
   const changelogs: Record<string, Record<string, string[]>> = {
+    "2.5": {
+      "UUR Manager": [
+        "New UUR Manager app accessible from Desktop and Terminal",
+        "Real built-in packages: Hello World (test app) and System Info (utility)",
+        "Package submission system for community contributions",
+        "Install, uninstall, and run UUR apps directly in the OS",
+        "GitHub-based package submission with review workflow"
+      ],
+      "CrashScreen Redesign": [
+        "Styled crash screen with different colors per crash type",
+        "Clear labeling as 'Styled Crash Screen' for testing",
+        "Distinct visual separation from real BugcheckScreen"
+      ],
+      "Command Queue Expansion": [
+        "Admin tools now use command queue instead of page redirects",
+        "Added UUR commands (uur inst, uur rm, uur up, uur search)",
+        "New commands: MAINTENANCE, SAFE_MODE, LOGOUT",
+        "Package management helpers for apt install/remove"
+      ],
+      "Documentation": [
+        "UUR docs expanded with full command reference",
+        "Table of contents and featured packages section",
+        "In-app Browser can now load documentation pages",
+        "DEF-DEV docs link added to UUR documentation"
+      ],
+      "DEF-DEV Improvements": [
+        "Redesigned DEF-DEV warning with terminal aesthetic",
+        "Enhanced admin tools using SystemBus APIs",
+        "Improved crash entry mode workflow"
+      ]
+    },
     "2.4": {
       "DEF-DEV Enhancements": [
         "Redesigned warning screen with terminal aesthetic and detailed info",

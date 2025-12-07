@@ -76,6 +76,22 @@ const UURDocs = () => {
                 <span className="text-sm text-slate-300">10k+ Downloads</span>
               </div>
             </div>
+            
+            {/* Open UUR Manager Button */}
+            <div className="pt-4">
+              <a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Try to open UUR in the app via postMessage or just redirect
+                  window.location.href = "/?open=uur-manager";
+                }}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-medium hover:from-cyan-400 hover:to-blue-400 transition-all shadow-lg shadow-cyan-500/25"
+              >
+                <Package className="w-5 h-5" />
+                Open UUR Manager in Desktop
+              </a>
+            </div>
           </div>
         </div>
       </section>

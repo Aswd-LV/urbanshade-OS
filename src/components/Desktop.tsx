@@ -6,8 +6,9 @@ import { WindowManager } from "./WindowManager";
 import { RecoveryMode } from "./RecoveryMode";
 import { ContextMenu, getDesktopMenuItems } from "./ContextMenu";
 import { actionDispatcher } from "@/lib/actionDispatcher";
-import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor } from "lucide-react";
+import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor, Package } from "lucide-react";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
 export interface App {
   id: string;
@@ -60,6 +61,23 @@ export const Desktop = ({
     };
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Handle URL parameter to open apps
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const openApp = urlParams.get('open');
+    if (openApp) {
+      // Clear the URL param
+      window.history.replaceState({}, '', window.location.pathname);
+      // Find and open the app after a short delay
+      setTimeout(() => {
+        const app = allApps.find(a => a.id === openApp);
+        if (app) {
+          openWindow(app);
+        }
+      }, 500);
+    }
   }, []);
 
   // Listen for installer window requests
@@ -617,6 +635,13 @@ export const Desktop = ({
       icon: <Users className="w-11 h-11" />,
       run: () => openWindow(allApps[69]),
       minimalInclude: true
+    },
+    {
+      id: "uur-manager",
+      name: "UUR Manager",
+      icon: <Package className="w-11 h-11" />,
+      run: () => openWindow(allApps[70]),
+      standardInclude: true
     }
   ];
 

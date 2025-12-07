@@ -1,0 +1,10 @@
+# UUR Package Submissions
+# Format: PACKAGE_NAME|GITHUB_URL|AUTHOR|DESCRIPTION|SUBMITTED_DATE
+# Status: PENDING|APPROVED|DENIED
+
+# === PENDING SUBMISSIONS ===
+# (New submissions will be added here)
+
+# === HISTORY ===
+# Example entry:
+# my-package|https://github.com/user/my-package|username|A cool package|2024-01-01|APPROVED

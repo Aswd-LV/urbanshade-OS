@@ -45,6 +45,11 @@ export const Browser = () => {
               <p className="text-sm text-muted-foreground">System guides and help resources</p>
             </a>
 
+            <a href="#" onClick={(e) => { e.preventDefault(); navigate("uur.urbanshade.local"); }} className="glass-panel p-4 hover:bg-white/10 transition-colors border-2 border-cyan-500/30">
+              <h3 className="font-bold text-cyan-400 mb-2">📦 UUR Repository</h3>
+              <p className="text-sm text-muted-foreground">Community packages and extensions</p>
+            </a>
+
             <a href="#" onClick={(e) => { e.preventDefault(); navigate("classified.urbanshade.local"); }} className="glass-panel p-4 hover:bg-white/10 transition-colors border-2 border-destructive/30">
               <h3 className="font-bold text-destructive mb-2">⚠ Classified Archives</h3>
               <p className="text-sm text-muted-foreground">Level 5+ clearance required</p>
@@ -402,6 +407,49 @@ export const Browser = () => {
                   <li>Keep clearance badge visible at all times</li>
                   <li>Report pressure anomalies immediately</li>
                 </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    "uur.urbanshade.local": {
+      url: "uur.urbanshade.local",
+      title: "UUR - UrbanShade User Repository",
+      content: (
+        <div className="p-8">
+          <h1 className="text-2xl font-bold text-cyan-400 mb-6">📦 UUR - UrbanShade User Repository</h1>
+          
+          <div className="space-y-4">
+            <div className="glass-panel p-4 border-cyan-500/20">
+              <h3 className="font-bold text-cyan-400 mb-3">What is UUR?</h3>
+              <p className="text-sm text-muted-foreground">
+                The UrbanShade User Repository is a community-driven package manager for extensions, themes, and utilities.
+              </p>
+            </div>
+
+            <div className="glass-panel p-4">
+              <h3 className="font-bold mb-3">Quick Commands</h3>
+              <div className="text-sm space-y-2 font-mono">
+                <div><span className="text-cyan-400">uur inst &lt;package&gt;</span> - Install a package</div>
+                <div><span className="text-cyan-400">uur rm &lt;package&gt;</span> - Remove a package</div>
+                <div><span className="text-cyan-400">uur search &lt;query&gt;</span> - Search packages</div>
+                <div><span className="text-cyan-400">uur lst app</span> - List all packages</div>
+              </div>
+            </div>
+
+            <div className="glass-panel p-4">
+              <h3 className="font-bold mb-3">Featured Packages</h3>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <div>• <strong>hello-world</strong> - Test your UUR installation</div>
+                <div>• <strong>system-info</strong> - Display system information</div>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-sm">
+              <div className="font-bold text-cyan-400 mb-2">💡 TIP</div>
+              <div className="text-muted-foreground">
+                Open the UUR Manager app from the Desktop to browse and install packages with a GUI.
               </div>
             </div>
           </div>

@@ -47,6 +47,7 @@ import { GenericInstaller } from "./apps/GenericInstaller";
 import { AccountSettings } from "./apps/AccountSettings";
 import { ImageEditor } from "./apps/ImageEditor";
 import { ComputerManagement } from "./apps/ComputerManagement";
+import { UURApp } from "./apps/UURApp";
 
 interface WindowData {
   id: string;
@@ -231,6 +232,11 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
       case "image-editor":
       case "img-editor":
         return <ImageEditor />;
+      case "uur-manager":
+        return <UURApp onClose={() => {
+          const windowId = windows.find(w => w.app.id === "uur-manager")?.id;
+          if (windowId) onCloseWindow(windowId);
+        }} />;
       case "computer-management":
         return <ComputerManagement />;
       default:
