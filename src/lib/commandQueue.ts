@@ -16,7 +16,15 @@ export type CommandType =
   | "CUSTOM"
   | "SET_BUGCHECK"
   | "APT_INSTALL"
-  | "UUR_IMPORT";
+  | "APT_REMOVE"
+  | "UUR_IMPORT"
+  | "UUR_INSTALL"
+  | "UUR_REMOVE"
+  | "UUR_UPDATE"
+  | "MAINTENANCE"
+  | "SAFE_MODE"
+  | "UPDATE"
+  | "LOGOUT";
 
 export interface QueuedCommand {
   id: string;
@@ -30,6 +38,8 @@ export interface QueuedCommand {
 const QUEUE_KEY = 'urbanshade_command_queue';
 const PERSISTENCE_KEY = 'def_dev_persistence_enabled';
 const BUGCHECK_DISABLED_KEY = 'urbanshade_bugchecks_disabled';
+const UUR_PACKAGES_KEY = 'urbanshade_uur_packages';
+const UUR_LISTS_KEY = 'urbanshade_uur_lists';
 
 class CommandQueue {
   private pollInterval: number | null = null;
@@ -165,6 +175,69 @@ class CommandQueue {
     localStorage.setItem(PERSISTENCE_KEY, enabled ? 'true' : 'false');
   }
 
+  // === UUR Package Management ===
+
+  getInstalledPackages(): Record<string, { version: string; installedAt: string; source: string }> {
+    try {
+      const stored = localStorage.getItem(UUR_PACKAGES_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  }
+
+  installPackage(name: string, version: string, source: string = 'uur'): boolean {
+    const packages = this.getInstalledPackages();
+    packages[name] = { version, installedAt: new Date().toISOString(), source };
+    localStorage.setItem(UUR_PACKAGES_KEY, JSON.stringify(packages));
+    return true;
+  }
+
+  removePackage(name: string): boolean {
+    const packages = this.getInstalledPackages();
+    if (packages[name]) {
+      delete packages[name];
+      localStorage.setItem(UUR_PACKAGES_KEY, JSON.stringify(packages));
+      return true;
+    }
+    return false;
+  }
+
+  isPackageInstalled(name: string): boolean {
+    return !!this.getInstalledPackages()[name];
+  }
+
+  getPackageVersion(name: string): string | null {
+    return this.getInstalledPackages()[name]?.version || null;
+  }
+
+  // UUR Lists (package sources)
+  getUurLists(): Record<string, { url: string; addedAt: string; packages: string[] }> {
+    try {
+      const stored = localStorage.getItem(UUR_LISTS_KEY);
+      return stored ? JSON.parse(stored) : { 
+        official: { 
+          url: 'uur://official', 
+          addedAt: new Date().toISOString(),
+          packages: Object.keys(UUR_AVAILABLE_PACKAGES)
+        }
+      };
+    } catch {
+      return {};
+    }
+  }
+
+  importUurList(name: string, packages: string[]): boolean {
+    const lists = this.getUurLists();
+    lists[name] = { 
+      url: `uur://${name}`, 
+      addedAt: new Date().toISOString(),
+      packages 
+    };
+    localStorage.setItem(UUR_LISTS_KEY, JSON.stringify(lists));
+    return true;
+  }
+
   // === Convenience methods for common commands ===
 
   queueCrash(crashType: string, process: string = 'system.exe'): string {
@@ -215,7 +288,6 @@ class CommandQueue {
     return this.queue('CUSTOM', { action, ...data });
   }
 
-  // New advanced commands
   queueSetBugcheck(enabled: boolean): string {
     return this.queue('SET_BUGCHECK', { enabled });
   }
@@ -224,8 +296,36 @@ class CommandQueue {
     return this.queue('APT_INSTALL', { appId });
   }
 
-  queueUurImport(appName: string, version: string): string {
-    return this.queue('UUR_IMPORT', { appName, version });
+  queueAptRemove(appId: string): string {
+    return this.queue('APT_REMOVE', { appId });
+  }
+
+  queueUurInstall(packageName: string, version: string = 'latest'): string {
+    return this.queue('UUR_INSTALL', { packageName, version });
+  }
+
+  queueUurRemove(packageName: string): string {
+    return this.queue('UUR_REMOVE', { packageName });
+  }
+
+  queueUurUpdate(packageName?: string): string {
+    return this.queue('UUR_UPDATE', { packageName });
+  }
+
+  queueMaintenance(enable: boolean): string {
+    return this.queue('MAINTENANCE', { enable });
+  }
+
+  queueSafeMode(): string {
+    return this.queue('SAFE_MODE', {});
+  }
+
+  queueUpdate(): string {
+    return this.queue('UPDATE', {});
+  }
+
+  queueLogout(): string {
+    return this.queue('LOGOUT', {});
   }
 }
 
@@ -247,29 +347,164 @@ export const parseTerminalCommand = (input: string): { command: string; args: st
   };
 };
 
-export const TERMINAL_COMMANDS: Record<string, { desc: string; usage: string }> = {
-  help: { desc: 'Show available commands', usage: 'help [command]' },
-  crash: { desc: 'Trigger a crash screen', usage: 'crash <type>' },
-  bugcheck: { desc: 'Trigger a bugcheck', usage: 'bugcheck <code> [message]' },
-  reboot: { desc: 'Reboot the system', usage: 'reboot' },
-  shutdown: { desc: 'Shutdown the system', usage: 'shutdown' },
-  lockdown: { desc: 'Trigger lockdown protocol', usage: 'lockdown <protocol>' },
-  recovery: { desc: 'Enter recovery mode', usage: 'recovery' },
-  wipe: { desc: 'Wipe all system data', usage: 'wipe --confirm' },
-  echo: { desc: 'Print text to terminal', usage: 'echo <text>' },
-  clear: { desc: 'Clear terminal output', usage: 'clear' },
-  ls: { desc: 'List localStorage keys', usage: 'ls [filter]' },
-  get: { desc: 'Get localStorage value', usage: 'get <key>' },
-  set: { desc: 'Set localStorage value', usage: 'set <key> <value>' },
-  del: { desc: 'Delete localStorage key', usage: 'del <key>' },
-  toast: { desc: 'Show a toast notification', usage: 'toast <type> <message>' },
-  status: { desc: 'Show system status', usage: 'status' },
-  queue: { desc: 'Show command queue', usage: 'queue' },
-  exec: { desc: 'Execute queued command on OS', usage: 'exec <command>' },
-  // Advanced sudo commands
-  sudo: { desc: 'Execute privileged commands', usage: 'sudo <command> [args]' },
-  apt: { desc: 'Package manager (use with sudo)', usage: 'sudo apt install <app>' },
-  uur: { desc: 'UrbanShade User Repository', usage: 'uur imp <appname>_<version>' },
+export const TERMINAL_COMMANDS: Record<string, { desc: string; usage: string; category: string }> = {
+  // Basic commands
+  help: { desc: 'Show available commands', usage: 'help [command]', category: 'basic' },
+  echo: { desc: 'Print text to terminal', usage: 'echo <text>', category: 'basic' },
+  clear: { desc: 'Clear terminal output', usage: 'clear', category: 'basic' },
+  date: { desc: 'Show current date and time', usage: 'date', category: 'basic' },
+  whoami: { desc: 'Show current user', usage: 'whoami', category: 'basic' },
+  uptime: { desc: 'Show system uptime', usage: 'uptime', category: 'basic' },
+  
+  // System control
+  crash: { desc: 'Trigger a styled crash screen', usage: 'crash <type>', category: 'system' },
+  bugcheck: { desc: 'Trigger a real bugcheck', usage: 'bugcheck <code> [message]', category: 'system' },
+  reboot: { desc: 'Reboot the system', usage: 'reboot', category: 'system' },
+  shutdown: { desc: 'Shutdown the system', usage: 'shutdown', category: 'system' },
+  lockdown: { desc: 'Trigger lockdown protocol', usage: 'lockdown <protocol>', category: 'system' },
+  recovery: { desc: 'Enter recovery mode', usage: 'recovery', category: 'system' },
+  maintenance: { desc: 'Toggle maintenance mode', usage: 'maintenance [on|off]', category: 'system' },
+  safemode: { desc: 'Enter safe mode', usage: 'safemode', category: 'system' },
+  logout: { desc: 'Log out current user', usage: 'logout', category: 'system' },
+  
+  // Storage commands
+  ls: { desc: 'List localStorage keys', usage: 'ls [filter]', category: 'storage' },
+  get: { desc: 'Get localStorage value', usage: 'get <key>', category: 'storage' },
+  set: { desc: 'Set localStorage value', usage: 'set <key> <value>', category: 'storage' },
+  del: { desc: 'Delete localStorage key', usage: 'del <key>', category: 'storage' },
+  wipe: { desc: 'Wipe all system data', usage: 'wipe --confirm', category: 'storage' },
+  
+  // Notifications
+  toast: { desc: 'Show a toast notification', usage: 'toast <type> <message>', category: 'notify' },
+  alert: { desc: 'Show an alert dialog', usage: 'alert <message>', category: 'notify' },
+  
+  // Queue and status
+  status: { desc: 'Show system status', usage: 'status', category: 'info' },
+  queue: { desc: 'Show command queue', usage: 'queue', category: 'info' },
+  exec: { desc: 'Execute command on OS', usage: 'exec <command>', category: 'system' },
+  
+  // Privileged commands
+  sudo: { desc: 'Execute privileged commands', usage: 'sudo <command> [args]', category: 'admin' },
+  apt: { desc: 'Package manager', usage: 'apt <install|remove|list> <package>', category: 'admin' },
+  
+  // UUR commands
+  uur: { desc: 'UrbanShade User Repository', usage: 'uur <command> [args]', category: 'uur' },
+};
+
+// UUR subcommands
+export const UUR_COMMANDS: Record<string, { desc: string; usage: string }> = {
+  inst: { desc: 'Install a package', usage: 'uur inst <package>_<version>' },
+  rm: { desc: 'Remove a package', usage: 'uur rm <package>' },
+  up: { desc: 'Update packages', usage: 'uur up [package]' },
+  lst: { desc: 'List packages or version', usage: 'uur lst [app|ver]' },
+  search: { desc: 'Search for packages', usage: 'uur search <query>' },
+  info: { desc: 'Get package info', usage: 'uur info <package>' },
+  imp: { desc: 'Import a package list', usage: 'uur imp <listname>' },
+  exp: { desc: 'Export installed packages', usage: 'uur exp' },
+  sync: { desc: 'Sync with repository', usage: 'uur sync' },
+  clean: { desc: 'Clean package cache', usage: 'uur clean' },
+};
+
+// Available UUR packages (simulated repository)
+export const UUR_AVAILABLE_PACKAGES: Record<string, { 
+  name: string; 
+  description: string; 
+  version: string; 
+  author: string;
+  category: string;
+  downloads: number;
+  stars: number;
+}> = {
+  'urbanshade-themes': {
+    name: 'UrbanShade Themes',
+    description: 'Custom theme packs for UrbanShade OS',
+    version: '2.1.0',
+    author: 'aswdBatch',
+    category: 'themes',
+    downloads: 2400,
+    stars: 48
+  },
+  'facility-sounds': {
+    name: 'Facility Sounds',
+    description: 'Ambient sound effects and alerts',
+    version: '1.3.2',
+    author: 'community',
+    category: 'audio',
+    downloads: 1800,
+    stars: 32
+  },
+  'extended-terminal': {
+    name: 'Extended Terminal',
+    description: 'Additional terminal commands and utilities',
+    version: '3.0.1',
+    author: 'defdev-team',
+    category: 'utility',
+    downloads: 3100,
+    stars: 67
+  },
+  'custom-bugchecks': {
+    name: 'Custom Bugchecks',
+    description: 'Create your own bugcheck screens',
+    version: '1.0.5',
+    author: 'community',
+    category: 'developer',
+    downloads: 890,
+    stars: 21
+  },
+  'dark-mode-plus': {
+    name: 'Dark Mode Plus',
+    description: 'Enhanced dark mode with OLED black',
+    version: '1.2.0',
+    author: 'themes-team',
+    category: 'themes',
+    downloads: 1560,
+    stars: 38
+  },
+  'sys-monitor-pro': {
+    name: 'System Monitor Pro',
+    description: 'Advanced system monitoring widgets',
+    version: '2.0.0',
+    author: 'defdev-team',
+    category: 'utility',
+    downloads: 2200,
+    stars: 55
+  },
+  'file-tools': {
+    name: 'File Tools',
+    description: 'Extended file management utilities',
+    version: '1.5.3',
+    author: 'community',
+    category: 'utility',
+    downloads: 1300,
+    stars: 29
+  },
+  'security-suite': {
+    name: 'Security Suite',
+    description: 'Enhanced security and privacy tools',
+    version: '1.1.0',
+    author: 'security-team',
+    category: 'security',
+    downloads: 980,
+    stars: 42
+  },
+  'notification-center-plus': {
+    name: 'Notification Center+',
+    description: 'Enhanced notification management',
+    version: '1.0.2',
+    author: 'community',
+    category: 'utility',
+    downloads: 720,
+    stars: 18
+  },
+  'retro-theme': {
+    name: 'Retro Theme',
+    description: 'Classic Windows-style retro theme',
+    version: '1.0.0',
+    author: 'nostalgia-dev',
+    category: 'themes',
+    downloads: 1100,
+    stars: 45
+  },
 };
 
 // Available apps for apt install

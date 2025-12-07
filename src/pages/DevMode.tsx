@@ -1319,14 +1319,10 @@ const DevMode = () => {
                     <button
                       key={bug.code}
                       onClick={() => {
-                        if (confirm(`Trigger ${bug.label} bugcheck?`)) {
+                        if (confirm(`Trigger ${bug.label} bugcheck?\n\nThis will queue a REAL bugcheck for the OS.`)) {
                           actionDispatcher.system(`Admin triggered bugcheck: ${bug.code}`);
-                          localStorage.setItem('urbanshade_pending_bugcheck', JSON.stringify({
-                            code: bug.code,
-                            description: bug.desc,
-                            triggeredAt: new Date().toISOString()
-                          }));
-                          window.location.href = '/';
+                          commandQueue.queueBugcheck(bug.code, bug.desc);
+                          toast.success(`Bugcheck queued: ${bug.code}`);
                         }
                       }}
                       className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-lg text-left transition-all"
@@ -1349,7 +1345,8 @@ const DevMode = () => {
                     onClick={() => {
                       if (confirm('Force system reboot?')) {
                         actionDispatcher.system('Admin forced reboot');
-                        window.location.href = '/';
+                        commandQueue.queueReboot();
+                        toast.success('Reboot queued');
                       }
                     }}
                     className="p-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded-lg"
