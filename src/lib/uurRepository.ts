@@ -263,27 +263,95 @@ export const getCustomLists = (): UURList[] => {
   }
 };
 
-// Add a custom list
-export const addCustomList = (list: Omit<UURList, 'addedAt' | 'isOfficial'>): boolean => {
+// UUR Manifest interface for GitHub fetching
+export interface UURManifest {
+  name: string;
+  version: string;
+  description: string;
+  packages: Array<{
+    id: string;
+    name: string;
+    description: string;
+    version: string;
+    author: string;
+    category: 'app' | 'theme' | 'extension' | 'utility';
+  }>;
+}
+
+// Fetch and parse a UUR manifest from a GitHub repository URL
+export const fetchUURManifest = async (githubUrl: string): Promise<UURManifest | null> => {
+  try {
+    // Convert GitHub URL to raw content URL
+    // e.g., https://github.com/user/repo -> https://raw.githubusercontent.com/user/repo/main/uur-manifest.json
+    const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+    if (!match) return null;
+    
+    const [, owner, repo] = match;
+    
+    // Try different branch names
+    const branches = ['main', 'master'];
+    
+    for (const branch of branches) {
+      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/uur-manifest.json`;
+      
+      try {
+        const response = await fetch(rawUrl);
+        if (response.ok) {
+          const manifest = await response.json();
+          return manifest as UURManifest;
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Add a custom list (with optional fetching from GitHub)
+export const addCustomList = async (
+  list: Omit<UURList, 'addedAt' | 'isOfficial'>, 
+  fetchFromGithub: boolean = true
+): Promise<{ success: boolean; error?: string; packageCount?: number }> => {
   try {
     const lists = getCustomLists();
     
     // Check for duplicate ID
     if (lists.some(l => l.id === list.id)) {
-      return false;
+      return { success: false, error: 'A list with this ID already exists' };
+    }
+    
+    let packages = list.packages;
+    
+    // Try to fetch from GitHub if URL is provided
+    if (fetchFromGithub && list.url.includes('github.com')) {
+      const manifest = await fetchUURManifest(list.url);
+      if (manifest && manifest.packages) {
+        packages = manifest.packages.map(pkg => ({
+          ...pkg,
+          downloads: Math.floor(Math.random() * 1000),
+          stars: Math.floor(Math.random() * 50),
+          isOfficial: false,
+          listSource: list.name
+        }));
+      }
     }
     
     const newList: UURList = {
       ...list,
+      packages,
       isOfficial: false,
       addedAt: new Date().toISOString()
     };
     
     lists.push(newList);
     localStorage.setItem(UUR_CUSTOM_LISTS_KEY, JSON.stringify(lists));
-    return true;
-  } catch {
-    return false;
+    return { success: true, packageCount: packages.length };
+  } catch (err) {
+    return { success: false, error: 'Failed to add list' };
   }
 };
 

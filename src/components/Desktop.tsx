@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Taskbar } from "./Taskbar";
 import { DesktopIcon } from "./DesktopIcon";
 import { StartMenu } from "./StartMenu";
 import { WindowManager } from "./WindowManager";
 import { RecoveryMode } from "./RecoveryMode";
 import { ContextMenu, getDesktopMenuItems } from "./ContextMenu";
+import { AltTabSwitcher } from "./AltTabSwitcher";
 import { actionDispatcher } from "@/lib/actionDispatcher";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { FileText, Database, Activity, Radio, FileBox, AlertTriangle, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor, Package } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
@@ -47,6 +49,45 @@ export const Desktop = ({
     const end = localStorage.getItem('settings_bg_gradient_end') || '#16213e';
     return { start, end };
   });
+
+  // Define window management functions first for keyboard shortcuts
+  const openWindow = useCallback((app: App) => {
+    const existing = windows.find(w => w.id === app.id);
+    if (existing) {
+      setWindows(prev => prev.map(w => 
+        w.id === app.id ? { ...w, zIndex: nextZIndex } : w
+      ));
+      setNextZIndex(prev => prev + 1);
+      actionDispatcher.window(`Focused: ${app.name}`);
+    } else {
+      setWindows(prev => [...prev, { id: app.id, app, zIndex: nextZIndex }]);
+      setNextZIndex(prev => prev + 1);
+      actionDispatcher.window(`Opened: ${app.name}`);
+      actionDispatcher.app(`${app.name} started`);
+    }
+    setStartMenuOpen(false);
+  }, [windows, nextZIndex]);
+
+  const closeWindow = useCallback((id: string) => {
+    const win = windows.find(w => w.id === id);
+    if (win) {
+      actionDispatcher.window(`Closed: ${win.app.name}`);
+    }
+    setWindows(prev => prev.filter(w => w.id !== id));
+  }, [windows]);
+
+  const minimizeWindow = useCallback((id: string) => {
+    setWindows(prev => prev.map(w => 
+      w.id === id ? { ...w, minimized: true } : w
+    ));
+  }, []);
+
+  const focusWindow = useCallback((id: string) => {
+    setWindows(prev => prev.map(w => 
+      w.id === id ? { ...w, zIndex: nextZIndex, minimized: false } : w
+    ));
+    setNextZIndex(prev => prev + 1);
+  }, [nextZIndex]);
 
   // Listen for settings changes and dispatch startup event
   useEffect(() => {
@@ -101,48 +142,9 @@ export const Desktop = ({
     return installed ? JSON.parse(installed) : [];
   });
 
-  const openWindow = (app: App) => {
-    const existing = windows.find(w => w.id === app.id);
-    if (existing) {
-      // Bring to front
-      setWindows(prev => prev.map(w => 
-        w.id === app.id ? { ...w, zIndex: nextZIndex } : w
-      ));
-      setNextZIndex(prev => prev + 1);
-      actionDispatcher.window(`Focused: ${app.name}`);
-    } else {
-      setWindows(prev => [...prev, { id: app.id, app, zIndex: nextZIndex }]);
-      setNextZIndex(prev => prev + 1);
-      actionDispatcher.window(`Opened: ${app.name}`);
-      actionDispatcher.app(`${app.name} started`);
-    }
-    setStartMenuOpen(false);
-  };
-
-  const closeWindow = (id: string) => {
-    const win = windows.find(w => w.id === id);
-    if (win) {
-      actionDispatcher.window(`Closed: ${win.app.name}`);
-    }
-    setWindows(prev => prev.filter(w => w.id !== id));
-  };
-
-  const minimizeWindow = (id: string) => {
-    setWindows(prev => prev.map(w => 
-      w.id === id ? { ...w, minimized: true } : w
-    ));
-  };
-
   const restoreWindow = (id: string) => {
     setWindows(prev => prev.map(w => 
       w.id === id ? { ...w, minimized: false, zIndex: nextZIndex } : w
-    ));
-    setNextZIndex(prev => prev + 1);
-  };
-
-  const focusWindow = (id: string) => {
-    setWindows(prev => prev.map(w => 
-      w.id === id ? { ...w, zIndex: nextZIndex, minimized: false } : w
     ));
     setNextZIndex(prev => prev + 1);
   };

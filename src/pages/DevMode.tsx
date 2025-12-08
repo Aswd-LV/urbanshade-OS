@@ -1334,13 +1334,61 @@ const DevMode = () => {
                 </div>
               </div>
 
-              {/* System Controls */}
+              {/* System Controls - Extended */}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
                   <Power className="w-4 h-4" /> System Controls
                 </h4>
                 
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-4 gap-3">
+                  <button
+                    onClick={() => {
+                      actionDispatcher.system('Admin triggered maintenance mode');
+                      commandQueue.queueMaintenance(true);
+                      toast.success('Maintenance mode queued');
+                    }}
+                    className="p-3 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 rounded-lg"
+                  >
+                    <Activity className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+                    <span className="text-xs text-amber-400">Maintenance</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      actionDispatcher.system('Admin triggered safe mode');
+                      commandQueue.queueSafeMode();
+                      toast.success('Safe mode queued');
+                    }}
+                    className="p-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded-lg"
+                  >
+                    <Shield className="w-5 h-5 text-blue-400 mx-auto mb-1" />
+                    <span className="text-xs text-blue-400">Safe Mode</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      actionDispatcher.system('Admin triggered system update');
+                      commandQueue.queueUpdate();
+                      toast.success('Update queued');
+                    }}
+                    className="p-3 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded-lg"
+                  >
+                    <RefreshCw className="w-5 h-5 text-green-400 mx-auto mb-1" />
+                    <span className="text-xs text-green-400">Update</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      actionDispatcher.system('Admin triggered logout');
+                      commandQueue.queueLogout();
+                      toast.success('Logout queued');
+                    }}
+                    className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded-lg"
+                  >
+                    <ExternalLink className="w-5 h-5 text-purple-400 mx-auto mb-1" />
+                    <span className="text-xs text-purple-400">Logout</span>
+                  </button>
+
                   <button
                     onClick={() => {
                       if (confirm('Force system reboot?')) {

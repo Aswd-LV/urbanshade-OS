@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Terminal as TerminalIcon } from "lucide-react";
 import { HIDDEN_COMMANDS, checkTimeBasedEvent, discoverEasterEgg } from "@/lib/easterEggs";
 
@@ -11,6 +11,22 @@ interface TerminalProps {
   onCrash?: (crashType: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload") => void;
 }
 
+// All available commands for autocomplete
+const ALL_COMMANDS = [
+  'help', 'status', 'users', 'logs', 'network', 'processes', 'files', 'security',
+  'pressure', 'specimens', 'zones', 'cameras', 'personnel', 'incidents', 'comms',
+  'power', 'hull', 'temperature', 'backup', 'uptime', 'version', 'about', 'ping',
+  'diagnostics', 'emergency', 'lockdown', 'manifest', 'scan', 'whoami', 'date',
+  'echo', 'history', 'depth', 'reality', 'admin', 'secret', 'glitch', 'crash',
+  'clear', 'syscontrol', 'deepdive', 'blackbox', 'godmode',
+  // Advanced commands
+  'sudo set bugcheck 0', 'sudo set bugcheck 1', 'sudo apt install',
+  'uur imp', 'uur inst', 'uur rm', 'uur lst', 'uur search',
+  // Crash types
+  'crash kernel', 'crash bluescreen', 'crash memory', 'crash corruption', 
+  'crash overload', 'crash virus'
+];
+
 export const Terminal = ({ onCrash }: TerminalProps = {}) => {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<CommandHistory[]>([
@@ -18,8 +34,19 @@ export const Terminal = ({ onCrash }: TerminalProps = {}) => {
   ]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [autocompleteIndex, setAutocompleteIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Autocomplete suggestions
+  const suggestions = useMemo(() => {
+    if (!input.trim()) return [];
+    const lower = input.toLowerCase();
+    return ALL_COMMANDS.filter(cmd => 
+      cmd.toLowerCase().startsWith(lower) && cmd.toLowerCase() !== lower
+    ).slice(0, 5);
+  }, [input]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
@@ -718,6 +745,32 @@ server to add custom user-created apps.`;
           </div>
         ))}
 
+        {/* Autocomplete suggestions */}
+        {suggestions.length > 0 && input.trim() && (
+          <div className="mb-2 bg-black/60 border border-primary/30 rounded p-2">
+            <div className="text-xs text-muted-foreground mb-1">Tab to complete:</div>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((cmd, idx) => (
+                <span 
+                  key={cmd} 
+                  className={`px-2 py-0.5 rounded text-xs cursor-pointer transition-colors ${
+                    idx === autocompleteIndex 
+                      ? 'bg-primary/30 text-primary' 
+                      : 'bg-primary/10 text-primary/70 hover:bg-primary/20'
+                  }`}
+                  onClick={() => {
+                    setInput(cmd);
+                    setAutocompleteIndex(0);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {cmd}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Current Input Line */}
         <form onSubmit={handleSubmit} className="flex gap-2 text-primary">
           <span>$</span>
@@ -725,8 +778,26 @@ server to add custom user-created apps.`;
             ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setAutocompleteIndex(0);
+            }}
             onKeyDown={(e) => {
+              // Tab for autocomplete
+              if (e.key === "Tab" && suggestions.length > 0) {
+                e.preventDefault();
+                setInput(suggestions[autocompleteIndex]);
+                setAutocompleteIndex(0);
+                return;
+              }
+              
+              // Cycle through suggestions with Tab+Shift
+              if (e.key === "Tab" && e.shiftKey && suggestions.length > 0) {
+                e.preventDefault();
+                setAutocompleteIndex(prev => (prev + 1) % suggestions.length);
+                return;
+              }
+
               if (e.key === "ArrowUp" && commandHistory.length > 0) {
                 e.preventDefault();
                 const newIndex = historyIndex < commandHistory.length - 1 ? historyIndex + 1 : historyIndex;
