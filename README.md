@@ -1,5 +1,24 @@
 # Welcome to the Urbanshade OS (website)!
 ---
+## I am extemely, EXTREMELY PROUD to announce this...
+
+SPECTRE! ONLINCE ACCOUNTS! NOW!
+
+Thats right! ONLINE ACCOUNTS ARE NOW A THING!
+
+Note that they're considered beta... BUT STILL! ONLINE ACCOUNTS!!!!!!!!!
+
+Thankyou Supabase for the cloud and Lovable.dev for helping with implementation. Without them, i would've been learning SQL for the next 3 months.
+
+*(Btw this is still a "Passion project")*
+
+If you want to support me, and you dont have a Lovable account...
+Feel free to use my refferal: `https://lovable.dev/invite/KZUL65C`
+This will help me continue this, and in return you get 10 extra credits, too!
+I cant be thankful enough for simply my friends supporting this. And especially, *YOU!*
+
+
+---
 ## Quick viewable status:
 
 
