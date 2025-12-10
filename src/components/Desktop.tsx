@@ -752,10 +752,10 @@ export const Desktop = ({
       <DesktopSwitcher
         desktops={desktops}
         activeDesktopId={activeDesktopId}
-        onSwitchDesktop={switchDesktop}
-        onCreateDesktop={createDesktop}
-        onDeleteDesktop={deleteDesktop}
-        onRenameDesktop={renameDesktop}
+        onSwitch={switchDesktop}
+        onCreate={createDesktop}
+        onDelete={deleteDesktop}
+        onRename={renameDesktop}
       />
 
       {/* Taskbar */}
