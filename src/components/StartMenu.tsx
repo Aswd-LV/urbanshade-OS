@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { App } from "./Desktop";
-import { LogOut, Activity, RotateCcw, Power, ChevronUp, Shield, HardDrive } from "lucide-react";
+import { LogOut, Activity, RotateCcw, Power, ChevronUp, Shield, HardDrive, Cloud } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface StartMenuProps {
@@ -17,6 +17,15 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown
   const [search, setSearch] = useState("");
   const [rebootMenuOpen, setRebootMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Get current user data
+  const currentUserData = JSON.parse(localStorage.getItem("urbanshade_current_user") || "{}");
+  const userName = currentUserData.name || currentUserData.username || "User";
+  const userRole = currentUserData.role || "User";
+  const userInitial = userName.charAt(0).toUpperCase();
+  
+  // Check if online mode is active
+  const isOnlineMode = localStorage.getItem("urbanshade_online_mode") === "true";
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -104,11 +113,14 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown
               className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-muted/50 transition-all"
             >
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-sm">
-                U
+                {userInitial}
               </div>
               <div className="text-left">
-                <div className="text-sm font-semibold text-foreground">User</div>
-                <div className="text-xs text-muted-foreground">Administrator</div>
+                <div className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                  {userName}
+                  {isOnlineMode && <Cloud className="w-3 h-3 text-blue-400" />}
+                </div>
+                <div className="text-xs text-muted-foreground">{userRole}</div>
               </div>
             </button>
 

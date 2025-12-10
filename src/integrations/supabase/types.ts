@@ -86,6 +86,45 @@ export type Database = {
         }
         Relationships: []
       }
+      uur_submissions: {
+        Row: {
+          author: string
+          description: string | null
+          github_url: string
+          id: string
+          package_name: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          status: string
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          author: string
+          description?: string | null
+          github_url: string
+          id?: string
+          package_name: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          author?: string
+          description?: string | null
+          github_url?: string
+          id?: string
+          package_name?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

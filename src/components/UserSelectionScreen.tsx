@@ -159,7 +159,7 @@ export const UserSelectionScreen = ({ onLogin, onShutdown, onRestart }: UserSele
           </div>
           <h1 className="text-4xl font-bold mb-2 text-cyan-400">URBANSHADE</h1>
           <p className="text-sm text-cyan-600 font-mono">
-            SECURE OPERATING SYSTEM v2.2.0
+            SECURE OPERATING SYSTEM v2.7
           </p>
           <div className="mt-4 text-xs text-slate-600 font-mono">
             [CLASSIFIED FACILITY] • DEPTH: 8,247m • PRESSURE: EXTREME
@@ -252,7 +252,7 @@ export const UserSelectionScreen = ({ onLogin, onShutdown, onRestart }: UserSele
             </div>
 
             <div className="text-center text-xs text-slate-600 font-mono">
-              © 2024 Urbanshade Corporation
+              © 2025 Urbanshade Corporation
             </div>
           </div>
         ) : (
@@ -321,7 +321,7 @@ export const UserSelectionScreen = ({ onLogin, onShutdown, onRestart }: UserSele
             </div>
 
             <div className="text-center text-xs text-slate-600 font-mono space-y-1">
-              <div>© 2024 Urbanshade Corporation</div>
+              <div>© 2025 Urbanshade Corporation</div>
               <div className="text-red-500/70">⚠ UNAUTHORIZED ACCESS IS PROHIBITED</div>
             </div>
           </form>

@@ -63,7 +63,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             URBANSHADE
           </h1>
           <p className="text-sm text-muted-foreground font-medium animate-fade-in mb-3" style={{ animationDelay: '200ms' }}>
-            Secure Operating System v2.2.0
+            Secure Operating System v2.7
           </p>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 animate-fade-in" style={{ animationDelay: '300ms' }}>
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
@@ -136,7 +136,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
         {/* Footer */}
         <div className="mt-8 text-center text-xs text-muted-foreground/60 space-y-1.5 animate-fade-in" style={{ animationDelay: '500ms' }}>
-          <div>© 2024 UrbanShade Corporation</div>
+          <div>© 2025 UrbanShade Corporation</div>
           <div className="flex items-center justify-center gap-2 text-destructive/80">
             <span className="text-base">⚠️</span>
             <span>Unauthorized access is prohibited</span>

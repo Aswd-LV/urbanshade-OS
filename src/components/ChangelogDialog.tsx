@@ -5,8 +5,8 @@ import { Sparkles, Check, Cloud, PartyPopper } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState("2.6");
-  const currentVersion = "2.6";
+  const [selectedVersion, setSelectedVersion] = useState("2.7");
+  const currentVersion = "2.7";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -21,6 +21,27 @@ export const ChangelogDialog = () => {
   };
 
   const changelogs: Record<string, Record<string, string[]>> = {
+    "2.7": {
+      "Quality of Life": [
+        "Updated version numbers throughout the system to v2.7",
+        "Start Menu now shows your actual username and role",
+        "Cloud sync indicator in Start Menu when online",
+        "Copyright year updated to 2025"
+      ],
+      "Online Accounts": [
+        "UUR submissions now sync to Supabase cloud storage",
+        "Better visual feedback for sync status",
+        "Connected email displayed in Settings"
+      ],
+      "UUR Manager Redesign": [
+        "Complete visual overhaul with advanced UI",
+        "New sidebar navigation with category filters",
+        "Enhanced package cards with detailed info",
+        "Statistics dashboard showing package counts",
+        "Real-time submission status from cloud database",
+        "Improved search with category filtering"
+      ]
+    },
     "2.6": {
       "Online Accounts": [
         "Full Supabase-powered online account system",
@@ -207,8 +228,8 @@ export const ChangelogDialog = () => {
     }
   };
 
-  const changelog = changelogs[selectedVersion] || changelogs["2.6"];
-  const isLatestVersion = selectedVersion === "2.6";
+  const changelog = changelogs[selectedVersion] || changelogs["2.7"];
+  const isLatestVersion = selectedVersion === "2.7";
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
