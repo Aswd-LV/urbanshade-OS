@@ -2,7 +2,7 @@
 ---
 ## I am extemely, EXTREMELY PROUD to announce this...
 
-SPECTRE! ONLINCE ACCOUNTS! NOW!
+SPECTRE! ONLINE ACCOUNTS! NOW!
 
 Thats right! ONLINE ACCOUNTS ARE NOW A THING!
 
