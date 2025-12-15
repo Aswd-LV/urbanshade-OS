@@ -186,9 +186,12 @@ export const Window = ({ title, children, zIndex, onClose, onFocus, onMinimize, 
   };
 
   const handleMinimize = () => {
-    if (onMinimize) {
-      onMinimize();
-    }
+    setIsMinimized(true);
+    setTimeout(() => {
+      if (onMinimize) {
+        onMinimize();
+      }
+    }, 150);
   };
 
   const handleResizeStart = (e: React.MouseEvent) => {
@@ -208,8 +211,8 @@ export const Window = ({ title, children, zIndex, onClose, onFocus, onMinimize, 
       <div
         ref={windowRef}
         className={`absolute rounded-xl glass-panel shadow-2xl flex flex-col overflow-hidden ${
-          isMinimized ? 'scale-0 opacity-0' : 'animate-scale-in'
-        } ${isDragging ? '' : 'transition-all duration-200'}`}
+          isMinimized ? 'scale-95 opacity-0 translate-y-[50vh]' : 'animate-scale-in'
+        } ${isDragging ? '' : 'transition-all duration-200 ease-out'}`}
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,

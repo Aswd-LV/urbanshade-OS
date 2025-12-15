@@ -18,7 +18,7 @@ const ALL_COMMANDS = [
   'power', 'hull', 'temperature', 'backup', 'uptime', 'version', 'about', 'ping',
   'diagnostics', 'emergency', 'lockdown', 'manifest', 'scan', 'whoami', 'date',
   'echo', 'history', 'depth', 'reality', 'admin', 'secret', 'glitch', 'crash',
-  'clear', 'syscontrol', 'deepdive', 'blackbox', 'godmode',
+  'clear', 'syscontrol', 'deepdive', 'blackbox', 'godmode', 'theme',
   // Advanced commands
   'sudo set bugcheck 0', 'sudo set bugcheck 1', 'sudo apt install',
   'uur imp', 'uur inst', 'uur rm', 'uur lst', 'uur search',
@@ -27,15 +27,28 @@ const ALL_COMMANDS = [
   'crash overload', 'crash virus'
 ];
 
+type TerminalTheme = 'default' | 'green' | 'amber' | 'white' | 'matrix';
+
+const TERMINAL_THEMES: Record<TerminalTheme, { bg: string; text: string; prompt: string; name: string }> = {
+  default: { bg: 'bg-black/40', text: 'text-cyan-400', prompt: 'text-cyan-400', name: 'Cyan (Default)' },
+  green: { bg: 'bg-black/60', text: 'text-green-400', prompt: 'text-green-500', name: 'CRT Green' },
+  amber: { bg: 'bg-black/50', text: 'text-amber-400', prompt: 'text-amber-500', name: 'Amber Retro' },
+  white: { bg: 'bg-slate-900/80', text: 'text-slate-100', prompt: 'text-slate-300', name: 'Light' },
+  matrix: { bg: 'bg-black/80', text: 'text-lime-400', prompt: 'text-lime-500', name: 'Matrix' },
+};
+
 export const Terminal = ({ onCrash }: TerminalProps = {}) => {
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<CommandHistory[]>([
-    { input: "", output: "URBANSHADE SECURE TERMINAL v3.2.1\nType 'help' for available commands.\n" }
+    { input: "", output: "URBANSHADE SECURE TERMINAL v3.2.1\nType 'help' for available commands.\nType 'theme' to change terminal colors.\n" }
   ]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [autocompleteIndex, setAutocompleteIndex] = useState(0);
+  const [currentTheme, setCurrentTheme] = useState<TerminalTheme>(() => {
+    return (localStorage.getItem('terminal_theme') as TerminalTheme) || 'default';
+  });
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -676,6 +689,23 @@ Example: uur imp customapp_1.0
 Import .uur files from the Discord community
 server to add custom user-created apps.`;
       }
+    } else if (cmdLower === "theme") {
+      output = `TERMINAL THEMES
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+Available themes:
+${Object.entries(TERMINAL_THEMES).map(([key, val]) => `  ${key.padEnd(10)} - ${val.name}`).join('\n')}
+
+Usage: theme <name>
+Example: theme green`;
+    } else if (cmdLower.startsWith("theme ")) {
+      const themeName = cmdLower.replace("theme ", "").trim() as TerminalTheme;
+      if (TERMINAL_THEMES[themeName]) {
+        setCurrentTheme(themeName);
+        localStorage.setItem('terminal_theme', themeName);
+        output = `Theme changed to: ${TERMINAL_THEMES[themeName].name}`;
+      } else {
+        output = `Unknown theme: ${themeName}\nType 'theme' to see available themes.`;
+      }
     } else if (cmdLower.startsWith("crash ")) {
       const crashType = cmdLower.replace("crash ", "").trim();
       const validTypes = ["kernel", "bluescreen", "memory", "corruption", "overload", "virus"];
@@ -715,12 +745,15 @@ server to add custom user-created apps.`;
     setInput("");
   };
 
+  const theme = TERMINAL_THEMES[currentTheme];
+
   return (
-    <div className="flex flex-col h-full bg-black/40 font-mono text-sm">
+    <div className={`flex flex-col h-full ${theme.bg} font-mono text-sm`}>
       {/* Header */}
-      <div className="px-4 py-2 border-b border-primary/20 bg-black/60 flex items-center gap-2">
-        <TerminalIcon className="w-4 h-4 text-primary" />
-        <span className="text-primary font-bold">TERMINAL</span>
+      <div className={`px-4 py-2 border-b border-current/20 bg-black/60 flex items-center gap-2 ${theme.prompt}`}>
+        <TerminalIcon className="w-4 h-4" />
+        <span className="font-bold">TERMINAL</span>
+        <span className="ml-auto text-xs opacity-60">{theme.name}</span>
       </div>
 
       {/* Terminal Output */}
@@ -732,13 +765,13 @@ server to add custom user-created apps.`;
         {history.map((item, idx) => (
           <div key={idx}>
             {item.input && (
-              <div className="flex gap-2 text-primary">
+              <div className={`flex gap-2 ${theme.prompt}`}>
                 <span>$</span>
                 <span>{item.input}</span>
               </div>
             )}
             {item.output && (
-              <pre className="text-foreground whitespace-pre-wrap mt-1 mb-3">
+              <pre className={`${theme.text} whitespace-pre-wrap mt-1 mb-3`}>
                 {item.output}
               </pre>
             )}
@@ -772,7 +805,7 @@ server to add custom user-created apps.`;
         )}
 
         {/* Current Input Line */}
-        <form onSubmit={handleSubmit} className="flex gap-2 text-primary">
+        <form onSubmit={handleSubmit} className={`flex gap-2 ${theme.prompt}`}>
           <span>$</span>
           <input
             ref={inputRef}
@@ -810,7 +843,7 @@ server to add custom user-created apps.`;
                 setInput(newIndex >= 0 ? commandHistory[commandHistory.length - 1 - newIndex] : "");
               }
             }}
-            className="flex-1 bg-transparent outline-none text-primary"
+            className={`flex-1 bg-transparent outline-none ${theme.prompt}`}
             autoFocus
             spellCheck={false}
           />

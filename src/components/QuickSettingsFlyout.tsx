@@ -9,11 +9,15 @@ import {
   BellOff, 
   Bell,
   Cloud,
-  CloudOff,
   Loader2,
   Settings,
   Palette,
-  X
+  X,
+  Bluetooth,
+  BluetoothOff,
+  Plane,
+  Battery,
+  BatteryCharging
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useAutoSync } from "@/hooks/useAutoSync";
@@ -39,6 +43,15 @@ export const QuickSettingsFlyout = ({ open, onClose, onOpenSettings }: QuickSett
     return localStorage.getItem("settings_dnd") === "true";
   });
   const [wifiEnabled, setWifiEnabled] = useState(true);
+  const [bluetoothEnabled, setBluetoothEnabled] = useState(() => {
+    return localStorage.getItem("settings_bluetooth") === "true";
+  });
+  const [airplaneMode, setAirplaneMode] = useState(false);
+  const [volume, setVolume] = useState(() => {
+    return parseInt(localStorage.getItem("settings_volume") || "75");
+  });
+  const [batteryLevel] = useState(() => Math.floor(Math.random() * 40) + 60); // Simulated 60-100%
+  const [isCharging] = useState(() => Math.random() > 0.5);
 
   const { isEnabled: syncEnabled, isSyncing, lastSyncTime, manualSync } = useAutoSync();
 
@@ -64,6 +77,23 @@ export const QuickSettingsFlyout = ({ open, onClose, onOpenSettings }: QuickSett
     localStorage.setItem("settings_dnd", doNotDisturb.toString());
   }, [doNotDisturb]);
 
+  useEffect(() => {
+    localStorage.setItem("settings_bluetooth", bluetoothEnabled.toString());
+  }, [bluetoothEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem("settings_volume", volume.toString());
+  }, [volume]);
+
+  const handleAirplaneToggle = () => {
+    const newState = !airplaneMode;
+    setAirplaneMode(newState);
+    if (newState) {
+      setWifiEnabled(false);
+      setBluetoothEnabled(false);
+    }
+  };
+
   const formatLastSync = (date: Date | null) => {
     if (!date) return "Never";
     const now = new Date();
@@ -80,19 +110,24 @@ export const QuickSettingsFlyout = ({ open, onClose, onOpenSettings }: QuickSett
     onClick, 
     icon: Icon, 
     activeIcon: ActiveIcon,
-    label 
+    label,
+    disabled
   }: { 
     active: boolean; 
     onClick: () => void; 
     icon: React.ElementType;
     activeIcon?: React.ElementType;
     label: string;
+    disabled?: boolean;
   }) => {
     const DisplayIcon = active && ActiveIcon ? ActiveIcon : Icon;
     return (
       <button
         onClick={onClick}
-        className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl transition-all ${
+        disabled={disabled}
+        className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl transition-all ${
+          disabled ? "opacity-50 cursor-not-allowed" : ""
+        } ${
           active 
             ? "bg-primary/20 text-primary border border-primary/30" 
             : "bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent"
@@ -106,32 +141,50 @@ export const QuickSettingsFlyout = ({ open, onClose, onOpenSettings }: QuickSett
 
   return (
     <div 
-      className="fixed right-3 bottom-[78px] w-80 rounded-xl backdrop-blur-2xl bg-background/95 border border-border/50 z-[900] shadow-2xl overflow-hidden animate-fade-in"
+      className="fixed right-3 bottom-[78px] w-[340px] rounded-xl backdrop-blur-2xl bg-background/95 border border-border/50 z-[900] shadow-2xl overflow-hidden animate-fade-in"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Header */}
+      {/* Header with Battery */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
         <h3 className="font-bold text-sm">Quick Settings</h3>
-        <Button variant="ghost" size="icon" onClick={onClose} className="w-7 h-7">
-          <X className="w-4 h-4" />
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            {isCharging ? (
+              <BatteryCharging className="w-4 h-4 text-green-500" />
+            ) : (
+              <Battery className={`w-4 h-4 ${batteryLevel < 20 ? 'text-destructive' : ''}`} />
+            )}
+            <span className={batteryLevel < 20 ? 'text-destructive' : ''}>{batteryLevel}%</span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="w-7 h-7">
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* Quick Toggles Grid */}
-      <div className="grid grid-cols-3 gap-2 p-4">
+      {/* Quick Toggles Grid - 4 columns */}
+      <div className="grid grid-cols-4 gap-2 p-3">
         <QuickToggle
-          active={wifiEnabled}
-          onClick={() => setWifiEnabled(!wifiEnabled)}
+          active={wifiEnabled && !airplaneMode}
+          onClick={() => !airplaneMode && setWifiEnabled(!wifiEnabled)}
           icon={WifiOff}
           activeIcon={Wifi}
           label="Wi-Fi"
+          disabled={airplaneMode}
         />
         <QuickToggle
-          active={soundEnabled}
-          onClick={() => setSoundEnabled(!soundEnabled)}
-          icon={VolumeX}
-          activeIcon={Volume2}
-          label="Sound"
+          active={bluetoothEnabled && !airplaneMode}
+          onClick={() => !airplaneMode && setBluetoothEnabled(!bluetoothEnabled)}
+          icon={BluetoothOff}
+          activeIcon={Bluetooth}
+          label="Bluetooth"
+          disabled={airplaneMode}
+        />
+        <QuickToggle
+          active={airplaneMode}
+          onClick={handleAirplaneToggle}
+          icon={Plane}
+          label="Airplane"
         />
         <QuickToggle
           active={doNotDisturb}
@@ -147,12 +200,19 @@ export const QuickSettingsFlyout = ({ open, onClose, onOpenSettings }: QuickSett
           activeIcon={Moon}
           label="Night Light"
         />
+        <QuickToggle
+          active={soundEnabled}
+          onClick={() => setSoundEnabled(!soundEnabled)}
+          icon={VolumeX}
+          activeIcon={Volume2}
+          label="Sound"
+        />
         <button
           onClick={() => {
             onOpenSettings();
             onClose();
           }}
-          className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent transition-all"
+          className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent transition-all"
         >
           <Palette className="w-5 h-5" />
           <span className="text-[10px] font-medium">Themes</span>
@@ -162,11 +222,34 @@ export const QuickSettingsFlyout = ({ open, onClose, onOpenSettings }: QuickSett
             onOpenSettings();
             onClose();
           }}
-          className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent transition-all"
+          className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-muted/50 text-muted-foreground hover:bg-muted border border-transparent transition-all"
         >
           <Settings className="w-5 h-5" />
           <span className="text-[10px] font-medium">Settings</span>
         </button>
+      </div>
+
+      {/* Volume Slider */}
+      <div className="px-4 pb-2">
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+          <button onClick={() => setSoundEnabled(!soundEnabled)}>
+            {soundEnabled ? (
+              <Volume2 className="w-4 h-4 text-muted-foreground shrink-0 hover:text-foreground transition-colors" />
+            ) : (
+              <VolumeX className="w-4 h-4 text-muted-foreground shrink-0 hover:text-foreground transition-colors" />
+            )}
+          </button>
+          <Slider
+            value={[volume]}
+            onValueChange={([val]) => setVolume(val)}
+            min={0}
+            max={100}
+            step={5}
+            className="flex-1"
+            disabled={!soundEnabled}
+          />
+          <span className="text-xs text-muted-foreground w-8 text-right">{volume}%</span>
+        </div>
       </div>
 
       {/* Brightness Slider */}

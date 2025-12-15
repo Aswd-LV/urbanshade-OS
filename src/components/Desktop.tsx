@@ -764,17 +764,13 @@ export const Desktop = ({
       }}
       onContextMenu={handleContextMenu}
     >
-      {/* Desktop Icons - Now positioned absolutely */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {desktopApps.map((app, index) => (
-          <div key={app.id} className="pointer-events-auto">
-            <DesktopIcon 
-              app={app} 
-              onOpen={openWindow}
-              gridIndex={index}
-            />
-          </div>
-        ))}
+      {/* Desktop Icons - Grid layout */}
+      <div className="absolute inset-0 z-10 p-6 pointer-events-none">
+        <div className="grid grid-cols-[repeat(auto-fill,100px)] gap-4 pointer-events-auto">
+          {desktopApps.map((app) => (
+            <DesktopIcon key={app.id} app={app} />
+          ))}
+        </div>
       </div>
 
       {/* Windows */}
