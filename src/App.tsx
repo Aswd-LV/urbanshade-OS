@@ -26,6 +26,7 @@ import DefDevAPI from "./pages/docs/defdev/API";
 import DefDevDiagnostics from "./pages/docs/defdev/Diagnostics";
 import UURDocs from "./pages/docs/UUR";
 import Features from "./pages/docs/Features";
+import AccountManage from "./pages/AccountManage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const App = () => (
         <Route path="/docs/def-dev/diagnostics" element={<DefDevDiagnostics />} />
         <Route path="/docs/uur" element={<UURDocs />} />
         <Route path="/docs/features" element={<Features />} />
+        <Route path="/acc-manage" element={<AccountManage />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

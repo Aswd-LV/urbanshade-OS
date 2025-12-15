@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { App } from "./Desktop";
-import { LogOut, Activity, RotateCcw, Power, ChevronUp, Shield, HardDrive, Cloud, Clock, X, FileText, Folder, Search } from "lucide-react";
+import { LogOut, Activity, RotateCcw, Power, ChevronUp, Shield, HardDrive, Cloud, Clock, X, FileText, Folder, Search, Settings } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { useRecentFiles, RecentFile } from "@/hooks/useRecentFiles";
 import { ScrollArea } from "./ui/scroll-area";
+import * as icons from "lucide-react";
 
 interface StartMenuProps {
   open: boolean;
@@ -21,12 +23,17 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const { recentFiles, addRecent, clearRecent } = useRecentFiles();
+  const navigate = useNavigate();
 
   // Get current user data
   const currentUserData = JSON.parse(localStorage.getItem("urbanshade_current_user") || "{}");
   const userName = currentUserData.name || currentUserData.username || "User";
   const userRole = currentUserData.role || "User";
-  const userInitial = userName.charAt(0).toUpperCase();
+  
+  // Get profile icon
+  const profileIconName = localStorage.getItem("urbanshade_profile_icon") || "User";
+  const profileColor = localStorage.getItem("urbanshade_profile_color") || "#00d4ff";
+  const ProfileIcon = (icons as any)[profileIconName] || icons.User;
   
   // Check if online mode is active
   const isOnlineMode = localStorage.getItem("urbanshade_online_mode") === "true";
@@ -197,13 +204,16 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown
           <div className="flex items-center justify-between">
             <button 
               onClick={() => {
-                onLogout();
+                navigate("/acc-manage");
                 onClose();
               }}
               className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-muted/50 transition-all"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-bold text-sm">
-                {userInitial}
+              <div 
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: `${profileColor}20` }}
+              >
+                <ProfileIcon className="w-4 h-4" style={{ color: profileColor }} />
               </div>
               <div className="text-left">
                 <div className="text-sm font-semibold text-foreground flex items-center gap-1.5">

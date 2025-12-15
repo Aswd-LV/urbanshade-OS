@@ -25,35 +25,41 @@ export const ChangelogDialog = () => {
     "2.8": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-blue-600",
-      tagline: "Quality & Polish Update",
+      tagline: "The Mass Update",
       sections: {
+        "Account Management": [
+          "New /acc-manage page for full account control",
+          "Custom profile icons using Lucide icons with color picker",
+          "Data deletion controls - delete specific data categories",
+          "Factory reset and account deletion options",
+          "Cloud disconnect for switching to local mode"
+        ],
+        "UUR Package Manager": [
+          "REAL GitHub package fetching - install apps from any GitHub repo",
+          "Install from GitHub URL directly in UUR Manager",
+          "Package manifest validation and HTML rendering",
+          "Improved package cards with source indicators"
+        ],
         "Quality & Polish": [
-          "Complete changelog redesign with modern UI",
-          "Enhanced sync system with 2-minute intervals",
+          "Wider changelog version selector with text wrapping",
+          "Stable 2-minute auto-sync interval",
           "Do Not Disturb mode for notifications",
           "Quick Settings flyout from taskbar"
         ],
         "Window Management": [
-          "Window snap zones - drag to edges for quick positioning",
-          "Visual snap indicators when dragging",
-          "Improved window controls and animations"
+          "Window snap zones - drag to edges for positioning",
+          "Visual snap indicators while dragging",
+          "Improved window controls"
         ],
         "Desktop Enhancements": [
-          "Enhanced right-click context menu with more options",
+          "Enhanced right-click context menu",
           "View options (Large/Medium/Small icons)",
-          "Sort icons by name, type, or date",
-          "Personalize and display settings shortcuts"
+          "Sort icons by name, type, or date"
         ],
         "Start Menu": [
-          "Recent files section showing last opened items",
-          "Improved search functionality",
-          "Better app grid layout"
-        ],
-        "Online Experience": [
-          "Welcome notification for new users",
-          "Offline indicator with pending sync count",
-          "Device name tracking for synced settings",
-          "Theme presets for quick customization"
+          "Profile icon now shows custom icon with color",
+          "Click profile to open Account Management",
+          "Recent files section"
         ]
       }
     },
@@ -138,7 +144,7 @@ export const ChangelogDialog = () => {
       <DialogContent className="max-w-5xl h-[85vh] p-0 overflow-hidden animate-scale-in bg-background border-border/50 gap-0">
         <div className="flex h-full">
           {/* Left Sidebar - Version List */}
-          <div className="w-56 bg-muted/30 border-r border-border/50 flex flex-col">
+          <div className="w-64 bg-muted/30 border-r border-border/50 flex flex-col">
             {/* Header */}
             <div className="p-5 border-b border-border/50">
               <div className="flex items-center gap-2 mb-1">
@@ -185,7 +191,7 @@ export const ChangelogDialog = () => {
                               </span>
                             )}
                           </div>
-                          <p className={`text-xs truncate ${
+                          <p className={`text-xs whitespace-normal break-words ${
                             isSelected ? "text-primary-foreground/70" : "text-muted-foreground"
                           }`}>
                             {data.tagline}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Package, Download, Star, CheckCircle, Trash2, RefreshCw, Send, Github, AlertCircle, Search, List, Plus, Shield, AlertTriangle, X, Filter, LayoutGrid, BarChart3, Clock, User, ExternalLink, Play, Loader2 } from "lucide-react";
+import { Package, Download, Star, CheckCircle, Trash2, RefreshCw, Send, Github, AlertCircle, Search, List, Plus, Shield, AlertTriangle, X, Filter, LayoutGrid, BarChart3, Clock, User, ExternalLink, Play, Loader2, Link } from "lucide-react";
 import { 
   UUR_REAL_PACKAGES, 
   getUURAppHtml, 
@@ -13,6 +13,7 @@ import {
   removeCustomList,
   getAllPackages,
   UUR_CATEGORIES,
+  installFromGithub,
   type InstalledUURApp,
   type UURList,
   type UURPackage,
@@ -52,6 +53,11 @@ export const UURApp = ({ onClose }: UURAppProps) => {
   const [cloudSubmissions, setCloudSubmissions] = useState<CloudSubmission[]>([]);
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  
+  // GitHub install
+  const [githubUrl, setGithubUrl] = useState("");
+  const [installingFromGithub, setInstallingFromGithub] = useState(false);
+  const [githubProgress, setGithubProgress] = useState("");
   
   // Submit form
   const [submitForm, setSubmitForm] = useState({
@@ -110,6 +116,29 @@ export const UURApp = ({ onClose }: UURAppProps) => {
       refreshPackages();
       toast.success("Package removed");
     }
+  };
+
+  const handleInstallFromGithub = async () => {
+    if (!githubUrl.includes('github.com')) {
+      toast.error("Please enter a valid GitHub URL");
+      return;
+    }
+
+    setInstallingFromGithub(true);
+    setGithubProgress("Starting...");
+
+    const result = await installFromGithub(githubUrl, (msg) => setGithubProgress(msg));
+
+    if (result.success) {
+      toast.success(`Installed ${result.package?.name || 'package'} from GitHub!`);
+      setGithubUrl("");
+      refreshPackages();
+    } else {
+      toast.error(result.error || "Installation failed");
+    }
+
+    setInstallingFromGithub(false);
+    setGithubProgress("");
   };
 
   const handleRunApp = (appId: string) => {
@@ -421,7 +450,46 @@ export const UURApp = ({ onClose }: UURAppProps) => {
         {/* Content Area */}
         <ScrollArea className="flex-1 p-4">
           {activeTab === 'browse' && (
-            <div className="grid gap-3">
+            <div className="space-y-4">
+              {/* Install from GitHub Section */}
+              <div className="p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/30 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <Github className="w-5 h-5 text-purple-400" />
+                  <h3 className="font-bold text-purple-400">Install from GitHub</h3>
+                </div>
+                <p className="text-xs text-slate-400 mb-3">
+                  Enter a GitHub repository URL containing a <code className="bg-slate-800 px-1 rounded">uur-manifest.json</code> and <code className="bg-slate-800 px-1 rounded">app.html</code>
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={githubUrl}
+                    onChange={(e) => setGithubUrl(e.target.value)}
+                    placeholder="https://github.com/user/my-uur-app"
+                    className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm focus:outline-none focus:border-purple-500/50"
+                    disabled={installingFromGithub}
+                  />
+                  <button
+                    onClick={handleInstallFromGithub}
+                    disabled={installingFromGithub || !githubUrl}
+                    className="px-4 py-2.5 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-500/30 disabled:opacity-50 flex items-center gap-2 border border-purple-500/30 whitespace-nowrap"
+                  >
+                    {installingFromGithub ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        {githubProgress || "Installing..."}
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" /> Install
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Package Grid */}
+              <div className="grid gap-3">
               {filteredPackages.map(pkg => {
                 const installed = isUURAppInstalled(pkg.id);
                 const isInstalling = installing === pkg.id;
@@ -511,6 +579,7 @@ export const UURApp = ({ onClose }: UURAppProps) => {
                   <p className="text-sm">Try adjusting your search or filters</p>
                 </div>
               )}
+              </div>
             </div>
           )}
 

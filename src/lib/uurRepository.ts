@@ -293,9 +293,29 @@ export const sanitizeHtml = (html: string): string => {
   }
 };
 
+// Key for storing GitHub-installed app HTML
+const UUR_GITHUB_APPS_KEY_LOCAL = 'urbanshade_uur_github_apps';
+
+// Get stored GitHub app HTML
+const getStoredGithubAppHtmlLocal = (appId: string): string | null => {
+  try {
+    const stored = localStorage.getItem(UUR_GITHUB_APPS_KEY_LOCAL);
+    const apps = stored ? JSON.parse(stored) : {};
+    return apps[appId] || null;
+  } catch {
+    return null;
+  }
+};
+
 // Get app HTML by ID (sanitized)
 export const getUURAppHtml = (appId: string): string | null => {
   let html: string | null = null;
+  
+  // First check for GitHub-installed apps
+  const githubHtml = getStoredGithubAppHtmlLocal(appId);
+  if (githubHtml) {
+    return githubHtml; // Already sanitized on install
+  }
   
   switch (appId) {
     case 'hello-world':
@@ -365,8 +385,14 @@ export const getCustomLists = (): UURList[] => {
 export interface UURManifest {
   name: string;
   version: string;
+  id?: string;
   description: string;
-  packages: Array<{
+  author?: string;
+  category?: UURCategory;
+  entry?: string;
+  icon?: string;
+  permissions?: string[];
+  packages?: Array<{
     id: string;
     name: string;
     description: string;
@@ -376,6 +402,32 @@ export interface UURManifest {
     dependencies?: string[];
   }>;
 }
+
+// Key for storing GitHub-installed app HTML
+const UUR_GITHUB_APPS_KEY = 'urbanshade_uur_github_apps';
+
+// Get stored GitHub app HTML
+export const getStoredGithubAppHtml = (appId: string): string | null => {
+  try {
+    const stored = localStorage.getItem(UUR_GITHUB_APPS_KEY);
+    const apps = stored ? JSON.parse(stored) : {};
+    return apps[appId] || null;
+  } catch {
+    return null;
+  }
+};
+
+// Store GitHub app HTML
+export const storeGithubAppHtml = (appId: string, html: string): void => {
+  try {
+    const stored = localStorage.getItem(UUR_GITHUB_APPS_KEY);
+    const apps = stored ? JSON.parse(stored) : {};
+    apps[appId] = html;
+    localStorage.setItem(UUR_GITHUB_APPS_KEY, JSON.stringify(apps));
+  } catch (err) {
+    console.error('[UUR] Failed to store app HTML:', err);
+  }
+};
 
 // Fetch and parse a UUR manifest from a GitHub repository URL
 export const fetchUURManifest = async (githubUrl: string): Promise<UURManifest | null> => {
@@ -407,6 +459,110 @@ export const fetchUURManifest = async (githubUrl: string): Promise<UURManifest |
     return null;
   } catch {
     return null;
+  }
+};
+
+// Fetch app HTML from GitHub
+export const fetchGithubAppHtml = async (githubUrl: string, entryFile: string = 'app.html'): Promise<string | null> => {
+  try {
+    const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+    if (!match) return null;
+    
+    const [, owner, repo] = match;
+    const branches = ['main', 'master'];
+    
+    for (const branch of branches) {
+      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${entryFile}`;
+      
+      try {
+        const response = await fetch(rawUrl);
+        if (response.ok) {
+          return await response.text();
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Install package directly from GitHub URL
+export const installFromGithub = async (
+  githubUrl: string,
+  onProgress?: (message: string) => void
+): Promise<{ success: boolean; error?: string; package?: UURPackage }> => {
+  try {
+    onProgress?.('Fetching manifest...');
+    const manifest = await fetchUURManifest(githubUrl);
+    
+    if (!manifest) {
+      return { success: false, error: 'No uur-manifest.json found in repository' };
+    }
+    
+    const appId = manifest.id || manifest.name.toLowerCase().replace(/\s+/g, '-');
+    const entryFile = manifest.entry || 'app.html';
+    
+    onProgress?.(`Fetching ${entryFile}...`);
+    const html = await fetchGithubAppHtml(githubUrl, entryFile);
+    
+    if (!html) {
+      return { success: false, error: `Entry file "${entryFile}" not found` };
+    }
+    
+    onProgress?.('Sanitizing and storing...');
+    const sanitizedHtml = sanitizeHtml(html);
+    storeGithubAppHtml(appId, sanitizedHtml);
+    
+    // Create package entry
+    const pkg: UURPackage = {
+      id: appId,
+      name: manifest.name,
+      description: manifest.description || 'GitHub package',
+      version: manifest.version || '1.0.0',
+      author: manifest.author || 'Unknown',
+      category: manifest.category || 'app',
+      downloads: 0,
+      stars: 0,
+      isOfficial: false,
+      githubUrl,
+      listSource: 'github'
+    };
+    
+    onProgress?.('Installing...');
+    
+    // Add to installed apps
+    const installed = getInstalledUURApps();
+    if (installed.find(a => a.id === appId)) {
+      // Update existing
+      const idx = installed.findIndex(a => a.id === appId);
+      installed[idx] = {
+        id: appId,
+        name: pkg.name,
+        version: pkg.version,
+        installedAt: new Date().toISOString(),
+        source: 'community',
+        listSource: 'github'
+      };
+    } else {
+      installed.push({
+        id: appId,
+        name: pkg.name,
+        version: pkg.version,
+        installedAt: new Date().toISOString(),
+        source: 'community',
+        listSource: 'github'
+      });
+    }
+    
+    localStorage.setItem(UUR_INSTALLED_APPS_KEY, JSON.stringify(installed));
+    
+    return { success: true, package: pkg };
+  } catch (err) {
+    return { success: false, error: String(err) };
   }
 };
 
