@@ -41,6 +41,13 @@ export const useOnlineAccount = () => {
       return;
     }
 
+    // If supabase is not configured, skip
+    if (!supabase) {
+      console.warn('[useOnlineAccount] Supabase not configured - running in offline mode');
+      setLoading(false);
+      return;
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -72,6 +79,8 @@ export const useOnlineAccount = () => {
   }, [isDevMode]);
 
   const fetchProfile = async (userId: string) => {
+    if (!supabase) return;
+    
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -91,6 +100,8 @@ export const useOnlineAccount = () => {
   };
 
   const signUp = async (email: string, password: string, username: string) => {
+    if (!supabase) return { data: null, error: new Error("Supabase not configured") };
+    
     const redirectUrl = `${window.location.origin}/`;
 
     const { data, error } = await supabase.auth.signUp({
@@ -114,6 +125,8 @@ export const useOnlineAccount = () => {
   };
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) return { data: null, error: new Error("Supabase not configured") };
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -128,6 +141,8 @@ export const useOnlineAccount = () => {
   };
 
   const signOut = async () => {
+    if (!supabase) return { error: new Error("Supabase not configured") };
+    
     const { error } = await supabase.auth.signOut();
     if (!error) {
       localStorage.setItem("urbanshade_online_account", "false");
@@ -149,7 +164,7 @@ export const useOnlineAccount = () => {
 
   // Update profile
   const updateProfile = async (updates: { display_name?: string; avatar_url?: string }) => {
-    if (!user) return { error: new Error("Not signed in") };
+    if (!user || !supabase) return { error: new Error("Not signed in or Supabase not configured") };
 
     try {
       const { error } = await supabase
@@ -173,7 +188,7 @@ export const useOnlineAccount = () => {
 
   // Delete account
   const deleteAccount = async () => {
-    if (!user) return { error: new Error("Not signed in") };
+    if (!user || !supabase) return { error: new Error("Not signed in or Supabase not configured") };
 
     try {
       // Delete synced settings first
@@ -193,7 +208,7 @@ export const useOnlineAccount = () => {
 
   // Sync settings to cloud (only if online mode and not dev mode)
   const syncSettings = async (preferences?: { desktopIcons: boolean; installedApps: boolean; theme: boolean; systemSettings: boolean }) => {
-    if (isDevMode || !isOnlineMode || !user) return;
+    if (isDevMode || !isOnlineMode || !user || !supabase) return;
 
     // Default to sync all if no preferences provided
     const prefs = preferences || { desktopIcons: true, installedApps: true, theme: true, systemSettings: true };
@@ -249,7 +264,7 @@ export const useOnlineAccount = () => {
 
   // Check for conflicts between local and cloud settings
   const checkForConflict = async () => {
-    if (isDevMode || !isOnlineMode || !user) return null;
+    if (isDevMode || !isOnlineMode || !user || !supabase) return null;
 
     try {
       const { data, error } = await supabase
@@ -284,7 +299,7 @@ export const useOnlineAccount = () => {
 
   // Load settings from cloud
   const loadCloudSettings = async () => {
-    if (isDevMode || !isOnlineMode || !user) return;
+    if (isDevMode || !isOnlineMode || !user || !supabase) return;
 
     try {
       const { data, error } = await supabase
