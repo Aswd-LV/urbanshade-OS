@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight } from "lucide-react";
+import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight, Info } from "lucide-react";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
@@ -21,45 +21,43 @@ export const ChangelogDialog = () => {
     setOpen(false);
   };
 
-  const changelogs: Record<string, { icon: React.ReactNode; color: string; tagline: string; sections: Record<string, string[]> }> = {
+  interface VersionData {
+    icon: React.ReactNode;
+    color: string;
+    tagline: string;
+    overview: string;
+    sections: Record<string, string[]>;
+  }
+
+  const changelogs: Record<string, VersionData> = {
     "2.8": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-blue-600",
       tagline: "The Mass Update",
+      overview: "A massive overhaul bringing real GitHub package installation, comprehensive account management with nested pages, and polished UI throughout. This update transforms UUR into a fully functional package manager with list-based discovery.",
       sections: {
         "Account Management": [
-          "New /acc-manage page for full account control",
+          "Reorganized /acc-manage into nested routes (/general, /data, /security, /devices, /danger)",
           "Custom profile icons using Lucide icons with color picker",
           "Data deletion controls - delete specific data categories",
-          "Factory reset and account deletion options",
-          "Cloud disconnect for switching to local mode"
+          "Device sync history and management",
+          "Factory reset and account deletion options"
         ],
         "UUR Package Manager": [
-          "REAL GitHub package fetching - install apps from any GitHub repo",
-          "Install from GitHub URL directly in UUR Manager",
-          "Package manifest validation and HTML rendering",
-          "Improved package cards with source indicators"
+          "NEW: Import package lists from GitHub repositories",
+          "Package lists define available packages with metadata",
+          "Install packages discovered from imported lists",
+          "Real manifest validation and HTML rendering"
+        ],
+        "Changelog Improvements": [
+          "Update Overview section for each version",
+          "Scrollable changelog content",
+          "Better version organization"
         ],
         "Quality & Polish": [
-          "Wider changelog version selector with text wrapping",
           "Stable 2-minute auto-sync interval",
           "Do Not Disturb mode for notifications",
           "Quick Settings flyout from taskbar"
-        ],
-        "Window Management": [
-          "Window snap zones - drag to edges for positioning",
-          "Visual snap indicators while dragging",
-          "Improved window controls"
-        ],
-        "Desktop Enhancements": [
-          "Enhanced right-click context menu",
-          "View options (Large/Medium/Small icons)",
-          "Sort icons by name, type, or date"
-        ],
-        "Start Menu": [
-          "Profile icon now shows custom icon with color",
-          "Click profile to open Account Management",
-          "Recent files section"
         ]
       }
     },
@@ -67,6 +65,7 @@ export const ChangelogDialog = () => {
       icon: <Cloud className="w-5 h-5" />,
       color: "from-blue-500 to-purple-600",
       tagline: "Cloud Sync Update",
+      overview: "Introducing cloud synchronization powered by Supabase. Your settings, desktop icons, and installed apps now sync across devices. UUR Manager received a complete visual redesign with advanced filtering and statistics.",
       sections: {
         "Quality of Life": [
           "Updated version numbers throughout the system to v2.7",
@@ -91,6 +90,7 @@ export const ChangelogDialog = () => {
       icon: <Shield className="w-5 h-5" />,
       color: "from-green-500 to-emerald-600",
       tagline: "Security Update",
+      overview: "The foundation for online accounts is here. Sign up with email and password, and your settings automatically sync to the cloud every 2 minutes. Your data is protected with Row Level Security policies.",
       sections: {
         "Online Accounts": [
           "Full Supabase-powered online account system",
@@ -109,6 +109,7 @@ export const ChangelogDialog = () => {
       icon: <Zap className="w-5 h-5" />,
       color: "from-yellow-500 to-orange-600",
       tagline: "UUR Manager Update",
+      overview: "The UUR package manager debuts with real built-in packages. Hello World and System Info ship as proof-of-concept apps, demonstrating the package installation system works correctly.",
       sections: {
         "UUR Manager": [
           "New UUR Manager app accessible from Desktop and Terminal",
@@ -125,6 +126,7 @@ export const ChangelogDialog = () => {
       icon: <Monitor className="w-5 h-5" />,
       color: "from-gray-500 to-slate-600",
       tagline: "Major Rewrite",
+      overview: "This update doesn't bring new features, however the entire site has been rewritten in TypeScript, React, and Vite. This modernizes the codebase with component-based architecture for better maintainability and improved overall quality.",
       sections: {
         "Major Changes": [
           "Complete rewrite using React and Tailwind CSS",
@@ -206,9 +208,9 @@ export const ChangelogDialog = () => {
           </div>
 
           {/* Right Content - Changelog Details */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-h-0">
             {/* Version Header */}
-            <div className={`relative px-8 py-8 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden`}>
+            <div className={`relative px-8 py-8 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden shrink-0`}>
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJjLTQgMC00IDQtNCA0czAgNCA0IDRjMiAwIDItMiAyLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
               <div className="relative z-10">
                 <div className="flex items-center gap-4">
@@ -230,9 +232,23 @@ export const ChangelogDialog = () => {
               </div>
             </div>
 
-            {/* Changelog Content */}
-            <ScrollArea className="flex-1 p-6">
-              <div className="space-y-5 pb-4">
+            {/* Changelog Content - Scrollable */}
+            <ScrollArea className="flex-1 min-h-0">
+              <div className="p-6 space-y-5 pb-4">
+                {/* Update Overview */}
+                {versionData?.overview && (
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Info className="w-4 h-4 text-primary" />
+                      <h3 className="font-bold text-sm text-primary">Update Overview</h3>
+                    </div>
+                    <p className="text-sm text-foreground/80 leading-relaxed">
+                      {versionData.overview}
+                    </p>
+                  </div>
+                )}
+
+                {/* Change Sections */}
                 {Object.entries(versionData?.sections || {}).map(([section, items], sectionIndex) => (
                   <div 
                     key={section} 
@@ -266,7 +282,7 @@ export const ChangelogDialog = () => {
             </ScrollArea>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-border/50 bg-muted/20 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-border/50 bg-muted/20 flex items-center justify-between shrink-0">
               <p className="text-xs text-muted-foreground">
                 Thank you for using URBANSHADE OS!
               </p>

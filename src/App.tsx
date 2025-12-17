@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Docs from "./pages/Docs";
 import DevMode from "./pages/DevMode";
@@ -26,8 +26,15 @@ import DefDevAPI from "./pages/docs/defdev/API";
 import DefDevDiagnostics from "./pages/docs/defdev/Diagnostics";
 import UURDocs from "./pages/docs/UUR";
 import Features from "./pages/docs/Features";
-import AccountManage from "./pages/AccountManage";
 import NotFound from "./pages/NotFound";
+
+// Account Manager pages
+import AccManageLayout from "./pages/acc-manage/Layout";
+import AccManageGeneral from "./pages/acc-manage/General";
+import AccManageData from "./pages/acc-manage/Data";
+import AccManageSecurity from "./pages/acc-manage/Security";
+import AccManageDevices from "./pages/acc-manage/Devices";
+import AccManageDanger from "./pages/acc-manage/Danger";
 
 const queryClient = new QueryClient();
 
@@ -65,7 +72,17 @@ const App = () => (
         <Route path="/docs/def-dev/diagnostics" element={<DefDevDiagnostics />} />
         <Route path="/docs/uur" element={<UURDocs />} />
         <Route path="/docs/features" element={<Features />} />
-        <Route path="/acc-manage" element={<AccountManage />} />
+        
+        {/* Account Manager - nested routes */}
+        <Route path="/acc-manage" element={<AccManageLayout />}>
+          <Route index element={<Navigate to="/acc-manage/general" replace />} />
+          <Route path="general" element={<AccManageGeneral />} />
+          <Route path="data" element={<AccManageData />} />
+          <Route path="security" element={<AccManageSecurity />} />
+          <Route path="devices" element={<AccManageDevices />} />
+          <Route path="danger" element={<AccManageDanger />} />
+        </Route>
+        
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
