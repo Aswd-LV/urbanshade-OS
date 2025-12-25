@@ -101,7 +101,7 @@ export const ShutdownScreen = ({ onComplete }: ShutdownScreenProps) => {
 
           {/* Version info */}
           <div className="mt-16 pt-8 border-t border-cyan-500/20 text-sm text-cyan-400/40">
-            <p>UrbanShade OS v2.2.1 • Facility Management System</p>
+            <p>UrbanShade OS v2.9 • Facility Management System</p>
             <p className="mt-1">© 2024 UrbanShade Corporation. All rights reserved.</p>
           </div>
         </div>

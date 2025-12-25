@@ -317,7 +317,7 @@ const Docs = () => {
         {/* Footer */}
         <footer className="text-center pt-8 border-t border-white/10 space-y-4">
           <p className="text-sm text-muted-foreground">
-            URBANSHADE OS Documentation • v2.2.0 • © 2024 Urbanshade Corporation  
+            URBANSHADE OS Documentation • v2.9 • © 2025 Urbanshade Corporation  
           </p>
           <p className="text-xs text-muted-foreground max-w-2xl mx-auto">
             This is a fictional simulation for entertainment purposes. No actual deep-sea facilities 

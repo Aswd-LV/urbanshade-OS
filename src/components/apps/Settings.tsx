@@ -228,7 +228,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">OS Version:</span>
-                  <span className="font-mono">Urbanshade OS v2.1</span>
+                  <span className="font-mono">Urbanshade OS v2.9</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">System Type:</span>
@@ -536,6 +536,78 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                     <div className="text-sm text-muted-foreground">Enable smooth transitions</div>
                   </div>
                   <Switch checked={settings.animationsEnabled} onCheckedChange={(checked) => updateSetting("animationsEnabled", checked)} />
+                </div>
+                {settings.animationsEnabled && (
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Animation Speed</label>
+                    <Select value={settings.animationSpeed} onValueChange={(value: 'slow' | 'normal' | 'fast' | 'instant') => updateSetting("animationSpeed", value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="slow">Slow</SelectItem>
+                        <SelectItem value="normal">Normal</SelectItem>
+                        <SelectItem value="fast">Fast</SelectItem>
+                        <SelectItem value="instant">Instant</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Window Transparency: {settings.windowTransparency}%</label>
+                  <Slider 
+                    value={[settings.windowTransparency]} 
+                    onValueChange={(value) => updateSetting("windowTransparency", value[0])}
+                    max={100} 
+                    min={50}
+                    step={5}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">Taskbar</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Taskbar Position</label>
+                  <Select value={settings.taskbarPosition} onValueChange={(value: 'bottom' | 'top' | 'left' | 'right') => updateSetting("taskbarPosition", value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="bottom">Bottom</SelectItem>
+                      <SelectItem value="top">Top</SelectItem>
+                      <SelectItem value="left">Left</SelectItem>
+                      <SelectItem value="right">Right</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">Show Desktop Switcher</div>
+                    <div className="text-sm text-muted-foreground">Show virtual desktop indicator on taskbar</div>
+                  </div>
+                  <Switch checked={settings.showDesktopSwitcher} onCheckedChange={(checked) => updateSetting("showDesktopSwitcher", checked)} />
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h3 className="font-semibold mb-4">Start Menu</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Start Menu Style</label>
+                  <Select value={settings.startMenuStyle} onValueChange={(value: 'classic' | 'modern') => updateSetting("startMenuStyle", value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="modern">Modern (Windows 10)</SelectItem>
+                      <SelectItem value="classic">Classic</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </Card>
@@ -1021,6 +1093,36 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                 </Button>
               </div>
             </Card>
+
+            <Card className="p-6 border-amber-500/30 bg-amber-500/5">
+              <h3 className="font-semibold mb-4 flex items-center gap-2">
+                <Users className="w-5 h-5 text-amber-400" />
+                Guest Account
+              </h3>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Allow temporary access without a password. Guest sessions don't save data.
+                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">Enable Guest Account</div>
+                    <div className="text-sm text-muted-foreground">Allow guests to use this computer</div>
+                  </div>
+                  <Switch 
+                    checked={settings.guestAccountEnabled} 
+                    onCheckedChange={(checked) => {
+                      updateSetting("guestAccountEnabled", checked);
+                      toast.success(checked ? "Guest account enabled" : "Guest account disabled");
+                    }} 
+                  />
+                </div>
+                {settings.guestAccountEnabled && (
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
+                    Guests can sign in from the lock screen. Their session will be temporary.
+                  </div>
+                )}
+              </div>
+            </Card>
           </div>
         );
 
@@ -1331,8 +1433,8 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">URBANSHADE OS</h3>
-                  <p className="text-muted-foreground">Version 2.0.0</p>
-                  <p className="text-xs text-muted-foreground mt-1">Build 20250116</p>
+                  <p className="text-muted-foreground">Version 2.9.0</p>
+                  <p className="text-xs text-muted-foreground mt-1">Build 20251225</p>
                 </div>
               </div>
 

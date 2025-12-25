@@ -45,6 +45,9 @@ export const UserSelectionScreen = ({ onLogin, onShutdown, onRestart }: UserSele
     console.error("Failed to parse accounts data:", e);
   }
 
+  // Check if guest account is enabled
+  const guestAccountEnabled = localStorage.getItem("settings_guest_account_enabled") === "true";
+
   // Combine admin and additional accounts
   const users = admin ? [admin, ...additionalAccounts] : additionalAccounts;
 
@@ -167,7 +170,7 @@ export const UserSelectionScreen = ({ onLogin, onShutdown, onRestart }: UserSele
           </div>
           <h1 className="text-4xl font-bold mb-2 text-cyan-400">URBANSHADE</h1>
           <p className="text-sm text-cyan-600 font-mono">
-            SECURE OPERATING SYSTEM v2.7
+            SECURE OPERATING SYSTEM v2.9
           </p>
           <div className="mt-4 text-xs text-slate-600 font-mono">
             [CLASSIFIED FACILITY] • DEPTH: 8,247m • PRESSURE: EXTREME
@@ -226,24 +229,26 @@ export const UserSelectionScreen = ({ onLogin, onShutdown, onRestart }: UserSele
                       </button>
                     ))}
 
-                    {/* Guest Login */}
-                    <button
-                      onClick={handleGuestLogin}
-                      disabled={loading}
-                      className="w-full p-4 rounded-lg bg-slate-900/30 border border-slate-600/30 hover:border-cyan-500/30 hover:bg-slate-800/30 transition-all text-left group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-full bg-slate-700/50 flex items-center justify-center group-hover:bg-slate-700 transition-colors border border-slate-600/30">
-                          <UserCircle className="w-7 h-7 text-slate-400 group-hover:text-cyan-400" />
+                    {/* Guest Login - only show if enabled */}
+                    {guestAccountEnabled && (
+                      <button
+                        onClick={handleGuestLogin}
+                        disabled={loading}
+                        className="w-full p-4 rounded-lg bg-slate-900/30 border border-slate-600/30 hover:border-cyan-500/30 hover:bg-slate-800/30 transition-all text-left group"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 rounded-full bg-slate-700/50 flex items-center justify-center group-hover:bg-slate-700 transition-colors border border-slate-600/30">
+                            <UserCircle className="w-7 h-7 text-slate-400 group-hover:text-cyan-400" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-bold text-lg text-slate-300 group-hover:text-white">Guest</div>
+                            <div className="text-sm text-slate-500">Limited access mode</div>
+                            <div className="text-xs text-slate-600 mt-1">Clearance Level 1</div>
+                          </div>
+                          <div className="text-2xl text-slate-600 group-hover:text-cyan-400 transition-colors">›</div>
                         </div>
-                        <div className="flex-1">
-                          <div className="font-bold text-lg text-slate-300 group-hover:text-white">Guest</div>
-                          <div className="text-sm text-slate-500">Limited access mode</div>
-                          <div className="text-xs text-slate-600 mt-1">Clearance Level 1</div>
-                        </div>
-                        <div className="text-2xl text-slate-600 group-hover:text-cyan-400 transition-colors">›</div>
-                      </div>
-                    </button>
+                      </button>
+                    )}
                   </>
                 )}
               </div>

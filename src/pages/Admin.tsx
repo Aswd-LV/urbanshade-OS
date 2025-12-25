@@ -603,7 +603,7 @@ const Admin = () => {
       <footer className="mt-16 border-t border-white/10 py-6">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Administrator Panel • URBANSHADE OS v2.2.0
+            Administrator Panel • URBANSHADE OS v2.9
           </p>
           <p className="text-xs text-red-400 mt-2">
             ⚠️ All actions are logged • Misuse will result in immediate termination

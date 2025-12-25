@@ -72,7 +72,7 @@ export default function AccManageLayout() {
         {/* Footer */}
         <div className="p-4 border-t border-cyan-500/20">
           <p className="text-[10px] text-slate-600 text-center">
-            URBANSHADE OS v2.8
+            URBANSHADE OS v2.9
           </p>
         </div>
       </aside>

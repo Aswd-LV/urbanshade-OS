@@ -70,7 +70,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
             URBANSHADE
           </h1>
           <p className="text-sm text-muted-foreground font-medium animate-fade-in mb-3" style={{ animationDelay: '200ms' }}>
-            Secure Operating System v2.7
+            Secure Operating System v2.9
           </p>
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 animate-fade-in" style={{ animationDelay: '300ms' }}>
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />

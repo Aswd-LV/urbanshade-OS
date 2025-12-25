@@ -246,7 +246,7 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
               [{appId.toUpperCase()}] Application interface loading...
             </p>
             <p className="mt-4 text-xs">
-              Urbanshade OS v2.2.0 — Application module
+              Urbanshade OS v2.9 — Application module
             </p>
           </div>
         );

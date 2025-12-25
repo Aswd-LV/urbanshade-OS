@@ -80,7 +80,7 @@ export const LogoutScreen = ({ onComplete, username = "User" }: LogoutScreenProp
 
       {/* Footer */}
       <div className="absolute bottom-6 text-xs text-slate-600">
-        UrbanShade OS v2.2.0
+        UrbanShade OS v2.9
       </div>
     </div>
   );

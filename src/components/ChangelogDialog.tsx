@@ -34,29 +34,44 @@ export const ChangelogDialog = () => {
       icon: <Paintbrush className="w-5 h-5" />,
       color: "from-purple-500 to-pink-600",
       tagline: "Smol Update",
-      overview: "Visual refresh! Redesigned boot screen with CRT terminal effects, overhauled Facility Map with SCP:SL-inspired zone navigation, revamped Security Cameras with Breach Scanner mode, and Admin Panel now requires authentication.",
+      overview: "Major improvements to the desktop experience! Virtual desktops now properly isolate windows, new Settings categories for personalization, guest account support, DEF-DEV debugging tools, enhanced system tray, and improved boot experience with animations.",
       sections: {
-        "Visual Redesign": [
-          "Boot screen: CRT terminal aesthetic with scanlines and green phosphor text",
-          "Facility Map: Zone-based layout inspired by SCP:SL control displays",
-          "Security Cameras: Industrial breach scanner panel design",
-          "Changelog scrolling bug fixed"
+        "Virtual Desktops": [
+          "Fixed window assignment - windows now properly belong to their desktop",
+          "Taskbar and Alt+Tab now filter to active desktop only",
+          "Slide animations when switching between desktops",
+          "Improved Desktop Switcher UI with window previews",
+          "Keyboard shortcuts: Ctrl+Win+←/→ to switch desktops"
         ],
-        "Facility Map": [
-          "Zone toggles: Light Containment, Heavy Containment, Entrance, Surface",
-          "Stats panel: Personnel counts by type (SCPs, MTF, Scientists, Class-D)",
-          "Tactical map display with room labels and connections",
-          "Crosshair player position indicator"
+        "Settings Overhaul": [
+          "NEW: Animation speed control (slow, normal, fast, instant)",
+          "NEW: Taskbar position (bottom, top, left, right)",
+          "NEW: Window transparency slider",
+          "NEW: Start Menu style toggle (modern/classic)",
+          "NEW: Desktop switcher visibility toggle",
+          "Enhanced appearance section with more customization"
         ],
-        "Security Cameras": [
-          "Breach Scanner mode with zone detection controls",
-          "Team detection filters (Class-D, Scientists, Foundation, Chaos)",
-          "Power and tier indicators with simulated scanning",
-          "Industrial control panel aesthetic"
+        "Account Management": [
+          "NEW: Guest account support - enable in Settings",
+          "Guest sessions are temporary with limited access",
+          "Guest login only shows when enabled",
+          "Improved account cards with role badges"
         ],
-        "Admin Panel": [
-          "Now requires authentication instead of instant access",
-          "Password prompt before entering admin mode"
+        "DEF-DEV Tools": [
+          "NEW: Performance Monitor with CPU/memory graphs",
+          "NEW: Network Inspector for request debugging",
+          "NEW: Event Debugger for system events",
+          "NEW: Component Inspector for React tree"
+        ],
+        "Boot & System Tray": [
+          "Enhanced BIOS screen with semantic colors",
+          "Lock screen password visibility toggle",
+          "System tray with volume, battery, clock",
+          "Hidden icons overflow menu"
+        ],
+        "Version Updates": [
+          "All version strings updated to v2.9 across the system",
+          "Updated build number to 20251225"
         ]
       }
     },

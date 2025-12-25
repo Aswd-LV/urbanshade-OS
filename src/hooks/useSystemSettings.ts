@@ -16,6 +16,14 @@ export interface SystemSettings {
   volume: number;
   soundEffects: boolean;
   notifications: boolean;
+  
+  // New v2.9 settings
+  animationSpeed: 'slow' | 'normal' | 'fast' | 'instant';
+  taskbarPosition: 'bottom' | 'top' | 'left' | 'right';
+  windowTransparency: number;
+  showDesktopSwitcher: boolean;
+  startMenuStyle: 'classic' | 'modern';
+  guestAccountEnabled: boolean;
 }
 
 const defaultSettings: SystemSettings = {
@@ -30,10 +38,17 @@ const defaultSettings: SystemSettings = {
   volume: 70,
   soundEffects: true,
   notifications: true,
+  // New v2.9 defaults
+  animationSpeed: 'normal',
+  taskbarPosition: 'bottom',
+  windowTransparency: 90,
+  showDesktopSwitcher: true,
+  startMenuStyle: 'modern',
+  guestAccountEnabled: false,
 };
 
 export const useSystemSettings = () => {
-  const [settings, setSettings] = useState<SystemSettings>(() => {
+const [settings, setSettings] = useState<SystemSettings>(() => {
     return {
       bgGradientStart: loadState("settings_bg_gradient_start", defaultSettings.bgGradientStart),
       bgGradientEnd: loadState("settings_bg_gradient_end", defaultSettings.bgGradientEnd),
@@ -46,6 +61,13 @@ export const useSystemSettings = () => {
       volume: loadState("settings_volume", defaultSettings.volume),
       soundEffects: loadState("settings_sound_effects", defaultSettings.soundEffects),
       notifications: loadState("settings_notifications", defaultSettings.notifications),
+      // New v2.9 settings
+      animationSpeed: loadState("settings_animation_speed", defaultSettings.animationSpeed),
+      taskbarPosition: loadState("settings_taskbar_position", defaultSettings.taskbarPosition),
+      windowTransparency: loadState("settings_window_transparency", defaultSettings.windowTransparency),
+      showDesktopSwitcher: loadState("settings_show_desktop_switcher", defaultSettings.showDesktopSwitcher),
+      startMenuStyle: loadState("settings_start_menu_style", defaultSettings.startMenuStyle),
+      guestAccountEnabled: loadState("settings_guest_account_enabled", defaultSettings.guestAccountEnabled),
     };
   });
 
@@ -55,6 +77,16 @@ export const useSystemSettings = () => {
     root.style.setProperty('--bg-gradient-start', settings.bgGradientStart);
     root.style.setProperty('--bg-gradient-end', settings.bgGradientEnd);
     root.style.setProperty('--custom-glass-opacity', String(settings.glassOpacity));
+    root.style.setProperty('--window-transparency', String(settings.windowTransparency / 100));
+    
+    // Apply animation speed
+    const speedMap: Record<string, string> = {
+      slow: '0.5s',
+      normal: '0.3s',
+      fast: '0.15s',
+      instant: '0s'
+    };
+    root.style.setProperty('--animation-duration', speedMap[settings.animationSpeed] || '0.3s');
     
     // Apply accent color
     const accentColors: Record<string, { hue: number; saturation: number }> = {
@@ -115,5 +147,11 @@ export const getSystemSettings = (): SystemSettings => {
     volume: loadState("settings_volume", defaultSettings.volume),
     soundEffects: loadState("settings_sound_effects", defaultSettings.soundEffects),
     notifications: loadState("settings_notifications", defaultSettings.notifications),
+    animationSpeed: loadState("settings_animation_speed", defaultSettings.animationSpeed),
+    taskbarPosition: loadState("settings_taskbar_position", defaultSettings.taskbarPosition),
+    windowTransparency: loadState("settings_window_transparency", defaultSettings.windowTransparency),
+    showDesktopSwitcher: loadState("settings_show_desktop_switcher", defaultSettings.showDesktopSwitcher),
+    startMenuStyle: loadState("settings_start_menu_style", defaultSettings.startMenuStyle),
+    guestAccountEnabled: loadState("settings_guest_account_enabled", defaultSettings.guestAccountEnabled),
   };
 };
