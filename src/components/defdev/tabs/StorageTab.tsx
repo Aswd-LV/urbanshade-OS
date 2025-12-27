@@ -1,23 +1,13 @@
+import { useState } from "react";
 import { Search, Database, Trash2, Edit, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
-interface StorageTabProps {
-  storageSearch: string;
-  setStorageSearch: (search: string) => void;
-  editingKey: string | null;
-  setEditingKey: (key: string | null) => void;
-  editValue: string;
-  setEditValue: (value: string) => void;
-}
+const StorageTab = () => {
+  const [storageSearch, setStorageSearch] = useState("");
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [refreshKey, setRefreshKey] = useState(0);
 
-const StorageTab = ({
-  storageSearch,
-  setStorageSearch,
-  editingKey,
-  setEditingKey,
-  editValue,
-  setEditValue,
-}: StorageTabProps) => {
   const storageEntries = Object.entries(localStorage)
     .filter(([key]) => 
       !key.includes('recovery_images') && key.toLowerCase().includes(storageSearch.toLowerCase())
@@ -28,6 +18,7 @@ const StorageTab = ({
     if (editingKey === key) {
       localStorage.setItem(key, editValue);
       setEditingKey(null);
+      setRefreshKey(k => k + 1);
       toast.success(`Updated: ${key}`);
     } else {
       setEditingKey(key);
@@ -37,6 +28,7 @@ const StorageTab = ({
 
   const handleDeleteKey = (key: string) => {
     localStorage.removeItem(key);
+    setRefreshKey(k => k + 1);
     toast.success(`Deleted: ${key}`);
   };
 
@@ -51,8 +43,7 @@ const StorageTab = ({
   };
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Toolbar */}
+    <div className="h-full flex flex-col" key={refreshKey}>
       <div className="p-3 border-b border-slate-800 flex items-center gap-3 bg-slate-900/50">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -69,7 +60,6 @@ const StorageTab = ({
         </div>
       </div>
 
-      {/* Storage list */}
       <div className="flex-1 overflow-auto p-3">
         {storageEntries.length === 0 ? (
           <div className="text-center text-slate-600 py-12">

@@ -3,15 +3,17 @@ import { Bug, Terminal, Activity, Database, HardDrive, Shield, Skull, Zap, Alert
 interface WarningScreenProps {
   firstBootSetup: boolean;
   actionConsentChecked: boolean;
-  onActionConsentChange: (checked: boolean) => void;
+  onConsentChange: (checked: boolean) => void;
   onAccept: () => void;
+  onCancel: () => void;
 }
 
 const WarningScreen = ({ 
   firstBootSetup, 
   actionConsentChecked, 
-  onActionConsentChange, 
-  onAccept 
+  onConsentChange, 
+  onAccept,
+  onCancel
 }: WarningScreenProps) => {
   return (
     <div className="fixed inset-0 bg-[#050508] flex items-center justify-center p-4 overflow-auto">
@@ -135,7 +137,7 @@ const WarningScreen = ({
                   <input
                     type="checkbox"
                     checked={actionConsentChecked}
-                    onChange={(e) => onActionConsentChange(e.target.checked)}
+                    onChange={(e) => onConsentChange(e.target.checked)}
                     className="mt-1 w-4 h-4 rounded border-amber-500/50 bg-transparent text-amber-500 focus:ring-amber-500/50"
                   />
                   <div>

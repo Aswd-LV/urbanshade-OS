@@ -336,12 +336,7 @@ const DefDevMain = () => {
       case "images":
         return <RecoveryTab />;
       case "bugchecks":
-        return (
-          <BugchecksTab
-            bugchecks={bugchecks}
-            onClear={clearBugchecks}
-          />
-        );
+        return <BugchecksTab />;
       case "performance":
         return <PerformanceTab />;
       case "network":

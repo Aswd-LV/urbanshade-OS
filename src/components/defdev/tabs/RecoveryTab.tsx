@@ -1,16 +1,14 @@
-import { HardDrive, Upload, Download, Play, Trash2, Plus } from "lucide-react";
+import { useState } from "react";
+import { HardDrive, Play, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { RecoveryImage } from "../hooks/useDefDevState";
 
-interface RecoveryTabProps {
-  recoveryImages: RecoveryImage[];
-  setRecoveryImages: React.Dispatch<React.SetStateAction<RecoveryImage[]>>;
-  selectedImage: RecoveryImage | null;
-  setSelectedImage: (image: RecoveryImage | null) => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
-}
+const RecoveryTab = () => {
+  const [recoveryImages, setRecoveryImages] = useState<RecoveryImage[]>(() => {
+    const saved = localStorage.getItem('urbanshade_recovery_images_data');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-const RecoveryTab = ({ recoveryImages, setRecoveryImages, selectedImage, setSelectedImage, fileInputRef }: RecoveryTabProps) => {
   const captureCurrentAsImage = () => {
     const data: Record<string, string> = {};
     for (let i = 0; i < localStorage.length; i++) {

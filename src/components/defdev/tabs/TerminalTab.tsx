@@ -1,28 +1,14 @@
+import { useState, useRef } from "react";
 import { Send, Terminal } from "lucide-react";
 import { TerminalResult, commandQueue, parseTerminalCommand, TERMINAL_COMMANDS, UUR_COMMANDS, UUR_AVAILABLE_PACKAGES } from "@/lib/commandQueue";
-import { actionDispatcher } from "@/lib/actionDispatcher";
 
-interface TerminalTabProps {
-  terminalInput: string;
-  setTerminalInput: (input: string) => void;
-  terminalHistory: { input: string; output: TerminalResult }[];
-  setTerminalHistory: React.Dispatch<React.SetStateAction<{ input: string; output: TerminalResult }[]>>;
-  historyIndex: number;
-  setHistoryIndex: (index: number) => void;
-  terminalInputRef: React.RefObject<HTMLInputElement>;
-  terminalEndRef: React.RefObject<HTMLDivElement>;
-}
+const TerminalTab = () => {
+  const [terminalInput, setTerminalInput] = useState("");
+  const [terminalHistory, setTerminalHistory] = useState<{ input: string; output: TerminalResult }[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const terminalInputRef = useRef<HTMLInputElement>(null);
+  const terminalEndRef = useRef<HTMLDivElement>(null);
 
-const TerminalTab = ({
-  terminalInput,
-  setTerminalInput,
-  terminalHistory,
-  setTerminalHistory,
-  historyIndex,
-  setHistoryIndex,
-  terminalInputRef,
-  terminalEndRef,
-}: TerminalTabProps) => {
   const executeTerminalCommand = (input: string): TerminalResult => {
     const { command, args } = parseTerminalCommand(input);
     
@@ -206,14 +192,12 @@ const TerminalTab = ({
 
   return (
     <div className="h-full flex flex-col bg-black">
-      {/* Terminal header */}
       <div className="px-4 py-2 border-b border-green-500/30 bg-green-500/5 flex items-center gap-3">
         <Terminal className="w-4 h-4 text-green-400" />
         <span className="text-green-400 font-mono text-sm">def-dev@urbanshade:~</span>
         <span className="text-green-600 text-xs">Type 'help' for commands</span>
       </div>
       
-      {/* Terminal output */}
       <div className="flex-1 overflow-auto p-4 font-mono text-sm">
         {terminalHistory.map((entry, idx) => (
           <div key={idx} className="mb-3">
@@ -232,7 +216,6 @@ const TerminalTab = ({
         <div ref={terminalEndRef} />
       </div>
       
-      {/* Input */}
       <form onSubmit={handleTerminalSubmit} className="p-3 border-t border-green-500/30 bg-green-500/5">
         <div className="flex items-center gap-2">
           <span className="text-green-400 font-mono">$</span>

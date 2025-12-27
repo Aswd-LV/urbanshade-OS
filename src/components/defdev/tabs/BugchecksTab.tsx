@@ -1,15 +1,18 @@
+import { useState } from "react";
 import { Shield, Trash2, Download, Clock } from "lucide-react";
+import { toast } from "sonner";
 import { BugcheckEntry } from "../hooks/useDefDevState";
 
-interface BugchecksTabProps {
-  bugchecks: BugcheckEntry[];
-  setBugchecks: React.Dispatch<React.SetStateAction<BugcheckEntry[]>>;
-}
+const BugchecksTab = () => {
+  const [bugchecks, setBugchecks] = useState<BugcheckEntry[]>(() => {
+    const saved = localStorage.getItem('urbanshade_bugchecks');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-const BugchecksTab = ({ bugchecks, setBugchecks }: BugchecksTabProps) => {
   const clearBugchecks = () => {
     setBugchecks([]);
     localStorage.removeItem('urbanshade_bugchecks');
+    toast.success("Bugcheck reports cleared");
   };
 
   const exportBugchecks = () => {
