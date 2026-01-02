@@ -31,6 +31,7 @@ import ModerationPanel from "./pages/ModerationPanel";
 import StatusPage from "./pages/Status";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Team from "./pages/Team";
 
 // Account Manager pages
 import AccManageLayout from "./pages/acc-manage/Layout";
@@ -96,6 +97,7 @@ const App = () => (
         {/* Legal Pages */}
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/team" element={<Team />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
