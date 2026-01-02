@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { User, Lock, Shield, Key, Save, Trash2, AlertTriangle, Check, Eye, EyeOff, Settings, Users, RefreshCw, ChevronRight } from "lucide-react";
+import { User, Lock, Shield, Key, Save, Trash2, AlertTriangle, Check, Eye, EyeOff, Settings, Users, RefreshCw, ChevronRight, AlertOctagon, Ban, Clock, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { getUserPenalties, UserPenalty, clearUserPenalties } from "@/components/defdev/tabs/AdminTab";
 
 export const AccountSettings = () => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [adminData, setAdminData] = useState<any>(null);
   const [accounts, setAccounts] = useState<any[]>([]);
+  const [penalties, setPenalties] = useState<UserPenalty[]>([]);
   
   const [newUsername, setNewUsername] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -14,13 +16,20 @@ export const AccountSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPasswords, setShowPasswords] = useState(false);
   
-  const [activeTab, setActiveTab] = useState<"profile" | "security" | "accounts">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "security" | "accounts" | "status">("profile");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    // Refresh penalties when switching to status tab
+    if (activeTab === "status") {
+      setPenalties(getUserPenalties());
+    }
+  }, [activeTab]);
 
   const loadData = () => {
     try {
@@ -35,6 +44,7 @@ export const AccountSettings = () => {
         setNewUsername(parsedAdmin.username || parsedAdmin.name || "");
       }
       if (accs) setAccounts(JSON.parse(accs));
+      setPenalties(getUserPenalties());
     } catch (e) {
       console.error("Failed to load account data:", e);
     }
@@ -123,7 +133,7 @@ export const AccountSettings = () => {
   };
 
   const handleResetSystem = () => {
-    if (!confirm("This will reset ALL system data including accounts, settings, and installed apps. Continue?")) return;
+    if (!confirm("This will reset ALL system data including accounts, settings, and data. Continue?")) return;
     if (!confirm("Are you ABSOLUTELY sure? This cannot be undone!")) return;
     
     const keys = Object.keys(localStorage).filter(k => k.startsWith("urbanshade_") || k.startsWith("settings_") || k.startsWith("icon_"));
@@ -133,10 +143,48 @@ export const AccountSettings = () => {
     setTimeout(() => window.location.reload(), 1500);
   };
 
+  const acknowledgePenalty = (penaltyId: string) => {
+    const updatedPenalties = penalties.map(p => 
+      p.id === penaltyId ? { ...p, acknowledged: true } : p
+    );
+    localStorage.setItem('urbanshade_user_penalties', JSON.stringify(updatedPenalties));
+    setPenalties(updatedPenalties);
+    toast.success('Penalty acknowledged');
+  };
+
+  const handleAppealPenalty = (penaltyId: string) => {
+    toast.info('Appeal submitted (simulated). An administrator will review your case.');
+  };
+
+  const handleClearAllPenalties = () => {
+    if (!confirm("Clear all penalties? This is for testing purposes.")) return;
+    clearUserPenalties();
+    setPenalties([]);
+    toast.success('All penalties cleared');
+  };
+
+  const activeBans = penalties.filter(p => p.type === 'ban' && (!p.expiresAt || new Date(p.expiresAt) > new Date()));
+  const activeWarnings = penalties.filter(p => p.type === 'warn');
+  const expiredPenalties = penalties.filter(p => p.expiresAt && new Date(p.expiresAt) <= new Date());
+
+  const getAccountStatus = () => {
+    if (activeBans.length > 0) {
+      const permanentBan = activeBans.find(b => !b.expiresAt);
+      if (permanentBan) return { status: 'banned', label: 'Permanently Banned', color: 'red' };
+      return { status: 'suspended', label: 'Temporarily Suspended', color: 'orange' };
+    }
+    if (activeWarnings.length >= 3) return { status: 'warning', label: 'Under Review', color: 'amber' };
+    if (activeWarnings.length > 0) return { status: 'warned', label: 'Warning on Record', color: 'yellow' };
+    return { status: 'good', label: 'Good Standing', color: 'green' };
+  };
+
+  const accountStatus = getAccountStatus();
+
   const tabs = [
     { id: "profile", label: "Profile", icon: User },
     { id: "security", label: "Security", icon: Lock },
     { id: "accounts", label: "Accounts", icon: Users },
+    { id: "status", label: "Status", icon: Shield, badge: penalties.filter(p => !p.acknowledged).length },
   ];
 
   return (
@@ -169,6 +217,11 @@ export const AccountSettings = () => {
               <div className="flex items-center gap-3">
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
+                {tab.badge && tab.badge > 0 && (
+                  <span className="px-1.5 py-0.5 text-xs bg-red-500 text-white rounded-full min-w-[18px] text-center">
+                    {tab.badge}
+                  </span>
+                )}
               </div>
               <ChevronRight className={`w-4 h-4 transition-transform ${activeTab === tab.id ? 'rotate-90' : ''}`} />
             </button>
@@ -384,6 +437,206 @@ export const AccountSettings = () => {
                 <div className="text-center text-slate-500 py-12 rounded-2xl bg-slate-800/20 border border-slate-700/30">
                   <Users className="w-12 h-12 mx-auto mb-3 text-slate-600" />
                   <p>No additional accounts</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Status Tab */}
+          {activeTab === "status" && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <h2 className="text-2xl font-bold text-cyan-400 mb-2">Account Status</h2>
+                <p className="text-slate-500">View your account standing and any penalties</p>
+              </div>
+
+              {/* Current Status Card */}
+              <div className={`p-6 rounded-2xl border ${
+                accountStatus.color === 'green' ? 'bg-emerald-500/10 border-emerald-500/30' :
+                accountStatus.color === 'yellow' ? 'bg-yellow-500/10 border-yellow-500/30' :
+                accountStatus.color === 'amber' ? 'bg-amber-500/10 border-amber-500/30' :
+                accountStatus.color === 'orange' ? 'bg-orange-500/10 border-orange-500/30' :
+                'bg-red-500/10 border-red-500/30'
+              }`}>
+                <div className="flex items-center gap-4">
+                  <div className={`p-4 rounded-xl ${
+                    accountStatus.color === 'green' ? 'bg-emerald-500/20' :
+                    accountStatus.color === 'yellow' ? 'bg-yellow-500/20' :
+                    accountStatus.color === 'amber' ? 'bg-amber-500/20' :
+                    accountStatus.color === 'orange' ? 'bg-orange-500/20' :
+                    'bg-red-500/20'
+                  }`}>
+                    {accountStatus.status === 'good' ? (
+                      <CheckCircle className="w-8 h-8 text-emerald-400" />
+                    ) : accountStatus.status === 'warned' || accountStatus.status === 'warning' ? (
+                      <AlertOctagon className="w-8 h-8 text-amber-400" />
+                    ) : (
+                      <Ban className="w-8 h-8 text-red-400" />
+                    )}
+                  </div>
+                  <div>
+                    <div className={`text-2xl font-black ${
+                      accountStatus.color === 'green' ? 'text-emerald-400' :
+                      accountStatus.color === 'yellow' ? 'text-yellow-400' :
+                      accountStatus.color === 'amber' ? 'text-amber-400' :
+                      accountStatus.color === 'orange' ? 'text-orange-400' :
+                      'text-red-400'
+                    }`}>
+                      {accountStatus.label}
+                    </div>
+                    <div className="text-sm text-slate-400 mt-1">
+                      {activeBans.length > 0 && `${activeBans.length} active ban(s)`}
+                      {activeBans.length > 0 && activeWarnings.length > 0 && ' • '}
+                      {activeWarnings.length > 0 && `${activeWarnings.length} warning(s)`}
+                      {activeBans.length === 0 && activeWarnings.length === 0 && 'No penalties on record'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Active Bans */}
+              {activeBans.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-red-400 uppercase tracking-wider flex items-center gap-2">
+                    <Ban className="w-4 h-4" /> Active Bans
+                  </h3>
+                  {activeBans.map((ban) => (
+                    <div key={ban.id} className="p-5 rounded-2xl bg-red-500/10 border border-red-500/30">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className={`px-2 py-1 text-xs rounded-lg font-bold ${
+                              ban.expiresAt ? 'bg-orange-500/20 text-orange-400' : 'bg-red-500/20 text-red-400'
+                            }`}>
+                              {ban.expiresAt ? 'TEMPORARY' : 'PERMANENT'}
+                            </span>
+                            {!ban.acknowledged && (
+                              <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-lg font-bold animate-pulse">
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-white font-medium mb-1">{ban.reason}</div>
+                          <div className="text-xs text-slate-500 space-y-1">
+                            <div>Issued: {new Date(ban.issuedAt).toLocaleString()}</div>
+                            {ban.expiresAt && (
+                              <div className="text-orange-400">Expires: {new Date(ban.expiresAt).toLocaleString()}</div>
+                            )}
+                            <div>By: {ban.issuedBy}</div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {!ban.acknowledged && (
+                            <button
+                              onClick={() => acknowledgePenalty(ban.id)}
+                              className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg transition-all"
+                            >
+                              Acknowledge
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleAppealPenalty(ban.id)}
+                            className="px-3 py-1.5 text-xs bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-lg transition-all"
+                          >
+                            Appeal
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Active Warnings */}
+              {activeWarnings.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <AlertOctagon className="w-4 h-4" /> Warnings ({activeWarnings.length}/3)
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-2">
+                    Accumulating 3 warnings may result in account review or suspension.
+                  </p>
+                  {activeWarnings.map((warn) => (
+                    <div key={warn.id} className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="px-2 py-1 text-xs bg-amber-500/20 text-amber-400 rounded-lg font-bold">
+                              WARNING
+                            </span>
+                            {!warn.acknowledged && (
+                              <span className="px-2 py-1 text-xs bg-amber-500/30 text-amber-300 rounded-lg font-bold animate-pulse">
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-white font-medium mb-1">{warn.reason}</div>
+                          <div className="text-xs text-slate-500">
+                            <div>Issued: {new Date(warn.issuedAt).toLocaleString()}</div>
+                            <div>By: {warn.issuedBy}</div>
+                          </div>
+                        </div>
+                        {!warn.acknowledged && (
+                          <button
+                            onClick={() => acknowledgePenalty(warn.id)}
+                            className="px-3 py-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg transition-all"
+                          >
+                            Acknowledge
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Expired Penalties */}
+              {expiredPenalties.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4" /> Expired Penalties
+                  </h3>
+                  {expiredPenalties.map((penalty) => (
+                    <div key={penalty.id} className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30 opacity-60">
+                      <div className="flex items-center gap-3">
+                        <XCircle className="w-5 h-5 text-slate-500" />
+                        <div>
+                          <div className="text-slate-400 text-sm">{penalty.reason}</div>
+                          <div className="text-xs text-slate-600">
+                            Expired: {new Date(penalty.expiresAt!).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* No Penalties */}
+              {penalties.length === 0 && (
+                <div className="text-center py-12 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+                  <CheckCircle className="w-16 h-16 mx-auto mb-4 text-emerald-400" />
+                  <div className="text-xl font-bold text-emerald-400 mb-2">Clean Record</div>
+                  <p className="text-slate-500">You have no penalties on your account. Keep up the good work!</p>
+                </div>
+              )}
+
+              {/* Clear Penalties (Dev) */}
+              {penalties.length > 0 && (
+                <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium text-slate-400">Testing Controls</div>
+                      <div className="text-xs text-slate-600">For development/testing purposes only</div>
+                    </div>
+                    <button
+                      onClick={handleClearAllPenalties}
+                      className="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded-lg transition-all flex items-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Clear All
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

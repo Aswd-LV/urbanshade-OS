@@ -1,7 +1,39 @@
-import { Skull, Zap, RefreshCw, Power, Lock, HardDrive, AlertTriangle, Trash2, Shield, Bomb, MonitorX, Cpu, MemoryStick, Flame, Bug, Radio, Wifi, WifiOff, Eye, EyeOff, Volume2, VolumeX, Moon, Sun, Sparkles } from "lucide-react";
+import { Skull, Zap, RefreshCw, Power, Lock, HardDrive, AlertTriangle, Trash2, Shield, Bomb, MonitorX, Cpu, MemoryStick, Flame, Bug, Radio, Wifi, WifiOff, Volume2, VolumeX, Sparkles, Ban, AlertOctagon, UserX, Clock, Gavel, Eye } from "lucide-react";
 import { commandQueue } from "@/lib/commandQueue";
 import { toast } from "sonner";
 import { useState } from "react";
+
+export interface UserPenalty {
+  id: string;
+  type: 'warn' | 'ban';
+  reason: string;
+  issuedAt: string;
+  expiresAt?: string;
+  issuedBy: string;
+  acknowledged: boolean;
+}
+
+// Helper to get/set penalties
+export const getUserPenalties = (): UserPenalty[] => {
+  return JSON.parse(localStorage.getItem('urbanshade_user_penalties') || '[]');
+};
+
+export const addUserPenalty = (penalty: Omit<UserPenalty, 'id' | 'issuedAt' | 'acknowledged'>) => {
+  const penalties = getUserPenalties();
+  const newPenalty: UserPenalty = {
+    ...penalty,
+    id: `penalty_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    issuedAt: new Date().toISOString(),
+    acknowledged: false,
+  };
+  penalties.unshift(newPenalty);
+  localStorage.setItem('urbanshade_user_penalties', JSON.stringify(penalties));
+  return newPenalty;
+};
+
+export const clearUserPenalties = () => {
+  localStorage.removeItem('urbanshade_user_penalties');
+};
 
 const AdminTab = () => {
   const [showDanger, setShowDanger] = useState(false);
@@ -79,6 +111,102 @@ const AdminTab = () => {
     },
   ];
 
+  // Fake moderation actions
+  const fakeWarnReasons = [
+    "Inappropriate behavior in chat",
+    "Spamming system notifications",
+    "Unauthorized access attempt",
+    "Violating facility protocols",
+    "Misuse of admin privileges",
+    "Harassment of personnel",
+  ];
+
+  const fakeBanReasons = [
+    "Repeated policy violations",
+    "Security breach attempt",
+    "Unauthorized data access",
+    "Sabotage of system operations",
+    "Critical protocol violation",
+    "Threat to facility security",
+  ];
+
+  const triggerFakeWarn = (reason?: string) => {
+    const warnReason = reason || fakeWarnReasons[Math.floor(Math.random() * fakeWarnReasons.length)];
+    const penalty = addUserPenalty({
+      type: 'warn',
+      reason: warnReason,
+      issuedBy: 'SYSTEM_ADMIN',
+    });
+    toast.warning(`⚠️ Warning issued: ${warnReason}`, {
+      duration: 5000,
+      icon: <AlertOctagon className="w-5 h-5 text-amber-400" />,
+    });
+    return penalty;
+  };
+
+  const triggerFakeBan = (duration: 'temp' | 'permanent', reason?: string) => {
+    const banReason = reason || fakeBanReasons[Math.floor(Math.random() * fakeBanReasons.length)];
+    const expiresAt = duration === 'temp' 
+      ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+      : undefined;
+    
+    const penalty = addUserPenalty({
+      type: 'ban',
+      reason: banReason,
+      expiresAt,
+      issuedBy: 'SYSTEM_ADMIN',
+    });
+    
+    toast.error(`🚫 ${duration === 'temp' ? 'Temporary' : 'Permanent'} Ban issued: ${banReason}`, {
+      duration: 5000,
+      icon: <Ban className="w-5 h-5 text-red-400" />,
+    });
+    return penalty;
+  };
+
+  const moderationActions = [
+    {
+      name: "Issue Warning",
+      icon: AlertOctagon,
+      color: "amber",
+      desc: "Add a warning to user record",
+      action: () => triggerFakeWarn(),
+    },
+    {
+      name: "Temp Ban (24h)",
+      icon: Clock,
+      color: "orange",
+      desc: "Temporary 24-hour ban",
+      action: () => triggerFakeBan('temp'),
+    },
+    {
+      name: "Permanent Ban",
+      icon: Ban,
+      color: "red",
+      desc: "Permanent account ban",
+      action: () => triggerFakeBan('permanent'),
+    },
+    {
+      name: "Clear Penalties",
+      icon: Trash2,
+      color: "green",
+      desc: "Clear all penalties",
+      action: () => {
+        clearUserPenalties();
+        toast.success('All penalties cleared');
+      },
+    },
+  ];
+
+  const viewPenalties = () => {
+    const penalties = getUserPenalties();
+    if (penalties.length === 0) {
+      toast.info('No penalties on record');
+    } else {
+      toast.info(`${penalties.length} penalties on record. Check Account Status for details.`);
+    }
+  };
+
   return (
     <div className="h-full overflow-auto p-4 space-y-6">
       {/* Header */}
@@ -90,6 +218,37 @@ const AdminTab = () => {
           <h2 className="text-xl font-black text-amber-400">Admin Control Center</h2>
           <p className="text-xs text-slate-500">Advanced system controls and crash triggers</p>
         </div>
+      </div>
+
+      {/* Fake Moderation Actions */}
+      <div className="p-4 bg-purple-500/5 border border-purple-500/30 rounded-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-purple-400 flex items-center gap-2">
+            <Gavel className="w-4 h-4" /> Moderation Actions (Fake)
+          </h3>
+          <button
+            onClick={viewPenalties}
+            className="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1"
+          >
+            <Eye className="w-3 h-3" /> View Penalties
+          </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {moderationActions.map(action => (
+            <button
+              key={action.name}
+              onClick={action.action}
+              className={`p-3 rounded-xl border transition-all hover:scale-105 bg-${action.color}-500/10 hover:bg-${action.color}-500/20 border-${action.color}-500/30`}
+            >
+              <action.icon className={`w-5 h-5 mx-auto mb-2 text-${action.color}-400`} />
+              <div className={`text-sm font-bold text-${action.color}-400 mb-1`}>{action.name}</div>
+              <div className="text-[10px] text-slate-500">{action.desc}</div>
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-slate-500 text-center">
+          💡 These are simulated actions. View your status in Account Settings → Status
+        </p>
       </div>
 
       {/* System Controls */}
