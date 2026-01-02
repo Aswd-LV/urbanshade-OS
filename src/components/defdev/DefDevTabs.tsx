@@ -30,29 +30,31 @@ const DefDevTabs = ({ selectedTab, onTabChange, bugcheckCount, crashEntry }: Def
   ];
 
   return (
-    <div className="flex border-b-2 border-slate-800/80 bg-slate-950/50 overflow-x-auto">
-      {tabs.map(tab => {
-        const isActive = selectedTab === tab.id;
-        const isCrashTab = crashEntry && tab.id === "bugchecks";
-        
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-all whitespace-nowrap ${
-              isActive 
-                ? `border-amber-500 text-amber-400 bg-amber-500/10` 
-                : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-800/50"
-            } ${isCrashTab ? "ring-1 ring-red-500/50" : ""}`}
-          >
-            <tab.icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : ''}`} />
-            <span className="font-medium">{tab.label}</span>
-            {isCrashTab && (
-              <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            )}
-          </button>
-        );
-      })}
+    <div className="flex border-b-2 border-slate-800/80 bg-slate-950/50 overflow-x-auto justify-end">
+      <div className="flex">
+        {tabs.map(tab => {
+          const isActive = selectedTab === tab.id;
+          const isCrashTab = crashEntry && tab.id === "bugchecks";
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-all whitespace-nowrap ${
+                isActive 
+                  ? `border-amber-500 text-amber-400 bg-amber-500/10` 
+                  : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-800/50"
+              } ${isCrashTab ? "ring-1 ring-red-500/50" : ""}`}
+            >
+              <tab.icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : ''}`} />
+              <span className="font-medium">{tab.label}</span>
+              {isCrashTab && (
+                <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

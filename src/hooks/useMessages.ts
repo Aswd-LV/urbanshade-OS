@@ -14,6 +14,7 @@ export interface Message {
   sender_profile?: {
     username: string;
     display_name: string | null;
+    role?: string;
   };
 }
 
@@ -52,16 +53,16 @@ export const useMessages = () => {
 
       // Fetch sender profiles for each message
       const senderIds = [...new Set(receivedMessages?.map(m => m.sender_id) || [])];
-      let profiles: Record<string, { username: string; display_name: string | null }> = {};
+      let profiles: Record<string, { username: string; display_name: string | null; role?: string }> = {};
       
       if (senderIds.length > 0) {
         const { data: profilesData } = await supabase
           .from('profiles')
-          .select('user_id, username, display_name')
+          .select('user_id, username, display_name, role')
           .in('user_id', senderIds);
         
         profilesData?.forEach(p => {
-          profiles[p.user_id] = { username: p.username, display_name: p.display_name };
+          profiles[p.user_id] = { username: p.username, display_name: p.display_name, role: p.role };
         });
       }
 
