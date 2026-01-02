@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock } from "lucide-react";
+import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock, Crown, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,6 +8,32 @@ import { toast } from "sonner";
 import { useMessages, Message } from "@/hooks/useMessages";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { supabase } from "@/integrations/supabase/client";
+
+// Badge component for Admin/Creator
+const UserBadge = ({ username, role }: { username: string; role?: string }) => {
+  const isCreator = username.toLowerCase() === 'aswd';
+  const isAdmin = role === 'admin';
+  
+  if (isCreator) {
+    return (
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 ml-1">
+        <Crown className="w-3 h-3" />
+        Creator
+      </span>
+    );
+  }
+  
+  if (isAdmin) {
+    return (
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 ml-1">
+        <Shield className="w-3 h-3" />
+        Admin
+      </span>
+    );
+  }
+  
+  return null;
+};
 
 export const Messages = () => {
   const { user, isOnlineMode } = useOnlineAccount();
@@ -291,6 +317,10 @@ export const Messages = () => {
                     <span className={`font-medium text-sm truncate ${!msg.read_at ? "text-primary font-bold" : ""}`}>
                       {msg.sender_profile?.display_name || msg.sender_profile?.username || "Unknown"}
                     </span>
+                    <UserBadge 
+                      username={msg.sender_profile?.username || ''} 
+                      role={msg.sender_profile?.role} 
+                    />
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button
@@ -448,11 +478,16 @@ export const Messages = () => {
                     )}
                     <h3 className="font-bold text-lg">{selected.subject}</h3>
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    From: <span className="text-foreground font-medium">
+                  <div className="text-sm text-muted-foreground flex items-center flex-wrap gap-1">
+                    <span>From:</span>
+                    <span className="text-foreground font-medium">
                       {selected.sender_profile?.display_name || selected.sender_profile?.username || "Unknown"}
                     </span>
-                    {" • "}{formatTime(selected.created_at)}
+                    <UserBadge 
+                      username={selected.sender_profile?.username || ''} 
+                      role={selected.sender_profile?.role} 
+                    />
+                    <span>• {formatTime(selected.created_at)}</span>
                   </div>
                 </div>
                 <Button
