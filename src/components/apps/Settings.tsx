@@ -1423,99 +1423,184 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
           <div className="space-y-6 animate-fade-in">
             <div>
               <h2 className="text-2xl font-bold mb-4">About Urbanshade OS</h2>
-              <p className="text-muted-foreground mb-6">Information about your system</p>
+              <p className="text-muted-foreground mb-6">Information about your system and the team behind it</p>
             </div>
 
-            <Card className="p-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-20 h-20 bg-primary/20 rounded-lg flex items-center justify-center">
-                  <SettingsIcon className="w-12 h-12 text-primary" />
+            {/* Hero Card */}
+            <Card className="p-6 bg-gradient-to-br from-primary/10 via-blue-500/5 to-purple-500/10 border-primary/20">
+              <div className="flex items-center gap-6 mb-6">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary/30 to-primary/10 rounded-2xl flex items-center justify-center shadow-lg border border-primary/20">
+                  <SettingsIcon className="w-14 h-14 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">URBANSHADE OS</h3>
-                  <p className="text-muted-foreground">Version 2.9.0</p>
-                  <p className="text-xs text-muted-foreground mt-1">Build 20251225</p>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
+                    URBANSHADE OS
+                  </h3>
+                  <p className="text-muted-foreground text-lg">Version 2.9.0</p>
+                  <p className="text-xs text-muted-foreground mt-1 font-mono">Build 20251225 • 64-bit</p>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold mb-2">System Information</h4>
-                  <div className="space-y-1 text-sm text-muted-foreground">
-                    <p>© 2025 Urbanshade Corporation</p>
-                    <p>Deep Sea Research Division</p>
-                    <p>All Rights Reserved</p>
+              <div className="grid grid-cols-3 gap-4 p-4 rounded-lg bg-muted/30 border border-white/5">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">3</p>
+                  <p className="text-xs text-muted-foreground">Team Members</p>
+                </div>
+                <div className="text-center border-x border-white/10">
+                  <p className="text-2xl font-bold text-primary">2025</p>
+                  <p className="text-xs text-muted-foreground">Started</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-primary">🇱🇻</p>
+                  <p className="text-xs text-muted-foreground">Made in Latvia</p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Team Section */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-semibold flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  The Team
+                </h4>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-primary hover:text-primary/80"
+                  onClick={() => window.open('/team', '_blank')}
+                >
+                  Meet the full team →
+                </Button>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-yellow-500/10 to-amber-500/5 border border-yellow-500/20 hover:border-yellow-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-lg">
+                    👑
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-yellow-500">Aswd_LV</p>
+                    <p className="text-xs text-muted-foreground">Founder & CEO • 95% of code</p>
                   </div>
                 </div>
-
-                <div className="pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => window.open('https://github.com/yourusername/urbanshade-os', '_blank')}
-                  >
-                    <Globe className="w-4 h-4 mr-2" />
-                    Visit GitHub Repository
-                  </Button>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold mb-3">Contributors</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Lead Developer</p>
-                        <p className="text-sm text-muted-foreground">Main contributor</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">UI/UX Designer</p>
-                        <p className="text-sm text-muted-foreground">Interface design</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Users className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Quality Assurance</p>
-                        <p className="text-sm text-muted-foreground">Testing & bug fixes</p>
-                      </div>
-                    </div>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-slate-500/10 to-zinc-500/5 border border-slate-500/20 hover:border-slate-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-slate-500/20 flex items-center justify-center text-lg">
+                    ☁️
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-slate-400">plplll</p>
+                    <p className="text-xs text-muted-foreground">Developer • Cloud features & ideas</p>
                   </div>
                 </div>
-
-                <div className="pt-4 border-t">
-                  <h4 className="font-semibold mb-3">License & Legal</h4>
-                  <p className="text-sm text-muted-foreground">
-                    This software is provided as-is for research and development purposes. 
-                    Urbanshade Corporation assumes no liability for any incidents, accidents, 
-                    or anomalies that may occur during operation.
-                  </p>
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/20 hover:border-green-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center text-lg">
+                    🌾
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-green-500">Kombainis_yehaw</p>
+                    <p className="text-xs text-muted-foreground">QA Tester • Bug hunter extraordinaire</p>
+                  </div>
                 </div>
+              </div>
+            </Card>
 
-                <div className="pt-4 border-t space-y-2">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => {
-                      localStorage.removeItem("urbanshade_last_seen_version");
-                      window.location.reload();
-                    }}
-                  >
-                    View Changelog
-                  </Button>
-                  <Button variant="outline" className="w-full">
-                    View Open Source Licenses
-                  </Button>
-                </div>
+            {/* Links & Info */}
+            <Card className="p-6">
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-auto py-3"
+                  onClick={() => window.open('https://github.com/Urbanshade-Team', '_blank')}
+                >
+                  <Globe className="w-4 h-4 mr-2" />
+                  <div className="text-left">
+                    <p className="text-sm font-medium">GitHub</p>
+                    <p className="text-xs text-muted-foreground">View source code</p>
+                  </div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-auto py-3"
+                  onClick={() => window.open('/team', '_blank')}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  <div className="text-left">
+                    <p className="text-sm font-medium">Team Page</p>
+                    <p className="text-xs text-muted-foreground">Meet the crew</p>
+                  </div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-auto py-3"
+                  onClick={() => window.open('/docs', '_blank')}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  <div className="text-left">
+                    <p className="text-sm font-medium">Documentation</p>
+                    <p className="text-xs text-muted-foreground">Learn more</p>
+                  </div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="justify-start h-auto py-3"
+                  onClick={() => window.open('/status', '_blank')}
+                >
+                  <Wifi className="w-4 h-4 mr-2" />
+                  <div className="text-left">
+                    <p className="text-sm font-medium">Status</p>
+                    <p className="text-xs text-muted-foreground">System status</p>
+                  </div>
+                </Button>
+              </div>
+            </Card>
+
+            {/* Legal */}
+            <Card className="p-6">
+              <h4 className="font-semibold mb-3">License & Legal</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                © 2025 Urbanshade Corporation • Deep Sea Research Division • All Rights Reserved
+              </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                This software is provided as-is for research and development purposes. 
+                Urbanshade Corporation assumes no liability for any incidents, accidents, 
+                or anomalies that may occur during operation.
+              </p>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.open('/terms', '_blank')}
+                >
+                  Terms of Service
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.open('/privacy', '_blank')}
+                >
+                  Privacy Policy
+                </Button>
+              </div>
+            </Card>
+
+            {/* Actions */}
+            <Card className="p-6">
+              <h4 className="font-semibold mb-4">System Actions</h4>
+              <div className="space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    localStorage.removeItem("urbanshade_last_seen_version");
+                    window.location.reload();
+                  }}
+                >
+                  📋 View Changelog
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  📜 View Open Source Licenses
+                </Button>
               </div>
             </Card>
           </div>

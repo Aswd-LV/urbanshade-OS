@@ -11,6 +11,8 @@ interface TeamMember {
   role: string;
   title: string;
   contributions: { icon: React.ReactNode; label: string }[];
+  bio: string[];
+  startDate: string;
   color: string;
   borderColor: string;
   textColor: string;
@@ -22,10 +24,15 @@ const teamMembers: TeamMember[] = [
     avatar: aswdAvatar,
     role: "Founder & CEO",
     title: "The Architect",
+    startDate: "January 27th, 2025",
     contributions: [
       { icon: <Code className="w-4 h-4" />, label: "95% of codebase" },
       { icon: <Crown className="w-4 h-4" />, label: "Founder of Urbanshade" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Vision & Direction" },
+    ],
+    bio: [
+      "Yo! I started this whole thing on January 27th, 2025, and honestly? It's been one heck of a ride. I've been the main one behind the keyboard, writing like 95% of the code, designing how everything works, and making sure this thing actually runs without catching fire. From late night coding sessions to \"why is this not working\" moments - I've been through it all.",
+      "Now look, I'm gonna be real with you - yes, there's been some AI involvement here. But honestly? It's more important to us to have fun building this, and a bunch of the code has still been made by us. We use AI as a tool, not a replacement. Every feature, every bugfix, every weird easter egg - there's a human behind it making decisions and having a blast doing it."
     ],
     color: "from-yellow-500/20 to-amber-500/20",
     borderColor: "border-yellow-500/30",
@@ -36,11 +43,16 @@ const teamMembers: TeamMember[] = [
     avatar: plplllAvatar,
     role: "Developer & Tester",
     title: "The Collaborator",
+    startDate: "Early 2025",
     contributions: [
       { icon: <Cloud className="w-4 h-4" />, label: "Cloud features" },
       { icon: <Code className="w-4 h-4" />, label: "Code contributions" },
       { icon: <TestTube className="w-4 h-4" />, label: "Testing" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Ideas & Feedback" },
+    ],
+    bio: [
+      "Been helping out since early 2025! I jumped in when things were already getting interesting and honestly couldn't resist being part of this madness. I've contributed to the cloud features, thrown in some code here and there, and spent way too many hours testing stuff that definitely shouldn't work (but somehow does).",
+      "My main thing? Ideas and feedback. You know how sometimes you're stuck on something and need fresh eyes? That's me. Plus, I get to break things on purpose and call it \"testing\" - best deal ever honestly. We're all about that transparency, so yeah, AI helped with some stuff, but we humans are definitely the ones having fun and making the weird decisions."
     ],
     color: "from-slate-500/20 to-zinc-500/20",
     borderColor: "border-slate-500/30",
@@ -51,9 +63,14 @@ const teamMembers: TeamMember[] = [
     avatar: kombainisAvatar,
     role: "QA Tester",
     title: "The Farmer",
+    startDate: "2025",
     contributions: [
       { icon: <TestTube className="w-4 h-4" />, label: "Quality Assurance" },
       { icon: <Lightbulb className="w-4 h-4" />, label: "Bug hunting" },
+    ],
+    bio: [
+      "Yehaw! I'm the designated bug farmer around here. Joined the squad in 2025 and my job is simple: break stuff, find bugs, and report back. Think of me as the guy who clicks every button in the wrong order just to see what happens. Spoiler alert: sometimes things explode (metaphorically... mostly).",
+      "Quality assurance sounds fancy, but really I'm just here to make sure you don't run into the same disasters I create on purpose. And yeah, about the AI thing - we're being honest here. Some AI help happened, but let's be real, the chaos energy? That's 100% human-made. We're here to have fun and make something cool, not pretend we're perfect."
     ],
     color: "from-green-500/20 to-emerald-500/20",
     borderColor: "border-green-500/30",
@@ -154,41 +171,53 @@ const Team = () => {
             who made this fever dream of an operating system possible.
           </p>
           
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="space-y-8">
             {teamMembers.map((member) => (
               <div 
                 key={member.name}
-                className={`p-6 rounded-xl bg-gradient-to-br ${member.color} border ${member.borderColor} hover:scale-[1.02] transition-all text-center group`}
+                className={`p-8 rounded-xl bg-gradient-to-br ${member.color} border ${member.borderColor} transition-all group`}
               >
-                {/* Avatar */}
-                <div className="w-32 h-32 mx-auto mb-4 rounded-xl overflow-hidden border-2 border-white/20 shadow-lg bg-black/40">
-                  <img 
-                    src={member.avatar} 
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Name & Role */}
-                <h4 className={`text-xl font-bold ${member.textColor} group-hover:underline`}>
-                  {member.name}
-                </h4>
-                <span className="inline-block px-3 py-1 rounded-full bg-black/40 border border-white/10 text-xs text-muted-foreground mt-2">
-                  {member.role}
-                </span>
-                <p className="text-sm text-muted-foreground italic mt-2">"{member.title}"</p>
-
-                {/* Contributions */}
-                <div className="space-y-2 mt-4">
-                  {member.contributions.map((contrib, idx) => (
-                    <div 
-                      key={idx}
-                      className="flex items-center gap-2 text-sm bg-black/30 rounded-lg px-3 py-2 text-muted-foreground"
-                    >
-                      <span className={member.textColor}>{contrib.icon}</span>
-                      <span>{contrib.label}</span>
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Avatar & Quick Info */}
+                  <div className="flex flex-col items-center md:items-start md:w-48 shrink-0">
+                    <div className="w-32 h-32 mb-4 rounded-xl overflow-hidden border-2 border-white/20 shadow-lg bg-black/40">
+                      <img 
+                        src={member.avatar} 
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  ))}
+                    <h4 className={`text-xl font-bold ${member.textColor} text-center md:text-left`}>
+                      {member.name}
+                    </h4>
+                    <span className="inline-block px-3 py-1 rounded-full bg-black/40 border border-white/10 text-xs text-muted-foreground mt-2">
+                      {member.role}
+                    </span>
+                    <p className="text-sm text-muted-foreground italic mt-2">"{member.title}"</p>
+                    <p className="text-xs text-muted-foreground mt-2">📅 Since {member.startDate}</p>
+                    
+                    {/* Contributions */}
+                    <div className="space-y-2 mt-4 w-full">
+                      {member.contributions.map((contrib, idx) => (
+                        <div 
+                          key={idx}
+                          className="flex items-center gap-2 text-sm bg-black/30 rounded-lg px-3 py-2 text-muted-foreground"
+                        >
+                          <span className={member.textColor}>{contrib.icon}</span>
+                          <span>{contrib.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bio */}
+                  <div className="flex-1 space-y-4">
+                    {member.bio.map((paragraph, idx) => (
+                      <p key={idx} className="text-muted-foreground leading-relaxed">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
             ))}
