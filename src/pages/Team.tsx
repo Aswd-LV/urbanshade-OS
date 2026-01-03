@@ -142,7 +142,7 @@ const Team = () => {
           </div>
         </section>
 
-        {/* About Section - Placeholder for user */}
+        {/* Our Story Section */}
         <section className="p-8 rounded-xl bg-gradient-to-br from-primary/20 via-blue-500/10 to-purple-500/20 border-2 border-primary/40 shadow-xl">
           <h3 className="text-3xl font-bold mb-6 text-primary flex items-center gap-3">
             <Waves className="w-8 h-8" />
@@ -150,7 +150,22 @@ const Team = () => {
           </h3>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p className="text-lg">
-              Text here :D
+              It all started on <strong className="text-primary">January 27th, 2025</strong>, when one person asked a simple question: 
+              "What if I made a fully fake operating system... for no reason?" And then, instead of going to bed like a normal person, 
+              they actually started building it.
+            </p>
+            <p>
+              What began as a weird side project quickly turned into something much bigger. Friends joined in, ideas kept flowing, 
+              and suddenly we had authentication systems, admin panels, cloud sync, and way more features than any joke project should have.
+              We built a messaging system. A moderation panel. A whole developer console. Why? Because it was fun.
+            </p>
+            <p>
+              Now look - we'll be transparent. Yes, AI tools have been involved in some parts of the development.
+              But here's the thing: we use AI as a <em>tool</em>, not a replacement for creativity. The weird ideas? The dumb jokes? 
+              The decision to add a "fake ban" prank feature? That's all us. We're having fun, and that's what matters.
+            </p>
+            <p className="text-lg font-medium text-primary">
+              Urbanshade OS is proof that passion projects don't need a "point" - sometimes the journey is the destination. 🚀
             </p>
           </div>
         </section>

@@ -425,14 +425,51 @@ export const Messages = () => {
                   <div className="flex gap-2">
                     <Input
                       value={compose.to}
-                      readOnly
-                      placeholder="Select a recipient..."
-                      className="flex-1 bg-muted/50"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCompose(prev => ({ ...prev, to: value, toUserId: "" }));
+                        // Try to match with existing user
+                        const matchedUser = users.find(u => 
+                          u.username.toLowerCase() === value.toLowerCase() ||
+                          u.display_name?.toLowerCase() === value.toLowerCase()
+                        );
+                        if (matchedUser) {
+                          setCompose(prev => ({ ...prev, toUserId: matchedUser.user_id }));
+                          if (matchedUser.username.toLowerCase() === 'aswd') {
+                            setShowAswdPopup(true);
+                          }
+                        }
+                      }}
+                      placeholder="Type username or select..."
+                      className="flex-1"
                     />
                     <Button onClick={() => setShowUserPicker(!showUserPicker)} variant="outline">
                       <Users className="w-4 h-4" />
                     </Button>
                   </div>
+                  
+                  {/* User suggestions when typing */}
+                  {compose.to && !compose.toUserId && users.filter(u => 
+                    u.username.toLowerCase().includes(compose.to.toLowerCase()) ||
+                    u.display_name?.toLowerCase().includes(compose.to.toLowerCase())
+                  ).length > 0 && (
+                    <div className="mt-2 p-2 rounded-lg border border-border bg-card max-h-32 overflow-y-auto">
+                      <p className="text-xs text-muted-foreground mb-2 px-2">Suggestions:</p>
+                      {users.filter(u => 
+                        u.username.toLowerCase().includes(compose.to.toLowerCase()) ||
+                        u.display_name?.toLowerCase().includes(compose.to.toLowerCase())
+                      ).slice(0, 5).map(u => (
+                        <div
+                          key={u.user_id}
+                          onClick={() => selectRecipient(u.user_id, u.display_name || u.username)}
+                          className="p-2 hover:bg-muted rounded cursor-pointer text-sm"
+                        >
+                          <div className="font-medium">{u.display_name || u.username}</div>
+                          <div className="text-xs text-muted-foreground">@{u.username}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   
                   {showUserPicker && (
                     <div className="mt-2 p-2 rounded-lg border border-border bg-card max-h-48 overflow-y-auto">

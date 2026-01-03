@@ -826,36 +826,10 @@ const DevMode = () => {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-gray-800">
-        {[
-          { id: "console", label: "Console", icon: <Terminal className="w-4 h-4" /> },
-          { id: "actions", label: "Actions", icon: <Activity className="w-4 h-4" /> },
-          { id: "terminal", label: "Terminal", icon: <Send className="w-4 h-4" /> },
-          { id: "storage", label: "Storage", icon: <Database className="w-4 h-4" /> },
-          { id: "images", label: "Recovery Images", icon: <HardDrive className="w-4 h-4" /> },
-          { id: "bugchecks", label: `Bugchecks${bugchecks.length > 0 ? ` (${bugchecks.length})` : ''}`, icon: <Shield className="w-4 h-4" /> },
-          { id: "admin", label: "Admin", icon: <Skull className="w-4 h-4" /> },
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabSwitch(tab.id as any)}
-            className={`flex items-center gap-2 px-4 py-2 text-sm border-b-2 transition-colors ${
-              selectedTab === tab.id 
-                ? "border-amber-500 text-amber-400 bg-amber-500/10" 
-                : "border-transparent text-gray-500 hover:text-gray-300"
-            } ${crashEntry && tab.id === "bugchecks" ? "ring-1 ring-red-500/50" : ""}`}
-          >
-            {tab.icon} {tab.label}
-            {crashEntry && tab.id === "bugchecks" && (
-              <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
+      {/* Main container with vertical tabs on right */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
         {selectedTab === "console" && (
           <div className="h-full flex flex-col">
             {/* Toolbar */}
@@ -1475,6 +1449,46 @@ const DevMode = () => {
             </div>
           </div>
         )}
+        </div>
+        
+        {/* Vertical Tabs on Right */}
+        <div className="w-44 min-w-44 border-l border-slate-800/80 bg-slate-950/70 flex flex-col">
+          <div className="p-3 border-b border-slate-800/60">
+            <span className="text-xs font-mono text-slate-500 uppercase tracking-wider">Tabs</span>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 space-y-1">
+            {[
+              { id: "console", label: "Console", icon: <Terminal className="w-4 h-4" /> },
+              { id: "actions", label: "Actions", icon: <Activity className="w-4 h-4" /> },
+              { id: "terminal", label: "Terminal", icon: <Send className="w-4 h-4" /> },
+              { id: "storage", label: "Storage", icon: <Database className="w-4 h-4" /> },
+              { id: "images", label: "Recovery", icon: <HardDrive className="w-4 h-4" /> },
+              { id: "bugchecks", label: `Bugchecks${bugchecks.length > 0 ? ` (${bugchecks.length})` : ''}`, icon: <Shield className="w-4 h-4" /> },
+              { id: "admin", label: "Admin", icon: <Skull className="w-4 h-4" /> },
+            ].map(tab => {
+              const isActive = selectedTab === tab.id;
+              const isCrashTab = crashEntry && tab.id === "bugchecks";
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabSwitch(tab.id as any)}
+                  className={`flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg transition-all ${
+                    isActive 
+                      ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" 
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent"
+                  } ${isCrashTab ? "ring-1 ring-red-500/50" : ""}`}
+                >
+                  <span className={`flex-shrink-0 ${isActive ? 'text-amber-400' : ''}`}>{tab.icon}</span>
+                  <span className="font-medium truncate">{tab.label}</span>
+                  {isCrashTab && (
+                    <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
       <SupabaseConnectivityChecker currentRoute="def-dev" />
     </div>

@@ -1,21 +1,34 @@
-import { ArrowLeft, Github, GitCommit, Users, Star, Code, Heart } from 'lucide-react';
+import { ArrowLeft, Github, GitCommit, Users, Star, Code, Heart, ExternalLink, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+
+interface GitHubContributor {
+  login: string;
+  id: number;
+  avatar_url: string;
+  html_url: string;
+  contributions: number;
+  type: string;
+}
 
 interface Contributor {
   name: string;
   role: string;
   contributions: string[];
   github?: string;
+  githubUrl?: string;
+  avatarUrl?: string;
   joinedAt?: string;
+  contributionCount?: number;
 }
 
-// Everyone who has ever contributed, big or small
-const allContributors: Contributor[] = [
+// Core team members (hardcoded)
+const coreTeam: Contributor[] = [
   {
     name: "Aswd_LV",
     role: "Founder & Lead Developer",
     contributions: ["Core architecture", "95% of codebase", "Vision & direction"],
-    github: "Aswd-LV",
+    github: "aswdBatch",
     joinedAt: "January 2025"
   },
   {
@@ -30,10 +43,50 @@ const allContributors: Contributor[] = [
     contributions: ["Bug hunting", "Quality assurance"],
     joinedAt: "2025"
   },
-  // Add more contributors here as they join!
 ];
 
 const TeamGit = () => {
+  const [githubContributors, setGithubContributors] = useState<GitHubContributor[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchContributors = async () => {
+      try {
+        const response = await fetch('https://api.github.com/repos/aswdbatch/Urbanshade-OS/contributors');
+        if (!response.ok) throw new Error('Failed to fetch contributors');
+        const data: GitHubContributor[] = await response.json();
+        // Filter out bots and the owner (aswdbatch)
+        const filtered = data.filter(c => 
+          c.type === 'User' && 
+          c.login.toLowerCase() !== 'aswdbatch'
+        );
+        setGithubContributors(filtered);
+      } catch (err) {
+        console.error('Failed to fetch GitHub contributors:', err);
+        setError('Failed to load GitHub contributors');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContributors();
+  }, []);
+
+  // Merge core team with GitHub contributors
+  const allContributors: Contributor[] = [
+    ...coreTeam,
+    ...githubContributors.map(gc => ({
+      name: gc.login,
+      role: "Contributor",
+      contributions: [`${gc.contributions} commit${gc.contributions > 1 ? 's' : ''}`],
+      github: gc.login,
+      githubUrl: gc.html_url,
+      avatarUrl: gc.avatar_url,
+      contributionCount: gc.contributions,
+    }))
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
       {/* Header */}
@@ -45,13 +98,13 @@ const TeamGit = () => {
           </h1>
           <div className="flex items-center gap-3">
             <a 
-              href="https://github.com/Urbanshade-Team" 
+              href="https://github.com/aswdbatch/Urbanshade-OS" 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-muted-foreground hover:bg-white/10 transition-colors text-sm"
             >
               <Github className="w-4 h-4" />
-              GitHub
+              Repository
             </a>
             <Link 
               to="/team" 
@@ -82,25 +135,35 @@ const TeamGit = () => {
             Big or small, every contribution matters. You helped make this happen.
           </p>
 
-          <div className="flex justify-center gap-4 text-sm">
+          <div className="flex justify-center gap-4 text-sm flex-wrap">
             <span className="px-4 py-2 rounded-full bg-primary/20 border border-primary/30 text-primary font-medium">
               <Star className="w-4 h-4 inline mr-2" />
               {allContributors.length} Contributors
             </span>
+            {githubContributors.length > 0 && (
+              <span className="px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-400 font-medium">
+                <Github className="w-4 h-4 inline mr-2" />
+                {githubContributors.length} from GitHub
+              </span>
+            )}
           </div>
         </section>
 
-        {/* Contributors Grid */}
+        {/* Core Team Section */}
         <section className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            {allContributors.map((contributor) => (
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <Star className="w-5 h-5 text-yellow-500" />
+            Core Team
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {coreTeam.map((contributor) => (
               <div 
                 key={contributor.name}
-                className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/30 hover:bg-white/10 transition-all group"
+                className="p-5 rounded-xl bg-gradient-to-br from-yellow-500/10 to-amber-500/10 border border-yellow-500/30 hover:border-yellow-500/50 transition-all group"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h3 className="font-bold text-lg group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-lg text-yellow-400">
                       {contributor.name}
                     </h3>
                     <p className="text-sm text-muted-foreground">{contributor.role}</p>
@@ -121,7 +184,7 @@ const TeamGit = () => {
                   {contributor.contributions.map((contrib, idx) => (
                     <span 
                       key={idx}
-                      className="px-2 py-1 rounded text-xs bg-primary/10 text-primary/80 border border-primary/20"
+                      className="px-2 py-1 rounded text-xs bg-yellow-500/20 text-yellow-400/90 border border-yellow-500/20"
                     >
                       {contrib}
                     </span>
@@ -130,12 +193,73 @@ const TeamGit = () => {
                 
                 {contributor.joinedAt && (
                   <p className="text-xs text-muted-foreground">
-                    Contributing since {contributor.joinedAt}
+                    Since {contributor.joinedAt}
                   </p>
                 )}
               </div>
             ))}
           </div>
+        </section>
+
+        {/* GitHub Contributors Section */}
+        <section className="space-y-6">
+          <h3 className="text-xl font-bold flex items-center gap-2">
+            <Github className="w-5 h-5 text-purple-400" />
+            GitHub Contributors
+          </h3>
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>{error}</p>
+              <p className="text-sm mt-2">Check back later or view on GitHub directly</p>
+            </div>
+          ) : githubContributors.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No additional contributors from GitHub yet</p>
+              <p className="text-sm mt-2">Be the first to contribute!</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {githubContributors.map((contributor) => (
+                <div 
+                  key={contributor.id}
+                  className="p-5 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/30 hover:bg-white/10 transition-all group"
+                >
+                  <div className="flex items-start gap-4 mb-3">
+                    <img 
+                      src={contributor.avatar_url} 
+                      alt={contributor.login}
+                      className="w-12 h-12 rounded-full border-2 border-purple-500/30"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-bold text-lg group-hover:text-purple-400 transition-colors">
+                        {contributor.login}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Contributor</p>
+                    </div>
+                    <a 
+                      href={contributor.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                    </a>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-sm bg-purple-500/20 text-purple-400 border border-purple-500/20 font-medium">
+                      {contributor.contributions} commit{contributor.contributions > 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Add Yourself Section */}
@@ -144,10 +268,10 @@ const TeamGit = () => {
           <h3 className="text-xl font-bold mb-3">Want to See Your Name Here?</h3>
           <p className="text-muted-foreground max-w-lg mx-auto mb-6">
             Contribute to Urbanshade OS and get added to this list! Every bug report, 
-            code contribution, idea, or feedback counts.
+            code contribution, idea, or feedback counts. Your GitHub avatar will appear here automatically.
           </p>
           <a 
-            href="https://github.com/Urbanshade-Team" 
+            href="https://github.com/aswdbatch/Urbanshade-OS" 
             target="_blank" 
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 hover:bg-green-500/30 transition-colors font-medium"

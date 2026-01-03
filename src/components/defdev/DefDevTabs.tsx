@@ -1,5 +1,6 @@
 import { Terminal, Activity, Send, Database, HardDrive, Shield, Skull, Cloud, Gavel, Cpu, Globe, Zap, Layers, Power, MemoryStick, Package } from "lucide-react";
 import { TabId } from "./hooks/useDefDevState";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface DefDevTabsProps {
   selectedTab: TabId;
@@ -30,31 +31,36 @@ const DefDevTabs = ({ selectedTab, onTabChange, bugcheckCount, crashEntry }: Def
   ];
 
   return (
-    <div className="flex border-b-2 border-slate-800/80 bg-slate-950/50 overflow-x-auto justify-end">
-      <div className="flex">
-        {tabs.map(tab => {
-          const isActive = selectedTab === tab.id;
-          const isCrashTab = crashEntry && tab.id === "bugchecks";
-          
-          return (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-sm border-b-2 transition-all whitespace-nowrap ${
-                isActive 
-                  ? `border-amber-500 text-amber-400 bg-amber-500/10` 
-                  : "border-transparent text-slate-500 hover:text-slate-300 hover:bg-slate-800/50"
-              } ${isCrashTab ? "ring-1 ring-red-500/50" : ""}`}
-            >
-              <tab.icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : ''}`} />
-              <span className="font-medium">{tab.label}</span>
-              {isCrashTab && (
-                <span className="ml-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              )}
-            </button>
-          );
-        })}
+    <div className="w-48 min-w-48 border-l border-slate-800/80 bg-slate-950/70 flex flex-col h-full">
+      <div className="p-3 border-b border-slate-800/60">
+        <span className="text-xs font-mono text-slate-500 uppercase tracking-wider">Tabs</span>
       </div>
+      <ScrollArea className="flex-1">
+        <div className="p-2 space-y-1">
+          {tabs.map(tab => {
+            const isActive = selectedTab === tab.id;
+            const isCrashTab = crashEntry && tab.id === "bugchecks";
+            
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={`flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg transition-all ${
+                  isActive 
+                    ? `bg-amber-500/20 text-amber-400 border border-amber-500/40` 
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent"
+                } ${isCrashTab ? "ring-1 ring-red-500/50" : ""}`}
+              >
+                <tab.icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-amber-400' : ''}`} />
+                <span className="font-medium truncate">{tab.label}</span>
+                {isCrashTab && (
+                  <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse flex-shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </ScrollArea>
     </div>
   );
 };

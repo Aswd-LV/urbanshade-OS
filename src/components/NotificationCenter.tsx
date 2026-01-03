@@ -197,29 +197,31 @@ export const NotificationCenter = ({ open, onClose }: NotificationCenterProps) =
       <div className="p-2 space-y-3">
         {nonEmptyGroups.map(([group, notifs]) => (
           <div key={group}>
-            <button
-              onClick={() => toggleGroup(group)}
-              className="flex items-center gap-2 w-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {expandedGroups.has(group) ? (
-                <ChevronDown className="w-3 h-3" />
-              ) : (
-                <ChevronRight className="w-3 h-3" />
-              )}
-              <span>{group}</span>
-              <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
-                {notifs.length}
-              </Badge>
+            <div className="flex items-center gap-2 w-full px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors group">
+              <button
+                onClick={() => toggleGroup(group)}
+                className="flex items-center gap-2 flex-1"
+              >
+                {expandedGroups.has(group) ? (
+                  <ChevronDown className="w-3 h-3" />
+                ) : (
+                  <ChevronRight className="w-3 h-3" />
+                )}
+                <span>{group}</span>
+                <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
+                  {notifs.length}
+                </Badge>
+              </button>
               {groupBy === "app" && (
                 <button
                   onClick={(e) => { e.stopPropagation(); clearByApp(group); }}
-                  className="ml-auto p-1 hover:bg-destructive/20 rounded opacity-0 group-hover:opacity-100"
+                  className="p-1 hover:bg-destructive/20 rounded opacity-0 group-hover:opacity-100"
                   title={`Clear all from ${group}`}
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
               )}
-            </button>
+            </div>
             {expandedGroups.has(group) && (
               <div className="space-y-2 mt-1">
                 {notifs.map(renderNotification)}
