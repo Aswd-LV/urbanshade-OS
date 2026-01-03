@@ -1,4 +1,4 @@
-import { ArrowLeft, Shield, AlertTriangle, Crown, Eye, Ban, Users, MessageSquare, CheckCircle, XCircle, Flag, Star, Sparkles, Lock, Fingerprint, Globe, Wifi, WifiOff, Key, EyeOff } from "lucide-react";
+import { ArrowLeft, Shield, AlertTriangle, Crown, Eye, Ban, Users, MessageSquare, CheckCircle, XCircle, Flag, Star, Sparkles, Lock, Fingerprint, Globe, Wifi, WifiOff, Key, EyeOff, Bot } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Safety = () => {
@@ -85,6 +85,24 @@ const Safety = () => {
                   who've earned special status. VIPs get perks like cloud priority, skipping message checks 
                   when contacting Aswd, and an awesome purple badge. If someone has this badge, 
                   you can trust they're cool!
+                </p>
+              </div>
+
+              {/* Bot Badge */}
+              <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <Bot className="w-4 h-4" />
+                    Bot
+                  </span>
+                  <span className="font-bold text-cyan-400">Automated System</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  The Bot badge indicates automated messages from <strong>NAVI</strong> or other system processes. 
+                  These messages are sent by UrbanShade itself, not by a human. They're used for 
+                  live announcements, update notifications, and system alerts. You can trust these messages 
+                  as official communications from UrbanShade. Bots cannot initiate private conversations - 
+                  they only send broadcast announcements.
                 </p>
               </div>
 

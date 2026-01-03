@@ -7,7 +7,7 @@ import {
   Settings, Database, Wifi, Globe, Server, ChevronDown, ChevronRight,
   TriangleAlert, ShieldAlert, ShieldCheck, Filter, Download, Trash2,
   MessageSquare, Bell, Volume2, VolumeX, Cpu, HardDrive, Crown, Megaphone,
-  UserCog, Send, Star, Sparkles
+  UserCog, Send, Star, Sparkles, Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -497,11 +497,15 @@ const ModerationPanel = () => {
   const [showOpDialog, setShowOpDialog] = useState(false);
   const [showBroadcastDialog, setShowBroadcastDialog] = useState(false);
   const [showVipDialog, setShowVipDialog] = useState(false);
+  const [showNaviMessageDialog, setShowNaviMessageDialog] = useState(false);
   const [warnReason, setWarnReason] = useState("");
   const [banReason, setBanReason] = useState("");
   const [banDuration, setBanDuration] = useState<"1h" | "24h" | "7d" | "30d" | "perm">("24h");
   const [isFakeBan, setIsFakeBan] = useState(false);
   const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [naviMessage, setNaviMessage] = useState("");
+  const [naviTarget, setNaviTarget] = useState<"all" | "online" | "admins" | "vips">("all");
+  const [naviPriority, setNaviPriority] = useState<"info" | "warning" | "critical">("info");
 
   // Check admin status and fetch data
   useEffect(() => {
@@ -842,6 +846,38 @@ const ModerationPanel = () => {
     }
   };
 
+  // Handle NAVI direct message announcement
+  const handleNaviMessage = async () => {
+    if (!naviMessage.trim()) {
+      toast.error("Please enter a message");
+      return;
+    }
+    
+    if (isDemoMode) {
+      toast.success(`[DEMO] NAVI message sent to ${naviTarget}: "${naviMessage}"`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "broadcast",
+        message: `[DEMO] 🤖 NAVI [${naviPriority.toUpperCase()}] to ${naviTarget}: ${naviMessage}`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowNaviMessageDialog(false);
+      setNaviMessage("");
+      return;
+    }
+    
+    // TODO: Real implementation via edge function - see pending.md
+    toast.info("NAVI messaging requires cloud implementation - see pending.md");
+    setActivities(prev => [{
+      id: Date.now().toString(),
+      type: "broadcast",
+      message: `🤖 NAVI message queued (pending cloud): ${naviMessage}`,
+      timestamp: new Date()
+    }, ...prev]);
+    setShowNaviMessageDialog(false);
+    setNaviMessage("");
+  };
+
   // Demo mode action wrappers
   const handleDemoWarn = () => {
     if (!selectedUser || !warnReason) return;
@@ -1065,6 +1101,14 @@ const ModerationPanel = () => {
             </div>
             
             <div className="flex items-center gap-3">
+              {/* NAVI Message Button */}
+              <Button 
+                onClick={() => setShowNaviMessageDialog(true)}
+                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 gap-2"
+              >
+                <Bot className="w-4 h-4" /> NAVI Message
+              </Button>
+              
               {/* Broadcast Button */}
               <Button 
                 onClick={() => setShowBroadcastDialog(true)}
@@ -1739,6 +1783,144 @@ const ModerationPanel = () => {
             <Button variant="outline" onClick={() => setShowVipDialog(false)} className="border-slate-700">Cancel</Button>
             <Button onClick={handleVip} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-2">
               <Star className="w-4 h-4" /> {isDemoMode && '[DEMO] '}Grant VIP
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* NAVI Direct Message Dialog */}
+      <Dialog open={showNaviMessageDialog} onOpenChange={setShowNaviMessageDialog}>
+        <DialogContent className="bg-slate-950 border-cyan-500/50 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-cyan-400 font-mono">
+              <Bot className="w-5 h-5" />
+              NAVI DIRECT MESSAGE
+            </DialogTitle>
+            <DialogDescription className="font-mono text-slate-400">
+              Send a message directly to users' inboxes as NAVI
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-mono mb-2 block text-slate-400">TARGET AUDIENCE</label>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { value: 'all', label: 'All Users', icon: '👥' },
+                  { value: 'online', label: 'Online Only', icon: '🟢' },
+                  { value: 'admins', label: 'Admins', icon: '🛡️' },
+                  { value: 'vips', label: 'VIPs', icon: '⭐' },
+                ] as const).map(t => (
+                  <Button
+                    key={t.value}
+                    variant={naviTarget === t.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setNaviTarget(t.value)}
+                    className={naviTarget === t.value ? "bg-cyan-600" : "border-slate-700"}
+                  >
+                    {t.icon} {t.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-mono mb-2 block text-slate-400">PRIORITY LEVEL</label>
+              <div className="flex gap-2">
+                {([
+                  { value: 'info', label: 'Info', color: 'cyan' },
+                  { value: 'warning', label: 'Warning', color: 'amber' },
+                  { value: 'critical', label: 'Critical', color: 'red' },
+                ] as const).map(p => (
+                  <Button
+                    key={p.value}
+                    variant={naviPriority === p.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setNaviPriority(p.value)}
+                    className={naviPriority === p.value 
+                      ? p.color === 'cyan' ? "bg-cyan-600" : p.color === 'amber' ? "bg-amber-600" : "bg-red-600"
+                      : "border-slate-700"}
+                  >
+                    {p.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-mono mb-2 block text-slate-400">MESSAGE</label>
+              <Textarea
+                value={naviMessage}
+                onChange={(e) => setNaviMessage(e.target.value)}
+                placeholder="Enter your NAVI announcement..."
+                rows={4}
+                className="bg-slate-900 border-slate-700 font-mono"
+                maxLength={500}
+              />
+              <div className="text-xs text-slate-500 mt-1 text-right">
+                {naviMessage.length}/500
+              </div>
+            </div>
+
+            {/* Preview */}
+            {naviMessage && (
+              <div>
+                <label className="text-sm font-mono mb-2 block text-slate-400 flex items-center gap-2">
+                  <Eye className="w-3 h-3" /> MESSAGE PREVIEW
+                </label>
+                <div className={`p-4 rounded-lg border-2 ${
+                  naviPriority === 'critical' ? 'bg-red-950/30 border-red-500/50' :
+                  naviPriority === 'warning' ? 'bg-amber-950/30 border-amber-500/50' :
+                  'bg-cyan-950/30 border-cyan-500/50'
+                }`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
+                      <Bot className="w-5 h-5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-cyan-400">NAVI</span>
+                        <span className="px-1.5 py-0.5 rounded text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                          Bot
+                        </span>
+                      </div>
+                      <span className="text-xs text-slate-500">System Announcement</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-300 font-mono">{naviMessage}</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded font-mono ${
+                      naviPriority === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                      naviPriority === 'warning' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                      'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                    }`}>
+                      {naviPriority.toUpperCase()}
+                    </span>
+                    <span className="text-xs text-slate-500">→ {naviTarget === 'all' ? 'All Users' : naviTarget === 'online' ? 'Online Users' : naviTarget === 'admins' ? 'Admins' : 'VIPs'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+              <p className="text-xs text-cyan-400 font-mono">
+                🤖 This message will appear directly in users' inboxes from NAVI. Great for time-sensitive updates!
+              </p>
+            </div>
+
+            {isDemoMode && (
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                <p className="text-xs text-amber-400 font-mono flex items-center gap-2">
+                  <Eye className="w-3 h-3" /> DEMO MODE: This action won't actually send messages
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNaviMessageDialog(false)} className="border-slate-700">Cancel</Button>
+            <Button onClick={handleNaviMessage} className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 gap-2">
+              <Bot className="w-4 h-4" /> {isDemoMode && '[DEMO] '}Send NAVI Message
             </Button>
           </DialogFooter>
         </DialogContent>

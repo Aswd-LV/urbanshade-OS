@@ -107,12 +107,64 @@ NAVI should be able to send announcements directly to users IN the Messages app,
    - Maintenance warnings
    - Emergency broadcasts
    - General announcements
+4. **Priority Levels**:
+   - Info (cyan) - General announcements
+   - Warning (amber) - Important notices
+   - Critical (red) - Urgent alerts
 
-### Implementation Notes
-- Requires real-time messaging infrastructure
-- NAVI messages should be visually distinct (system styling)
-- Should integrate with existing Messages app
-- Consider adding "priority" levels for different urgency
+### UI Implementation (DONE)
+- [x] Bot badge added to Messages.tsx (cyan themed with Bot icon)
+- [x] Badge hierarchy: Creator > Bot > Admin > VIP > User
+- [x] NAVI Message dialog in ModerationPanel with:
+  - Target audience selector (all/online/admins/vips)
+  - Priority level selector (info/warning/critical)
+  - Message preview with Bot badge styling
+  - Demo mode support
+
+### Backend Implementation Needed
+
+#### 1. NAVI Messages Table
+```sql
+create table public.navi_messages (
+    id uuid primary key default gen_random_uuid(),
+    message text not null,
+    priority text default 'info' check (priority in ('info', 'warning', 'critical')),
+    target_audience text default 'all' check (target_audience in ('all', 'online', 'admins', 'vips')),
+    sent_by uuid references auth.users(id),
+    created_at timestamp with time zone default now()
+);
+
+alter table public.navi_messages enable row level security;
+
+-- Policy: Admins can manage NAVI messages
+create policy "Admins can manage NAVI messages"
+on public.navi_messages
+for all
+to authenticated
+using (public.has_role(auth.uid(), 'admin'));
+```
+
+#### 2. Deliver NAVI Messages to Inboxes
+When a NAVI message is created, an edge function should:
+1. Query target users based on `target_audience`
+2. Insert a message into each user's inbox with:
+   - `sender_id` = NAVI system account (create a special system user)
+   - `is_system` = true flag
+   - Special styling flag for Bot badge display
+
+#### 3. Edge Function Endpoint
+```
+POST /admin-actions with action 'navi_message'
+Body: {
+  message: string,
+  priority: 'info' | 'warning' | 'critical',
+  target: 'all' | 'online' | 'admins' | 'vips'
+}
+```
+
+#### 4. Real-time Delivery (Optional Enhancement)
+- Use Supabase Realtime to push NAVI messages instantly
+- Consider adding toast notifications for critical priority
 
 ---
 
@@ -121,3 +173,4 @@ NAVI should be able to send announcements directly to users IN the Messages app,
 - All VIP functionality in the UI is currently using local state/demo mode
 - Once these tables and functions are created, the frontend can be updated to use real data
 - VIP badges, popups, and priority indicators are already in the UI
+- Bot badge and NAVI UI components are fully implemented

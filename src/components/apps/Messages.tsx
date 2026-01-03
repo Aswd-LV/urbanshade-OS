@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock, Crown, Shield, Sparkles } from "lucide-react";
+import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock, Crown, Shield, Sparkles, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,16 +9,27 @@ import { useMessages, Message } from "@/hooks/useMessages";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { supabase } from "@/integrations/supabase/client";
 
-// Badge component for Admin/Creator/VIP
-const UserBadge = ({ username, role, isVip }: { username: string; role?: string; isVip?: boolean }) => {
+// Badge component for Admin/Creator/VIP/Bot
+const UserBadge = ({ username, role, isVip, isBot }: { username: string; role?: string; isVip?: boolean; isBot?: boolean }) => {
   const isCreator = username.toLowerCase() === 'aswd';
   const isAdmin = role === 'admin';
+  const isNaviBot = username.toLowerCase() === 'navi' || username.toLowerCase() === 'system' || isBot;
   
+  // Badge hierarchy: Creator > Bot > Admin > VIP
   if (isCreator) {
     return (
       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 ml-1">
         <Crown className="w-3 h-3" />
         Creator
+      </span>
+    );
+  }
+  
+  if (isNaviBot) {
+    return (
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 ml-1">
+        <Bot className="w-3 h-3" />
+        Bot
       </span>
     );
   }
