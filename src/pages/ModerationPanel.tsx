@@ -866,16 +866,32 @@ const ModerationPanel = () => {
       return;
     }
     
-    // TODO: Real implementation via edge function - see pending.md
-    toast.info("NAVI messaging requires cloud implementation - see pending.md");
-    setActivities(prev => [{
-      id: Date.now().toString(),
-      type: "broadcast",
-      message: `🤖 NAVI message queued (pending cloud): ${naviMessage}`,
-      timestamp: new Date()
-    }, ...prev]);
-    setShowNaviMessageDialog(false);
-    setNaviMessage("");
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        method: 'POST',
+        body: { 
+          action: 'navi_message',
+          message: naviMessage,
+          priority: naviPriority,
+          target: naviTarget
+        }
+      });
+
+      if (response.error) throw response.error;
+      
+      toast.success("NAVI message sent!");
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "broadcast",
+        message: `🤖 NAVI [${naviPriority.toUpperCase()}] to ${naviTarget}: ${naviMessage}`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowNaviMessageDialog(false);
+      setNaviMessage("");
+    } catch (error) {
+      console.error("NAVI message error:", error);
+      toast.error("Failed to send NAVI message");
+    }
   };
 
   // Demo mode action wrappers
@@ -980,13 +996,37 @@ const ModerationPanel = () => {
       return;
     }
     
-    // TODO: Real implementation via edge function
-    toast.info("VIP functionality requires cloud implementation - see pending.md");
-    setShowVipDialog(false);
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        method: 'POST',
+        body: { 
+          action: 'grant_vip',
+          targetUserId: selectedUser.user_id,
+          reason: 'Granted by admin'
+        }
+      });
+
+      if (response.error) throw response.error;
+      
+      toast.success(`VIP status granted to ${selectedUser.username}`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "op",
+        user: selectedUser.username,
+        message: `⭐ VIP granted to @${selectedUser.username}`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowVipDialog(false);
+      setShowUserDetails(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("Grant VIP error:", error);
+      toast.error("Failed to grant VIP status");
+    }
   };
 
   // Handle VIP revoke
-  const handleRevokeVip = () => {
+  const handleRevokeVip = async () => {
     if (!selectedUser) return;
     
     if (isDemoMode) {
@@ -1006,8 +1046,31 @@ const ModerationPanel = () => {
       return;
     }
     
-    // TODO: Real implementation via edge function
-    toast.info("VIP functionality requires cloud implementation - see pending.md");
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        method: 'POST',
+        body: { 
+          action: 'revoke_vip',
+          targetUserId: selectedUser.user_id
+        }
+      });
+
+      if (response.error) throw response.error;
+      
+      toast.success(`VIP status revoked from ${selectedUser.username}`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "system",
+        user: selectedUser.username,
+        message: `VIP revoked: @${selectedUser.username}`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowUserDetails(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("Revoke VIP error:", error);
+      toast.error("Failed to revoke VIP status");
+    }
   };
 
 

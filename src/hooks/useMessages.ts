@@ -62,10 +62,16 @@ export const useMessages = () => {
           .select('user_id, username, display_name, role')
           .in('user_id', senderIds);
         
-        profilesData?.forEach(p => {
-          // TODO: Fetch VIP status from vips table when implemented
-          profiles[p.user_id] = { username: p.username, display_name: p.display_name, role: p.role, is_vip: false };
-        });
+        // Check VIP status for each sender
+        for (const p of profilesData || []) {
+          const { data: isVipResult } = await supabase.rpc('is_vip', { _user_id: p.user_id });
+          profiles[p.user_id] = { 
+            username: p.username, 
+            display_name: p.display_name, 
+            role: p.role || undefined, 
+            is_vip: isVipResult === true 
+          };
+        }
       }
 
       const messagesWithProfiles = (receivedMessages || []).map(m => ({
@@ -113,12 +119,17 @@ export const useMessages = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Now that RLS allows authenticated users to view profiles, this should work
       const { data, error } = await supabase
         .from('profiles')
         .select('id, user_id, username, display_name')
-        .neq('user_id', user.id);
+        .neq('user_id', user.id)
+        .order('username');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching users:', error);
+        return;
+      }
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);

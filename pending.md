@@ -4,7 +4,7 @@ This file lists features that need backend/cloud implementation by the developer
 
 ---
 
-## ✅ VIP System - IMPLEMENTED
+## ✅ VIP System - FULLY IMPLEMENTED
 
 ### Database
 - ✅ `vips` table created with RLS policies
@@ -14,6 +14,11 @@ This file lists features that need backend/cloud implementation by the developer
 - ✅ `POST /admin-actions/grant_vip` - Grant VIP status
 - ✅ `POST /admin-actions/revoke_vip` - Remove VIP status
 - ✅ `GET /admin-actions/vips` - List all VIPs
+
+### Frontend Wiring
+- ✅ ModerationPanel calls real endpoints
+- ✅ VIP welcome popup on login
+- ✅ VIP status shown in Messages badges
 
 ---
 
@@ -30,7 +35,7 @@ This file lists features that need backend/cloud implementation by the developer
 
 ---
 
-## ✅ NAVI AI Bot - Live Announcements - IMPLEMENTED
+## ✅ NAVI AI Bot - Live Announcements - FULLY IMPLEMENTED
 
 ### Database
 - ✅ `navi_messages` table created with RLS policies
@@ -39,15 +44,36 @@ This file lists features that need backend/cloud implementation by the developer
 - ✅ `POST /admin-actions/navi_message` - Send NAVI message
 - ✅ `GET /admin-actions/navi_messages` - Get NAVI message history
 
-### UI (Previously Done)
+### Frontend Wiring
 - ✅ Bot badge added to Messages.tsx
 - ✅ Badge hierarchy: Creator > Bot > Admin > VIP > User
-- ✅ NAVI Message dialog in ModerationPanel
+- ✅ NAVI Message dialog calls real endpoints
+
+---
+
+## ✅ Ban Enforcement - FULLY IMPLEMENTED
+
+### Features
+- ✅ `useBanCheck` hook checks for active bans on login
+- ✅ BannedScreen component blocks all access
+- ✅ Fake bans show "just kidding" after 5 seconds
+- ✅ Banned users cannot access ANY online features
+- ✅ Ban check refreshes every 5 minutes
+
+---
+
+## ✅ Messages User Discovery - FIXED
+
+### Database
+- ✅ Added RLS policy to allow authenticated users to view profiles
+
+### Frontend
+- ✅ Users can now see other users to message
+- ✅ VIP status properly fetched for message badges
 
 ---
 
 ## Notes
 
-- All VIP, Site Lock, and NAVI features now have full backend support
-- VIP badges, popups, and priority indicators in UI can now use real data
-- Frontend can be updated to call these endpoints instead of demo mode
+- All cloud features are now fully wired up!
+- Leaked password protection should be enabled in Supabase dashboard (Auth > Security)

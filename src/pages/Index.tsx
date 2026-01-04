@@ -22,15 +22,20 @@ import { LogoutScreen } from "@/components/LogoutScreen";
 import { DevModeConsole } from "@/components/DevModeConsole";
 import { LockScreen } from "@/components/LockScreen";
 import { BugcheckScreen, createBugcheck, BugcheckData } from "@/components/BugcheckScreen";
+import { BannedScreen } from "@/components/BannedScreen";
+import { VipWelcomeDialog } from "@/components/VipWelcomeDialog";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { systemBus } from "@/lib/systemBus";
 import { commandQueue, QueuedCommand } from "@/lib/commandQueue";
 import { useNaviSecurity } from "@/hooks/useNaviSecurity";
+import { useBanCheck } from "@/hooks/useBanCheck";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 
 const Index = () => {
   // NAVI AI Security System
   const naviSecurity = useNaviSecurity();
+  // Ban checking system
+  const banCheck = useBanCheck();
   const [adminSetupComplete, setAdminSetupComplete] = useState(false);
   const [showingBiosTransition, setShowingBiosTransition] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -576,6 +581,18 @@ const Index = () => {
     );
   }
 
+  // Ban check - blocks ALL online features (shows after NAVI lockout check)
+  if (banCheck.isBanned && !banCheck.isLoading) {
+    return (
+      <BannedScreen
+        reason={banCheck.reason}
+        expiresAt={banCheck.expiresAt}
+        isFakeBan={banCheck.isFakeBan}
+        onFakeBanDismiss={banCheck.refreshBanStatus}
+      />
+    );
+  }
+
   if (lockdownMode) {
     return <LockdownScreen onAuthorized={handleLockdownAuthorized} protocolName={lockdownProtocol} />;
   }
@@ -708,6 +725,13 @@ const Index = () => {
       )}
       {devModeOpen && <DevModeConsole onClose={() => setDevModeOpen(false)} />}
       <SupabaseConnectivityChecker currentRoute="main" />
+      
+      {/* VIP Welcome Dialog */}
+      <VipWelcomeDialog 
+        open={banCheck.showVipWelcome}
+        onClose={banCheck.dismissVipWelcome}
+        reason={banCheck.vipReason}
+      />
     </>
   );
 };
