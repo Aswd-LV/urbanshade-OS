@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { User, Check, Cloud, CloudOff } from "lucide-react";
+import { User, Check, Cloud, CloudOff, LogIn, LogOut, Mail, Lock, UserPlus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
@@ -14,11 +14,18 @@ const POPULAR_ICONS = [
 ];
 
 export default function GeneralPage() {
-  const { user, profile, isOnlineMode, updateProfile } = useOnlineAccount();
+  const { user, profile, isOnlineMode, updateProfile, signIn, signUp, signOut, loading } = useOnlineAccount();
   
   const [selectedIcon, setSelectedIcon] = useState("User");
   const [selectedColor, setSelectedColor] = useState("#00d4ff");
   const [displayName, setDisplayName] = useState("");
+  
+  // Auth form state
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     const savedIcon = localStorage.getItem("urbanshade_profile_icon");
@@ -54,6 +61,52 @@ export default function GeneralPage() {
     toast.success("Display name updated!");
   };
 
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+
+    try {
+      if (authMode === "login") {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Signed in to cloud!");
+          setEmail("");
+          setPassword("");
+        }
+      } else {
+        if (!username.trim()) {
+          toast.error("Username is required");
+          setAuthLoading(false);
+          return;
+        }
+        const { error } = await signUp(email, password, username);
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Account created! Check your email to confirm.");
+          setEmail("");
+          setPassword("");
+          setUsername("");
+        }
+      }
+    } catch (err) {
+      toast.error("Authentication failed");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error("Failed to sign out");
+    } else {
+      toast.success("Signed out from cloud");
+    }
+  };
+
   const currentUserData = JSON.parse(localStorage.getItem("urbanshade_current_user") || "{}");
   const IconComponent = (icons as any)[selectedIcon] || icons.User;
 
@@ -63,6 +116,135 @@ export default function GeneralPage() {
         <h1 className="text-2xl font-bold text-cyan-400 mb-2">General Settings</h1>
         <p className="text-slate-400 text-sm">Manage your profile and account information</p>
       </div>
+
+      {/* Cloud Account Section */}
+      <section className="p-6 rounded-2xl bg-gradient-to-br from-blue-900/30 to-cyan-900/20 border border-blue-500/30">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-lg bg-blue-500/20">
+            <Cloud className="w-5 h-5 text-blue-400" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-blue-400">Cloud Account</h2>
+            <p className="text-xs text-slate-400">Sync your settings across devices</p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          </div>
+        ) : isOnlineMode && user ? (
+          // Signed in state
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 p-4 bg-slate-800/50 rounded-xl">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                <Cloud className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-green-400 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  Connected to Cloud
+                </div>
+                <div className="text-sm text-slate-400">{user.email}</div>
+                {profile?.username && (
+                  <div className="text-xs text-slate-500">@{profile.username}</div>
+                )}
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSignOut}
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+            <p className="text-xs text-slate-500">
+              Your settings, desktop icons, and installed apps sync automatically.
+            </p>
+          </div>
+        ) : (
+          // Sign in/up form
+          <div className="space-y-4">
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant={authMode === "login" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setAuthMode("login")}
+                className={authMode === "login" ? "" : "border-slate-600"}
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+              <Button
+                variant={authMode === "signup" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setAuthMode("signup")}
+                className={authMode === "signup" ? "" : "border-slate-600"}
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Sign Up
+              </Button>
+            </div>
+
+            <form onSubmit={handleAuth} className="space-y-3">
+              {authMode === "signup" && (
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="pl-10 bg-slate-800 border-slate-700"
+                    required
+                  />
+                </div>
+              )}
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                  required
+                />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700"
+                  required
+                  minLength={6}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={authLoading}>
+                {authLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : authMode === "login" ? (
+                  <LogIn className="w-4 h-4 mr-2" />
+                ) : (
+                  <UserPlus className="w-4 h-4 mr-2" />
+                )}
+                {authMode === "login" ? "Sign In" : "Create Account"}
+              </Button>
+            </form>
+
+            <p className="text-xs text-slate-500 text-center">
+              {authMode === "login" 
+                ? "Sign in to sync your settings across devices"
+                : "Create an account to enable cloud sync"}
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* Profile Icon Section */}
       <section className="p-6 rounded-2xl bg-slate-900/50 border border-cyan-500/20">

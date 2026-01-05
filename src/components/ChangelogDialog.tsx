@@ -76,50 +76,44 @@ export const ChangelogDialog = () => {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-rose-500 to-orange-600",
       tagline: "THE YEAR UPDATE",
-      overview: "The biggest update yet! Complete overhaul of the ban system with NAVI-powered moderation, revamped messaging with friends system, real-time activity monitoring, enhanced admin tools, and improved network resilience throughout the system.",
+      overview: "The biggest update yet! New creator role with golden styling, cloud login in Account Manager, enhanced admin hierarchy, improved ban system with NAVI-powered moderation, and friends system.",
       sections: {
-        "Ban System Overhaul": [
-          "NEW: Redesigned BannedScreen with NAVI AI styling",
-          "NEW: Temporary ban popup with countdown timer",
-          "NEW: Persistent temp ban banner with remaining time",
-          "NEW: Fake ban reveal animation - prank your friends!",
-          "Improved ban checking with offline resilience",
-          "Better error handling for network failures"
+        "Creator Role": [
+          "NEW: Creator role - highest privilege level",
+          "NEW: Golden styling for creator badges throughout UI",
+          "Creators can demote admins (admins cannot demote each other)",
+          "Protected: Creators cannot be demoted"
         ],
-        "NAVI Message Delivery": [
-          "NEW: NAVI broadcasts appear in your inbox automatically",
-          "NEW: Moderation actions trigger system messages",
-          "NEW: Message metadata for tracking message types",
-          "Ban/warn/VIP notifications delivered to affected users"
+        "Account Manager": [
+          "NEW: Cloud login directly in Account Manager",
+          "Sign in or create account from acc-manage/general",
+          "Visual cloud connection status indicator",
+          "Seamless sync toggle and status display"
+        ],
+        "Ban System Overhaul": [
+          "Redesigned BannedScreen with NAVI AI styling",
+          "Temporary ban popup with countdown timer",
+          "Persistent temp ban banner with remaining time",
+          "Fake ban reveal animation - prank your friends!",
+          "Improved ban checking with offline resilience"
         ],
         "Friends System": [
-          "NEW: Send and accept friend requests",
-          "NEW: Friends tab in Messages app",
-          "NEW: Visual indicators for friend status",
-          "NEW: Priority messaging to friends",
-          "Real-time friend request notifications"
+          "Send and accept friend requests",
+          "Friends tab in Messages app",
+          "Visual indicators for friend status",
+          "Priority messaging to friends"
         ],
         "Messages Revamp": [
-          "NEW: Tabbed interface - Inbox, Friends, All Users",
-          "NEW: User badges showing roles (Admin, Mod, VIP)",
-          "NEW: NAVI broadcast styling for system messages",
-          "NEW: Friend request actions in conversation view",
-          "Improved user discovery with search",
+          "Tabbed interface - Inbox, Friends, All Users",
+          "User badges showing roles (Admin, Mod, VIP, Creator)",
+          "NAVI broadcast styling for system messages",
           "Real-time message updates via Supabase Realtime"
         ],
         "Moderation Panel": [
-          "NEW: Real-time activity monitoring tab",
-          "NEW: Statistics dashboard with charts",
-          "NEW: Bulk moderation actions (warn/ban/VIP)",
-          "NEW: Activity event logging to database",
-          "Enhanced admin verification"
-        ],
-        "Technical Improvements": [
-          "Network-resilient ban checking (graceful offline handling)",
-          "Improved error messages (warn instead of error for network issues)",
-          "Database: monitoring_events table for activity tracking",
-          "Database: friends table with RLS policies",
-          "Enhanced message metadata support"
+          "Real-time activity monitoring tab",
+          "Statistics dashboard with charts",
+          "Bulk moderation actions (warn/ban/VIP)",
+          "Enhanced admin verification with creator support"
         ]
       }
     },
