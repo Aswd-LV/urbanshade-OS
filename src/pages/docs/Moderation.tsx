@@ -1,18 +1,59 @@
-import { ArrowLeft, Shield, Users, Ban, MessageSquare, AlertTriangle, Eye, Lock, Radio, Settings, UserX, Clock, Flag, Sparkles, Crown, CheckCircle } from "lucide-react";
+import { ArrowLeft, Shield, BookOpen, Eye, Zap, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Moderation = () => {
+  const sections = [
+    {
+      title: "Overview",
+      description: "Getting started with the moderation panel, user management, and quick actions.",
+      icon: BookOpen,
+      color: "red",
+      path: "/docs/moderation/overview"
+    },
+    {
+      title: "NAVI Monitor",
+      description: "Real-time insights into NAVI bot activity, message filtering, and lockout events.",
+      icon: Eye,
+      color: "cyan",
+      path: "/docs/moderation/navi-monitor"
+    },
+    {
+      title: "Actions",
+      description: "Detailed guide on warnings, bans, VIP grants, and other moderation actions.",
+      icon: Zap,
+      color: "amber",
+      path: "/docs/moderation/actions"
+    },
+    {
+      title: "Statistics",
+      description: "Analytics dashboard with user growth, moderation metrics, and activity heatmaps.",
+      icon: BarChart3,
+      color: "blue",
+      path: "/docs/moderation/statistics"
+    }
+  ];
+
+  const getColorClasses = (color: string) => {
+    const colors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
+      red: { bg: "bg-red-500/10", border: "border-red-500/30", text: "text-red-400", icon: "text-red-400" },
+      cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/30", text: "text-cyan-400", icon: "text-cyan-400" },
+      amber: { bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-400", icon: "text-amber-400" },
+      blue: { bg: "bg-blue-500/10", border: "border-blue-500/30", text: "text-blue-400", icon: "text-blue-400" }
+    };
+    return colors[color] || colors.red;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-red-400">Moderation Guide</h1>
           <Link 
-            to="/" 
+            to="/docs" 
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to App
+            Back to Docs
           </Link>
         </div>
       </header>
@@ -26,381 +67,29 @@ const Moderation = () => {
             This is an internal document - handle with care.
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm">
-            <Lock className="w-4 h-4" />
+            <Shield className="w-4 h-4" />
             Admin Access Required
           </div>
         </section>
 
-        {/* Getting Started */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-sm">1</span>
-            Getting Started
-          </h3>
-          <div className="p-6 rounded-lg bg-black/40 border border-white/10 space-y-4">
-            <p className="text-muted-foreground">
-              Access the moderation panel at <code className="px-2 py-1 rounded bg-slate-800 text-primary">/moderation</code>. 
-              You must be logged in as an admin to use the panel. Non-admins can view the panel in demo mode, 
-              but cannot perform any real actions.
-            </p>
-            <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertTriangle className="w-5 h-5 text-amber-400" />
-                <span className="font-bold text-amber-400">Demo Mode Notice</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                If you're not an admin, you'll see a demo mode banner. All actions in demo mode are simulated 
-                and don't affect real users. It's a great way to learn the interface!
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* User Management */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-sm">2</span>
-            User Management
-          </h3>
-          <div className="p-6 rounded-lg bg-black/40 border border-white/10 space-y-6">
-            <p className="text-muted-foreground">
-              The Users tab is your main workspace for managing accounts.
-            </p>
-
-            <div className="grid gap-4">
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <Eye className="w-5 h-5 text-cyan-400" />
-                  <span className="font-bold text-cyan-400">View User Details</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Click on any user to see their full profile, including account creation date, 
-                  last activity, warnings, and moderation history.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-5 h-5 text-yellow-400" />
-                  <span className="font-bold text-yellow-400">Issue Warnings</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Warnings are official notices to users about rule violations. They're tracked in the 
-                  user's history and can lead to bans if accumulated.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <Ban className="w-5 h-5 text-red-400" />
-                  <span className="font-bold text-red-400">Ban Users</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Bans can be temporary or permanent. When banning, you'll see a preview of the 
-                  message the user will receive. Always include a clear reason.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                  <span className="font-bold text-purple-400">Grant VIP Status</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Only Aswd can grant VIP status. VIPs get special perks like cloud priority, 
-                  message check bypass, and the coveted purple badge.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 mb-2">
-                  <UserX className="w-5 h-5 text-orange-400" />
-                  <span className="font-bold text-orange-400">Demote Admins (De-OP)</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Owner-only action. Removes admin privileges from a user. Use with caution - 
-                  this action is logged and the user will be notified.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-sm">3</span>
-            Quick Actions
-          </h3>
-          <div className="p-6 rounded-lg bg-black/40 border border-white/10 space-y-6">
-            <p className="text-muted-foreground">
-              The Quick Actions panel provides emergency controls and system-wide operations.
-            </p>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <Lock className="w-5 h-5 text-red-400" />
-                  <span className="font-bold text-red-400">Lock Site</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Emergency lockdown. Prevents all users from accessing the site. 
-                  Use only in critical situations (security breach, major attack, etc.).
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <Radio className="w-5 h-5 text-amber-400" />
-                  <span className="font-bold text-amber-400">Global Broadcast</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Send a message to all online users. Great for announcements, 
-                  maintenance notices, or emergency alerts.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <Settings className="w-5 h-5 text-cyan-400" />
-                  <span className="font-bold text-cyan-400">Maintenance Mode</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Enables a maintenance screen for regular users while admins can still access 
-                  the system. Perfect for updates and fixes.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-5 h-5 text-purple-400" />
-                  <span className="font-bold text-purple-400">Scheduled Actions</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Plan bans, unbans, or other moderation actions to execute at a specific time. 
-                  Useful for timed punishments.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Logs & Reports */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-sm">4</span>
-            Logs & Reports
-          </h3>
-          <div className="p-6 rounded-lg bg-black/40 border border-white/10 space-y-4">
-            <p className="text-muted-foreground">
-              The Logs tab tracks all moderation actions for accountability and review.
-            </p>
-
-            <div className="grid gap-4">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <span className="font-bold text-green-400">Action History</span>
-                  <p className="text-sm text-muted-foreground">
-                    Every ban, warning, and moderation action is logged with timestamp, 
-                    actor (which admin did it), and reason.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <span className="font-bold text-green-400">User Reports</span>
-                  <p className="text-sm text-muted-foreground">
-                    View reports submitted by users about rule violations or suspicious activity.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <span className="font-bold text-green-400">Security Events</span>
-                  <p className="text-sm text-muted-foreground">
-                    Track login attempts, password changes, and other security-relevant events.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Security Tab */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-sm">5</span>
-            Security Settings
-          </h3>
-          <div className="p-6 rounded-lg bg-black/40 border border-white/10 space-y-4">
-            <p className="text-muted-foreground">
-              The Security tab contains advanced protection features.
-            </p>
-
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-primary">IP Blocking</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Block specific IP addresses from accessing the site.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-primary">Rate Limiting</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Configure how many requests users can make in a given timeframe.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-primary">Spam Filters</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Automatic detection and filtering of spam messages.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* NAVI Monitor Tab */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-white font-bold text-sm">6</span>
-            NAVI Monitor
-          </h3>
-          <div className="p-6 rounded-lg bg-cyan-500/10 border border-cyan-500/30 space-y-4">
-            <p className="text-muted-foreground">
-              The NAVI Monitor tab provides real-time insights into NAVI bot activity and message filtering.
-            </p>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-cyan-400">Message Queue</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  View messages currently being processed by NAVI, including priority levels and delivery status.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-cyan-400">Filter Statistics</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  See how many messages NAVI has filtered, flagged, or allowed through.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-cyan-400">Response Times</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Monitor NAVI's response latency and performance metrics.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-cyan-400">Lockout Events</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Track when NAVI triggered lockouts and the reasons behind them.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Tab */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm">7</span>
-            Statistics Dashboard
-          </h3>
-          <div className="p-6 rounded-lg bg-blue-500/10 border border-blue-500/30 space-y-4">
-            <p className="text-muted-foreground">
-              The Stats tab provides comprehensive analytics about user activity and moderation actions.
-            </p>
-
-            <div className="grid gap-4">
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-blue-400">User Growth</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Track new signups, active users, and user retention over time with interactive charts.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-blue-400">Moderation Metrics</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  See warnings issued, bans enacted, and appeals processed with trend analysis.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-blue-400">Role Distribution</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Visualize the breakdown of users by role: regular users, VIPs, staff, and admins.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-                <span className="font-bold text-blue-400">Activity Heatmap</span>
-                <p className="text-sm text-muted-foreground mt-1">
-                  See when users are most active to plan maintenance windows and announcements.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Best Practices */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold text-sm">✓</span>
-            Best Practices
-          </h3>
-          <div className="p-6 rounded-lg bg-green-500/10 border border-green-500/30 space-y-4">
-            <div className="grid gap-4">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <p className="text-muted-foreground">
-                  <strong className="text-green-400">Always include reasons</strong> - Every action should have a clear, documented reason.
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <p className="text-muted-foreground">
-                  <strong className="text-green-400">Start with warnings</strong> - Unless severe, warn before banning.
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <p className="text-muted-foreground">
-                  <strong className="text-green-400">Use the preview</strong> - Check how ban messages look before sending.
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <p className="text-muted-foreground">
-                  <strong className="text-green-400">Communicate with the team</strong> - Coordinate with other admins on major actions.
-                </p>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                <p className="text-muted-foreground">
-                  <strong className="text-green-400">Stay calm</strong> - Handle situations professionally, even when users are difficult.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <footer className="text-center pt-8 border-t border-white/10">
-          <p className="text-sm text-muted-foreground mb-4">
-            This document is for authorized personnel only. Handle with care.
-          </p>
-          <Link to="/" className="text-primary hover:underline">← Return to UrbanShade OS</Link>
-        </footer>
+        <div className="grid gap-6 md:grid-cols-2">
+          {sections.map((section) => {
+            const colors = getColorClasses(section.color);
+            const Icon = section.icon;
+            
+            return (
+              <Link
+                key={section.path}
+                to={section.path}
+                className={`p-6 rounded-lg ${colors.bg} border ${colors.border} hover:scale-105 transition-transform group`}
+              >
+                <Icon className={`w-10 h-10 ${colors.icon} mb-4`} />
+                <h3 className={`text-xl font-bold ${colors.text} mb-2`}>{section.title}</h3>
+                <p className="text-sm text-muted-foreground">{section.description}</p>
+              </Link>
+            );
+          })}
+        </div>
       </main>
     </div>
   );
