@@ -10,6 +10,8 @@ import {
   UserCog, Send, Star, Sparkles, Bot, BarChart3
 } from "lucide-react";
 import { NaviMonitoringTab } from "@/components/moderation/NaviMonitoringTab";
+import { NaviAuthoritiesTab } from "@/components/moderation/NaviAuthoritiesTab";
+import { NaviAutonomousPanel } from "@/components/moderation/NaviAutonomousPanel";
 import { StatsTab } from "@/components/moderation/StatsTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1244,8 +1246,14 @@ const ModerationPanel = () => {
               <TabsTrigger value="navi" className="gap-2 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">
                 <Bot className="w-4 h-4" /> NAVI Monitor
               </TabsTrigger>
+              <TabsTrigger value="authorities" className="gap-2 data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400">
+                <Shield className="w-4 h-4" /> Authorities
+              </TabsTrigger>
               <TabsTrigger value="stats" className="gap-2 data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">
                 <BarChart3 className="w-4 h-4" /> Stats
+              </TabsTrigger>
+              <TabsTrigger value="autonomous" className="gap-2 data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400">
+                <Zap className="w-4 h-4" /> Autonomous
               </TabsTrigger>
             </TabsList>
 
@@ -1532,8 +1540,16 @@ const ModerationPanel = () => {
               <NaviMonitoringTab />
             </TabsContent>
 
+            <TabsContent value="authorities" className="m-0">
+              <NaviAuthoritiesTab isDemo={isDemoMode} />
+            </TabsContent>
+
             <TabsContent value="stats" className="m-0">
               <StatsTab users={users} />
+            </TabsContent>
+
+            <TabsContent value="autonomous" className="m-0">
+              <NaviAutonomousPanel />
             </TabsContent>
           </Tabs>
         </div>
