@@ -4,94 +4,97 @@ This file lists features that need backend/cloud implementation by the developer
 
 ---
 
-## ✅ VIP System - FULLY IMPLEMENTED
+## 🔧 NAVI Authorities System - NEEDS SQL TABLE
 
-### Database
+### Description
+The NAVI Authorities feature allows admins to toggle site-wide restrictions like disabling signups, read-only mode, maintenance mode, etc.
+
+### Frontend Status
+✅ NaviAuthoritiesTab component created
+✅ Wired into ModerationPanel as "Authorities" tab
+✅ Edge function endpoints added (get/set settings)
+
+### Required SQL - Paste in Supabase SQL Editor
+
+```sql
+-- NAVI Settings Table for Authority Controls
+CREATE TABLE IF NOT EXISTS public.navi_settings (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    
+    -- Authority toggles
+    disable_signups boolean DEFAULT false NOT NULL,
+    read_only_mode boolean DEFAULT false NOT NULL,
+    maintenance_mode boolean DEFAULT false NOT NULL,
+    disable_messages boolean DEFAULT false NOT NULL,
+    vip_only_mode boolean DEFAULT false NOT NULL,
+    lockdown_mode boolean DEFAULT false NOT NULL,
+    
+    -- Maintenance message
+    maintenance_message text DEFAULT NULL,
+    
+    -- Metadata
+    updated_at timestamptz DEFAULT now(),
+    updated_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+    created_at timestamptz DEFAULT now() NOT NULL
+);
+
+-- Enable RLS
+ALTER TABLE public.navi_settings ENABLE ROW LEVEL SECURITY;
+
+-- Only admins can read settings (through edge function with service role)
+-- No direct client access needed - edge function handles it
+
+-- Insert default row
+INSERT INTO public.navi_settings (disable_signups, read_only_mode, maintenance_mode, disable_messages, vip_only_mode, lockdown_mode)
+VALUES (false, false, false, false, false, false)
+ON CONFLICT DO NOTHING;
+
+-- Grant usage to service role
+GRANT ALL ON public.navi_settings TO service_role;
+```
+
+---
+
+## ✅ Previously Completed Features
+
+### VIP System - FULLY IMPLEMENTED
 - ✅ `vips` table created with RLS policies
 - ✅ `is_vip()` function created
-
-### Admin Endpoints
-- ✅ `POST /admin-actions/grant_vip` - Grant VIP status
-- ✅ `POST /admin-actions/revoke_vip` - Remove VIP status
-- ✅ `GET /admin-actions/vips` - List all VIPs
-
-### Frontend Wiring
-- ✅ ModerationPanel calls real endpoints
+- ✅ Admin endpoints for grant/revoke VIP
 - ✅ VIP welcome popup on login
 - ✅ VIP status shown in Messages badges
 
----
+### Lock Site Feature - IMPLEMENTED
+- ✅ `site_locks` table created
+- ✅ Admin endpoints for lock/unlock site
 
-## ✅ Lock Site Feature - IMPLEMENTED
+### NAVI AI Bot - Live Announcements - FULLY IMPLEMENTED
+- ✅ `navi_messages` table created
+- ✅ Admin endpoints for sending NAVI messages
+- ✅ Bot badge in Messages.tsx
+- ✅ NAVI Message dialog in ModerationPanel
 
-### Database
-- ✅ `site_locks` table created with RLS policies
-- ✅ Default 'global' row inserted
+### Ban Enforcement - FULLY IMPLEMENTED
+- ✅ `useBanCheck` hook
+- ✅ BannedScreen component
+- ✅ Fake bans with "just kidding" reveal
 
-### Admin Endpoints
-- ✅ `POST /admin-actions/lock_site` - Lock the site
-- ✅ `POST /admin-actions/unlock_site` - Unlock the site
-- ✅ `GET /admin-actions/site_lock_status` - Get lock status
+### Messages User Discovery - FIXED
+- ✅ RLS policy for profile viewing
+- ✅ Users can see and message each other
 
----
+### Friends System - IMPLEMENTED
+- ✅ `friends` table with RLS
+- ✅ Friend requests flow
 
-## ✅ NAVI AI Bot - Live Announcements - FULLY IMPLEMENTED
-
-### Database
-- ✅ `navi_messages` table created with RLS policies
-
-### Admin Endpoints
-- ✅ `POST /admin-actions/navi_message` - Send NAVI message
-- ✅ `GET /admin-actions/navi_messages` - Get NAVI message history
-
-### Frontend Wiring
-- ✅ Bot badge added to Messages.tsx
-- ✅ Badge hierarchy: Creator > Bot > Admin > VIP > User
-- ✅ NAVI Message dialog calls real endpoints
-
----
-
-## ✅ Ban Enforcement - FULLY IMPLEMENTED
-
-### Features
-- ✅ `useBanCheck` hook checks for active bans on login
-- ✅ BannedScreen component with NAVI-style design for perm bans
-- ✅ Temp bans show popup + persistent banner (can still use offline features)
-- ✅ Perm bans show full NAVI lockout screen
-- ✅ Fake bans show "just kidding" after 5 seconds with working dismiss
-- ✅ Ban check refreshes every 5 minutes
-
----
-
-## ✅ Messages User Discovery - FIXED
-
-### Database
-- ✅ Added RLS policy to allow authenticated users to view profiles
-
-### Frontend
-- ✅ Users can now see other users to message
-- ✅ VIP status properly fetched for message badges
-- ✅ Messages app revamped with Inbox/Friends/Users tabs
-- ✅ NAVI broadcasts appear in user inboxes
-
----
-
-## ✅ Friends System - IMPLEMENTED
-
-### Database
-- ✅ `friends` table created with RLS policies
-- ✅ Realtime enabled for friends updates
-
-### Frontend
-- ✅ Send friend requests from Messages app
-- ✅ Accept/decline pending requests
-- ✅ Friends tab for quick messaging
-- ✅ Add friend button after reading message
+### Stats Tab - WORKING
+- ✅ Queries moderation_actions for counts
+- ✅ Shows user distribution charts
 
 ---
 
 ## Notes
 
-- All cloud features are now fully wired up!
-- Leaked password protection should be enabled in Supabase dashboard (Auth > Security)
-- ✅ NAVI Monitoring tab and Stats tab wired into ModerationPanel tabs
+- Once the `navi_settings` table is created, the Authorities tab will be fully functional
+- Settings are managed via the admin-actions edge function
+- The frontend uses demo mode when not connected to cloud

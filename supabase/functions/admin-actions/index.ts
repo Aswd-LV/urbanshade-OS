@@ -172,6 +172,34 @@ Deno.serve(async (req) => {
         });
       }
 
+      if (action === 'navi_settings') {
+        // Get NAVI authority settings
+        const { data: settings, error } = await supabaseAdmin
+          .from('navi_settings')
+          .select('*')
+          .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+
+        // Return defaults if no settings exist
+        const defaultSettings = {
+          disable_signups: false,
+          read_only_mode: false,
+          maintenance_mode: false,
+          disable_messages: false,
+          vip_only_mode: false,
+          lockdown_mode: false,
+          maintenance_message: null
+        };
+
+        return new Response(JSON.stringify({ 
+          settings: settings || defaultSettings,
+          maintenanceMessage: settings?.maintenance_message || null
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
       if (action === 'monitoring_events') {
         // Get recent monitoring events
         const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
@@ -632,6 +660,80 @@ Deno.serve(async (req) => {
         return new Response(JSON.stringify({ success: true, broadcast: data }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
+      }
+
+      // =============================================
+      // NAVI SETTINGS ACTIONS
+      // =============================================
+      
+      if (action === 'set_navi_setting') {
+        const { setting, value, message } = body;
+        
+        // Valid settings
+        const validSettings = ['disable_signups', 'read_only_mode', 'maintenance_mode', 'disable_messages', 'vip_only_mode', 'lockdown_mode'];
+        if (!validSettings.includes(setting)) {
+          return new Response(JSON.stringify({ error: 'Invalid setting' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Check if settings row exists
+        const { data: existing } = await supabaseAdmin
+          .from('navi_settings')
+          .select('id')
+          .single();
+
+        const updateData: Record<string, any> = {
+          [setting]: value,
+          updated_at: new Date().toISOString(),
+          updated_by: user.id
+        };
+
+        // Add maintenance message if setting maintenance mode
+        if (setting === 'maintenance_mode' && message) {
+          updateData.maintenance_message = message;
+        }
+
+        if (existing) {
+          const { data, error } = await supabaseAdmin
+            .from('navi_settings')
+            .update(updateData)
+            .eq('id', existing.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+          console.log(`Admin ${user.id} set ${setting} to ${value}`);
+
+          return new Response(JSON.stringify({ success: true, settings: data }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } else {
+          // Create initial settings row
+          const initialSettings = {
+            disable_signups: false,
+            read_only_mode: false,
+            maintenance_mode: false,
+            disable_messages: false,
+            vip_only_mode: false,
+            lockdown_mode: false,
+            ...updateData
+          };
+
+          const { data, error } = await supabaseAdmin
+            .from('navi_settings')
+            .insert(initialSettings)
+            .select()
+            .single();
+
+          if (error) throw error;
+          console.log(`Admin ${user.id} created settings and set ${setting} to ${value}`);
+
+          return new Response(JSON.stringify({ success: true, settings: data }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
       }
 
       // =============================================
