@@ -12,7 +12,7 @@ Online/offline:
 ### CURRENTLY ONLINE!
 `urbanshade.lovable.dev`
 
-Update cycle: every 2nd week on Friday - Sunday we push an update (hopefully)
+Update cycle: every 2nd week on Friday - Sunday we push an update. (hopefully)
 
 ---
 ## What is this in the first place?
