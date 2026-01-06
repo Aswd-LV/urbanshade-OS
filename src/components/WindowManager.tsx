@@ -49,6 +49,7 @@ import { ImageEditor } from "./apps/ImageEditor";
 import { ComputerManagement } from "./apps/ComputerManagement";
 import { UURApp } from "./apps/UURApp";
 import { GameHub } from "./apps/GameHub";
+import { ContainmentGame } from "./apps/ContainmentGame/ContainmentGame";
 
 interface WindowData {
   id: string;
@@ -135,6 +136,11 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         return <Downloads />;
       case "plugin-store":
         return <PluginStore />;
+      case "containment-game":
+        return <ContainmentGame onClose={() => {
+          const windowId = windows.find(w => w.app.id === 'containment-game')?.id;
+          if (windowId) onCloseWindow(windowId);
+        }} />;
       case "crash-app":
         return <CrashApp onCrash={(crashType, process) => onCriticalKill(process || "system.exe", "bluescreen")} />;
       case "settings":

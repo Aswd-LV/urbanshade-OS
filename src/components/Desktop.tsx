@@ -547,6 +547,13 @@ export const Desktop = ({
       downloadable: true
     },
     {
+      id: "containment-game",
+      name: "Containment Breach",
+      icon: <Skull className="w-11 h-11" />,
+      run: () => openWindow(allApps[47]),
+      downloadable: true
+    },
+    {
       id: "chat",
       name: "Instant Chat",
       icon: <MessageSquare className="w-11 h-11" />,
