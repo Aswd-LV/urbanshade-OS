@@ -94,6 +94,20 @@ export const SUBJECTS: Subject[] = [
     description: 'Absorbs memetic energy. Highly resistant to containment shocks. Immune to most lures.',
     deathHint: 'Z-31 ignores most of your tools. Doors are your only reliable defense - don\'t waste power on shocks.',
     activeOnNight: 5
+  },
+  // Foxy-type entity - ignores lures completely, unique attack pattern
+  {
+    id: 'Z-XX',
+    name: 'The Stalker',
+    behavior: 'foxy',
+    speed: 3.0, // Very fast when triggered
+    lureSensitivity: 0, // Completely ignores lures
+    shockResistance: 2,
+    specialAbility: 'ignores_lures',
+    description: 'A predatory entity that charges when not observed. Audio lures have no effect. Must be monitored constantly.',
+    deathHint: 'Z-XX only moves when you\'re not watching. Check its camera frequently or it will charge without warning.',
+    activeOnNight: 2,
+    spawnRoom: 'foxy-room' // Custom spawn
   }
 ];
 

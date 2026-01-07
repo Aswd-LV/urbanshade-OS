@@ -47,6 +47,7 @@ import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Team from "./pages/Team";
 import TeamGit from "./pages/TeamGit";
+import Support from "./pages/Support";
 
 // Account Manager pages
 import AccManageLayout from "./pages/acc-manage/Layout";
@@ -127,6 +128,7 @@ const App = () => (
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/team" element={<Team />} />
         <Route path="/team/git" element={<TeamGit />} />
+        <Route path="/support" element={<Support />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

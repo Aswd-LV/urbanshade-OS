@@ -6,8 +6,8 @@ import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState("3.1");
-  const currentVersion = "3.1";
+  const [selectedVersion, setSelectedVersion] = useState("3.0");
+  const currentVersion = "3.0";
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
@@ -30,12 +30,18 @@ export const ChangelogDialog = () => {
   }
 
   const changelogs: Record<string, VersionData> = {
-    "3.1": {
-      icon: <Bot className="w-5 h-5" />,
-      color: "from-cyan-500 to-blue-600",
-      tagline: "NAVI Intelligence Update",
-      overview: "Major NAVI enhancements! Autonomous threat detection with graduated responses, auto-moderation, automated messaging, adaptive thresholds, streamlined moderation panel with sidebar navigation, and precision threshold controls.",
+    "3.0": {
+      icon: <Rocket className="w-5 h-5" />,
+      color: "from-rose-500 to-orange-600",
+      tagline: "THE YEAR UPDATE",
+      overview: "The biggest update yet! Creator role with golden styling, cloud login in Account Manager, NAVI autonomous threat detection, enhanced moderation system, friends system, and the new Support Center.",
       sections: {
+        "Creator Role": [
+          "NEW: Creator role - highest privilege level",
+          "NEW: Golden styling for creator badges throughout UI",
+          "Creators can demote admins (admins cannot demote each other)",
+          "Protected: Creators cannot be demoted"
+        ],
         "NAVI Autonomous System": [
           "NEW: Graduated threat levels (Normal, Elevated, Warning, Critical, Emergency)",
           "NEW: Auto-warn users at 5x threshold",
@@ -49,40 +55,6 @@ export const ChangelogDialog = () => {
           "NEW: Degraded service notices during emergencies",
           "NEW: Warning messages to flagged users",
           "All message types individually toggleable"
-        ],
-        "Push Notifications": [
-          "NEW: Critical alert notifications (lockdown events)",
-          "NEW: Warning notifications (threshold approaching)",
-          "NEW: Recovery notifications (threat normalized)",
-          "All notification types individually toggleable"
-        ],
-        "Moderation Panel Overhaul": [
-          "Redesigned with sidebar navigation for better UX",
-          "Removed redundant Security tab",
-          "Removed redundant NAVI Monitor tab",
-          "Renamed 'Autonomous' to 'NAVI Config'",
-          "Replaced imprecise sliders with number inputs",
-          "Added Export button to Personnel tab"
-        ],
-        "Database Additions": [
-          "navi_settings table for configuration storage",
-          "navi_auto_actions table for action logging",
-          "user_first_login table for welcome tracking",
-          "navi_threshold_history table for adaptive learning"
-        ]
-      }
-    },
-    "3.0": {
-      icon: <Rocket className="w-5 h-5" />,
-      color: "from-rose-500 to-orange-600",
-      tagline: "THE YEAR UPDATE",
-      overview: "The biggest update yet! New creator role with golden styling, cloud login in Account Manager, enhanced admin hierarchy, improved ban system with NAVI-powered moderation, and friends system.",
-      sections: {
-        "Creator Role": [
-          "NEW: Creator role - highest privilege level",
-          "NEW: Golden styling for creator badges throughout UI",
-          "Creators can demote admins (admins cannot demote each other)",
-          "Protected: Creators cannot be demoted"
         ],
         "Account Manager": [
           "NEW: Cloud login directly in Account Manager",
@@ -109,11 +81,25 @@ export const ChangelogDialog = () => {
           "NAVI broadcast styling for system messages",
           "Real-time message updates via Supabase Realtime"
         ],
-        "Moderation Panel": [
+        "Moderation Panel Overhaul": [
+          "Redesigned with sidebar navigation for better UX",
           "Real-time activity monitoring tab",
           "Statistics dashboard with charts",
           "Bulk moderation actions (warn/ban/VIP)",
-          "Enhanced admin verification with creator support"
+          "Replaced imprecise sliders with number inputs",
+          "Added Export button to Personnel tab"
+        ],
+        "Support Center": [
+          "NEW: /support page with FAQ and contact options",
+          "Comprehensive FAQ library with 40+ searchable questions",
+          "Live chat interface for contacting admins",
+          "Quick links to documentation and status page"
+        ],
+        "Database Additions": [
+          "navi_settings table for configuration storage",
+          "navi_auto_actions table for action logging",
+          "user_first_login table for welcome tracking",
+          "navi_threshold_history table for adaptive learning"
         ]
       }
     },

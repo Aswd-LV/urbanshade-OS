@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { MainMenu } from './MainMenu';
 import { GameScreen } from './GameScreen';
 import { GameOver } from './GameOver';
@@ -9,24 +9,31 @@ import { useAudio } from './hooks/useAudio';
 
 interface ContainmentGameProps {
   onClose?: () => void;
+  onExclusiveFullscreen?: (enabled: boolean) => void;
 }
 
-export const ContainmentGame = ({ onClose }: ContainmentGameProps) => {
+export const ContainmentGame = ({ onClose, onExclusiveFullscreen }: ContainmentGameProps) => {
   const {
     gameState,
     startNight,
     endGame,
-    activateLure,
+    placeLure,
     activateShock,
     blockDoor,
     releaseDoor,
     rebootCamera,
+    selectCamera,
     returnToMenu,
     openLoreViewer,
     setGameState
   } = useGameLoop();
 
   const audio = useAudio();
+
+  // Notify parent about exclusive fullscreen state
+  useEffect(() => {
+    onExclusiveFullscreen?.(gameState.isExclusiveFullscreen);
+  }, [gameState.isExclusiveFullscreen, onExclusiveFullscreen]);
 
   const handleExit = useCallback(() => {
     returnToMenu();
@@ -57,11 +64,12 @@ export const ContainmentGame = ({ onClose }: ContainmentGameProps) => {
         <GameScreen
           gameState={gameState}
           setGameState={setGameState}
-          onLure={activateLure}
+          onPlaceLure={placeLure}
           onShock={activateShock}
           onBlockDoor={blockDoor}
           onReleaseDoor={releaseDoor}
           onRebootCamera={rebootCamera}
+          onSelectCamera={selectCamera}
           onEndGame={endGame}
           onExit={returnToMenu}
         />
