@@ -8,12 +8,13 @@ import {
   Settings, Database, Wifi, Globe, Server, ChevronDown, ChevronRight,
   TriangleAlert, ShieldAlert, ShieldCheck, Filter, Download, Trash2,
   MessageSquare, Bell, Volume2, VolumeX, Cpu, HardDrive, Crown, Megaphone,
-  UserCog, Send, Star, Sparkles, Bot, BarChart3
+  UserCog, Send, Star, Sparkles, Bot, BarChart3, Hash
 } from "lucide-react";
 import { NaviAuthoritiesTab } from "@/components/moderation/NaviAuthoritiesTab";
 import { NaviAutonomousPanel } from "@/components/moderation/NaviAutonomousPanel";
 import { StatsTab } from "@/components/moderation/StatsTab";
 import SupportTicketsTab from "@/components/moderation/SupportTicketsTab";
+import { NaviAIChatTab } from "@/components/moderation/NaviAIChatTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1323,6 +1324,16 @@ const ModerationPanel = () => {
               onClick={() => setActiveTab('navi-config')} 
               color="amber"
             />
+            
+            <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider mt-4">Communication</div>
+            
+            <SidebarNavItem 
+              icon={Hash} 
+              label="Chat" 
+              active={activeTab === 'chat'} 
+              onClick={() => setActiveTab('chat')} 
+              color="cyan"
+            />
           </div>
         </div>
 
@@ -1565,6 +1576,11 @@ const ModerationPanel = () => {
           {/* NAVI Config Tab (formerly Autonomous) */}
           {activeTab === 'navi-config' && (
             <NaviAutonomousPanel />
+          )}
+
+          {/* Chat Tab - NAVI AI */}
+          {activeTab === 'chat' && (
+            <NaviAIChatTab isDemoMode={isDemoMode} />
           )}
         </div>
 

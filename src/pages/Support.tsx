@@ -848,11 +848,11 @@ const Support = () => {
                     Troubleshooting Guide
                   </Button>
                 </Link>
-                <Link to="/status">
+                <a href="https://urbanshade.statuspage.io" target="_blank" rel="noopener noreferrer">
                   <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-white hover:border-slate-600">
                     System Status
                   </Button>
-                </Link>
+                </a>
                 <Link to="/team">
                   <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-white hover:border-slate-600">
                     Meet the Team

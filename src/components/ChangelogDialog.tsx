@@ -34,8 +34,15 @@ export const ChangelogDialog = () => {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-rose-500 to-orange-600",
       tagline: "THE YEAR UPDATE",
-      overview: "The biggest update yet! Creator role with golden styling, cloud login in Account Manager, NAVI autonomous threat detection, enhanced moderation system, friends system, and the new Support Center.",
+      overview: "The biggest update yet! Creator role with golden styling, NAVI AI for moderation chat, cloud login in Account Manager, NAVI autonomous threat detection, dedicated StatusPage, and the new Support Center.",
       sections: {
+        "NAVI AI": [
+          "NEW: AI-powered assistant in moderation #chat channel",
+          "Query with @NAVI for real-time system insights",
+          "Analyzes NAVI Autonomous actions and reports",
+          "Smart filtering - rejects frivolous messages",
+          "Terminal-style error responses for denied access"
+        ],
         "Creator Role": [
           "NEW: Creator role - highest privilege level",
           "NEW: Golden styling for creator badges throughout UI",
@@ -55,6 +62,11 @@ export const ChangelogDialog = () => {
           "NEW: Degraded service notices during emergencies",
           "NEW: Warning messages to flagged users",
           "All message types individually toggleable"
+        ],
+        "StatusPage Integration": [
+          "NEW: Dedicated status page at urbanshade.statuspage.io",
+          "Support Center now links to external StatusPage",
+          "Real-time incident tracking and updates"
         ],
         "Account Manager": [
           "NEW: Cloud login directly in Account Manager",
