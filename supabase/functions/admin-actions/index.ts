@@ -679,9 +679,39 @@ Deno.serve(async (req) => {
           .single();
 
         if (error) throw error;
+        
+        // Now deliver to ALL users' inboxes so they actually see it
+        const { data: allProfiles } = await supabaseAdmin
+          .from('profiles')
+          .select('user_id');
+        
+        const targetUserIds = allProfiles?.map(p => p.user_id) || [];
+        
+        if (targetUserIds.length > 0) {
+          const inboxMessages = targetUserIds.map(recipientId => ({
+            sender_id: user.id,
+            recipient_id: recipientId,
+            subject: `[BROADCAST] Global Announcement`,
+            body: message,
+            priority: 'urgent',
+            message_type: 'navi_broadcast',
+            metadata: { navi_message_id: data.id, broadcast_target: 'all' }
+          }));
+
+          const { error: inboxError } = await supabaseAdmin
+            .from('messages')
+            .insert(inboxMessages);
+          
+          if (inboxError) {
+            console.error('Failed to deliver broadcast to inboxes:', inboxError);
+          } else {
+            console.log(`Broadcast delivered to ${targetUserIds.length} users`);
+          }
+        }
+        
         console.log(`Admin ${user.id} sent broadcast: ${message.substring(0, 50)}...`);
 
-        return new Response(JSON.stringify({ success: true, broadcast: data }), {
+        return new Response(JSON.stringify({ success: true, broadcast: data, deliveredTo: targetUserIds.length }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
@@ -841,6 +871,196 @@ Deno.serve(async (req) => {
         console.log(`Admin ${user.id} bulk granted VIP to ${targetUserIds.length} users`);
 
         return new Response(JSON.stringify({ success: true, count: data.length }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // =============================================
+      // TEST EMERGENCY ACTIONS
+      // =============================================
+      
+      if (action === 'start_test_emergency') {
+        // Check if user has started a test emergency in the last 12 hours
+        const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+        
+        const { data: recentEmergency } = await supabaseAdmin
+          .from('test_emergencies')
+          .select('*')
+          .eq('initiated_by', user.id)
+          .gte('started_at', twelveHoursAgo)
+          .single();
+        
+        if (recentEmergency) {
+          const nextAvailable = new Date(new Date(recentEmergency.started_at).getTime() + 12 * 60 * 60 * 1000);
+          return new Response(JSON.stringify({ 
+            error: 'Rate limited', 
+            message: `You can only start one test emergency every 12 hours. Next available: ${nextAvailable.toISOString()}`,
+            nextAvailable: nextAvailable.toISOString()
+          }), {
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Generate fake emergency data
+        const fakeData = {
+          signups_spike: Math.floor(Math.random() * 500) + 100,
+          failed_logins: Math.floor(Math.random() * 300) + 50,
+          messages_spam: Math.floor(Math.random() * 1000) + 200,
+          threat_level: ['elevated', 'high', 'critical'][Math.floor(Math.random() * 3)],
+          affected_systems: ['auth', 'messaging', 'storage'].slice(0, Math.floor(Math.random() * 3) + 1),
+          simulated_users: Array.from({ length: 5 }, (_, i) => ({
+            username: `TestUser${i + 1}`,
+            threat_score: Math.floor(Math.random() * 100),
+            activity: ['suspicious_login', 'spam', 'brute_force'][Math.floor(Math.random() * 3)]
+          }))
+        };
+
+        // Create test emergency
+        const { data: emergency, error: emergencyError } = await supabaseAdmin
+          .from('test_emergencies')
+          .insert({
+            initiated_by: user.id,
+            is_active: true,
+            fake_data: fakeData,
+            started_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (emergencyError) throw emergencyError;
+
+        // Notify all admins/mods via NAVI message
+        const { data: admins } = await supabaseAdmin
+          .from('user_roles')
+          .select('user_id')
+          .in('role', ['admin', 'moderator', 'creator']);
+
+        const adminIds = admins?.map(a => a.user_id) || [];
+
+        if (adminIds.length > 0) {
+          // Store NAVI message
+          const { data: naviMsg } = await supabaseAdmin
+            .from('navi_messages')
+            .insert({
+              message: `🚨 TEST EMERGENCY initiated by an admin. This is a drill to test moderation response. Fake data is being used. Emergency ID: ${emergency.id}`,
+              priority: 'warning',
+              target_audience: 'admins',
+              sent_by: user.id
+            })
+            .select()
+            .single();
+
+          // Deliver to admin inboxes
+          const inboxMessages = adminIds.map(recipientId => ({
+            sender_id: user.id,
+            recipient_id: recipientId,
+            subject: `[TEST EMERGENCY] Moderation Drill Started`,
+            body: `A test emergency has been initiated. This is a drill to test the moderation team's response.\n\nFake data is being generated for testing purposes.\n\nEmergency ID: ${emergency.id}\nThreat Level: ${fakeData.threat_level}\nAffected Systems: ${fakeData.affected_systems.join(', ')}`,
+            priority: 'urgent',
+            message_type: 'navi_broadcast',
+            metadata: { emergency_id: emergency.id, is_test: true }
+          }));
+
+          await supabaseAdmin.from('messages').insert(inboxMessages);
+        }
+
+        console.log(`Admin ${user.id} started test emergency: ${emergency.id}`);
+
+        return new Response(JSON.stringify({ 
+          success: true, 
+          emergency,
+          notifiedAdmins: adminIds.length
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'end_test_emergency') {
+        const { emergencyId } = body;
+        
+        const { data, error } = await supabaseAdmin
+          .from('test_emergencies')
+          .update({
+            is_active: false,
+            ended_at: new Date().toISOString()
+          })
+          .eq('id', emergencyId)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Notify admins that the test is over
+        const { data: admins } = await supabaseAdmin
+          .from('user_roles')
+          .select('user_id')
+          .in('role', ['admin', 'moderator', 'creator']);
+
+        const adminIds = admins?.map(a => a.user_id) || [];
+
+        if (adminIds.length > 0) {
+          const inboxMessages = adminIds.map(recipientId => ({
+            sender_id: user.id,
+            recipient_id: recipientId,
+            subject: `[TEST EMERGENCY ENDED] Drill Complete`,
+            body: `The test emergency has been concluded. All fake data from this drill can be disregarded.\n\nEmergency ID: ${emergencyId}`,
+            priority: 'normal',
+            message_type: 'navi_broadcast',
+            metadata: { emergency_id: emergencyId, is_test: true }
+          }));
+
+          await supabaseAdmin.from('messages').insert(inboxMessages);
+        }
+
+        console.log(`Admin ${user.id} ended test emergency: ${emergencyId}`);
+
+        return new Response(JSON.stringify({ success: true, emergency: data }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'get_active_test_emergency') {
+        const { data, error } = await supabaseAdmin
+          .from('test_emergencies')
+          .select('*')
+          .eq('is_active', true)
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        // Not finding an active emergency is not an error
+        if (error && error.code !== 'PGRST116') throw error;
+
+        return new Response(JSON.stringify({ success: true, emergency: data || null }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'get_test_emergency_cooldown') {
+        const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
+        
+        const { data: recentEmergency } = await supabaseAdmin
+          .from('test_emergencies')
+          .select('started_at')
+          .eq('initiated_by', user.id)
+          .gte('started_at', twelveHoursAgo)
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (recentEmergency) {
+          const nextAvailable = new Date(new Date(recentEmergency.started_at).getTime() + 12 * 60 * 60 * 1000);
+          return new Response(JSON.stringify({ 
+            success: true, 
+            onCooldown: true,
+            nextAvailable: nextAvailable.toISOString()
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        return new Response(JSON.stringify({ success: true, onCooldown: false }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }

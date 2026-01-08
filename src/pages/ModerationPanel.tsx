@@ -554,6 +554,11 @@ const ModerationPanel = () => {
   const [naviMessage, setNaviMessage] = useState("");
   const [naviTarget, setNaviTarget] = useState<"all" | "online" | "admins" | "vips">("all");
   const [naviPriority, setNaviPriority] = useState<"info" | "warning" | "critical">("info");
+  
+  // Test Emergency state
+  const [activeTestEmergency, setActiveTestEmergency] = useState<any>(null);
+  const [testEmergencyCooldown, setTestEmergencyCooldown] = useState<Date | null>(null);
+  const [testEmergencyLoading, setTestEmergencyLoading] = useState(false);
 
   // Check admin status and fetch data
   useEffect(() => {
@@ -629,6 +634,39 @@ const ModerationPanel = () => {
 
     checkAdminAndFetch();
   }, [navigate]);
+
+  // Fetch test emergency status
+  const fetchTestEmergencyStatus = async () => {
+    if (isDemoMode) return;
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'get_active_test_emergency' }
+      });
+      if (response.data?.emergency) {
+        setActiveTestEmergency(response.data.emergency);
+      } else {
+        setActiveTestEmergency(null);
+      }
+      
+      // Check cooldown
+      const cooldownResponse = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'get_test_emergency_cooldown' }
+      });
+      if (cooldownResponse.data?.onCooldown) {
+        setTestEmergencyCooldown(new Date(cooldownResponse.data.nextAvailable));
+      } else {
+        setTestEmergencyCooldown(null);
+      }
+    } catch (error) {
+      console.error("Test emergency status error:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!isDemoMode && isAdmin) {
+      fetchTestEmergencyStatus();
+    }
+  }, [isDemoMode, isAdmin]);
 
   const fetchUsers = async () => {
     try {
@@ -1160,6 +1198,73 @@ const ModerationPanel = () => {
     }
   };
 
+  // Handle test emergency start
+  const handleStartTestEmergency = async () => {
+    if (isDemoMode) {
+      toast.info("[DEMO] Test emergency would be started");
+      return;
+    }
+    
+    setTestEmergencyLoading(true);
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'start_test_emergency' }
+      });
+
+      if (response.error) throw response.error;
+      
+      if (response.data?.error) {
+        toast.error(response.data.message || "Cannot start test emergency");
+        if (response.data.nextAvailable) {
+          setTestEmergencyCooldown(new Date(response.data.nextAvailable));
+        }
+        return;
+      }
+      
+      setActiveTestEmergency(response.data.emergency);
+      toast.success(`Test emergency started! ${response.data.notifiedAdmins} admins notified.`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "broadcast",
+        message: `🚨 TEST EMERGENCY STARTED - ${response.data.notifiedAdmins} mods notified`,
+        timestamp: new Date()
+      }, ...prev]);
+    } catch (error: any) {
+      console.error("Start test emergency error:", error);
+      toast.error(error?.message || "Failed to start test emergency");
+    } finally {
+      setTestEmergencyLoading(false);
+    }
+  };
+
+  // Handle test emergency end
+  const handleEndTestEmergency = async () => {
+    if (!activeTestEmergency || isDemoMode) return;
+    
+    setTestEmergencyLoading(true);
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'end_test_emergency', emergencyId: activeTestEmergency.id }
+      });
+
+      if (response.error) throw response.error;
+      
+      setActiveTestEmergency(null);
+      toast.success("Test emergency ended");
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "system",
+        message: `✅ TEST EMERGENCY ENDED - Drill complete`,
+        timestamp: new Date()
+      }, ...prev]);
+      fetchTestEmergencyStatus();
+    } catch (error: any) {
+      console.error("End test emergency error:", error);
+      toast.error(error?.message || "Failed to end test emergency");
+    } finally {
+      setTestEmergencyLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter(u => {
     const matchesSearch = u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1352,6 +1457,13 @@ const ModerationPanel = () => {
               active={activeTab === 'navi-config'} 
               onClick={() => setActiveTab('navi-config')} 
               color="amber"
+            />
+            <SidebarNavItem 
+              icon={Zap} 
+              label="Test Emergency" 
+              active={activeTab === 'test-emergency'} 
+              onClick={() => { setActiveTab('test-emergency'); fetchTestEmergencyStatus(); }} 
+              color="red"
             />
             
             <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider mt-4">Communication</div>
@@ -1610,6 +1722,65 @@ const ModerationPanel = () => {
           {/* Chat Tab - NAVI AI */}
           {activeTab === 'chat' && (
             <NaviAIChatTab isDemoMode={isDemoMode} />
+          )}
+
+          {/* Test Emergency Tab */}
+          {activeTab === 'test-emergency' && (
+            <div className="space-y-6">
+              <div className="p-6 rounded-lg bg-gradient-to-br from-red-950/30 to-slate-900 border border-red-500/30">
+                <h3 className="text-xl font-bold text-red-400 mb-2 flex items-center gap-2">
+                  <Zap className="w-5 h-5" /> Test Emergency Drill
+                </h3>
+                <p className="text-sm text-slate-400 mb-4">
+                  Start a test emergency to drill the moderation team. All admins/mods will be notified automatically via NAVI. 
+                  Fake data will be generated for testing purposes. Limited to once per 12 hours per admin.
+                </p>
+                
+                {testEmergencyCooldown && new Date() < testEmergencyCooldown && (
+                  <div className="p-3 rounded bg-amber-500/10 border border-amber-500/30 mb-4">
+                    <p className="text-amber-400 text-sm">
+                      ⏳ On cooldown until: {testEmergencyCooldown.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                
+                {activeTestEmergency ? (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded bg-red-500/10 border border-red-500/50 animate-pulse">
+                      <p className="font-bold text-red-400">🚨 TEST EMERGENCY ACTIVE</p>
+                      <p className="text-xs text-slate-400 mt-1">ID: {activeTestEmergency.id}</p>
+                      <p className="text-xs text-slate-400">Started: {new Date(activeTestEmergency.started_at).toLocaleString()}</p>
+                    </div>
+                    
+                    {activeTestEmergency.fake_data && (
+                      <div className="p-4 rounded bg-slate-800/50 border border-slate-700">
+                        <h4 className="font-bold text-slate-300 mb-2">Fake Data (Test Only)</h4>
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div className="p-2 rounded bg-slate-900"><span className="text-slate-500">Signups:</span> <span className="text-cyan-400">{activeTestEmergency.fake_data.signups_spike}</span></div>
+                          <div className="p-2 rounded bg-slate-900"><span className="text-slate-500">Failed Logins:</span> <span className="text-amber-400">{activeTestEmergency.fake_data.failed_logins}</span></div>
+                          <div className="p-2 rounded bg-slate-900"><span className="text-slate-500">Spam:</span> <span className="text-red-400">{activeTestEmergency.fake_data.messages_spam}</span></div>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-500">Threat Level: <span className="text-red-400 uppercase">{activeTestEmergency.fake_data.threat_level}</span></p>
+                      </div>
+                    )}
+                    
+                    <Button onClick={handleEndTestEmergency} disabled={testEmergencyLoading} className="bg-green-600 hover:bg-green-500">
+                      {testEmergencyLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                      End Test Emergency
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={handleStartTestEmergency} 
+                    disabled={testEmergencyLoading || (testEmergencyCooldown && new Date() < testEmergencyCooldown)}
+                    className="bg-red-600 hover:bg-red-500"
+                  >
+                    {testEmergencyLoading ? <RefreshCw className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+                    Start Test Emergency
+                  </Button>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
