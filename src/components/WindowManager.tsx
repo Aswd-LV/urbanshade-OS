@@ -50,6 +50,10 @@ import { ComputerManagement } from "./apps/ComputerManagement";
 import { UURApp } from "./apps/UURApp";
 import { GameHub } from "./apps/GameHub";
 import { ContainmentGame } from "./apps/ContainmentGame/ContainmentGame";
+import { UserDirectory } from "./apps/UserDirectory";
+import { Leaderboards } from "./apps/Leaderboards";
+import { AchievementsViewer } from "./apps/AchievementsViewer";
+import { EventsCalendar } from "./apps/EventsCalendar";
 
 interface WindowData {
   id: string;
