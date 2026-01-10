@@ -7,6 +7,7 @@ export interface OnlineProfile {
   user_id: string;
   username: string;
   display_name: string | null;
+  bio: string | null;
   clearance: number;
   role: string;
   avatar_url: string | null;
@@ -153,7 +154,7 @@ export const useOnlineAccount = () => {
   };
 
   // Update profile
-  const updateProfile = async (updates: { display_name?: string; avatar_url?: string }) => {
+  const updateProfile = async (updates: { display_name?: string | null; avatar_url?: string; bio?: string }) => {
     if (!user) return { error: new Error("Not signed in") };
 
     try {
