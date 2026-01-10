@@ -720,6 +720,35 @@ export const Desktop = ({
       icon: <Package className="w-11 h-11" />,
       run: () => openWindow(allApps[70]),
       standardInclude: true
+    },
+    // Online Social Apps
+    {
+      id: "user-directory",
+      name: "User Directory",
+      icon: <Search className="w-11 h-11" />,
+      run: () => openWindow(allApps[71]),
+      standardInclude: true
+    },
+    {
+      id: "leaderboards",
+      name: "Leaderboards",
+      icon: <Star className="w-11 h-11" />,
+      run: () => openWindow(allApps[72]),
+      standardInclude: true
+    },
+    {
+      id: "achievements",
+      name: "Achievements",
+      icon: <Sparkles className="w-11 h-11" />,
+      run: () => openWindow(allApps[73]),
+      standardInclude: true
+    },
+    {
+      id: "events-calendar",
+      name: "Events",
+      icon: <Calendar className="w-11 h-11" />,
+      run: () => openWindow(allApps[74]),
+      standardInclude: true
     }
   ];
 
