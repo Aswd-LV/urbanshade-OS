@@ -4,8 +4,8 @@ export type SnapZone = "left" | "right" | "top" | "bottom-left" | "bottom-right"
 
 // Taskbar is at TOP with h-12 (48px) + border, plus some padding
 const TASKBAR_HEIGHT = 56;
-// Bottom has some UI elements, leave margin
-const BOTTOM_MARGIN = 16;
+// Bottom has version info and clock, leave proper margin
+const BOTTOM_MARGIN = 80;
 
 export const useWindowSnap = () => {
   const [snapZone, setSnapZone] = useState<SnapZone>(null);

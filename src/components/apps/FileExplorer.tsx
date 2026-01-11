@@ -524,7 +524,7 @@ export const FileExplorer = ({ onLog, onVirusDetected, initialPath }: FileExplor
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
+                        <DropdownMenuContent align="end" className="z-[999999] bg-background border border-border">
                           <DropdownMenuItem onClick={() => { setRenameDialog({ open: true, file }); setNewName(file.name); }}>
                             <Edit className="w-4 h-4 mr-2" /> Rename
                           </DropdownMenuItem>

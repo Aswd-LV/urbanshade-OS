@@ -97,7 +97,7 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown
   return (
     <div
       ref={menuRef}
-      className="fixed left-4 bottom-[60px] w-[640px] rounded-2xl bg-background/95 backdrop-blur-2xl border border-border/50 z-[9999] shadow-2xl overflow-hidden animate-scale-in"
+      className="fixed left-4 top-[60px] w-[640px] rounded-2xl bg-background/95 backdrop-blur-2xl border border-border/50 z-[9999] shadow-2xl overflow-hidden animate-scale-in"
     >
       {/* Search Header */}
       <div className="p-5 pb-4">

@@ -149,14 +149,14 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     description?: string; 
     children: React.ReactNode 
   }) => (
-    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors group">
+    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/20 border border-border/30 hover:bg-muted/30 transition-colors group">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
           <Icon className="w-5 h-5" />
         </div>
         <div>
-          <div className="font-medium">{title}</div>
-          {description && <div className="text-sm text-muted-foreground">{description}</div>}
+          <div className="font-medium text-sm">{title}</div>
+          {description && <div className="text-xs text-muted-foreground">{description}</div>}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -169,25 +169,25 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     switch (selectedCategory) {
       case "system":
         return (
-          <div className="space-y-4">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
+          <div className="space-y-3">
+            <div className="p-5 rounded-lg bg-gradient-to-br from-primary/5 to-transparent border border-primary/20">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
-                  <Monitor className="w-8 h-8 text-primary" />
+                <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Monitor className="w-7 h-7 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">Urbanshade OS</h2>
-                  <p className="text-muted-foreground">Version 3.0</p>
+                  <h2 className="text-xl font-bold">Urbanshade OS</h2>
+                  <p className="text-sm text-muted-foreground">Version 3.0</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="p-3 rounded-lg bg-background/50">
-                  <span className="text-muted-foreground">Device:</span>
-                  <span className="ml-2 font-medium">{settings.deviceName || "Urbanshade Terminal"}</span>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="p-3 rounded-md bg-background/50 border border-border/30">
+                  <span className="text-muted-foreground text-xs">Device</span>
+                  <div className="font-medium">{settings.deviceName || "Urbanshade Terminal"}</div>
                 </div>
-                <div className="p-3 rounded-lg bg-background/50">
-                  <span className="text-muted-foreground">Type:</span>
-                  <span className="ml-2 font-medium">64-bit OS</span>
+                <div className="p-3 rounded-md bg-background/50 border border-border/30">
+                  <span className="text-muted-foreground text-xs">Architecture</span>
+                  <div className="font-medium">64-bit OS</div>
                 </div>
               </div>
             </div>
@@ -207,27 +207,27 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
             </SettingRow>
 
             <Button 
-              className="w-full h-12 text-base"
+              className="w-full h-11"
               onClick={() => {
                 toast.success("Checking for updates...");
                 setTimeout(() => onUpdate?.(), 2000);
               }}
             >
-              <RefreshCw className="w-5 h-5 mr-2" />
+              <RefreshCw className="w-4 h-4 mr-2" />
               Check for Updates
             </Button>
 
             <Collapsible open={developerOptionsOpen} onOpenChange={setDeveloperOptionsOpen}>
               <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-between h-14 px-4">
+                <Button variant="outline" className="w-full justify-between h-12 px-4 border-amber-500/20 hover:bg-amber-500/5">
                   <div className="flex items-center gap-3">
-                    <Code className="w-5 h-5 text-amber-500" />
+                    <Code className="w-4 h-4 text-amber-500" />
                     <div className="text-left">
-                      <div className="font-semibold text-amber-500">Developer Options</div>
+                      <div className="font-medium text-amber-500 text-sm">Developer Options</div>
                       <div className="text-xs text-muted-foreground">Advanced debugging tools</div>
                     </div>
                   </div>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${developerOptionsOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-amber-500 transition-transform ${developerOptionsOpen ? 'rotate-180' : ''}`} />
                 </Button>
               </CollapsibleTrigger>
               
@@ -266,13 +266,13 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       case "display":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <SettingRow icon={Palette} title="Theme" description="Choose your visual style">
               <Select value={theme} onValueChange={(v) => { setTheme(v); handleSave("settings_theme", v); }}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-36 h-9">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[99999] bg-background border border-border">
                   <SelectItem value="dark">Dark</SelectItem>
                   <SelectItem value="light">Light</SelectItem>
                   <SelectItem value="system">System</SelectItem>
@@ -282,13 +282,13 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
             <SettingRow icon={Monitor} title="Resolution" description="Display resolution">
               <Select value={resolution} onValueChange={(v) => { setResolution(v); handleSave("settings_resolution", v); }}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-36 h-9">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1920x1080">1920×1080</SelectItem>
-                  <SelectItem value="2560x1440">2560×1440</SelectItem>
-                  <SelectItem value="3840x2160">3840×2160</SelectItem>
+                <SelectContent className="z-[99999] bg-background border border-border">
+                  <SelectItem value="1920x1080">1920 x 1080</SelectItem>
+                  <SelectItem value="2560x1440">2560 x 1440</SelectItem>
+                  <SelectItem value="3840x2160">3840 x 2160</SelectItem>
                 </SelectContent>
               </Select>
             </SettingRow>
@@ -304,7 +304,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       case "network":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <SettingRow icon={Wifi} title="Wi-Fi" description="Wireless network connection">
               <Switch 
                 checked={wifiEnabled} 
@@ -320,10 +320,10 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
             </SettingRow>
 
             {wifiEnabled && (
-              <div className="p-4 rounded-xl bg-muted/30 space-y-3">
-                <div className="text-sm font-medium">Available Networks</div>
+              <div className="p-4 rounded-lg bg-muted/20 border border-border/30 space-y-2">
+                <div className="text-sm font-medium mb-3">Available Networks</div>
                 {["URBANSHADE-SECURE", "FACILITY-GUEST", "SCP-NETWORK"].map(network => (
-                  <div key={network} className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors cursor-pointer">
+                  <div key={network} className="flex items-center justify-between p-3 rounded-md bg-background/50 border border-border/30 hover:bg-background/80 transition-colors cursor-pointer">
                     <div className="flex items-center gap-3">
                       <Wifi className="w-4 h-4 text-primary" />
                       <span className="text-sm">{network}</span>
@@ -338,14 +338,14 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       case "sound":
         return (
-          <div className="space-y-4">
-            <div className="p-6 rounded-xl bg-muted/30">
+          <div className="space-y-3">
+            <div className="p-5 rounded-lg bg-muted/20 border border-border/30">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <Volume2 className="w-5 h-5 text-primary" />
-                  <span className="font-medium">Master Volume</span>
+                  <span className="font-medium text-sm">Master Volume</span>
                 </div>
-                <span className="text-sm text-muted-foreground">{volume[0]}%</span>
+                <span className="text-sm text-muted-foreground font-mono">{volume[0]}%</span>
               </div>
               <Slider 
                 value={volume} 
@@ -374,7 +374,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       case "notifications":
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <SettingRow icon={Bell} title="Notifications" description="Enable system notifications">
               <Switch 
                 checked={notificationsEnabled} 
@@ -393,25 +393,25 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       case "accounts":
         return (
-          <div className="space-y-4">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border border-blue-500/20">
+          <div className="space-y-3">
+            <div className="p-5 rounded-lg bg-gradient-to-br from-blue-500/5 to-transparent border border-blue-500/20">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center">
-                  <Cloud className="w-8 h-8 text-blue-400" />
+                <div className="w-14 h-14 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <Cloud className="w-7 h-7 text-blue-400" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-bold text-lg">{isOnlineMode ? "Connected" : "Offline Mode"}</h3>
+                  <h3 className="font-bold">{isOnlineMode ? "Connected" : "Offline Mode"}</h3>
                   <p className="text-sm text-muted-foreground">
                     {isOnlineMode ? `Signed in as ${profile?.username || user?.email}` : "Sign in to sync your data"}
                   </p>
                 </div>
                 {isOnlineMode ? (
-                  <Button variant="outline" onClick={signOut}>
+                  <Button variant="outline" size="sm" onClick={signOut}>
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
                   </Button>
                 ) : (
-                  <Button>Sign In</Button>
+                  <Button size="sm">Sign In</Button>
                 )}
               </div>
             </div>
@@ -428,34 +428,34 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       case "about":
         return (
-          <div className="space-y-4">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 text-center">
-              <div className="w-20 h-20 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                <SettingsIcon className="w-10 h-10 text-primary" />
+          <div className="space-y-3">
+            <div className="p-6 rounded-lg bg-gradient-to-br from-primary/5 to-transparent border border-primary/20 text-center">
+              <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <SettingsIcon className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold mb-1">Urbanshade OS</h2>
-              <p className="text-muted-foreground mb-4">Version 3.0.0 Build 2024</p>
-              <div className="text-xs text-muted-foreground">© 2024 Urbanshade Corporation</div>
+              <h2 className="text-xl font-bold mb-1">Urbanshade OS</h2>
+              <p className="text-muted-foreground text-sm mb-3">Version 3.0.0 Build 2024</p>
+              <div className="text-xs text-muted-foreground">Urbanshade Corporation</div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <input ref={fileInputRef} type="file" accept=".img,.json" onChange={handleImportSystemImage} className="hidden" />
-              <Button variant="outline" className="h-14" onClick={() => fileInputRef.current?.click()}>
-                <Upload className="w-5 h-5 mr-2" />
+              <Button variant="outline" className="h-11" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-4 h-4 mr-2" />
                 Import Image
               </Button>
-              <Button variant="outline" className="h-14" onClick={handleExportSystemImage}>
-                <Download className="w-5 h-5 mr-2" />
+              <Button variant="outline" className="h-11" onClick={handleExportSystemImage}>
+                <Download className="w-4 h-4 mr-2" />
                 Export Image
               </Button>
             </div>
 
             <Button 
               variant="destructive" 
-              className="w-full h-14"
+              className="w-full h-11"
               onClick={() => setShowFactoryResetDialog(true)}
             >
-              <AlertTriangle className="w-5 h-5 mr-2" />
+              <AlertTriangle className="w-4 h-4 mr-2" />
               Factory Reset
             </Button>
           </div>
@@ -465,8 +465,8 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
         return (
           <div className="flex items-center justify-center h-full text-muted-foreground">
             <div className="text-center">
-              <SettingsIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p>Select a category to view settings</p>
+              <SettingsIcon className="w-12 h-12 mx-auto mb-4 opacity-30" />
+              <p className="text-sm">Select a category to view settings</p>
             </div>
           </div>
         );
@@ -474,41 +474,41 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   };
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="flex h-full bg-background/50">
       {/* Sidebar */}
-      <div className="w-72 border-r border-border/50 flex flex-col bg-muted/20">
-        <div className="p-4 border-b border-border/50">
+      <div className="w-64 border-r border-border/30 flex flex-col bg-muted/10">
+        <div className="p-3 border-b border-border/30">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search settings..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-background/50"
+              className="pl-9 h-9 bg-background/50 text-sm"
             />
           </div>
         </div>
 
         <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
+          <div className="p-2 space-y-0.5">
             {filteredCategories.map((category) => {
               const Icon = category.icon;
               return (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
                     selectedCategory === category.id
-                      ? "bg-primary/10 text-primary border border-primary/30"
+                      ? "bg-primary/10 text-primary border border-primary/20"
                       : "hover:bg-muted/50 text-foreground"
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4" />
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm">{category.name}</div>
-                    <div className="text-xs text-muted-foreground truncate">{category.description}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{category.description}</div>
                   </div>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${selectedCategory === category.id ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <ChevronRight className={`w-3 h-3 transition-transform ${selectedCategory === category.id ? 'text-primary' : 'text-muted-foreground'}`} />
                 </button>
               );
             })}
@@ -517,20 +517,20 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <div className="p-6 border-b border-border/50 bg-muted/10">
-          <h1 className="text-2xl font-bold">{categories.find(c => c.id === selectedCategory)?.name || "Settings"}</h1>
-          <p className="text-muted-foreground">{categories.find(c => c.id === selectedCategory)?.description}</p>
+      <div className="flex-1 flex flex-col min-w-0">
+        <div className="p-5 border-b border-border/30 bg-muted/5">
+          <h1 className="text-lg font-bold">{categories.find(c => c.id === selectedCategory)?.name || "Settings"}</h1>
+          <p className="text-sm text-muted-foreground">{categories.find(c => c.id === selectedCategory)?.description}</p>
         </div>
 
-        <ScrollArea className="flex-1 p-6">
+        <ScrollArea className="flex-1 p-5">
           {renderContent()}
         </ScrollArea>
       </div>
 
       {/* Factory Reset Dialog */}
       <Dialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
-        <DialogContent>
+        <DialogContent className="bg-background border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
@@ -549,7 +549,7 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       {/* OEM Unlock Dialog */}
       <Dialog open={showOemDialog} onOpenChange={setShowOemDialog}>
-        <DialogContent>
+        <DialogContent className="bg-background border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-amber-500">
               <AlertTriangle className="w-5 h-5" />
