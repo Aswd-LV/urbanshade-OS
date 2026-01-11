@@ -177,10 +177,10 @@ export const Window = ({ title, children, zIndex, onClose, onFocus, onMinimize, 
       setIsMaximized(false);
       setIsSnapped(false);
     } else {
-      // Maximize
+      // Maximize - leave space at TOP for taskbar (48px), cover the bottom
       setPreviousState({ position, size });
-      setPosition({ x: 0, y: 0 });
-      setSize({ width: window.innerWidth, height: window.innerHeight - 60 }); // 60px for taskbar
+      setPosition({ x: 0, y: 48 }); // Start below the top taskbar
+      setSize({ width: window.innerWidth, height: window.innerHeight - 48 }); // Full height minus taskbar
       setIsMaximized(true);
     }
   };
@@ -295,19 +295,19 @@ const SnapIndicator = ({ zone }: { zone: SnapZone }) => {
   const getZoneStyles = () => {
     switch (zone) {
       case "left":
-        return "left-1 top-1 bottom-[61px] w-[calc(50%-4px)]";
+        return "left-1 top-[49px] bottom-1 w-[calc(50%-4px)]";
       case "right":
-        return "right-1 top-1 bottom-[61px] w-[calc(50%-4px)]";
+        return "right-1 top-[49px] bottom-1 w-[calc(50%-4px)]";
       case "top":
-        return "left-1 right-1 top-1 bottom-[61px]";
+        return "left-1 right-1 top-[49px] bottom-1";
       case "top-left":
-        return "left-1 top-1 w-[calc(50%-4px)] h-[calc(50%-32px)]";
+        return "left-1 top-[49px] w-[calc(50%-4px)] h-[calc(50%-26px)]";
       case "top-right":
-        return "right-1 top-1 w-[calc(50%-4px)] h-[calc(50%-32px)]";
+        return "right-1 top-[49px] w-[calc(50%-4px)] h-[calc(50%-26px)]";
       case "bottom-left":
-        return "left-1 bottom-[61px] w-[calc(50%-4px)] h-[calc(50%-32px)]";
+        return "left-1 bottom-1 w-[calc(50%-4px)] h-[calc(50%-26px)]";
       case "bottom-right":
-        return "right-1 bottom-[61px] w-[calc(50%-4px)] h-[calc(50%-32px)]";
+        return "right-1 bottom-1 w-[calc(50%-4px)] h-[calc(50%-26px)]";
       default:
         return "";
     }

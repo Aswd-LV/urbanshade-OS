@@ -1,5 +1,50 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Bell, Volume2, VolumeX, Power, Cloud, CloudOff, Loader2, BellOff, WifiOff, Lock } from "lucide-react";
+
+// Separate component for notification button to handle anchor ref
+const NotificationButton = ({ 
+  notificationsOpen, 
+  setNotificationsOpen, 
+  setQuickSettingsOpen,
+  isDndEnabled,
+  unreadCount
+}: {
+  notificationsOpen: boolean;
+  setNotificationsOpen: (open: boolean) => void;
+  setQuickSettingsOpen: (open: boolean) => void;
+  isDndEnabled: boolean;
+  unreadCount: number;
+}) => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  
+  return (
+    <>
+      <button
+        ref={buttonRef}
+        onClick={() => {
+          setNotificationsOpen(!notificationsOpen);
+          setQuickSettingsOpen(false);
+        }}
+        className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-white/5 transition-all relative"
+        title="Notifications"
+      >
+        {isDndEnabled ? (
+          <BellOff className="w-4 h-4" />
+        ) : (
+          <Bell className="w-4 h-4" />
+        )}
+        {unreadCount > 0 && !isDndEnabled && (
+          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+        )}
+      </button>
+      <NotificationCenter 
+        open={notificationsOpen} 
+        onClose={() => setNotificationsOpen(false)}
+        anchorRef={buttonRef}
+      />
+    </>
+  );
+};
 import { App } from "./Desktop";
 import { NotificationCenter } from "./NotificationCenter";
 import { ShutdownOptionsDialog } from "./ShutdownOptionsDialog";
@@ -278,27 +323,14 @@ export const Taskbar = ({
           </button>
 
           {/* Notifications */}
-          <button
-            onClick={() => {
-              setNotificationsOpen(!notificationsOpen);
-              setQuickSettingsOpen(false);
-            }}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-white/5 transition-all relative"
-            title="Notifications"
-          >
-            {isDndEnabled ? (
-              <BellOff className="w-4 h-4" />
-            ) : (
-              <Bell className="w-4 h-4" />
-            )}
-            {unreadCount > 0 && !isDndEnabled && (
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            )}
-          </button>
+          <NotificationButton 
+            notificationsOpen={notificationsOpen}
+            setNotificationsOpen={setNotificationsOpen}
+            setQuickSettingsOpen={setQuickSettingsOpen}
+            isDndEnabled={isDndEnabled}
+            unreadCount={unreadCount}
+          />
         </div>
-
-        {/* Notification Center */}
-        <NotificationCenter open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
         
         {/* Quick Settings Flyout */}
         <QuickSettingsFlyout 

@@ -2,10 +2,10 @@ import { useState, useCallback } from "react";
 
 export type SnapZone = "left" | "right" | "top" | "bottom-left" | "bottom-right" | "top-left" | "top-right" | null;
 
-// Taskbar is at TOP with h-12 (48px) + border, plus some padding
-const TASKBAR_HEIGHT = 56;
-// Bottom has version info and clock, leave proper margin
-const BOTTOM_MARGIN = 80;
+// Taskbar is at TOP with h-12 (48px)
+const TASKBAR_HEIGHT = 48;
+// Bottom has version info and clock overlay, small margin for aesthetics
+const BOTTOM_MARGIN = 8;
 
 export const useWindowSnap = () => {
   const [snapZone, setSnapZone] = useState<SnapZone>(null);
