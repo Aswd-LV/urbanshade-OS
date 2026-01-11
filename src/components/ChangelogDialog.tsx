@@ -118,9 +118,45 @@ export const ChangelogDialog = () => {
     "2.9": {
       icon: <Paintbrush className="w-5 h-5" />,
       color: "from-purple-500 to-pink-600",
-      tagline: "Smol Update",
-      overview: "Major improvements to the desktop experience! Virtual desktops now properly isolate windows, new Settings categories for personalization, guest account support, DEF-DEV debugging tools, enhanced system tray, and improved boot experience with animations.",
+      tagline: "Visual Overhaul",
+      overview: "Complete redesign of Security Cameras and Facility Map apps with retro-modern CRT aesthetic. New shared UI components, radar scanner effects, and improved visual polish throughout.",
       sections: {
+        "Security Cameras Redesign": [
+          "NEW: CRT visual effects with scanlines, noise, and vignette",
+          "NEW: Chromatic aberration and phosphor glow effects",
+          "NEW: Animated moving scanline across camera feed",
+          "NEW: Blueprint grid overlay with corner brackets",
+          "NEW: Motion detection zones with visual indicators",
+          "NEW: Compact bottom action bar with camera navigation",
+          "NEW: Signal interference animation on warning cameras",
+          "NEW: Frame counter timestamp display",
+          "Tab key toggle for facility map integration"
+        ],
+        "Facility Map Redesign": [
+          "NEW: Dark blueprint aesthetic with cyan grid lines",
+          "NEW: Glowing room cards with status-based colors",
+          "NEW: Animated dashed connection lines between rooms",
+          "NEW: Room hover previews with quick details",
+          "NEW: Search/filter functionality for rooms",
+          "NEW: Radar scanner with animated sweep and blips",
+          "NEW: CRT overlay effect for immersive visuals",
+          "Improved zone navigation with room counts"
+        ],
+        "New Shared Components": [
+          "NEW: CRTEffect - Reusable CRT overlay (scanlines, noise, vignette)",
+          "NEW: StatusIndicator - Unified online/offline/warning badges",
+          "NEW: PowerMeter - Consistent power display with gradients",
+          "NEW: GlitchText - Text with random glitch animations",
+          "NEW: RadarScanner - Animated radar with entity blips"
+        ],
+        "CSS Additions": [
+          "NEW: Interlace animation for CRT effect",
+          "NEW: Scanline scroll keyframes",
+          "NEW: Glitch shake animation",
+          "NEW: Signal interference effect",
+          "NEW: Radar sweep animation",
+          "NEW: Fast blink animation for alerts"
+        ],
         "Virtual Desktops": [
           "Fixed window assignment - windows now properly belong to their desktop",
           "Taskbar and Alt+Tab now filter to active desktop only",
@@ -135,28 +171,6 @@ export const ChangelogDialog = () => {
           "NEW: Start Menu style toggle (modern/classic)",
           "NEW: Desktop switcher visibility toggle",
           "Enhanced appearance section with more customization"
-        ],
-        "Account Management": [
-          "NEW: Guest account support - enable in Settings",
-          "Guest sessions are temporary with limited access",
-          "Guest login only shows when enabled",
-          "Improved account cards with role badges"
-        ],
-        "DEF-DEV Tools": [
-          "NEW: Performance Monitor with CPU/memory graphs",
-          "NEW: Network Inspector for request debugging",
-          "NEW: Event Debugger for system events",
-          "NEW: Component Inspector for React tree"
-        ],
-        "Boot & System Tray": [
-          "Enhanced BIOS screen with semantic colors",
-          "Lock screen password visibility toggle",
-          "System tray with volume, battery, clock",
-          "Hidden icons overflow menu"
-        ],
-        "Version Updates": [
-          "All version strings updated to v2.9 across the system",
-          "Updated build number to 20251225"
         ]
       }
     },
@@ -261,13 +275,26 @@ export const ChangelogDialog = () => {
     "2.0": {
       icon: <Monitor className="w-5 h-5" />,
       color: "from-gray-500 to-slate-600",
-      tagline: "Major Rewrite",
-      overview: "This update doesn't bring new features, however the entire site has been rewritten in TypeScript, React, and Vite. This modernizes the codebase with component-based architecture for better maintainability and improved overall quality.",
+      tagline: "The Vite Rewrite — August 2025",
+      overview: "The foundation of modern UrbanShade. Complete rewrite from the ground up using React, TypeScript, Vite, and Tailwind CSS. This modernizes the codebase with component-based architecture for better maintainability.",
       sections: {
         "Major Changes": [
           "Complete rewrite using React and Tailwind CSS",
           "Modern component-based architecture",
-          "TypeScript for better code quality"
+          "TypeScript for better code quality",
+          "Vite for blazing fast development"
+        ],
+        "Project Timeline": [
+          "Jan 27 2025 — Small beginnings",
+          "February 2025 — First API",
+          "April 2025 — First DEF-DEV iteration",
+          "May 2025 — Improved work",
+          "August 2025 — Rewrite in Vite + React",
+          "September 2025 — DEF-DEV console no longer admin-only",
+          "October 2025 — NOW PUBLIC!",
+          "November 2025 — Online features",
+          "December 2025 — A ton of bug fixes",
+          "January 2026 — Working on v3.0: THE YEAR UPDATE"
         ]
       }
     }

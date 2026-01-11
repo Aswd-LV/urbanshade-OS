@@ -405,6 +405,98 @@
   animation: icon-bounce 0.3s ease-out;
 }
 
+/* CRT/Retro Effects */
+@keyframes interlace {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(4px);
+  }
+}
+
+.animate-interlace {
+  animation: interlace 0.1s linear infinite;
+}
+
+@keyframes scanline-scroll {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-scanline-scroll {
+  animation: scanline-scroll 3s linear infinite;
+}
+
+@keyframes glitch-shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-2px);
+  }
+  75% {
+    transform: translateX(2px);
+  }
+}
+
+.animate-glitch-shake {
+  animation: glitch-shake 0.1s linear;
+}
+
+@keyframes signal-interference {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  10% {
+    opacity: 0.8;
+    transform: translateY(-1px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 0.9;
+    transform: translateY(1px);
+  }
+}
+
+.animate-signal-interference {
+  animation: signal-interference 0.5s linear;
+}
+
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  animation: radar-sweep 3s linear infinite;
+}
+
+@keyframes blink-fast {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0;
+  }
+}
+
+.animate-blink-fast {
+  animation: blink-fast 1s step-end infinite;
+}
+
 /* GPU acceleration hints */
 .gpu-accelerated {
   transform: translateZ(0);

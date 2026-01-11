@@ -50,10 +50,8 @@ import { ComputerManagement } from "./apps/ComputerManagement";
 import { UURApp } from "./apps/UURApp";
 import { GameHub } from "./apps/GameHub";
 import { ContainmentGame } from "./apps/ContainmentGame/ContainmentGame";
-import { UserDirectory } from "./apps/UserDirectory";
-import { Leaderboards } from "./apps/Leaderboards";
-import { AchievementsViewer } from "./apps/AchievementsViewer";
-import { EventsCalendar } from "./apps/EventsCalendar";
+import { PersonnelCenter } from "./apps/PersonnelCenter";
+import { SignalInterceptor } from "./apps/SignalInterceptor";
 
 interface WindowData {
   id: string;
@@ -98,16 +96,10 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         }} />;
       case "monitor":
         return <SystemMonitor />;
-      case "personnel":
-        return <UserDirectory />;
-      case "user-directory":
-        return <UserDirectory />;
-      case "leaderboards":
-        return <Leaderboards />;
-      case "achievements":
-        return <AchievementsViewer />;
-      case "events-calendar":
-        return <EventsCalendar />;
+      case "personnel-center":
+        return <PersonnelCenter />;
+      case "signal-interceptor":
+        return <SignalInterceptor />;
       case "logger":
         return <ActionLogger />;
       case "network":

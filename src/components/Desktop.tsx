@@ -6,7 +6,6 @@ import { WindowManager } from "./WindowManager";
 import { RecoveryMode } from "./RecoveryMode";
 import { ContextMenu, getDesktopMenuItems } from "./ContextMenu";
 import { AltTabSwitcher } from "./AltTabSwitcher";
-import { DesktopSwitcher } from "./DesktopSwitcher";
 import { WindowSnapIndicator } from "./WindowSnapIndicator";
 import { GlobalSearch } from "./GlobalSearch";
 import { WidgetManager } from "./widgets/WidgetManager";
@@ -19,7 +18,7 @@ import { useAutoSync } from "@/hooks/useAutoSync";
 import { useWindowSnap, SnapZone } from "@/hooks/useWindowSnap";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Database, Activity, Radio, FileBox, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Download, Puzzle, Skull, Monitor, Package, Search, Star, Sparkles } from "lucide-react";
+import { FileText, Database, Activity, Radio, FileBox, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Puzzle, Skull, Monitor, Package, Star, Download, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -244,8 +243,8 @@ export const Desktop = ({
       minimalInclude: true
     },
     {
-      id: "personnel",
-      name: "Personnel",
+      id: "personnel-center",
+      name: "Personnel Center",
       icon: <Users className="w-11 h-11" />,
       run: () => openWindow(allApps[3]),
       standardInclude: true
@@ -379,11 +378,11 @@ export const Desktop = ({
       standardInclude: true
     },
     {
-      id: "downloads",
-      name: "Downloads",
-      icon: <Download className="w-11 h-11" />,
+      id: "signal-interceptor",
+      name: "Signal Interceptor",
+      icon: <Radio className="w-11 h-11" />,
       run: () => openWindow(allApps[23]),
-      minimalInclude: true
+      standardInclude: true
     },
     {
       id: "plugin-store",
@@ -721,35 +720,6 @@ export const Desktop = ({
       run: () => openWindow(allApps[70]),
       standardInclude: true
     },
-    // Online Social Apps
-    {
-      id: "user-directory",
-      name: "User Directory",
-      icon: <Search className="w-11 h-11" />,
-      run: () => openWindow(allApps[71]),
-      standardInclude: true
-    },
-    {
-      id: "leaderboards",
-      name: "Leaderboards",
-      icon: <Star className="w-11 h-11" />,
-      run: () => openWindow(allApps[72]),
-      standardInclude: true
-    },
-    {
-      id: "achievements",
-      name: "Achievements",
-      icon: <Sparkles className="w-11 h-11" />,
-      run: () => openWindow(allApps[73]),
-      standardInclude: true
-    },
-    {
-      id: "events-calendar",
-      name: "Events",
-      icon: <Calendar className="w-11 h-11" />,
-      run: () => openWindow(allApps[74]),
-      standardInclude: true
-    }
   ];
 
   // Listen for app installations
@@ -862,16 +832,6 @@ export const Desktop = ({
         onReboot={onReboot}
         onShutdown={onShutdown}
         onLogout={onLogout}
-      />
-
-      {/* Desktop Switcher */}
-      <DesktopSwitcher
-        desktops={desktops}
-        activeDesktopId={activeDesktopId}
-        onSwitch={switchDesktop}
-        onCreate={createDesktop}
-        onDelete={deleteDesktop}
-        onRename={renameDesktop}
       />
 
       {/* Taskbar */}
