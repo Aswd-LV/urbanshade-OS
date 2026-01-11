@@ -284,14 +284,15 @@ export const ChangelogDialog = () => {
           "TypeScript for better code quality",
           "Vite for blazing fast development"
         ],
-        "Timeline": [
-          "August 2025: v2.0 - Vite Rewrite",
-          "September 2025: v2.5 - UUR Manager",
-          "October 2025: v2.6 - Online Accounts",
-          "November 2025: v2.7 - Cloud Sync",
-          "December 2025: v2.8 - Cloud Messaging",
+        "Project Timeline": [
+          "January 27, 2025: Project started - v1.0 original release",
+          "August 2025: v2.0 - The Vite Rewrite",
+          "September 2025: v2.5 - UUR Manager Update",
+          "October 2025: v2.6 - Security Update (Online Accounts)",
+          "November 2025: v2.7 - Cloud Sync Update",
+          "December 2025: v2.8 - The Mass Update",
           "December 2025: v2.9 - Visual Overhaul",
-          "January 2026: v3.0 - The Year Update"
+          "January 2026: v3.0 - The Year Update (current)"
         ]
       }
     }
