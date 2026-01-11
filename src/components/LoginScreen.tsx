@@ -1,308 +1,311 @@
 import { useState, useEffect } from "react";
-import { Lock, Terminal as TerminalIcon, Server, Cpu, HardDrive, Wifi } from "lucide-react";
+import { Lock, User, Users, ChevronRight, Loader2 } from "lucide-react";
 
 interface LoginScreenProps {
   onLogin: () => void;
 }
 
-const bootMessages = [
-  { text: "[    0.000000] UrbanShade kernel 3.1.0-stable booting...", delay: 0 },
-  { text: "[    0.124512] CPU: x86_64 compatible processor detected", delay: 100 },
-  { text: "[    0.256789] Memory: 16384MB available", delay: 200 },
-  { text: "[    0.389012] ACPI: Core subsystem initialized", delay: 300 },
-  { text: "[    0.512345] PCI: Scanning bus 0000:00", delay: 400 },
-  { text: "[    0.634567] NET: Registered protocol family 2 (TCP/IP)", delay: 500 },
-  { text: "[    0.789123] EXT4-fs: mounted filesystem with ordered data mode", delay: 600 },
-  { text: "[    1.023456] systemd[1]: Starting UrbanShade System...", delay: 700 },
-  { text: "[    1.256789] systemd[1]: Started Authentication Service.", delay: 850 },
-  { text: "[    1.456123] urbanshade[1]: Initializing secure terminal...", delay: 1000 },
-  { text: "[  OK  ] Ready for login.", delay: 1200 },
+interface UserAccount {
+  id: string;
+  username: string;
+  displayName: string;
+  hasPassword: boolean;
+  isAdmin: boolean;
+  avatarColor: string;
+}
+
+const avatarColors = [
+  "from-blue-500 to-cyan-500",
+  "from-purple-500 to-pink-500",
+  "from-green-500 to-emerald-500",
+  "from-orange-500 to-red-500",
+  "from-indigo-500 to-violet-500",
 ];
 
 export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
-  const [username, setUsername] = useState("");
+  const [accounts, setAccounts] = useState<UserAccount[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState<UserAccount | null>(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [bootPhase, setBootPhase] = useState(0);
-  const [showLogin, setShowLogin] = useState(false);
-  const [uptime, setUptime] = useState(0);
+  const [time, setTime] = useState(new Date());
 
-  // Boot sequence animation
+  // Load accounts from localStorage
   useEffect(() => {
-    const timers: NodeJS.Timeout[] = [];
+    const loadedAccounts: UserAccount[] = [];
     
-    bootMessages.forEach((msg, index) => {
-      const timer = setTimeout(() => {
-        setBootPhase(index + 1);
-      }, msg.delay);
-      timers.push(timer);
-    });
-
-    // Show login form after boot
-    const showTimer = setTimeout(() => {
-      setShowLogin(true);
-    }, 1500);
-    timers.push(showTimer);
-
-    return () => timers.forEach(clearTimeout);
+    // Load admin account
+    const adminData = localStorage.getItem("urbanshade_admin");
+    if (adminData) {
+      const admin = JSON.parse(adminData);
+      loadedAccounts.push({
+        id: "admin",
+        username: admin.username,
+        displayName: admin.displayName || admin.username,
+        hasPassword: !!admin.password,
+        isAdmin: true,
+        avatarColor: avatarColors[0],
+      });
+    }
+    
+    // Load additional accounts
+    const additionalAccounts = localStorage.getItem("urbanshade_accounts");
+    if (additionalAccounts) {
+      const parsed = JSON.parse(additionalAccounts);
+      parsed.forEach((acc: any, index: number) => {
+        loadedAccounts.push({
+          id: acc.id || `user-${index}`,
+          username: acc.username,
+          displayName: acc.displayName || acc.username,
+          hasPassword: !!acc.password,
+          isAdmin: false,
+          avatarColor: avatarColors[(index + 1) % avatarColors.length],
+        });
+      });
+    }
+    
+    setAccounts(loadedAccounts);
   }, []);
 
-  // Uptime counter
+  // Update time every second
   useEffect(() => {
-    const interval = setInterval(() => {
-      setUptime(prev => prev + 1);
-    }, 1000);
+    const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const formatUptime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const handleSelectAccount = (account: UserAccount) => {
+    setSelectedAccount(account);
+    setPassword("");
+    setError("");
+  };
+
+  const handleBack = () => {
+    setSelectedAccount(null);
+    setPassword("");
+    setError("");
   };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
-    if (!username || !password) {
-      setError("Authentication failed: missing credentials");
+    if (!selectedAccount) return;
+
+    // Check if password is required
+    if (selectedAccount.hasPassword && !password) {
+      setError("Password required");
       return;
     }
 
     setLoading(true);
 
-    const timeoutId = setTimeout(() => {
-      setError("Connection timed out. Retry?");
-      setLoading(false);
-    }, 10000);
-
     setTimeout(() => {
-      clearTimeout(timeoutId);
-      const adminData = localStorage.getItem("urbanshade_admin");
-      
-      if (adminData) {
-        const admin = JSON.parse(adminData);
-        if (username === admin.username && password === admin.password) {
-          onLogin();
-        } else {
-          setError("Authentication failed: invalid credentials");
-          setLoading(false);
+      // Verify password
+      if (selectedAccount.isAdmin) {
+        const adminData = localStorage.getItem("urbanshade_admin");
+        if (adminData) {
+          const admin = JSON.parse(adminData);
+          if (!selectedAccount.hasPassword || password === admin.password) {
+            onLogin();
+            return;
+          }
         }
       } else {
-        setError("System error: no administrator configured");
-        setLoading(false);
+        const additionalAccounts = localStorage.getItem("urbanshade_accounts");
+        if (additionalAccounts) {
+          const parsed = JSON.parse(additionalAccounts);
+          const account = parsed.find((a: any) => 
+            a.username === selectedAccount.username || a.id === selectedAccount.id
+          );
+          if (account && (!selectedAccount.hasPassword || password === account.password)) {
+            onLogin();
+            return;
+          }
+        }
       }
-    }, 1500);
+
+      setError("Incorrect password");
+      setLoading(false);
+    }, 800);
   };
 
-  const lastLoginDate = new Date();
-  lastLoginDate.setHours(lastLoginDate.getHours() - Math.floor(Math.random() * 48));
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long',
+      month: 'long', 
+      day: 'numeric'
+    });
+  };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-slate-950 font-mono relative overflow-hidden">
-      {/* Matrix-style background rain */}
-      <div className="absolute inset-0 opacity-5 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-primary text-xs whitespace-pre animate-pulse"
-            style={{
-              left: `${i * 5}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              opacity: 0.3 + Math.random() * 0.4,
-            }}
-          >
-            {[...Array(20)].map((_, j) => (
-              <div key={j} style={{ animationDelay: `${j * 0.1}s` }}>
-                {String.fromCharCode(0x30A0 + Math.random() * 96)}
-              </div>
-            ))}
-          </div>
-        ))}
+    <div className="h-screen w-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+      {/* Ambient background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Top bar - System info */}
-      <div className="border-b border-primary/20 bg-slate-900/80 backdrop-blur-sm px-4 py-2 flex items-center justify-between text-xs text-muted-foreground z-10">
-        <div className="flex items-center gap-4">
-          <span className="text-primary font-bold">URBANSHADE OS</span>
-          <span className="text-muted-foreground/60">|</span>
-          <span>kernel: urbanshade-3.1-stable</span>
-          <span className="text-muted-foreground/60">|</span>
-          <span>arch: x86_64</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <Cpu className="w-3 h-3 text-green-400" />
-            <span>2.4%</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <HardDrive className="w-3 h-3 text-cyan-400" />
-            <span>47.2GB</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Wifi className="w-3 h-3 text-green-400" />
-            <span>Connected</span>
-          </div>
-          <span className="text-muted-foreground/60">|</span>
-          <span>uptime: {formatUptime(uptime)}</span>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 flex">
-        {/* Boot log panel */}
-        <div className="w-80 border-r border-primary/10 bg-slate-900/50 p-4 overflow-hidden">
-          <div className="flex items-center gap-2 mb-4 text-xs text-muted-foreground">
-            <Server className="w-4 h-4 text-primary" />
-            <span>System Boot Log</span>
-          </div>
-          <div className="space-y-1 text-[10px] font-mono">
-            {bootMessages.slice(0, bootPhase).map((msg, index) => (
-              <div 
-                key={index} 
-                className={`animate-fade-in ${
-                  msg.text.includes('[  OK  ]') 
-                    ? 'text-green-400' 
-                    : msg.text.includes('Error') 
-                      ? 'text-red-400' 
-                      : 'text-muted-foreground/70'
-                }`}
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                {msg.text}
+      {/* Account tiles - top left when no selection, center when selected */}
+      <div className={`absolute transition-all duration-500 ease-out ${
+        selectedAccount 
+          ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" 
+          : "top-6 left-6"
+      }`}>
+        {!selectedAccount ? (
+          // Account selection tiles
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs mb-3 px-1">
+              <Users className="w-4 h-4" />
+              <span>Select account</span>
+            </div>
+            
+            {accounts.length === 0 ? (
+              <div className="text-muted-foreground text-sm px-1">
+                No accounts configured
               </div>
-            ))}
-            {bootPhase === bootMessages.length && (
-              <div className="mt-4 pt-4 border-t border-primary/10">
-                <div className="text-muted-foreground/50 animate-pulse">
-                  █ Awaiting authentication...
-                </div>
+            ) : (
+              <div className="space-y-1.5">
+                {accounts.map((account) => (
+                  <button
+                    key={account.id}
+                    onClick={() => handleSelectAccount(account)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group w-64"
+                  >
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${account.avatarColor} flex items-center justify-center text-white font-semibold shadow-lg`}>
+                      {account.displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="text-sm font-medium text-foreground">{account.displayName}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {account.isAdmin ? "Administrator" : "User"}
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </button>
+                ))}
               </div>
             )}
           </div>
-        </div>
-
-        {/* Login form */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className={`w-full max-w-md transition-all duration-500 ${showLogin ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            {/* ASCII Art Header */}
-            <pre className="text-primary text-[8px] leading-tight mb-6 text-center opacity-60">
-{`
- _   _ ____  ____    _    _   _ ____  _   _    _    ____  _____ 
-| | | |  _ \\| __ )  / \\  | \\ | / ___|| | | |  / \\  |  _ \\| ____|
-| | | | |_) |  _ \\ / _ \\ |  \\| \\___ \\| |_| | / _ \\ | | | |  _|  
-| |_| |  _ <| |_) / ___ \\| |\\  |___) |  _  |/ ___ \\| |_| | |___ 
- \\___/|_| \\_\\____/_/   \\_\\_| \\_|____/|_| |_/_/   \\_\\____/|_____|
-                                                                 
-`}
-            </pre>
-
-            {/* Last login info */}
-            <div className="text-xs text-muted-foreground/60 mb-4 font-mono">
-              <div>Last login: {lastLoginDate.toLocaleString()} from 192.168.1.xxx</div>
-              <div className="text-primary/60">Welcome to UrbanShade OS 3.1 LTS (Deep Ocean)</div>
+        ) : (
+          // Selected account - password entry
+          <div className="w-80 animate-fade-in">
+            <div className="flex flex-col items-center mb-6">
+              <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${selectedAccount.avatarColor} flex items-center justify-center text-white text-3xl font-bold shadow-2xl mb-4 ring-4 ring-white/10`}>
+                {selectedAccount.displayName.charAt(0).toUpperCase()}
+              </div>
+              <h2 className="text-xl font-semibold text-foreground">{selectedAccount.displayName}</h2>
+              <p className="text-sm text-muted-foreground">
+                {selectedAccount.isAdmin ? "Administrator" : "User"}
+              </p>
             </div>
 
-            {/* Login Box */}
-            <div className="border border-primary/30 bg-slate-900/80 backdrop-blur-sm rounded-lg overflow-hidden">
-              {/* Terminal header */}
-              <div className="flex items-center gap-2 px-4 py-2 border-b border-primary/20 bg-slate-800/50">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                </div>
-                <span className="text-xs text-muted-foreground ml-2">urbanshade-auth — secure terminal</span>
-              </div>
-
-              <form onSubmit={handleLogin} className="p-6 space-y-4">
-                <div className="flex items-center gap-2 text-sm text-primary mb-4">
-                  <Lock className="w-4 h-4" />
-                  <span className="font-mono">Authentication Required</span>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-400 text-sm font-mono">login:</span>
-                    <input
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      className="flex-1 px-3 py-2 bg-slate-800/50 border border-primary/20 rounded text-foreground text-sm font-mono focus:border-primary focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all placeholder:text-muted-foreground/40"
-                      placeholder="username"
-                      disabled={loading}
-                      autoFocus
-                    />
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-400 text-sm font-mono">pass:</span>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="flex-1 px-3 py-2 bg-slate-800/50 border border-primary/20 rounded text-foreground text-sm font-mono focus:border-primary focus:ring-1 focus:ring-primary/30 focus:outline-none transition-all placeholder:text-muted-foreground/40"
-                      placeholder="••••••••"
-                      disabled={loading}
-                    />
-                  </div>
+            {selectedAccount.hasPassword ? (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                    autoFocus
+                    disabled={loading}
+                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all"
+                  />
                 </div>
 
                 {error && (
-                  <div className="p-3 rounded bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono animate-fade-in">
-                    <span className="text-red-500">error:</span> {error}
+                  <div className="text-sm text-red-400 text-center animate-shake">
+                    {error}
                   </div>
                 )}
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-4 py-2.5 rounded bg-primary/20 border border-primary/40 text-primary font-mono text-sm hover:bg-primary/30 hover:border-primary/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-primary/20 border border-primary/30 text-primary font-medium hover:bg-primary/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                      <span>Authenticating...</span>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Signing in...
                     </>
                   ) : (
-                    <>
-                      <TerminalIcon className="w-4 h-4" />
-                      <span>$ sudo login</span>
-                    </>
+                    "Sign in"
                   )}
                 </button>
-              </form>
-            </div>
 
-            {/* Footer */}
-            <div className="mt-6 text-center text-[10px] text-muted-foreground/40 font-mono space-y-1">
-              <div>© 2025 UrbanShade Corporation — All Rights Reserved</div>
-              <div className="text-yellow-500/60">⚠ CLASSIFIED SYSTEM — AUTHORIZED PERSONNEL ONLY</div>
-              <div className="text-muted-foreground/30 pt-2">Simulated operating system environment</div>
-            </div>
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ← Back to accounts
+                </button>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <button
+                  onClick={handleLogin}
+                  disabled={loading}
+                  className="w-full py-3 rounded-xl bg-primary/20 border border-primary/30 text-primary font-medium hover:bg-primary/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign in"
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ← Back to accounts
+                </button>
+              </div>
+            )}
           </div>
+        )}
+      </div>
+
+      {/* Center message when no account selected */}
+      {!selectedAccount && accounts.length > 0 && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+          <User className="w-20 h-20 mx-auto mb-6 text-muted-foreground/30" />
+          <p className="text-xl text-muted-foreground/50 font-light">
+            Select an account to sign in
+          </p>
+        </div>
+      )}
+
+      {/* Time display - bottom right */}
+      <div className="absolute bottom-8 right-8 text-right">
+        <div className="text-6xl font-light text-foreground/90 tracking-tight">
+          {formatTime(time)}
+        </div>
+        <div className="text-lg text-muted-foreground mt-1">
+          {formatDate(time)}
         </div>
       </div>
 
-      {/* Bottom status bar */}
-      <div className="border-t border-primary/20 bg-slate-900/80 px-4 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground/60 font-mono">
-        <div className="flex items-center gap-3">
-          <span>TTY1</span>
-          <span>•</span>
-          <span>Secure Shell Active</span>
-          <span>•</span>
-          <span>Encryption: AES-256-GCM</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span>Depth: 8,247m</span>
-          <span>•</span>
-          <span>Pressure: 824.7 bar</span>
-          <span>•</span>
-          <span className="text-green-400">● All Systems Nominal</span>
-        </div>
+      {/* System info - bottom left */}
+      <div className="absolute bottom-8 left-8 text-left">
+        <div className="text-sm font-medium text-foreground/80">UrbanShade OS</div>
+        <div className="text-xs text-muted-foreground">v3.1 Deep Ocean</div>
       </div>
     </div>
   );

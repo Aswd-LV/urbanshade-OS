@@ -40,9 +40,9 @@ export const PersonnelCenter = () => {
   }, []);
 
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
       {/* Header */}
-      <div className="border-b border-border p-3 bg-muted/20">
+      <div className="flex-shrink-0 border-b border-border p-3 bg-muted/20">
         <div className="flex items-center gap-3 mb-3">
           <Users className="w-6 h-6 text-primary" />
           <h1 className="text-xl font-bold text-foreground">Personnel Center</h1>
@@ -70,13 +70,15 @@ export const PersonnelCenter = () => {
         </Tabs>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
-        {mainTab === "directory" && <DirectoryTab />}
-        {mainTab === "leaderboards" && <LeaderboardsTab />}
-        {mainTab === "achievements" && <AchievementsTab userId={userId} />}
-        {mainTab === "events" && <EventsTab />}
-      </div>
+      {/* Content - scrollable */}
+      <ScrollArea className="flex-1">
+        <div className="h-full">
+          {mainTab === "directory" && <DirectoryTab />}
+          {mainTab === "leaderboards" && <LeaderboardsTab />}
+          {mainTab === "achievements" && <AchievementsTab userId={userId} />}
+          {mainTab === "events" && <EventsTab />}
+        </div>
+      </ScrollArea>
     </div>
   );
 };
@@ -346,11 +348,18 @@ const LeaderboardsTab = () => {
     valueKey: keyof LeaderboardEntry; 
     valueLabel: string;
   }) => (
-    <ScrollArea className="h-[350px]">
+    <div className="h-full overflow-auto">
       {loading ? (
-        <div className="p-4 text-center text-muted-foreground">Loading...</div>
+        <div className="p-4 text-center text-muted-foreground">
+          <Loader2 className="w-5 h-5 mx-auto mb-2 animate-spin" />
+          Loading leaderboard...
+        </div>
       ) : data.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground">No data yet</div>
+        <div className="p-8 text-center">
+          <Trophy className="w-12 h-12 mx-auto mb-3 text-muted-foreground/30" />
+          <p className="text-muted-foreground">No entries yet</p>
+          <p className="text-xs text-muted-foreground/70 mt-1">Be the first to rank!</p>
+        </div>
       ) : (
         <div className="p-3 space-y-2">
           {data.map((entry, index) => (
@@ -381,7 +390,7 @@ const LeaderboardsTab = () => {
           ))}
         </div>
       )}
-    </ScrollArea>
+    </div>
   );
 
   const veteranWithDays = veteranEntries.map(entry => ({
@@ -390,9 +399,9 @@ const LeaderboardsTab = () => {
   }));
 
   return (
-    <div className="p-4 h-full flex flex-col">
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
-        <TabsList className="w-full grid grid-cols-4 mb-4">
+    <div className="p-4 h-full flex flex-col min-h-0">
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col min-h-0">
+        <TabsList className="w-full grid grid-cols-4 mb-4 flex-shrink-0">
           <TabsTrigger value="chat" className="text-xs gap-1">
             <MessageSquare className="w-3 h-3" />
             Chatters
@@ -411,7 +420,7 @@ const LeaderboardsTab = () => {
           </TabsTrigger>
         </TabsList>
         
-        <div className="flex-1 border border-border rounded-lg overflow-hidden">
+        <div className="flex-1 border border-border rounded-lg overflow-hidden min-h-0">
           <TabsContent value="chat" className="m-0 h-full">
             <div className="p-3 border-b border-border bg-muted/30">
               <h2 className="font-semibold text-foreground">Top Chatters</h2>
