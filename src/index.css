@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reduce motion for accessibility */
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* High contrast mode */
+.high-contrast {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --border: 0 0% 100%;
+}
+
+/* Larger text mode */
+.larger-text {
+  font-size: 110%;
+}
+
+/* No transparency mode */
+.no-transparency .backdrop-blur-sm,
+.no-transparency .backdrop-blur-md,
+.no-transparency .backdrop-blur-lg,
+.no-transparency .backdrop-blur-xl {
+  backdrop-filter: none !important;
+  background-color: hsl(var(--background)) !important;
+}
+
 /* Urbanshade OS Design System v3.0 */
 
 @layer base {

@@ -121,57 +121,6 @@ export const useBiosSettings = () => {
     return settings.bootPassword === password;
   }, [settings.bootPassword]);
 
-  // Static getters for external use (like BootScreen)
-  const getFastBoot = () => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored).fastBoot ?? false;
-      }
-    } catch {}
-    return false;
-  };
-
-  const getBootTimeout = () => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored).bootTimeout ?? 3;
-      }
-    } catch {}
-    return 3;
-  };
-
-  const getBootLogo = () => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored).bootLogo ?? true;
-      }
-    } catch {}
-    return true;
-  };
-
-  const getBootOrder = (): string[] => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return JSON.parse(stored).bootOrder ?? ['hdd', 'usb', 'network'];
-      }
-    } catch {}
-    return ['hdd', 'usb', 'network'];
-  };
-
-  const hasAdminPassword = () => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        return !!JSON.parse(stored).adminPassword;
-      }
-    } catch {}
-    return false;
-  };
-
   return {
     settings,
     hasChanges,
@@ -184,11 +133,6 @@ export const useBiosSettings = () => {
     setBootPassword,
     verifyAdminPassword,
     verifyBootPassword,
-    getFastBoot,
-    getBootTimeout,
-    getBootLogo,
-    getBootOrder,
-    hasAdminPassword,
     DEFAULT_SETTINGS,
   };
 };
@@ -202,4 +146,81 @@ export const getBiosSettings = (): BiosSettings => {
     }
   } catch {}
   return DEFAULT_SETTINGS;
+};
+
+// Export BIOS config to JSON string
+export const exportBiosConfig = (): string => {
+  const settings = getBiosSettings();
+  // Don't export passwords for security
+  const exportable = {
+    ...settings,
+    adminPassword: null,
+    bootPassword: null,
+    exportedAt: new Date().toISOString(),
+    version: '2.9.0'
+  };
+  return JSON.stringify(exportable, null, 2);
+};
+
+// Import BIOS config from JSON string
+export const importBiosConfig = (jsonString: string): { success: boolean; error?: string } => {
+  try {
+    const imported = JSON.parse(jsonString);
+    
+    // Validate it has expected fields
+    if (typeof imported.fastBoot !== 'boolean' || 
+        typeof imported.bootLogo !== 'boolean' ||
+        !Array.isArray(imported.bootOrder)) {
+      return { success: false, error: 'Invalid configuration format' };
+    }
+    
+    // Merge with defaults (don't import passwords)
+    const newSettings: BiosSettings = {
+      ...DEFAULT_SETTINGS,
+      fastBoot: imported.fastBoot,
+      bootLogo: imported.bootLogo,
+      secureBoot: imported.secureBoot ?? DEFAULT_SETTINGS.secureBoot,
+      bootTimeout: imported.bootTimeout ?? DEFAULT_SETTINGS.bootTimeout,
+      bootOrder: imported.bootOrder,
+      hyperThreading: imported.hyperThreading ?? DEFAULT_SETTINGS.hyperThreading,
+      virtualization: imported.virtualization ?? DEFAULT_SETTINGS.virtualization,
+      turboBoost: imported.turboBoost ?? DEFAULT_SETTINGS.turboBoost,
+      cStates: imported.cStates ?? DEFAULT_SETTINGS.cStates,
+      sataMode: imported.sataMode ?? DEFAULT_SETTINGS.sataMode,
+      pcieLinkSpeed: imported.pcieLinkSpeed ?? DEFAULT_SETTINGS.pcieLinkSpeed,
+      iommu: imported.iommu ?? DEFAULT_SETTINGS.iommu,
+      tpmEnabled: imported.tpmEnabled ?? DEFAULT_SETTINGS.tpmEnabled,
+      adminPassword: null, // Never import passwords
+      bootPassword: null,
+    };
+    
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: 'Failed to parse configuration file' };
+  }
+};
+
+// Check if boot password is required
+export const requiresBootPassword = (): boolean => {
+  const settings = getBiosSettings();
+  return settings.bootPassword !== null;
+};
+
+// Check if admin password is required for BIOS
+export const requiresAdminPassword = (): boolean => {
+  const settings = getBiosSettings();
+  return settings.adminPassword !== null;
+};
+
+// Verify boot password
+export const verifyBootPassword = (password: string): boolean => {
+  const settings = getBiosSettings();
+  return settings.bootPassword === password;
+};
+
+// Verify admin password
+export const verifyAdminPassword = (password: string): boolean => {
+  const settings = getBiosSettings();
+  return settings.adminPassword === password;
 };
