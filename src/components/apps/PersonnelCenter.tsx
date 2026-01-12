@@ -14,9 +14,9 @@ import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { Achievement, getRarityColor, getRarityBgColor } from "@/lib/achievements";
 import { toast } from "sonner";
-import { BattlePassTab } from "@/components/BattlePassTab";
+import { BattlePassGrid } from "@/components/BattlePassGrid";
 
-type MainTab = "directory" | "leaderboards" | "achievements" | "battlepass" | "events";
+type MainTab = "directory" | "leaderboards" | "achievements" | "events";
 
 interface SystemEvent {
   id: string;
@@ -50,7 +50,7 @@ export const PersonnelCenter = () => {
         </div>
         
         <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as MainTab)}>
-          <TabsList className="w-full grid grid-cols-5 h-9">
+          <TabsList className="w-full grid grid-cols-4 h-9">
             <TabsTrigger value="directory" className="text-xs gap-1">
               <Users className="w-3 h-3" />
               Directory
@@ -62,10 +62,6 @@ export const PersonnelCenter = () => {
             <TabsTrigger value="achievements" className="text-xs gap-1">
               <Award className="w-3 h-3" />
               Achieve
-            </TabsTrigger>
-            <TabsTrigger value="battlepass" className="text-xs gap-1">
-              <Zap className="w-3 h-3" />
-              Pass
             </TabsTrigger>
             <TabsTrigger value="events" className="text-xs gap-1">
               <Calendar className="w-3 h-3" />
@@ -81,8 +77,7 @@ export const PersonnelCenter = () => {
           {mainTab === "directory" && <DirectoryTab />}
           {mainTab === "leaderboards" && <LeaderboardsTab />}
           {mainTab === "achievements" && <AchievementsTab userId={userId} />}
-          {mainTab === "battlepass" && <BattlePassTab userId={userId} />}
-          {mainTab === "events" && <EventsTab />}
+          {mainTab === "events" && <EventsTab userId={userId} />}
         </div>
       </ScrollArea>
     </div>
@@ -596,11 +591,12 @@ const AchievementsTab = ({ userId }: { userId?: string }) => {
   );
 };
 
-// ============ EVENTS TAB ============
-const EventsTab = () => {
+// ============ EVENTS TAB (with Battle Pass) ============
+const EventsTab = ({ userId }: { userId?: string }) => {
   const [events, setEvents] = useState<SystemEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [subTab, setSubTab] = useState<'events' | 'battlepass'>('battlepass');
 
   useEffect(() => {
     fetchEvents();
@@ -701,66 +697,90 @@ const EventsTab = () => {
 
   return (
     <div className="p-4 h-full flex flex-col">
-      <div className="flex flex-wrap gap-2 mb-4">
-        {eventTypes.map((type) => (
-          <Button
-            key={type.value}
-            variant={filter === type.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(type.value)}
-            className="text-xs"
-          >
-            {type.label}
-          </Button>
-        ))}
-      </div>
+      {/* Sub-tabs for Battle Pass / Events */}
+      <Tabs value={subTab} onValueChange={(v) => setSubTab(v as any)} className="flex-1 flex flex-col">
+        <TabsList className="w-full grid grid-cols-2 mb-4 flex-shrink-0">
+          <TabsTrigger value="battlepass" className="text-xs gap-1">
+            <Zap className="w-3 h-3" />
+            Battle Pass
+          </TabsTrigger>
+          <TabsTrigger value="events" className="text-xs gap-1">
+            <Calendar className="w-3 h-3" />
+            Announcements
+          </TabsTrigger>
+        </TabsList>
 
-      <ScrollArea className="flex-1">
-        {loading ? (
-          <div className="p-4 text-center text-muted-foreground">Loading events...</div>
-        ) : filteredEvents.length === 0 ? (
-          <div className="p-8 text-center">
-            <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-            <p className="text-muted-foreground">No active events</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Check back later for updates</p>
-          </div>
-        ) : (
-          <div className="space-y-3 pr-4">
-            {filteredEvents.map((event) => (
-              <div
-                key={event.id}
-                className={`p-4 rounded-lg border transition-all ${getEventColor(event.event_type)}`}
+        {/* Battle Pass Sub-Tab */}
+        <TabsContent value="battlepass" className="flex-1 m-0 overflow-hidden">
+          <ScrollArea className="h-full">
+            <BattlePassGrid userId={userId} />
+          </ScrollArea>
+        </TabsContent>
+
+        {/* Events Sub-Tab */}
+        <TabsContent value="events" className="flex-1 m-0 overflow-hidden">
+          <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
+            {eventTypes.map((type) => (
+              <Button
+                key={type.value}
+                variant={filter === type.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilter(type.value)}
+                className="text-xs"
               >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
-                    {getEventIcon(event.event_type)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-foreground">{event.title}</h3>
-                      <Badge variant="outline" className={`text-[9px] ${getPriorityColor(event.priority)}`}>
-                        {event.priority}
-                      </Badge>
-                    </div>
-                    
-                    {event.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {event.description}
-                      </p>
-                    )}
-                    
-                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      {formatEventDate(event.starts_at, event.ends_at)}
-                    </div>
-                  </div>
-                </div>
-              </div>
+                {type.label}
+              </Button>
             ))}
           </div>
-        )}
-      </ScrollArea>
+
+          <ScrollArea className="flex-1">
+            {loading ? (
+              <div className="p-4 text-center text-muted-foreground">Loading events...</div>
+            ) : filteredEvents.length === 0 ? (
+              <div className="p-8 text-center">
+                <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                <p className="text-muted-foreground">No active events</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">Check back later for updates</p>
+              </div>
+            ) : (
+              <div className="space-y-3 pr-4">
+                {filteredEvents.map((event) => (
+                  <div
+                    key={event.id}
+                    className={`p-4 rounded-lg border transition-all ${getEventColor(event.event_type)}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
+                        {getEventIcon(event.event_type)}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-foreground">{event.title}</h3>
+                          <Badge variant="outline" className={`text-[9px] ${getPriorityColor(event.priority)}`}>
+                            {event.priority}
+                          </Badge>
+                        </div>
+                        
+                        {event.description && (
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            {event.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                          <Clock className="w-3 h-3" />
+                          {formatEventDate(event.starts_at, event.ends_at)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Volume2, VolumeX, Power, Cloud, CloudOff, Loader2, BellOff, WifiOff, Lock } from "lucide-react";
+import { Bell, Volume2, VolumeX, Power, Cloud, CloudOff, Loader2, BellOff, WifiOff, Lock, Clock } from "lucide-react";
 
 // Separate component for notification button to handle anchor ref
 const NotificationButton = ({ 
@@ -253,6 +253,15 @@ export const Taskbar = ({
 
         {/* Right - System Tray */}
         <div className="flex items-center gap-1">
+          {/* Compact Clock - shows when any window is open */}
+          {windows.some(w => !w.minimized) && (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-primary/5 border border-primary/10 mr-1">
+              <Clock className="w-3 h-3 text-muted-foreground" />
+              <span className="text-xs font-mono text-foreground/80">
+                {formatTime(time)}
+              </span>
+            </div>
+          )}
           {/* Offline / Pending Sync Indicator */}
           {syncEnabled && (!isOnline || pendingChanges.length > 0) && (
             <TooltipProvider>

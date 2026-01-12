@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Calendar, Bell, AlertTriangle, PartyPopper, Wrench, Megaphone, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Bell, AlertTriangle, PartyPopper, Wrench, Megaphone, Clock, Trophy } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { BattlePassGrid } from "@/components/BattlePassGrid";
 
 interface SystemEvent {
   id: string;
@@ -17,10 +19,11 @@ interface SystemEvent {
   created_at: string;
 }
 
-export const EventsCalendar = () => {
+export const EventsCalendar = ({ userId }: { userId?: string }) => {
   const [events, setEvents] = useState<SystemEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<'events' | 'battlepass'>('events');
 
   useEffect(() => {
     fetchEvents();
@@ -121,75 +124,99 @@ export const EventsCalendar = () => {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-background p-4">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <Calendar className="w-6 h-6 text-primary" />
-        <h1 className="text-xl font-bold text-foreground">Events & Announcements</h1>
-      </div>
+    <div className="h-full flex flex-col bg-background">
+      {/* Tabs Header */}
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="flex-1 flex flex-col">
+        <div className="flex-shrink-0 p-4 pb-0">
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="events" className="gap-2">
+              <Calendar className="w-4 h-4" />
+              Events
+            </TabsTrigger>
+            <TabsTrigger value="battlepass" className="gap-2">
+              <Trophy className="w-4 h-4" />
+              Battle Pass
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-      {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {eventTypes.map((type) => (
-          <Button
-            key={type.value}
-            variant={filter === type.value ? "default" : "outline"}
-            size="sm"
-            onClick={() => setFilter(type.value)}
-            className="text-xs"
-          >
-            {type.label}
-          </Button>
-        ))}
-      </div>
+        {/* Events Tab */}
+        <TabsContent value="events" className="flex-1 m-0 overflow-hidden px-4 pb-4">
+          <div className="h-full flex flex-col pt-4">
+            {/* Filter Buttons */}
+            <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
+              {eventTypes.map((type) => (
+                <Button
+                  key={type.value}
+                  variant={filter === type.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setFilter(type.value)}
+                  className="text-xs"
+                >
+                  {type.label}
+                </Button>
+              ))}
+            </div>
 
-      {/* Events List */}
-      <ScrollArea className="flex-1">
-        {loading ? (
-          <div className="p-4 text-center text-muted-foreground">Loading events...</div>
-        ) : filteredEvents.length === 0 ? (
-          <div className="p-8 text-center">
-            <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-            <p className="text-muted-foreground">No active events</p>
-            <p className="text-xs text-muted-foreground/70 mt-1">Check back later for updates</p>
-          </div>
-        ) : (
-          <div className="space-y-3 pr-4">
-            {filteredEvents.map((event) => (
-              <div
-                key={event.id}
-                className={`p-4 rounded-lg border transition-all ${getEventColor(event.event_type)}`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
-                    {getEventIcon(event.event_type)}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-semibold text-foreground">{event.title}</h3>
-                      <Badge variant="outline" className={`text-[9px] ${getPriorityColor(event.priority)}`}>
-                        {event.priority}
-                      </Badge>
-                    </div>
-                    
-                    {event.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {event.description}
-                      </p>
-                    )}
-                    
-                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      {formatEventDate(event.starts_at, event.ends_at)}
-                    </div>
-                  </div>
+            {/* Events List */}
+            <ScrollArea className="flex-1">
+              {loading ? (
+                <div className="p-4 text-center text-muted-foreground">Loading events...</div>
+              ) : filteredEvents.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Calendar className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                  <p className="text-muted-foreground">No active events</p>
+                  <p className="text-xs text-muted-foreground/70 mt-1">Check back later for updates</p>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div className="space-y-3 pr-4">
+                  {filteredEvents.map((event) => (
+                    <div
+                      key={event.id}
+                      className={`p-4 rounded-lg border transition-all ${getEventColor(event.event_type)}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-background/50 flex items-center justify-center">
+                          {getEventIcon(event.event_type)}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h3 className="font-semibold text-foreground">{event.title}</h3>
+                            <Badge variant="outline" className={`text-[9px] ${getPriorityColor(event.priority)}`}>
+                              {event.priority}
+                            </Badge>
+                          </div>
+                          
+                          {event.description && (
+                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                              {event.description}
+                            </p>
+                          )}
+                          
+                          <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                            <Clock className="w-3 h-3" />
+                            {formatEventDate(event.starts_at, event.ends_at)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
           </div>
-        )}
-      </ScrollArea>
+        </TabsContent>
+
+        {/* Battle Pass Tab */}
+        <TabsContent value="battlepass" className="flex-1 m-0 overflow-hidden">
+          <ScrollArea className="h-full">
+            <div className="p-4">
+              <BattlePassGrid userId={userId} />
+            </div>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
