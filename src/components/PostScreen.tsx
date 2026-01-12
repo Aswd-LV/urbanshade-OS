@@ -11,7 +11,6 @@ export const PostScreen = ({ onComplete, onEnterBios }: PostScreenProps) => {
   const [showBiosPrompt, setShowBiosPrompt] = useState(false);
   const [memoryProgress, setMemoryProgress] = useState(0);
   const [phase, setPhase] = useState<'memory' | 'devices' | 'prompt' | 'done'>('memory');
-  const [flickerOpacity, setFlickerOpacity] = useState(1);
 
   const biosSettings = getBiosSettings();
   const isFastBoot = biosSettings.fastBoot;
@@ -28,18 +27,6 @@ export const PostScreen = ({ onComplete, onEnterBios }: PostScreenProps) => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
-
-  // Random flicker effect
-  useEffect(() => {
-    const flicker = () => {
-      if (Math.random() < 0.05) {
-        setFlickerOpacity(0.8 + Math.random() * 0.2);
-        setTimeout(() => setFlickerOpacity(1), 50);
-      }
-    };
-    const interval = setInterval(flicker, 150);
-    return () => clearInterval(interval);
-  }, []);
 
   // Memory test phase
   useEffect(() => {
@@ -75,7 +62,7 @@ export const PostScreen = ({ onComplete, onEnterBios }: PostScreenProps) => {
       { name: 'NVMe: URBANSHADE-SSD-01 (2048GB)', delay: isFastBoot ? 50 : 100 },
       { name: 'Network: Urbanshade Gigabit Ethernet', delay: isFastBoot ? 50 : 100 },
       { name: 'USB: 4 Ports Detected', delay: isFastBoot ? 50 : 80 },
-      { name: 'TPM 2.0: Active', delay: isFastBoot ? 50 : 80 },
+      { name: `TPM 2.0: ${biosSettings.tpmEnabled ? 'Active' : 'Disabled'}`, delay: isFastBoot ? 50 : 80 },
     ];
 
     let index = 0;
@@ -101,7 +88,7 @@ export const PostScreen = ({ onComplete, onEnterBios }: PostScreenProps) => {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [phase, isFastBoot]);
+  }, [phase, isFastBoot, biosSettings.tpmEnabled]);
 
   // Prompt phase
   useEffect(() => {
@@ -119,27 +106,8 @@ export const PostScreen = ({ onComplete, onEnterBios }: PostScreenProps) => {
   }, [phase, isFastBoot, onComplete]);
 
   return (
-    <div 
-      className="fixed inset-0 bg-black font-mono text-[#00ff00] overflow-hidden"
-      style={{ opacity: flickerOpacity }}
-    >
-      {/* CRT effects */}
-      <div className="absolute inset-0 pointer-events-none z-10">
-        <div 
-          className="absolute inset-0 opacity-[0.06]"
-          style={{
-            background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 0, 0.1) 2px, rgba(0, 255, 0, 0.1) 4px)'
-          }}
-        />
-        <div 
-          className="absolute inset-0"
-          style={{
-            background: 'radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 100%)'
-          }}
-        />
-      </div>
-
-      <div className="p-6 text-sm leading-relaxed z-0 relative">
+    <div className="fixed inset-0 bg-black font-mono text-[#00ff00] overflow-hidden">
+      <div className="p-6 text-sm leading-relaxed">
         {/* Header */}
         <div className="mb-4">
           <div className="text-lg font-bold text-white mb-1">URBANSHADE UEFI BIOS v2.9.0</div>

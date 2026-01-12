@@ -27,11 +27,13 @@ import { BannedScreen } from "@/components/BannedScreen";
 import { TempBanPopup } from "@/components/TempBanPopup";
 import { TempBanBanner } from "@/components/TempBanBanner";
 import { VipWelcomeDialog } from "@/components/VipWelcomeDialog";
+import { BootPasswordPrompt } from "@/components/BootPasswordPrompt";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { systemBus } from "@/lib/systemBus";
 import { commandQueue, QueuedCommand } from "@/lib/commandQueue";
 import { useNaviSecurity } from "@/hooks/useNaviSecurity";
 import { useBanCheck } from "@/hooks/useBanCheck";
+import { requiresBootPassword, requiresAdminPassword, verifyAdminPassword } from "@/hooks/useBiosSettings";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 
 const Index = () => {
