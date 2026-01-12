@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { trackContainmentNightComplete, trackContainmentDeath } from '@/hooks/useAchievementTriggers';
 import { 
   GameState, 
   SubjectState, 
@@ -119,8 +120,16 @@ export const useGameLoop = () => {
           unlockedLore: prev.unlockedLore
         }));
 
+        // Track achievement for completing night
+        const luresUsed = prev.activeLures.length;
+        trackContainmentNightComplete(prev.currentNight, prev.power, luresUsed);
+
         return { ...prev, phase: 'victory', unlockedNights: newUnlockedNights, isExclusiveFullscreen: false };
       } else {
+        // Track death achievement
+        if (killedBy) {
+          trackContainmentDeath(killedBy);
+        }
         return { ...prev, phase: 'gameover', breachWarning: { ...prev.breachWarning, subjectId: killedBy || null }, isExclusiveFullscreen: false };
       }
     });

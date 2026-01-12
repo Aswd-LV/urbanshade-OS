@@ -52,6 +52,7 @@ import { GameHub } from "./apps/GameHub";
 import { ContainmentGame } from "./apps/ContainmentGame/ContainmentGame";
 import { PersonnelCenter } from "./apps/PersonnelCenter";
 import { SignalInterceptor } from "./apps/SignalInterceptor";
+import { UntitledCardGame } from "./apps/UntitledCardGame";
 
 interface WindowData {
   id: string;
@@ -200,6 +201,9 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         return <GenericApp title="Sound Editor" description="Record and edit audio files" features={["Multi-track recording", "Audio effects", "Noise reduction", "Format conversion"]} />;
       case "game-center":
         return <GameHub />;
+      case "ucg":
+      case "untitled-card-game":
+        return <UntitledCardGame />;
       case "chat":
         return <InstantChat />;
       case "video-call":

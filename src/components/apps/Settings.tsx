@@ -22,6 +22,7 @@ import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { useAutoSync } from "@/hooks/useAutoSync";
 import { trackThemeChange } from "@/hooks/useAchievementTriggers";
+import { VERSION } from "@/lib/versionInfo";
 
 export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   const { settings, updateSetting, resetToDefaults } = useSystemSettings();
@@ -243,10 +244,10 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold">UrbanShade OS</h2>
-                  <p className="text-muted-foreground">Version 3.1 Deep Ocean</p>
+                  <p className="text-muted-foreground">{VERSION.displayVersion} - {VERSION.codename}</p>
                   <div className="flex items-center gap-2 mt-2">
                     <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">Up to date</span>
-                    <span className="text-xs text-muted-foreground">Build 8247</span>
+                    <span className="text-xs text-muted-foreground">Build {VERSION.build}</span>
                   </div>
                 </div>
               </div>

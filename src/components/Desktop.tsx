@@ -33,6 +33,7 @@ export interface App {
   minimalInclude?: boolean;
   standardInclude?: boolean;
   downloadable?: boolean;
+  searchAliases?: string[];
 }
 export const Desktop = ({ 
   onLogout, 
@@ -566,6 +567,14 @@ export const Desktop = ({
       icon: <Skull className="w-11 h-11" />,
       run: () => openAppById("containment-game"),
       downloadable: true
+    },
+    {
+      id: "ucg",
+      name: "Untitled Card Game",
+      icon: <Sparkles className="w-11 h-11" />,
+      run: () => openAppById("ucg"),
+      downloadable: true,
+      searchAliases: ["UCG", "21", "twenty one", "blackjack", "card game"]
     },
     {
       id: "chat",

@@ -249,6 +249,174 @@ export async function checkSessionAchievements(): Promise<void> {
   }
 }
 
+// UCG Achievement tracking
+const UCG_STORAGE = {
+  GAMES_COMPLETED: 'ucg_games_completed',
+  TOTAL_WINS: 'ucg_total_wins',
+};
+
+export async function trackUCGRoundWin(handValue: number, wasBlackjack: boolean): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  await grantAchievement(userId, 'ucg_first_win');
+  
+  if (wasBlackjack) {
+    await grantAchievement(userId, 'ucg_blackjack');
+  }
+  
+  if (handValue === 21) {
+    await grantAchievement(userId, 'ucg_win_21');
+  }
+  
+  dispatchQuestProgress('ucg_round_win', 1, { handValue, wasBlackjack });
+}
+
+export async function trackUCGGameComplete(
+  roundsPlayed: number,
+  roundsWon: number,
+  botDifficulty: string,
+  botCount: number
+): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  await grantAchievement(userId, 'ucg_first_game');
+  
+  // Track completed games
+  const gamesCompleted = parseInt(localStorage.getItem(UCG_STORAGE.GAMES_COMPLETED) || '0') + 1;
+  localStorage.setItem(UCG_STORAGE.GAMES_COMPLETED, gamesCompleted.toString());
+  
+  if (gamesCompleted >= 50) {
+    await grantAchievement(userId, 'ucg_50_games');
+  }
+  
+  // Winning streak (5+ wins)
+  if (roundsWon >= 5) {
+    await grantAchievement(userId, 'ucg_win_5');
+  }
+  
+  // Perfect game
+  if (roundsWon === roundsPlayed && roundsPlayed >= 5) {
+    await grantAchievement(userId, 'ucg_perfect_game');
+  }
+  
+  // Marathon (10 rounds)
+  if (roundsPlayed >= 10) {
+    await grantAchievement(userId, 'ucg_marathon');
+  }
+  
+  // Beat hard bots
+  if (botDifficulty === 'hard' && botCount >= 3 && roundsWon > roundsPlayed / 2) {
+    await grantAchievement(userId, 'ucg_beat_hard');
+  }
+  
+  dispatchQuestProgress('ucg_game_complete', 1, { roundsPlayed, roundsWon });
+}
+
+export async function trackUCGCloseCall(playerScore: number, opponentScore: number): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  if (playerScore === 20 && opponentScore === 19) {
+    await grantAchievement(userId, 'ucg_close_call');
+  }
+}
+
+// Containment Breach Achievement tracking
+const CONTAINMENT_STORAGE = {
+  ENCOUNTERED_SUBJECTS: 'containment_encountered_subjects',
+  LORE_READ: 'containment_lore_read',
+};
+
+export async function trackContainmentNightComplete(
+  night: number,
+  powerRemaining: number,
+  luresUsed: number
+): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  // Night completion achievements
+  if (night >= 1) await grantAchievement(userId, 'containment_night1');
+  if (night >= 3) await grantAchievement(userId, 'containment_night3');
+  if (night >= 5) {
+    await grantAchievement(userId, 'containment_night5');
+    await grantAchievement(userId, 'containment_master');
+  }
+  
+  // Power saver
+  if (powerRemaining >= 50) {
+    await grantAchievement(userId, 'containment_power_saver');
+  }
+  
+  // Silent night
+  if (luresUsed === 0) {
+    await grantAchievement(userId, 'containment_no_lure');
+  }
+  
+  dispatchQuestProgress('containment_night_complete', 1, { night, powerRemaining });
+}
+
+export async function trackContainmentDeath(subjectId: string): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  await grantAchievement(userId, 'containment_died');
+  
+  // Track encountered subjects
+  const stored = localStorage.getItem(CONTAINMENT_STORAGE.ENCOUNTERED_SUBJECTS);
+  const encountered: string[] = stored ? JSON.parse(stored) : [];
+  
+  if (!encountered.includes(subjectId)) {
+    encountered.push(subjectId);
+    localStorage.setItem(CONTAINMENT_STORAGE.ENCOUNTERED_SUBJECTS, JSON.stringify(encountered));
+    
+    // Check if all subjects encountered (assuming 5 unique subjects)
+    if (encountered.length >= 5) {
+      await grantAchievement(userId, 'containment_all_subjects');
+    }
+  }
+}
+
+export async function trackContainmentCloseCall(timeRemaining: number): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  if (timeRemaining <= 1000) {
+    await grantAchievement(userId, 'containment_close_call');
+  }
+}
+
+export async function trackContainmentLoreRead(): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  const count = parseInt(localStorage.getItem(CONTAINMENT_STORAGE.LORE_READ) || '0') + 1;
+  localStorage.setItem(CONTAINMENT_STORAGE.LORE_READ, count.toString());
+  
+  if (count >= 5) {
+    await grantAchievement(userId, 'containment_lore_reader');
+  }
+}
+
+export async function trackContainmentSubjectEncounter(subjectId: string): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  const stored = localStorage.getItem(CONTAINMENT_STORAGE.ENCOUNTERED_SUBJECTS);
+  const encountered: string[] = stored ? JSON.parse(stored) : [];
+  
+  if (!encountered.includes(subjectId)) {
+    encountered.push(subjectId);
+    localStorage.setItem(CONTAINMENT_STORAGE.ENCOUNTERED_SUBJECTS, JSON.stringify(encountered));
+    
+    if (encountered.length >= 5) {
+      await grantAchievement(userId, 'containment_all_subjects');
+    }
+  }
+}
+
 // Hook for components to use
 export function useAchievementTriggers() {
   const triggerAppOpen = useCallback(async (appId: string) => {
@@ -289,6 +457,45 @@ export function useAchievementTriggers() {
     await checkSessionAchievements();
   }, []);
 
+  // UCG triggers
+  const triggerUCGRoundWin = useCallback(async (handValue: number, wasBlackjack: boolean) => {
+    await trackUCGRoundWin(handValue, wasBlackjack);
+  }, []);
+
+  const triggerUCGGameComplete = useCallback(async (
+    roundsPlayed: number,
+    roundsWon: number,
+    botDifficulty: string,
+    botCount: number
+  ) => {
+    await trackUCGGameComplete(roundsPlayed, roundsWon, botDifficulty, botCount);
+  }, []);
+
+  const triggerUCGCloseCall = useCallback(async (playerScore: number, opponentScore: number) => {
+    await trackUCGCloseCall(playerScore, opponentScore);
+  }, []);
+
+  // Containment triggers
+  const triggerContainmentNightComplete = useCallback(async (
+    night: number,
+    powerRemaining: number,
+    luresUsed: number
+  ) => {
+    await trackContainmentNightComplete(night, powerRemaining, luresUsed);
+  }, []);
+
+  const triggerContainmentDeath = useCallback(async (subjectId: string) => {
+    await trackContainmentDeath(subjectId);
+  }, []);
+
+  const triggerContainmentCloseCall = useCallback(async (timeRemaining: number) => {
+    await trackContainmentCloseCall(timeRemaining);
+  }, []);
+
+  const triggerContainmentLoreRead = useCallback(async () => {
+    await trackContainmentLoreRead();
+  }, []);
+
   return {
     triggerAppOpen,
     triggerChatMessage,
@@ -299,5 +506,14 @@ export function useAchievementTriggers() {
     triggerThemeChange,
     triggerCrashRecovery,
     checkSession,
+    // UCG
+    triggerUCGRoundWin,
+    triggerUCGGameComplete,
+    triggerUCGCloseCall,
+    // Containment
+    triggerContainmentNightComplete,
+    triggerContainmentDeath,
+    triggerContainmentCloseCall,
+    triggerContainmentLoreRead,
   };
 }
