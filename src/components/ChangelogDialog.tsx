@@ -3,11 +3,12 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight, Info, Paintbrush, Bot } from "lucide-react";
+import { VERSION, getShortVersion } from "@/lib/versionInfo";
 
 export const ChangelogDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState("3.0");
-  const currentVersion = "3.0";
+  const [selectedVersion, setSelectedVersion] = useState(getShortVersion());
+  const currentVersion = getShortVersion();
 
   useEffect(() => {
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
