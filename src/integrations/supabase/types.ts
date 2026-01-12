@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      battlepass_seasons: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          is_active: boolean | null
+          max_level: number | null
+          name: string
+          rewards: Json
+          season_key: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          is_active?: boolean | null
+          max_level?: number | null
+          name: string
+          rewards?: Json
+          season_key: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          is_active?: boolean | null
+          max_level?: number | null
+          name?: string
+          rewards?: Json
+          season_key?: string
+          starts_at?: string
+        }
+        Relationships: []
+      }
       chat_rate_limits: {
         Row: {
           identifier: string
@@ -768,6 +807,50 @@ export type Database = {
         }
         Relationships: []
       }
+      user_battlepass: {
+        Row: {
+          claimed_rewards: Json | null
+          created_at: string | null
+          current_level: number | null
+          current_xp: number | null
+          id: string
+          last_xp_tick: string | null
+          season_id: string | null
+          total_xp_earned: number | null
+          user_id: string
+        }
+        Insert: {
+          claimed_rewards?: Json | null
+          created_at?: string | null
+          current_level?: number | null
+          current_xp?: number | null
+          id?: string
+          last_xp_tick?: string | null
+          season_id?: string | null
+          total_xp_earned?: number | null
+          user_id: string
+        }
+        Update: {
+          claimed_rewards?: Json | null
+          created_at?: string | null
+          current_level?: number | null
+          current_xp?: number | null
+          id?: string
+          last_xp_tick?: string | null
+          season_id?: string | null
+          total_xp_earned?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_battlepass_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "battlepass_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_first_login: {
         Row: {
           created_at: string | null
@@ -786,6 +869,54 @@ export type Database = {
           user_id?: string
           welcomed?: boolean | null
           welcomed_at?: string | null
+        }
+        Relationships: []
+      }
+      user_quests: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          progress: number | null
+          quest_description: string | null
+          quest_id: string
+          quest_name: string
+          rarity: string
+          reset_at: string
+          target: number | null
+          user_id: string
+          xp_reward: number
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          progress?: number | null
+          quest_description?: string | null
+          quest_id: string
+          quest_name: string
+          rarity: string
+          reset_at: string
+          target?: number | null
+          user_id: string
+          xp_reward: number
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          progress?: number | null
+          quest_description?: string | null
+          quest_id?: string
+          quest_name?: string
+          rarity?: string
+          reset_at?: string
+          target?: number | null
+          user_id?: string
+          xp_reward?: number
         }
         Relationships: []
       }
@@ -809,6 +940,33 @@ export type Database = {
           granted_by?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_titles: {
+        Row: {
+          id: string
+          source: string
+          title_id: string
+          title_name: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          source: string
+          title_id: string
+          title_name: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          source?: string
+          title_id?: string
+          title_name?: string
+          unlocked_at?: string | null
           user_id?: string
         }
         Relationships: []
