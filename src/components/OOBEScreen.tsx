@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Waves, Shield, Globe, Keyboard, Wifi, User, Lock, Eye, EyeOff, Settings, Check, ChevronRight, Terminal, Cloud, Monitor, HelpCircle, Mail, RefreshCw, Download, Loader2 } from "lucide-react";
+import { Shield, Globe, Keyboard, Wifi, User, Lock, Eye, EyeOff, Check, ChevronRight, Cloud, Monitor, Mail, Download, Loader2 } from "lucide-react";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { VERSION } from "@/lib/versionInfo";
 
 interface OOBEScreenProps {
   onComplete: () => void;
@@ -61,10 +61,26 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
   ];
 
   const stepIndex = ["welcome", "region", "keyboard", "network", "online-choice", "online-signup", "email-verify", "online-signin", "import-settings", "account", "password", "privacy", "finish"].indexOf(step);
+  const totalSteps = 7;
 
   useEffect(() => {
-    setProgress((stepIndex / 12) * 100);
-  }, [stepIndex]);
+    const stepMapping: Record<string, number> = {
+      "welcome": 0,
+      "region": 1,
+      "keyboard": 2,
+      "network": 3,
+      "online-choice": 4,
+      "online-signup": 4,
+      "email-verify": 4,
+      "online-signin": 4,
+      "import-settings": 4,
+      "account": 4,
+      "password": 5,
+      "privacy": 6,
+      "finish": 7
+    };
+    setProgress((stepMapping[step] / totalSteps) * 100);
+  }, [step]);
 
   useEffect(() => {
     if (step === "finish") {
@@ -110,7 +126,6 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
   const handlePasswordNext = () => {
     setAccountError("");
     
-    // Password is optional - allow empty passwords
     if (password && password.length < 4) {
       setAccountError("Password must be at least 4 characters or empty");
       return;
@@ -121,12 +136,11 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
       return;
     }
     
-    // Save account
     const accounts = JSON.parse(localStorage.getItem("urbanshade_accounts") || "[]");
     const newAccount = {
       id: Date.now().toString(),
       username: username.trim(),
-      password: password, // Can be empty
+      password: password,
       name: username.trim(),
       role: "Operator",
       clearance: 3,
@@ -166,11 +180,9 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
       return;
     }
 
-    // Set username for local account too
     setUsername(onlineUsername);
     setPassword("");
     
-    // Save local account with online link
     const accounts = JSON.parse(localStorage.getItem("urbanshade_accounts") || "[]");
     const newAccount = {
       id: Date.now().toString(),
@@ -191,7 +203,6 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
     setStep("email-verify");
   };
 
-  // Check email verification status
   const checkEmailVerification = async () => {
     setIsCheckingVerification(true);
     setOnlineError("");
@@ -209,11 +220,9 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
         return;
       }
       
-      // Success - email was verified
       const displayName = data.user?.user_metadata?.username || onlineUsername || email.split("@")[0];
       setUsername(displayName);
       
-      // Save local account with online link
       const accounts = JSON.parse(localStorage.getItem("urbanshade_accounts") || "[]");
       const newAccount = {
         id: Date.now().toString(),
@@ -262,11 +271,9 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
       return;
     }
 
-    // Get username from profile or email
     const displayName = data.user?.user_metadata?.username || email.split("@")[0];
     setUsername(displayName);
     
-    // Save local account with online link
     const accounts = JSON.parse(localStorage.getItem("urbanshade_accounts") || "[]");
     const existingOnline = accounts.find((a: any) => a.email === email);
     if (!existingOnline) {
@@ -286,7 +293,6 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
       localStorage.setItem("urbanshade_accounts", JSON.stringify(accounts));
     }
     
-    // Check if there are cloud settings to import
     const conflict = await checkForConflict();
     if (conflict?.cloudSettings) {
       setHasCloudSettings(true);
@@ -326,83 +332,78 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
     onComplete();
   };
 
-  const ToggleSwitch = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
-    <button
-      onClick={onToggle}
-      className={`w-12 h-6 rounded-full transition-all duration-200 ${enabled ? 'bg-cyan-500' : 'bg-slate-600'}`}
-    >
-      <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${enabled ? 'translate-x-6' : 'translate-x-0.5'}`} />
-    </button>
+  // Step indicator dots
+  const StepIndicator = () => (
+    <div className="flex items-center gap-2">
+      {[0, 1, 2, 3, 4, 5, 6].map((i) => {
+        const stepMapping: Record<string, number> = {
+          "welcome": 0, "region": 1, "keyboard": 2, "network": 3,
+          "online-choice": 4, "online-signup": 4, "email-verify": 4,
+          "online-signin": 4, "import-settings": 4, "account": 4,
+          "password": 5, "privacy": 6, "finish": 7
+        };
+        const currentStepNum = stepMapping[step];
+        const isComplete = i < currentStepNum;
+        const isCurrent = i === currentStepNum;
+        
+        return (
+          <div
+            key={i}
+            className={`h-1 rounded-full transition-all duration-300 ${
+              isComplete 
+                ? "w-8 bg-cyan-400" 
+                : isCurrent 
+                  ? "w-8 bg-cyan-500/50" 
+                  : "w-4 bg-slate-700"
+            }`}
+          />
+        );
+      })}
+    </div>
   );
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 text-white flex flex-col overflow-hidden">
-      {/* Ambient effects */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 -left-32 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-32 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-      </div>
-
-      {/* Header */}
-      <div className="h-12 bg-slate-900/80 backdrop-blur flex items-center justify-between px-6 border-b border-cyan-500/20">
-        <div className="flex items-center gap-3">
-          <Waves className="w-5 h-5 text-cyan-400" />
-          <span className="text-cyan-400 font-bold text-sm tracking-wider">URBANSHADE SETUP</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-cyan-600">
-          <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          <span>OOBE v2.2.0</span>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-1 bg-slate-800">
-        <div 
-          className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-500"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-xl relative z-10">
+    <div className="fixed inset-0 bg-slate-950 text-white flex flex-col overflow-hidden">
+      {/* Subtle gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900/50 to-cyan-950/20" />
+      
+      {/* Main content area */}
+      <div className="flex-1 flex items-center justify-center p-8 relative z-10">
+        <div className="w-full max-w-lg">
           
           {/* Welcome */}
           {step === "welcome" && (
-            <div className="animate-fade-in text-center">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                <Shield className="w-12 h-12 text-cyan-400" />
+            <div className="animate-fade-in">
+              <div className="mb-8">
+                <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center">
+                  <Shield className="w-8 h-8 text-cyan-400" />
+                </div>
+                <h1 className="text-4xl font-light text-white mb-2">Welcome</h1>
+                <p className="text-slate-400">Let's set up your UrbanShade workstation</p>
               </div>
-              <h1 className="text-4xl font-bold text-cyan-400 mb-3">Welcome to UrbanShade</h1>
-              <p className="text-cyan-600 mb-8">Let's get your terminal set up</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-6 mb-8 text-left">
-                <p className="text-slate-300 text-sm mb-4">
-                  This setup wizard will guide you through configuring your UrbanShade workstation for optimal facility operations.
-                </p>
-                <ul className="space-y-2 text-sm text-slate-400">
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                    Regional & input settings
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                    Network configuration
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                    Account creation
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                    Privacy preferences
-                  </li>
-                </ul>
+              <div className="space-y-3 mb-10">
+                <div className="flex items-center gap-3 text-sm text-slate-400">
+                  <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-cyan-400">1</div>
+                  <span>Configure region & input</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-slate-400">
+                  <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-cyan-400">2</div>
+                  <span>Connect to network</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-slate-400">
+                  <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-cyan-400">3</div>
+                  <span>Create your account</span>
+                </div>
+                <div className="flex items-center gap-3 text-sm text-slate-400">
+                  <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center text-xs text-cyan-400">4</div>
+                  <span>Privacy preferences</span>
+                </div>
               </div>
 
               <button
                 onClick={() => setStep("region")}
-                className="px-8 py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg font-bold text-cyan-400 transition-all"
+                className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all"
               >
                 Get Started
               </button>
@@ -412,21 +413,23 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
           {/* Region */}
           {step === "region" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Globe className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Select Your Region</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6 flex items-center gap-3">
+                  <Globe className="w-5 h-5 text-cyan-400" />
+                  <h1 className="text-2xl font-light text-white">Select your region</h1>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Choose your facility sector</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg overflow-hidden mb-6">
+              <div className="space-y-2 mb-8">
                 {regions.map((r) => (
                   <button
                     key={r}
                     onClick={() => setRegion(r)}
-                    className={`w-full px-4 py-3 text-left transition-all flex items-center justify-between ${
+                    className={`w-full px-4 py-3 rounded-xl text-left transition-all flex items-center justify-between ${
                       region === r 
-                        ? "bg-cyan-500/20 text-cyan-300 border-l-2 border-cyan-400" 
-                        : "text-slate-300 hover:bg-slate-700/50"
+                        ? "bg-cyan-500/10 border border-cyan-500/30 text-white" 
+                        : "bg-slate-800/50 border border-transparent text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     <span>{r}</span>
@@ -435,18 +438,18 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
                 ))}
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("welcome")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setStep("keyboard")}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all flex items-center justify-center gap-2"
                 >
-                  Next <ChevronRight className="w-4 h-4" />
+                  Continue <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -455,21 +458,23 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
           {/* Keyboard */}
           {step === "keyboard" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Keyboard className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Keyboard Layout</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6 flex items-center gap-3">
+                  <Keyboard className="w-5 h-5 text-cyan-400" />
+                  <h1 className="text-2xl font-light text-white">Keyboard layout</h1>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Select your input configuration</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg overflow-hidden mb-6">
+              <div className="space-y-2 mb-8">
                 {keyboards.map((k) => (
                   <button
                     key={k}
                     onClick={() => setKeyboardLayout(k)}
-                    className={`w-full px-4 py-3 text-left transition-all flex items-center justify-between ${
+                    className={`w-full px-4 py-3 rounded-xl text-left transition-all flex items-center justify-between ${
                       keyboardLayout === k 
-                        ? "bg-cyan-500/20 text-cyan-300 border-l-2 border-cyan-400" 
-                        : "text-slate-300 hover:bg-slate-700/50"
+                        ? "bg-cyan-500/10 border border-cyan-500/30 text-white" 
+                        : "bg-slate-800/50 border border-transparent text-slate-300 hover:bg-slate-800"
                     }`}
                   >
                     <span>{k}</span>
@@ -478,18 +483,18 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
                 ))}
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("region")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setStep("network")}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all flex items-center justify-center gap-2"
                 >
-                  Next <ChevronRight className="w-4 h-4" />
+                  Continue <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -498,30 +503,32 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
           {/* Network */}
           {step === "network" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Wifi className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Network Connection</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6 flex items-center gap-3">
+                  <Wifi className="w-5 h-5 text-cyan-400" />
+                  <h1 className="text-2xl font-light text-white">Network connection</h1>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Connect to facility network</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-4 mb-6 space-y-3">
-                <div className="flex items-center justify-between py-3 px-4 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
+              <div className="space-y-3 mb-8">
+                <div className="px-4 py-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                      <Wifi className="w-4 h-4 text-cyan-400" />
+                    <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                      <Wifi className="w-5 h-5 text-cyan-400" />
                     </div>
                     <div>
-                      <div className="text-cyan-300 font-bold">URBANSHADE-SECURE</div>
-                      <div className="text-xs text-cyan-600">Encrypted • 2.4/5GHz</div>
+                      <div className="text-white font-medium">URBANSHADE-SECURE</div>
+                      <div className="text-xs text-slate-400">Encrypted • 2.4/5GHz</div>
                     </div>
                   </div>
-                  <span className="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded">Connected</span>
+                  <span className="text-xs text-green-400 bg-green-500/10 px-3 py-1 rounded-full">Connected</span>
                 </div>
                 
-                <div className="flex items-center justify-between py-3 px-4 opacity-50">
+                <div className="px-4 py-4 bg-slate-800/30 rounded-xl flex items-center justify-between opacity-50">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                      <Wifi className="w-4 h-4 text-slate-500" />
+                    <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
+                      <Wifi className="w-5 h-5 text-slate-500" />
                     </div>
                     <div>
                       <div className="text-slate-400">FACILITY-GUEST</div>
@@ -531,193 +538,176 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
                 </div>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("keyboard")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => isDevMode ? setStep("account") : setStep("online-choice")}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all flex items-center justify-center gap-2"
                 >
-                  Next <ChevronRight className="w-4 h-4" />
+                  Continue <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Online Account Choice - Only shown if not in Dev Mode */}
+          {/* Online Account Choice */}
           {step === "online-choice" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Cloud className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Connect Your Account</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6">
+                  <h1 className="text-2xl font-light text-white">How would you like to sign in?</h1>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Would you like to use an online account?</p>
               
-              <div className="space-y-4 mb-6">
-                {/* Online Account Option */}
+              <div className="space-y-3 mb-8">
                 <button
                   onClick={() => setStep("online-signup")}
-                  className="w-full p-6 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl text-left transition-all hover:border-cyan-400 hover:bg-cyan-500/20 group"
+                  className="w-full p-5 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl text-left transition-all hover:border-cyan-400 group"
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center shrink-0">
                       <Cloud className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="flex-1">
-                      <div className="text-cyan-300 font-bold text-lg mb-1">Use Online Account</div>
-                      <div className="text-slate-400 text-sm mb-2">Sync your settings across devices. Sign in anywhere.</div>
-                      <div className="flex gap-2 flex-wrap">
-                        <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded">Cloud Sync</span>
-                        <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded">Backup</span>
-                        <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded">Multi-device</span>
-                      </div>
+                      <div className="text-white font-medium mb-1">Create online account</div>
+                      <div className="text-slate-400 text-sm">Sync settings across devices</div>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-cyan-600 group-hover:text-cyan-400 transition-colors" />
+                    <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-cyan-400 transition-colors" />
                   </div>
                 </button>
 
-                {/* Already have account */}
                 <button
                   onClick={() => setStep("online-signin")}
-                  className="w-full p-4 bg-slate-800/50 border border-slate-600/30 rounded-lg text-left transition-all hover:border-cyan-500/30 hover:bg-slate-800 text-sm"
+                  className="w-full p-4 bg-slate-800/30 border border-slate-700/50 rounded-xl text-left transition-all hover:border-slate-600"
                 >
                   <span className="text-slate-400">Already have an account? </span>
-                  <span className="text-cyan-400 font-semibold">Sign in</span>
+                  <span className="text-cyan-400">Sign in</span>
                 </button>
 
-                {/* Local Account Option */}
                 <button
                   onClick={() => setStep("account")}
-                  className="w-full p-6 bg-slate-800/50 border border-slate-600/30 rounded-xl text-left transition-all hover:border-slate-500 group"
+                  className="w-full p-5 bg-slate-800/30 border border-slate-700/50 rounded-xl text-left transition-all hover:border-slate-600 group"
                 >
-                  <div className="flex items-start gap-4">
+                  <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center shrink-0">
                       <Monitor className="w-6 h-6 text-slate-400" />
                     </div>
                     <div className="flex-1">
-                      <div className="text-slate-300 font-bold text-lg mb-1">Use Local Account</div>
-                      <div className="text-slate-500 text-sm mb-2">Stay offline. Your data remains on this device only.</div>
-                      <div className="flex gap-2 flex-wrap">
-                        <span className="text-xs bg-slate-700/50 text-slate-400 px-2 py-0.5 rounded">Offline</span>
-                        <span className="text-xs bg-slate-700/50 text-slate-400 px-2 py-0.5 rounded">Private</span>
-                      </div>
+                      <div className="text-slate-300 font-medium mb-1">Use local account</div>
+                      <div className="text-slate-500 text-sm">Stay offline, data on this device only</div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-slate-400 transition-colors" />
                   </div>
                 </button>
               </div>
 
-              <div className="flex justify-between">
-                <button
-                  onClick={() => setStep("network")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
-                >
-                  Back
-                </button>
-              </div>
+              <button
+                onClick={() => setStep("network")}
+                className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
+              >
+                Back
+              </button>
             </div>
           )}
 
           {/* Online Signup */}
           {step === "online-signup" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Cloud className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Create Online Account</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6 flex items-center gap-3">
+                  <Cloud className="w-5 h-5 text-cyan-400" />
+                  <h1 className="text-2xl font-light text-white">Create your account</h1>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Sign up for cloud sync</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-6 mb-6 space-y-4">
+              <div className="space-y-4 mb-8">
                 <div>
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">USERNAME</label>
+                  <label className="block text-sm text-slate-400 mb-2">Username</label>
                   <input
                     type="text"
                     value={onlineUsername}
                     onChange={(e) => setOnlineUsername(e.target.value)}
                     placeholder="Choose a username"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors"
                     autoFocus
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">EMAIL</label>
+                  <label className="block text-sm text-slate-400 mb-2">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors"
                   />
                 </div>
                 
                 <div className="relative">
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">PASSWORD</label>
+                  <label className="block text-sm text-slate-400 mb-2">Password</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={onlinePassword}
                     onChange={(e) => setOnlinePassword(e.target.value)}
                     placeholder="Min 6 characters"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors pr-12"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-8 text-slate-500 hover:text-cyan-400"
+                    className="absolute right-4 top-10 text-slate-500 hover:text-white"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 
                 {onlineError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                     {onlineError}
                   </div>
                 )}
-
-                <p className="text-xs text-slate-500">
-                  ⚠️ Note: You may need to confirm your email before signing in.
-                </p>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("online-choice")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleOnlineSignup}
                   disabled={isOnlineLoading}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isOnlineLoading ? "Creating..." : "Create Account"} <ChevronRight className="w-4 h-4" />
+                  {isOnlineLoading ? "Creating..." : "Create Account"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Email Verification Step */}
+          {/* Email Verification */}
           {step === "email-verify" && (
-            <div className="animate-fade-in text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                <Mail className="w-10 h-10 text-cyan-400" />
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                  <Mail className="w-8 h-8 text-cyan-400" />
+                </div>
+                <h1 className="text-2xl font-light text-white mb-2">Check your email</h1>
+                <p className="text-slate-400">We sent a verification link to <span className="text-cyan-400">{email}</span></p>
               </div>
-              <h1 className="text-2xl font-bold text-cyan-400 mb-2">Check Your Email</h1>
-              <p className="text-cyan-600 text-sm mb-6">We sent a verification link to <span className="text-cyan-400">{email}</span></p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-6 mb-6 text-left space-y-4">
-                <p className="text-slate-300 text-sm">
-                  Click the link in your email to verify your account, then click "I've Verified" below.
-                </p>
-                
+              <div className="space-y-4 mb-8">
                 {onlineError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                     {onlineError}
                   </div>
                 )}
@@ -725,54 +715,52 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
                 <button
                   onClick={checkEmailVerification}
                   disabled={isCheckingVerification}
-                  className="w-full py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isCheckingVerification ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                  {isCheckingVerification ? "Checking..." : "I've Verified My Email"}
+                  {isCheckingVerification ? "Checking..." : "I've verified my email"}
                 </button>
                 
                 <p className="text-xs text-slate-500 text-center">
-                  Didn't receive it? Check your spam folder or wait a moment and try again.
+                  Didn't receive it? Check your spam folder.
                 </p>
               </div>
 
               <button
                 onClick={() => setStep("online-signup")}
-                className="text-slate-400 hover:text-white transition-colors text-sm"
+                className="w-full text-center text-slate-400 hover:text-white transition-colors text-sm"
               >
-                ← Back to signup
+                Back to signup
               </button>
             </div>
           )}
 
-          {/* Import Settings Step */}
+          {/* Import Settings */}
           {step === "import-settings" && (
-            <div className="animate-fade-in text-center">
-              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                <Download className="w-10 h-10 text-cyan-400" />
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+                  <Download className="w-8 h-8 text-cyan-400" />
+                </div>
+                <h1 className="text-2xl font-light text-white mb-2">Import your settings?</h1>
+                <p className="text-slate-400">We found settings from your cloud account</p>
               </div>
-              <h1 className="text-2xl font-bold text-cyan-400 mb-2">Import Your Settings?</h1>
-              <p className="text-cyan-600 text-sm mb-6">We found settings from your cloud account</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-6 mb-6 space-y-4">
-                <p className="text-slate-300 text-sm text-left">
-                  Your online account has saved settings including desktop icons, installed apps, and theme preferences.
-                </p>
-                
+              <div className="space-y-3 mb-8">
                 <button
                   onClick={handleImportCloudSettings}
                   disabled={isLoadingCloudSettings}
-                  className="w-full py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isLoadingCloudSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                  {isLoadingCloudSettings ? "Importing..." : "Import Cloud Settings"}
+                  {isLoadingCloudSettings ? "Importing..." : "Import settings"}
                 </button>
                 
                 <button
                   onClick={handleSkipImport}
-                  className="w-full py-2 text-slate-400 hover:text-white transition-colors text-sm"
+                  className="w-full py-3 bg-slate-800/50 hover:bg-slate-800 rounded-xl text-slate-400 transition-all"
                 >
-                  Start Fresh Instead
+                  Start fresh instead
                 </button>
               </div>
             </div>
@@ -781,109 +769,113 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
           {/* Online Signin */}
           {step === "online-signin" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Cloud className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Sign In</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6 flex items-center gap-3">
+                  <Cloud className="w-5 h-5 text-cyan-400" />
+                  <h1 className="text-2xl font-light text-white">Sign in</h1>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Sign in to your online account</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-6 mb-6 space-y-4">
+              <div className="space-y-4 mb-8">
                 <div>
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">EMAIL</label>
+                  <label className="block text-sm text-slate-400 mb-2">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors"
                     autoFocus
                   />
                 </div>
                 
                 <div className="relative">
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">PASSWORD</label>
+                  <label className="block text-sm text-slate-400 mb-2">Password</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={onlinePassword}
                     onChange={(e) => setOnlinePassword(e.target.value)}
                     placeholder="Your password"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors pr-12"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-8 text-slate-500 hover:text-cyan-400"
+                    className="absolute right-4 top-10 text-slate-500 hover:text-white"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 
                 {onlineError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                     {onlineError}
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("online-choice")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleOnlineSignin}
                   disabled={isOnlineLoading}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isOnlineLoading ? "Signing in..." : "Sign In"} <ChevronRight className="w-4 h-4" />
+                  {isOnlineLoading ? "Signing in..." : "Sign In"}
                 </button>
               </div>
             </div>
           )}
 
-          {/* Account */}
+          {/* Account (Local) */}
           {step === "account" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <User className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Create Your Account</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6 flex items-center gap-3">
+                  <User className="w-5 h-5 text-cyan-400" />
+                  <h1 className="text-2xl font-light text-white">Create your account</h1>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Enter your operator name</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-6 mb-6 space-y-4">
+              <div className="space-y-4 mb-8">
                 <div>
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">USERNAME</label>
+                  <label className="block text-sm text-slate-400 mb-2">Username</label>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors"
                     autoFocus
                   />
                 </div>
                 
                 {accountError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                     {accountError}
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => isDevMode ? setStep("network") : setStep("online-choice")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleAccountNext}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all flex items-center justify-center gap-2"
                 >
-                  Next <ChevronRight className="w-4 h-4" />
+                  Continue <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -892,63 +884,64 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
           {/* Password */}
           {step === "password" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Lock className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Set Password</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6 flex items-center gap-3">
+                  <Lock className="w-5 h-5 text-cyan-400" />
+                  <h1 className="text-2xl font-light text-white">Set a password</h1>
+                </div>
+                <p className="text-slate-500 text-sm mt-1">Optional - leave empty to skip</p>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Secure your account (optional)</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-6 mb-6 space-y-4">
+              <div className="space-y-4 mb-8">
                 <div className="relative">
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">PASSWORD</label>
+                  <label className="block text-sm text-slate-400 mb-2">Password</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter password (or leave empty)"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors pr-12"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-8 text-slate-500 hover:text-cyan-400"
+                    className="absolute right-4 top-10 text-slate-500 hover:text-white"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 
                 <div>
-                  <label className="block text-xs text-cyan-600 mb-2 font-mono">CONFIRM PASSWORD</label>
+                  <label className="block text-sm text-slate-400 mb-2">Confirm password</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm password"
-                    className="w-full px-4 py-3 bg-slate-900/50 border border-cyan-500/30 rounded-lg text-cyan-300 placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors"
                   />
                 </div>
-
-                <p className="text-xs text-slate-500">Leave empty for no password (not recommended)</p>
                 
                 {accountError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
                     {accountError}
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("account")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handlePasswordNext}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all flex items-center justify-center gap-2"
                 >
-                  Next <ChevronRight className="w-4 h-4" />
+                  Continue <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -957,48 +950,65 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
           {/* Privacy */}
           {step === "privacy" && (
             <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-2">
-                <Settings className="w-6 h-6 text-cyan-400" />
-                <h1 className="text-2xl font-bold text-cyan-400">Privacy Settings</h1>
+              <div className="mb-8">
+                <StepIndicator />
+                <div className="mt-6">
+                  <h1 className="text-2xl font-light text-white">Privacy settings</h1>
+                  <p className="text-slate-500 text-sm mt-1">Choose what data to share</p>
+                </div>
               </div>
-              <p className="text-cyan-600 text-sm mb-6">Configure data preferences</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg divide-y divide-cyan-500/10 mb-6">
-                <div className="p-4 flex items-center justify-between">
+              <div className="space-y-3 mb-8">
+                <div className="p-4 bg-slate-800/30 rounded-xl flex items-center justify-between">
                   <div>
-                    <div className="text-cyan-300 font-bold text-sm">System Telemetry</div>
+                    <div className="text-white text-sm font-medium">System telemetry</div>
                     <div className="text-xs text-slate-500">Help improve UrbanShade</div>
                   </div>
-                  <ToggleSwitch enabled={telemetry} onToggle={() => setTelemetry(!telemetry)} />
+                  <button
+                    onClick={() => setTelemetry(!telemetry)}
+                    className={`w-12 h-6 rounded-full transition-all duration-200 ${telemetry ? 'bg-cyan-500' : 'bg-slate-600'}`}
+                  >
+                    <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${telemetry ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
                 </div>
                 
-                <div className="p-4 flex items-center justify-between">
+                <div className="p-4 bg-slate-800/30 rounded-xl flex items-center justify-between">
                   <div>
-                    <div className="text-cyan-300 font-bold text-sm">Location Services</div>
+                    <div className="text-white text-sm font-medium">Location services</div>
                     <div className="text-xs text-slate-500">Enable depth tracking</div>
                   </div>
-                  <ToggleSwitch enabled={locationServices} onToggle={() => setLocationServices(!locationServices)} />
+                  <button
+                    onClick={() => setLocationServices(!locationServices)}
+                    className={`w-12 h-6 rounded-full transition-all duration-200 ${locationServices ? 'bg-cyan-500' : 'bg-slate-600'}`}
+                  >
+                    <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${locationServices ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
                 </div>
                 
-                <div className="p-4 flex items-center justify-between">
+                <div className="p-4 bg-slate-800/30 rounded-xl flex items-center justify-between">
                   <div>
-                    <div className="text-cyan-300 font-bold text-sm">Crash Reports</div>
+                    <div className="text-white text-sm font-medium">Crash reports</div>
                     <div className="text-xs text-slate-500">Send diagnostic data</div>
                   </div>
-                  <ToggleSwitch enabled={crashReports} onToggle={() => setCrashReports(!crashReports)} />
+                  <button
+                    onClick={() => setCrashReports(!crashReports)}
+                    className={`w-12 h-6 rounded-full transition-all duration-200 ${crashReports ? 'bg-cyan-500' : 'bg-slate-600'}`}
+                  >
+                    <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform duration-200 ${crashReports ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                  </button>
                 </div>
               </div>
 
-              <div className="flex justify-between">
+              <div className="flex gap-3">
                 <button
                   onClick={() => setStep("password")}
-                  className="px-6 py-2 text-slate-400 hover:text-white transition-colors"
+                  className="px-6 py-3 text-slate-400 hover:text-white transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={() => setStep("finish")}
-                  className="px-8 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-lg text-cyan-400 font-bold transition-all flex items-center gap-2"
+                  className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all flex items-center justify-center gap-2"
                 >
                   Finish Setup <ChevronRight className="w-4 h-4" />
                 </button>
@@ -1008,27 +1018,26 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
 
           {/* Finish */}
           {step === "finish" && (
-            <div className="animate-fade-in text-center">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-                <Terminal className="w-12 h-12 text-cyan-400" />
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <h1 className="text-3xl font-light text-white mb-2">Welcome, {username}</h1>
+                <p className="text-slate-400">Setting up your workstation...</p>
               </div>
-              <h1 className="text-3xl font-bold text-cyan-400 mb-2">Welcome, {username}</h1>
-              <p className="text-cyan-600 mb-8">Configuring your workstation...</p>
               
-              <div className="bg-slate-800/50 border border-cyan-500/20 rounded-lg p-4 mb-6 text-left font-mono text-xs max-h-48 overflow-y-auto">
-              {finishMessages.filter(Boolean).map((msg, i) => (
+              <div className="bg-slate-800/30 rounded-xl p-4 mb-6 font-mono text-xs max-h-48 overflow-y-auto">
+                {finishMessages.filter(Boolean).map((msg, i) => (
                   <div key={i} className="flex items-center gap-2 py-1">
-                    <span className="text-cyan-600">&gt;</span>
-                    <span className={msg?.includes("complete") ? "text-green-400" : "text-cyan-300"}>{msg}</span>
+                    <span className="text-slate-600">&gt;</span>
+                    <span className={msg?.includes("complete") ? "text-green-400" : "text-slate-400"}>{msg}</span>
                   </div>
                 ))}
-                {finishProgress < 100 && <span className="text-cyan-400 animate-pulse">█</span>}
+                {finishProgress < 100 && <span className="text-cyan-400 animate-pulse">_</span>}
               </div>
 
-              <div className="mb-6">
-                <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="mb-8">
+                <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
                   <div 
-                    className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-300"
+                    className="h-full bg-cyan-500 transition-all duration-300"
                     style={{ width: `${finishProgress}%` }}
                   />
                 </div>
@@ -1037,7 +1046,7 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
               {finishProgress >= 100 && (
                 <button
                   onClick={handleComplete}
-                  className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 rounded-lg font-bold text-slate-900 transition-all animate-fade-in"
+                  className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 rounded-xl font-semibold text-slate-900 transition-all animate-fade-in"
                 >
                   Enter UrbanShade
                 </button>
@@ -1048,8 +1057,8 @@ export const OOBEScreen = ({ onComplete }: OOBEScreenProps) => {
       </div>
 
       {/* Footer */}
-      <div className="h-10 bg-slate-900/80 backdrop-blur flex items-center justify-between px-6 text-xs text-slate-600 border-t border-cyan-500/20">
-        <span>Depth: 8,247m • Pressure: 824 atm</span>
+      <div className="h-12 flex items-center justify-between px-8 text-xs text-slate-600 relative z-10">
+        <span>{VERSION.displayVersion}</span>
         <span>© 2024 UrbanShade Corporation</span>
       </div>
     </div>

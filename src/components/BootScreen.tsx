@@ -18,12 +18,13 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [stages, setStages] = useState<BootStage[]>([]);
+  const [phase, setPhase] = useState<"logo" | "loading">("logo");
+  const [logoVisible, setLogoVisible] = useState(false);
 
   // Get BIOS settings
   const biosSettings = getBiosSettings();
   const isFastBoot = biosSettings.fastBoot;
   const bootTimeout = biosSettings.bootTimeout;
-  const showBootLogo = biosSettings.bootLogo;
 
   // Initialize stages
   useEffect(() => {
@@ -79,9 +80,24 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
     };
   }, [showSafeModePrompt, onSafeMode]);
 
+  // Logo phase animation
+  useEffect(() => {
+    if (showSafeModePrompt) return;
+    
+    // Fade in logo
+    setTimeout(() => setLogoVisible(true), 100);
+    
+    // After 1 second, show loading phase
+    const timer = setTimeout(() => {
+      setPhase("loading");
+    }, isFastBoot ? 500 : 1000);
+    
+    return () => clearTimeout(timer);
+  }, [showSafeModePrompt, isFastBoot]);
+
   // Boot sequence runner
   useEffect(() => {
-    if (showSafeModePrompt || stages.length === 0) return;
+    if (phase !== "loading" || stages.length === 0) return;
 
     const totalStages = stages.length;
     const baseDelay = isFastBoot ? 150 : 350;
@@ -121,35 +137,34 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
     };
 
     runStage();
-  }, [showSafeModePrompt, stages.length, isFastBoot, onComplete]);
+  }, [phase, stages.length, isFastBoot, onComplete]);
 
   const getCurrentAction = () => {
     if (currentStageIndex >= stages.length) return 'Starting...';
     const stage = stages[currentStageIndex];
     if (!stage) return 'Initializing...';
-    return stage.label;
+    return stage.label + '...';
   };
 
   if (showSafeModePrompt) {
     return (
-      <div className="fixed inset-0 bg-black font-mono flex items-center justify-center">
-        <div className="text-center space-y-4">
-          {showBootLogo && (
-            <div className="text-primary text-2xl font-bold animate-pulse tracking-widest">
-              URBANSHADE OS
-            </div>
-          )}
-          {!showBootLogo && (
-            <div className="text-primary text-lg">
-              Starting Urbanshade OS...
-            </div>
-          )}
-          <div className="text-primary/80 text-sm">
-            Press <kbd className="px-3 py-1 bg-primary/20 rounded text-primary font-bold border border-primary/40">F8</kbd> for Safe Mode
+      <div className="fixed inset-0 bg-black flex items-center justify-center">
+        <div className="text-center space-y-6">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <img 
+              src="/favicon.png" 
+              alt="UrbanShade" 
+              className="w-20 h-20 animate-pulse"
+            />
           </div>
-          <div className="text-primary/50 text-xs">
+          
+          <div className="text-cyan-400/80 text-sm font-mono">
+            Press <kbd className="px-3 py-1.5 bg-cyan-500/10 rounded-md text-cyan-400 font-bold border border-cyan-500/30 mx-1">F8</kbd> for Safe Mode
+          </div>
+          <div className="text-slate-600 text-xs font-mono">
             Booting normally in {safeModeCountdown}...
-            {isFastBoot && <span className="ml-2 text-green-400/70">(Fast Boot)</span>}
+            {isFastBoot && <span className="ml-2 text-cyan-500/50">(Fast Boot)</span>}
           </div>
         </div>
       </div>
@@ -157,66 +172,34 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black font-mono flex flex-col items-center justify-center">
-      {/* Logo */}
-      {showBootLogo && (
-        <div className="mb-8">
-          <div className="text-primary text-3xl font-bold tracking-widest">
-            URBANSHADE
-          </div>
-          <div className="text-primary/50 text-sm text-center mt-1">
-            Deep Ocean Edition
-          </div>
-        </div>
-      )}
+    <div className="fixed inset-0 bg-black flex flex-col">
+      {/* Centered Logo */}
+      <div className="flex-1 flex items-center justify-center">
+        <img 
+          src="/favicon.png" 
+          alt="UrbanShade" 
+          className={`w-24 h-24 transition-opacity duration-500 ${logoVisible ? 'opacity-100' : 'opacity-0'}`}
+        />
+      </div>
 
-      {/* Main content area */}
-      <div className="w-80 space-y-6">
-        {/* Current action */}
-        <div className="text-center">
-          <div className="text-primary/80 text-sm">
-            {getCurrentAction()}
-            <span className="animate-pulse">...</span>
+      {/* Bottom Progress Bar - Only visible during loading phase */}
+      <div className={`h-12 transition-opacity duration-300 ${phase === "loading" ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Progress bar at the very bottom */}
+        <div className="absolute bottom-0 left-0 right-0">
+          {/* Status text on the right */}
+          <div className="flex justify-end px-4 mb-1">
+            <span className="text-xs text-cyan-500/70 font-mono">
+              {getCurrentAction()}
+            </span>
           </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="space-y-2">
-          <div className="h-1 bg-primary/20 rounded-full overflow-hidden">
+          
+          {/* Thin blue progress bar */}
+          <div className="h-1 bg-slate-900">
             <div 
-              className="h-full bg-primary transition-all duration-300 ease-out"
+              className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="flex justify-between text-[10px] text-primary/50">
-            <span>{progress}%</span>
-            <span>{isFastBoot ? 'FAST BOOT' : 'NORMAL BOOT'}</span>
-          </div>
-        </div>
-
-        {/* Stage indicators (compact) */}
-        <div className="flex justify-center gap-1">
-          {stages.map((stage, idx) => (
-            <div 
-              key={idx}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                stage.status === 'done' ? 'bg-primary' :
-                stage.status === 'warn' ? 'bg-yellow-500' :
-                stage.status === 'error' ? 'bg-red-500' :
-                stage.status === 'running' ? 'bg-primary animate-pulse' :
-                'bg-primary/20'
-              }`}
-              title={stage.label}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom info */}
-      <div className="absolute bottom-4 left-0 right-0 px-4">
-        <div className="flex justify-between text-[10px] text-primary/40">
-          <span>URBANSHADE HADAL BLACKSITE</span>
-          <span>DEPTH: 8,247m | HULL: 98.7%</span>
         </div>
       </div>
     </div>
