@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_feed: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string | null
+          id: string
+          is_public: boolean
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          is_public?: boolean
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          is_public?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       battlepass_seasons: {
         Row: {
           created_at: string | null
@@ -95,6 +122,42 @@ export type Database = {
           status?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      gift_transactions: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          gift_type: string
+          id: string
+          item_id: string | null
+          item_type: string | null
+          message: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          gift_type: string
+          id?: string
+          item_id?: string | null
+          item_type?: string | null
+          message?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          gift_type?: string
+          id?: string
+          item_id?: string | null
+          item_type?: string | null
+          message?: string | null
+          recipient_id?: string
+          sender_id?: string
         }
         Relationships: []
       }
@@ -460,6 +523,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_visitors: {
+        Row: {
+          id: string
+          profile_user_id: string
+          visited_at: string | null
+          visitor_user_id: string
+        }
+        Insert: {
+          id?: string
+          profile_user_id: string
+          visited_at?: string | null
+          visitor_user_id: string
+        }
+        Update: {
+          id?: string
+          profile_user_id?: string
+          visited_at?: string | null
+          visitor_user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -467,11 +551,17 @@ export type Database = {
           clearance: number | null
           created_at: string
           display_name: string | null
+          equipped_badge_id: string | null
+          equipped_title_id: string | null
           id: string
           is_online: boolean | null
+          last_login_bonus: string | null
           last_seen: string | null
+          lifetime_kroner: number
+          login_streak: number
           role: string | null
           settings: Json | null
+          spendable_kroner: number
           total_chat_messages: number | null
           total_messages: number | null
           updated_at: string
@@ -484,11 +574,17 @@ export type Database = {
           clearance?: number | null
           created_at?: string
           display_name?: string | null
+          equipped_badge_id?: string | null
+          equipped_title_id?: string | null
           id?: string
           is_online?: boolean | null
+          last_login_bonus?: string | null
           last_seen?: string | null
+          lifetime_kroner?: number
+          login_streak?: number
           role?: string | null
           settings?: Json | null
+          spendable_kroner?: number
           total_chat_messages?: number | null
           total_messages?: number | null
           updated_at?: string
@@ -501,11 +597,17 @@ export type Database = {
           clearance?: number | null
           created_at?: string
           display_name?: string | null
+          equipped_badge_id?: string | null
+          equipped_title_id?: string | null
           id?: string
           is_online?: boolean | null
+          last_login_bonus?: string | null
           last_seen?: string | null
+          lifetime_kroner?: number
+          login_streak?: number
           role?: string | null
           settings?: Json | null
+          spendable_kroner?: number
           total_chat_messages?: number | null
           total_messages?: number | null
           updated_at?: string
@@ -559,6 +661,48 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      shop_items: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_available: boolean
+          item_id: string
+          item_type: string
+          limited_until: string | null
+          name: string
+          preview_data: Json | null
+          price: number
+          rarity: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_available?: boolean
+          item_id: string
+          item_type: string
+          limited_until?: string | null
+          name: string
+          preview_data?: Json | null
+          price?: number
+          rarity?: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_available?: boolean
+          item_id?: string
+          item_type?: string
+          limited_until?: string | null
+          name?: string
+          preview_data?: Json | null
+          price?: number
+          rarity?: string
         }
         Relationships: []
       }
@@ -851,6 +995,39 @@ export type Database = {
           },
         ]
       }
+      user_certificates: {
+        Row: {
+          achievement_rarity: string | null
+          certificate_id: string
+          certificate_name: string
+          certificate_type: string
+          earned_at: string | null
+          id: string
+          season_key: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_rarity?: string | null
+          certificate_id: string
+          certificate_name: string
+          certificate_type: string
+          earned_at?: string | null
+          id?: string
+          season_key?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_rarity?: string | null
+          certificate_id?: string
+          certificate_name?: string
+          certificate_type?: string
+          earned_at?: string | null
+          id?: string
+          season_key?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_first_login: {
         Row: {
           created_at: string | null
@@ -869,6 +1046,36 @@ export type Database = {
           user_id?: string
           welcomed?: boolean | null
           welcomed_at?: string | null
+        }
+        Relationships: []
+      }
+      user_inventory: {
+        Row: {
+          acquired_at: string | null
+          gifted_by: string | null
+          id: string
+          item_id: string
+          item_type: string
+          source: string
+          user_id: string
+        }
+        Insert: {
+          acquired_at?: string | null
+          gifted_by?: string | null
+          id?: string
+          item_id: string
+          item_type: string
+          source: string
+          user_id: string
+        }
+        Update: {
+          acquired_at?: string | null
+          gifted_by?: string | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          source?: string
+          user_id?: string
         }
         Relationships: []
       }
