@@ -43,7 +43,9 @@ export const Desktop = ({
   onLockdown, 
   onEnterBios, 
   onUpdate,
-  onLock
+  onLock,
+  safeMode = false,
+  onExitSafeMode
 }: { 
   onLogout: () => void; 
   onReboot: () => void; 
@@ -53,6 +55,8 @@ export const Desktop = ({
   onEnterBios?: () => void; 
   onUpdate?: () => void;
   onLock?: () => void;
+  safeMode?: boolean;
+  onExitSafeMode?: () => void;
 }) => {
   const [startMenuOpen, setStartMenuOpen] = useState(false);
   const [windows, setWindows] = useState<Array<{ id: string; app: App; zIndex: number; minimized?: boolean }>>([]);
@@ -816,12 +820,45 @@ export const Desktop = ({
 
   return (
     <div 
-      className="relative h-screen w-full overflow-hidden"
+      className={`relative h-screen w-full overflow-hidden ${safeMode ? 'grayscale-[30%] contrast-[90%]' : ''}`}
       style={{
-        background: `linear-gradient(160deg, ${bgGradient.start} 0%, ${bgGradient.end} 50%, ${bgGradient.start} 100%)`
+        background: safeMode 
+          ? 'linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f0f1a 100%)'
+          : `linear-gradient(160deg, ${bgGradient.start} 0%, ${bgGradient.end} 50%, ${bgGradient.start} 100%)`
       }}
       onContextMenu={handleContextMenu}
     >
+      {/* Safe Mode Watermarks */}
+      {safeMode && (
+        <>
+          <div className="fixed top-20 left-4 text-yellow-500/40 font-bold text-sm z-[9999] pointer-events-none select-none">
+            SAFE MODE
+          </div>
+          <div className="fixed top-20 right-4 text-yellow-500/40 font-bold text-sm z-[9999] pointer-events-none select-none">
+            SAFE MODE
+          </div>
+          <div className="fixed bottom-20 left-4 text-yellow-500/40 font-bold text-sm z-[9999] pointer-events-none select-none">
+            SAFE MODE
+          </div>
+          <div className="fixed bottom-20 right-4 text-yellow-500/40 font-bold text-sm z-[9999] pointer-events-none select-none">
+            SAFE MODE
+          </div>
+          {/* Safe Mode Banner */}
+          <div className="fixed top-12 left-1/2 -translate-x-1/2 z-[9999] bg-yellow-600/90 text-black px-4 py-1.5 rounded-b-lg text-xs font-bold flex items-center gap-2 shadow-lg">
+            <Shield className="w-4 h-4" />
+            Safe Mode - Limited functionality. Restart to exit.
+            {onExitSafeMode && (
+              <button 
+                onClick={onExitSafeMode}
+                className="ml-2 bg-black/20 hover:bg-black/30 px-2 py-0.5 rounded text-[10px] transition-colors"
+              >
+                Exit Safe Mode
+              </button>
+            )}
+          </div>
+        </>
+      )}
+
       {/* Subtle grid overlay */}
       <div 
         className="absolute inset-0 opacity-[0.02] pointer-events-none"
@@ -837,11 +874,13 @@ export const Desktop = ({
       {/* Top gradient fade */}
       <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-background/30 to-transparent pointer-events-none z-[5]" />
 
-      {/* Widgets Layer */}
-      <WidgetManager onOpenApp={(appId) => {
-        const app = allApps.find(a => a.id === appId);
-        if (app) openWindow(app);
-      }} />
+      {/* Widgets Layer - Disabled in Safe Mode */}
+      {!safeMode && (
+        <WidgetManager onOpenApp={(appId) => {
+          const app = allApps.find(a => a.id === appId);
+          if (app) openWindow(app);
+        }} />
+      )}
 
       {/* Desktop Icons - Grid layout with top padding for taskbar */}
       <div className="absolute inset-0 z-10 pt-16 px-6 pb-24 pointer-events-none">

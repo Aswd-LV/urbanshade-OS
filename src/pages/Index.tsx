@@ -80,7 +80,9 @@ const Index = () => {
   const [lockdownMode, setLockdownMode] = useState(false);
   const [lockdownProtocol, setLockdownProtocol] = useState<string>("");
   const [showTour, setShowTour] = useState(false);
-  const [safeMode, setSafeMode] = useState(false);
+  const [safeMode, setSafeMode] = useState(() => {
+    return sessionStorage.getItem("urbanshade_safe_mode") === "true";
+  });
   const [needsRecovery, setNeedsRecovery] = useState(false);
   const [inRecoveryMode, setInRecoveryMode] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -703,8 +705,10 @@ const Index = () => {
     return <BootScreen 
       onComplete={() => setBooted(true)} 
       onSafeMode={() => {
+        sessionStorage.setItem("urbanshade_safe_mode", "true");
         setSafeMode(true);
         setBooted(true);
+        toast.info("Entering Safe Mode...");
       }}
     />;
   }
@@ -766,6 +770,13 @@ const Index = () => {
         onEnterBios={handleEnterBios}
         onUpdate={() => setIsUpdating(true)}
         onLock={() => setIsLocked(true)}
+        safeMode={safeMode}
+        onExitSafeMode={() => {
+          sessionStorage.removeItem("urbanshade_safe_mode");
+          setSafeMode(false);
+          // Trigger reboot to exit safe mode
+          handleReboot();
+        }}
       />
       <ChangelogDialog />
       {maintenanceMode && <MaintenanceMode onExit={() => setMaintenanceMode(false)} />}

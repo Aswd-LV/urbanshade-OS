@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { 
   Trophy, Star, Gift, Lock, Check, Clock, ChevronLeft, ChevronRight,
-  Sparkles, Crown, Zap, AlertCircle, Award, Palette, Medal
+  Sparkles, Crown, Zap, AlertCircle, Award, Palette, Medal, Target,
+  RefreshCw, Flame
 } from 'lucide-react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useBattlePass } from '@/hooks/useBattlePass';
+import { useQuests } from '@/hooks/useQuests';
+import { RARITY_CONFIG } from '@/lib/quests';
 import { cn } from '@/lib/utils';
 
 interface BattlePassGridProps {
@@ -40,6 +42,7 @@ export const BattlePassGrid = ({ userId }: BattlePassGridProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [activeTab, setActiveTab] = useState<'rewards' | 'quests'>('rewards');
   
   const { 
     season, 
@@ -52,6 +55,14 @@ export const BattlePassGrid = ({ userId }: BattlePassGridProps) => {
     canClaimReward,
     isRewardUnlocked
   } = useBattlePass(userId);
+
+  const {
+    quests,
+    loading: questsLoading,
+    questStreak,
+    getTimeUntilReset,
+    getCompletedCount
+  } = useQuests(userId);
 
   const checkScroll = () => {
     if (!scrollRef.current) return;
@@ -120,9 +131,14 @@ export const BattlePassGrid = ({ userId }: BattlePassGridProps) => {
   const xpNeeded = getXpNeeded();
   const timeRemaining = getTimeRemaining();
 
+  const getRarityStyle = (rarity: string) => {
+    const config = RARITY_CONFIG[rarity as keyof typeof RARITY_CONFIG];
+    return config ? `${config.color} ${config.bgColor}` : 'text-muted-foreground bg-muted/50';
+  };
+
   return (
     <div className="space-y-4">
-      {/* Season Header */}
+      {/* Season Header with Tabs */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
@@ -133,12 +149,44 @@ export const BattlePassGrid = ({ userId }: BattlePassGridProps) => {
             <p className="text-xs text-muted-foreground">{season.description}</p>
           </div>
         </div>
-        {timeRemaining && (
-          <Badge variant="outline" className="gap-1">
-            <Clock className="w-3 h-3" />
-            {timeRemaining}
-          </Badge>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Tab Switcher */}
+          <div className="flex bg-muted/30 rounded-lg p-0.5">
+            <button
+              onClick={() => setActiveTab('rewards')}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                activeTab === 'rewards' 
+                  ? "bg-primary text-primary-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Rewards
+            </button>
+            <button
+              onClick={() => setActiveTab('quests')}
+              className={cn(
+                "px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1",
+                activeTab === 'quests' 
+                  ? "bg-primary text-primary-foreground" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Quests
+              {quests.filter(q => !q.completed).length > 0 && (
+                <span className="w-4 h-4 rounded-full bg-yellow-500 text-[10px] text-black font-bold flex items-center justify-center">
+                  {quests.filter(q => !q.completed).length}
+                </span>
+              )}
+            </button>
+          </div>
+          {timeRemaining && (
+            <Badge variant="outline" className="gap-1">
+              <Clock className="w-3 h-3" />
+              {timeRemaining}
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Level & XP Bar */}
@@ -166,6 +214,120 @@ export const BattlePassGrid = ({ userId }: BattlePassGridProps) => {
         </div>
       </div>
 
+      {/* Quests Tab Content */}
+      {activeTab === 'quests' && (
+        <div className="space-y-3">
+          {/* Quest Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Daily Quests</span>
+              {questStreak > 0 && (
+                <Badge variant="secondary" className="gap-1 text-orange-400">
+                  <Flame className="w-3 h-3" />
+                  {questStreak} streak
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <RefreshCw className="w-3 h-3" />
+              Resets in {getTimeUntilReset()}
+            </div>
+          </div>
+
+          {/* Quest Cards */}
+          {questsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+            </div>
+          ) : quests.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No active quests</p>
+              <p className="text-xs">Check back after the next reset!</p>
+            </div>
+          ) : (
+            <div className="grid gap-2">
+              {quests.map((quest) => {
+                const progressPercent = Math.min((quest.progress / quest.target) * 100, 100);
+                const rarityConfig = RARITY_CONFIG[quest.rarity as keyof typeof RARITY_CONFIG];
+                
+                return (
+                  <div
+                    key={quest.id}
+                    className={cn(
+                      "relative p-3 rounded-lg border transition-all",
+                      quest.completed 
+                        ? "bg-green-500/10 border-green-500/30" 
+                        : `${rarityConfig?.bgColor || 'bg-muted/20'} border-border/50 hover:border-border`
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={cn(
+                            "text-xs font-medium px-1.5 py-0.5 rounded",
+                            rarityConfig?.color || 'text-muted-foreground',
+                            rarityConfig?.bgColor || 'bg-muted/50'
+                          )}>
+                            {quest.rarity.toUpperCase()}
+                          </span>
+                          <h4 className={cn(
+                            "font-medium text-sm",
+                            quest.completed ? "text-green-400 line-through" : "text-foreground"
+                          )}>
+                            {quest.quest_name}
+                          </h4>
+                        </div>
+                        {quest.quest_description && (
+                          <p className="text-xs text-muted-foreground mb-2">{quest.quest_description}</p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <Progress value={progressPercent} className="h-1.5 flex-1" />
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            {quest.progress}/{quest.target}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="flex items-center gap-1 text-yellow-400">
+                          <Star className="w-3 h-3" />
+                          <span className="text-xs font-bold">+{quest.xp_reward}</span>
+                        </div>
+                        {quest.completed && (
+                          <Check className="w-4 h-4 text-green-400" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Quest Stats */}
+          <div className="grid grid-cols-3 gap-2 pt-2">
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/30 text-center">
+              <p className="text-lg font-bold text-green-400">{getCompletedCount()}</p>
+              <p className="text-[10px] text-muted-foreground">Completed</p>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/30 text-center">
+              <p className="text-lg font-bold text-foreground">{quests.length - getCompletedCount()}</p>
+              <p className="text-[10px] text-muted-foreground">Remaining</p>
+            </div>
+            <div className="p-2 rounded-lg bg-muted/20 border border-border/30 text-center">
+              <p className="text-lg font-bold text-yellow-400">
+                {quests.reduce((sum, q) => sum + (q.completed ? q.xp_reward : 0), 0)}
+              </p>
+              <p className="text-[10px] text-muted-foreground">XP Earned</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rewards Tab Content */}
+      {activeTab === 'rewards' && (
+        <>
       {/* Horizontal Reward Grid - Fortnite Style */}
       <div className="relative">
         {/* Scroll Buttons */}
@@ -304,6 +466,8 @@ export const BattlePassGrid = ({ userId }: BattlePassGridProps) => {
           <p className="text-[10px] text-muted-foreground uppercase">Locked</p>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };
