@@ -53,6 +53,8 @@ import { ContainmentGame } from "./apps/ContainmentGame/ContainmentGame";
 import { PersonnelCenter } from "./apps/PersonnelCenter";
 import { SignalInterceptor } from "./apps/SignalInterceptor";
 import { UntitledCardGame } from "./apps/UntitledCardGame";
+import { Shop } from "./apps/Shop";
+import { CertificateViewer } from "./apps/CertificateViewer";
 
 interface WindowData {
   id: string;
@@ -254,6 +256,10 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         }} />;
       case "computer-management":
         return <ComputerManagement />;
+      case "shop":
+        return <Shop />;
+      case "certificate-viewer":
+        return <CertificateViewer />;
       default:
         return (
           <div className="p-4 text-muted-foreground">

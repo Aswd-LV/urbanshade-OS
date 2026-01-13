@@ -35,23 +35,42 @@ export const ChangelogDialog = () => {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-rose-500 to-orange-600",
       tagline: "THE YEAR UPDATE",
-      overview: "The biggest update yet! Battle Pass system, quest tracking, Containment Breach game, redesigned App Store, and much more.",
+      overview: "The biggest update yet! Battle Pass system, quest tracking, Containment Breach game, Kroner currency & Shop, Certificate Viewer, and much more.",
       sections: {
+        "Kroner Economy System": [
+          "NEW: Dual currency - Lifetime Kroner (leaderboards) and Spendable Kroner (purchases)",
+          "Earn Kroner from achievements, quests, and Battle Pass rewards",
+          "Daily login bonus with streak multiplier",
+          "Gift Kroner to friends",
+          "Kroner balance shown in Personnel Center"
+        ],
+        "Shop App": [
+          "NEW: Spend Spendable Kroner on cosmetics",
+          "Categories: Themes, Titles, Badges, Wallpapers, Profile Effects",
+          "5 rarity tiers: Common, Uncommon, Rare, Epic, Legendary",
+          "Items can be earned via Battle Pass or achievements",
+          "Limited-time items with countdown timers"
+        ],
+        "Certificate Viewer": [
+          "NEW: View all your earned certificates",
+          "Battle Pass Level 100 completion certificates",
+          "Epic and Legendary achievement certificates",
+          "Beautiful certificate display with share functionality"
+        ],
         "Battle Pass System": [
-          "NEW: Full Battle Pass with 100 levels and seasonal rewards",
+          "Full Battle Pass with 100 levels and seasonal rewards",
           "Quest system with 5 rarities: Common, Uncommon, Rare, Epic, Legendary",
           "Quests reset every 6 hours with random selection",
           "XP progression with passive earning (1 XP/min)",
-          "Claimable rewards: Titles, Themes, Leaderboard Points",
+          "Rewards: Kroner, Themes, Titles, Badges, Wallpapers, Effects",
           "Season 1: Genesis (Q1 2025) fully planned",
-          "Season 2: Phantom Protocol (Q2 2025) pre-loaded",
-          "Battle Pass tab in Personnel Center"
+          "Season 2: Phantom Protocol (Q2 2025) pre-loaded"
         ],
         "Theme System Overhaul": [
-          "NEW: 12 Battle Pass exclusive themes",
+          "12 Battle Pass exclusive themes",
           "Themes section in Settings showing all presets",
           "Lock icons for themes not yet unlocked",
-          "Instant theme preview and application"
+          "Purchasable themes in Shop"
         ],
         "New Achievements": [
           "10 new achievements added (48 total)",
@@ -61,42 +80,34 @@ export const ChangelogDialog = () => {
           "speed_demon, file_explorer_pro, calculator_use, and more"
         ],
         "Containment Breach Game": [
-          "NEW: FNAF-style horror game in the App Store",
+          "FNAF-style horror game in the App Store",
           "Survive 5 nights monitoring escaped memetic hazards",
           "Camera system with periodic ping sweeps",
-          "8 unique subjects with special abilities",
-          "Unlockable lore documents after each night"
+          "8 unique subjects with special abilities"
         ],
-        "App Store Redesign": [
-          "NEW: Visual overhaul matching Plugin Store aesthetic",
-          "Gradient backgrounds with category-colored icons",
-          "Improved card layout with better spacing"
+        "Untitled Card Game (UCG)": [
+          "NEW: 21-style card game",
+          "Play against bots (Easy, Medium, Hard difficulty)",
+          "Multiple rounds with score tracking",
+          "UCG-specific achievements",
+          "NEW: Card icon (Spade) for the app"
         ],
         "UI Improvements": [
-          "Fixed window snapping to work with top taskbar layout",
-          "Login screen with improved visual hierarchy",
-          "Personnel Center now has 5 tabs including Battle Pass"
+          "App Store redesign with gradient backgrounds",
+          "Fixed window snapping for top taskbar layout",
+          "Improved Personnel Center with 5 tabs"
         ],
-        "NAVI AI": [
-          "NEW: AI-powered assistant in moderation #chat channel",
-          "Query with @NAVI for real-time system insights",
-          "Smart filtering - rejects frivolous messages"
-        ],
-        "Creator Role": [
-          "NEW: Creator role - highest privilege level",
-          "Golden styling for creator badges throughout UI",
-          "Creators can demote admins"
-        ],
-        "NAVI Autonomous System": [
-          "NEW: Graduated threat levels",
-          "Auto-warn, auto-temp-ban, auto-lockdown",
-          "Adaptive thresholds based on rolling average"
+        "NAVI AI & Moderation": [
+          "AI-powered assistant in moderation #chat channel",
+          "Creator role - highest privilege level",
+          "Autonomous threat levels and auto-actions"
         ],
         "Database Additions": [
-          "battlepass_seasons table for season configuration",
-          "user_battlepass table for progress tracking",
-          "user_quests table for quest management",
-          "user_titles table for earned titles"
+          "shop_items table for purchasable cosmetics",
+          "user_inventory table for owned items",
+          "user_certificates table for earned certificates",
+          "profile_visitors, activity_feed, gift_transactions tables",
+          "Kroner fields on profiles (lifetime + spendable)"
         ]
       }
     },

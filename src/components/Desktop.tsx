@@ -19,7 +19,7 @@ import { useWindowSnap, SnapZone } from "@/hooks/useWindowSnap";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { trackAppOpen, trackWindowCount, checkSessionAchievements } from "@/hooks/useAchievementTriggers";
-import { FileText, Database, Activity, Radio, FileBox, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Puzzle, Skull, Monitor, Package, Star, Download, Sparkles } from "lucide-react";
+import { FileText, Database, Activity, Radio, FileBox, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Puzzle, Skull, Monitor, Package, Star, Download, Spade, Award, Coins, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -575,10 +575,26 @@ export const Desktop = ({
     {
       id: "ucg",
       name: "Untitled Card Game",
-      icon: <Sparkles className="w-11 h-11" />,
+      icon: <Spade className="w-11 h-11" />,
       run: () => openAppById("ucg"),
       downloadable: true,
       searchAliases: ["UCG", "21", "twenty one", "blackjack", "card game"]
+    },
+    {
+      id: "shop",
+      name: "Shop",
+      icon: <Coins className="w-11 h-11" />,
+      run: () => openAppById("shop"),
+      downloadable: true,
+      searchAliases: ["store", "kroner", "buy", "themes", "titles"]
+    },
+    {
+      id: "certificate-viewer",
+      name: "Certificate Viewer",
+      icon: <Award className="w-11 h-11" />,
+      run: () => openAppById("certificate-viewer"),
+      downloadable: true,
+      searchAliases: ["certificates", "awards", "battlepass", "achievements"]
     },
     {
       id: "chat",
