@@ -1,6 +1,35 @@
-import { useState } from "react";
-import { Info, CheckCircle, ShieldCheck, Github, BookOpen, FastForward, AlertTriangle, Lock, Database, Eye, Cloud, Wifi } from "lucide-react";
+// UrbanShade OS v3.1 - Redesigned Disclaimer Screen
+import { useState, useEffect } from "react";
+import { CheckCircle, ShieldCheck, Github, AlertTriangle, Cloud, Database, Users, Crown, Code, TestTube, Lightbulb, ChevronDown, Sparkles, Terminal, Zap, Lock, FastForward } from "lucide-react";
 import { VERSION } from "@/lib/versionInfo";
+
+// Team data
+const CONTRIBUTORS = [
+  {
+    name: "Aswd_LV",
+    role: "Founder & Lead Dev",
+    color: "from-yellow-500 to-amber-600",
+    icon: <Crown className="w-4 h-4" />,
+  },
+  {
+    name: "plplll",
+    role: "Developer & Tester",
+    color: "from-slate-400 to-zinc-500",
+    icon: <Code className="w-4 h-4" />,
+  },
+  {
+    name: "robo-karlix",
+    role: "Lead Tester",
+    color: "from-purple-500 to-violet-600",
+    icon: <TestTube className="w-4 h-4" />,
+  },
+  {
+    name: "Kombainis_yehaw",
+    role: "QA Tester",
+    color: "from-green-500 to-emerald-600",
+    icon: <Lightbulb className="w-4 h-4" />,
+  },
+];
 
 interface DisclaimerScreenProps {
   onAccept: (skipInstall?: boolean) => void;
@@ -9,327 +38,235 @@ interface DisclaimerScreenProps {
 export const DisclaimerScreen = ({ onAccept }: DisclaimerScreenProps) => {
   const [understood, setUnderstood] = useState(false);
   const [skipInstall, setSkipInstall] = useState(false);
-  const [showFullWarning, setShowFullWarning] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground flex items-center justify-center p-4 sm:p-8">
-      <div className="max-w-5xl w-full">
-        {/* Header Section */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 mb-6 animate-scale-in">
-            <ShieldCheck className="w-10 h-10 text-cyan-400" />
-          </div>
-          <h1 className="text-5xl sm:text-6xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            UrbanShade OS
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A browser-based operating system simulator inspired by underwater research facilities
-          </p>
-          <div className="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20">
-            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-            <span className="text-sm font-mono text-cyan-400">{VERSION.displayVersion} • Simulation Active</span>
-          </div>
-        </div>
-
-        {/* Warning Banner */}
-        <div className="mb-6 animate-fade-in" style={{ animationDelay: "50ms" }}>
-          <div className="p-5 bg-gradient-to-r from-amber-950/50 to-amber-900/30 border-2 border-amber-500/40 rounded-2xl">
-            <div className="flex items-start gap-4">
-              <AlertTriangle className="w-7 h-7 text-amber-400 flex-shrink-0 mt-0.5" />
-              <div className="space-y-3 flex-1">
-                <h3 className="text-lg font-bold text-amber-400">Important Notice</h3>
-                <div className="text-sm text-amber-200/80 space-y-2">
-                  <p>
-                    <strong className="text-amber-300">This is a simulation.</strong> Everything you see here—the desktop, 
-                    files, apps, and system messages—is fictional. No actual software is installed on your device.
-                  </p>
-                  {showFullWarning && (
-                    <>
-                      <p>
-                        <strong className="text-amber-300">Crash screens and errors:</strong> Some features intentionally 
-                        trigger "crash screens" or "bugchecks" as part of the simulation experience. However, 
-                        <strong className="text-red-400"> real errors can also occur</strong>—these will be clearly labeled 
-                        as "NOT A SIMULATION" and indicate actual bugs in the application code.
-                      </p>
-                    </>
-                  )}
-                </div>
-                <button 
-                  onClick={() => setShowFullWarning(!showFullWarning)}
-                  className="text-xs text-amber-400 hover:text-amber-300 underline underline-offset-2"
-                >
-                  {showFullWarning ? "Show less" : "Read more about error handling..."}
-                </button>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black text-foreground overflow-hidden">
+      {/* Animated background grid */}
+      <div className="fixed inset-0 opacity-[0.03]" style={{
+        backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+        backgroundSize: '50px 50px',
+      }} />
+      
+      {/* Glow effects */}
+      <div className="fixed top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[128px] -translate-y-1/2" />
+      <div className="fixed bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[128px] translate-y-1/2" />
+      
+      <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-8">
+        <div className={`max-w-3xl w-full space-y-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+          
+          {/* Hero Section */}
+          <div className="text-center space-y-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 animate-pulse">
+              <Terminal className="w-10 h-10 text-cyan-400" />
+            </div>
+            
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+                UrbanShade OS
+              </span>
+            </h1>
+            
+            <div className="flex items-center justify-center gap-3 text-sm">
+              <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-mono">
+                {VERSION.displayVersion}
+              </span>
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                Browser-Based OS Simulator
+              </span>
             </div>
           </div>
-        </div>
 
-        <div className="grid gap-4 mb-6">
-          {/* Main Info Card */}
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-2xl animate-fade-in" style={{ animationDelay: "100ms" }}>
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
-                <Info className="w-6 h-6 text-cyan-400" />
-              </div>
-              <div className="space-y-3 flex-1">
-                <h3 className="text-xl font-bold text-foreground">What This Actually Is</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  This is a <strong className="text-foreground">fictional operating system simulator</strong> that runs 
-                  entirely in your web browser. It mimics the look and feel of a real OS interface, complete with apps, 
-                  files, and system tools—but everything you see here is simulated.
+          {/* Quick Info Cards */}
+          <div className="grid sm:grid-cols-3 gap-3">
+            <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 text-center">
+              <Zap className="w-6 h-6 mx-auto mb-2 text-yellow-400" />
+              <p className="text-sm font-medium">100% Browser-Based</p>
+              <p className="text-xs text-muted-foreground mt-1">No installation needed</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 text-center">
+              <Lock className="w-6 h-6 mx-auto mb-2 text-green-400" />
+              <p className="text-sm font-medium">Your Data, Your Control</p>
+              <p className="text-xs text-muted-foreground mt-1">Local or cloud storage</p>
+            </div>
+            <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 text-center">
+              <ShieldCheck className="w-6 h-6 mx-auto mb-2 text-cyan-400" />
+              <p className="text-sm font-medium">Completely Safe</p>
+              <p className="text-xs text-muted-foreground mt-1">It's just a simulation</p>
+            </div>
+          </div>
+
+          {/* Warning Banner */}
+          <div className="p-4 bg-gradient-to-r from-amber-950/50 to-amber-900/30 border border-amber-500/30 rounded-xl">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-6 h-6 text-amber-400 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-300">Important</p>
+                <p className="text-xs text-amber-200/70">
+                  This is a simulation. Don't enter real passwords or sensitive information.
                 </p>
-                <div className="flex flex-wrap gap-2 pt-2">
-                  <div className="px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-xs font-medium text-green-400">
-                    <CheckCircle className="w-3 h-3 inline mr-1.5" />
-                    Browser-Based Only
-                  </div>
-                  <div className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs font-medium text-blue-400">
-                    <Lock className="w-3 h-3 inline mr-1.5" />
-                    No Installation
-                  </div>
-                  <div className="px-3 py-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs font-medium text-purple-400">
-                    <ShieldCheck className="w-3 h-3 inline mr-1.5" />
-                    Completely Safe
-                  </div>
-                </div>
               </div>
             </div>
           </div>
 
-          {/* Two Column Grid - Account Options */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            {/* Local Mode Card */}
-            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-xl animate-fade-in" style={{ animationDelay: "200ms" }}>
-              <div className="flex items-start gap-3 mb-4">
-                <div className="flex-shrink-0 p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                  <Database className="w-5 h-5 text-purple-400" />
-                </div>
-                <h3 className="text-lg font-bold text-foreground">Local Mode</h3>
+          {/* Mode Selection */}
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Database className="w-5 h-5 text-purple-400" />
+                <span className="font-semibold text-sm">Local Mode</span>
               </div>
-              <ul className="space-y-2.5 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-400 mt-0.5">•</span>
-                  <span>All data stored in browser's <strong className="text-foreground">localStorage</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-400 mt-0.5">•</span>
-                  <span>Nothing uploaded to any server—stays on your device</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-400 mt-0.5">•</span>
-                  <span>Clearing browser data resets the simulation</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-400 mt-0.5">•</span>
-                  <span>Incognito mode won't save progress</span>
-                </li>
-              </ul>
+              <p className="text-xs text-muted-foreground">
+                Data stays in your browser. Clearing cache resets everything.
+              </p>
             </div>
-
-            {/* Cloud Mode Card */}
-            <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-sm border border-cyan-500/30 rounded-2xl p-6 shadow-xl animate-fade-in" style={{ animationDelay: "300ms" }}>
-              <div className="flex items-start gap-3 mb-4">
-                <div className="flex-shrink-0 p-2.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                  <Cloud className="w-5 h-5 text-cyan-400" />
-                </div>
-                <h3 className="text-lg font-bold text-foreground">Cloud Mode <span className="text-xs font-normal text-cyan-400">(Optional)</span></h3>
+            <div className="p-4 rounded-xl bg-cyan-500/5 border border-cyan-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Cloud className="w-5 h-5 text-cyan-400" />
+                <span className="font-semibold text-sm">Cloud Mode</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">Optional</span>
               </div>
-              <ul className="space-y-2.5 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">•</span>
-                  <span>Sign up with <strong className="text-foreground">email &amp; password</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">•</span>
-                  <span>Settings, desktop icons, and apps sync to cloud</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">•</span>
-                  <span>Send <strong className="text-foreground">real messages</strong> to other users</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-cyan-400 mt-0.5">•</span>
-                  <span>Data stored securely via <strong className="text-foreground">Supabase</strong></span>
-                </li>
-              </ul>
+              <p className="text-xs text-muted-foreground">
+                Sign up to sync settings and chat with other users.
+              </p>
             </div>
           </div>
 
-          {/* Privacy & Security Card */}
-          <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 shadow-xl animate-fade-in" style={{ animationDelay: "350ms" }}>
-            <div className="flex items-start gap-3 mb-4">
-              <div className="flex-shrink-0 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <Eye className="w-5 h-5 text-amber-400" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Privacy & Security</h3>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <ul className="space-y-2.5 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 mt-0.5">⚠</span>
-                  <span><strong className="text-foreground">Never enter real passwords</strong> or sensitive info</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-amber-400 mt-0.5">•</span>
-                  <span>This is a simulation—use fake credentials only</span>
-                </li>
-              </ul>
-              <ul className="space-y-2.5 text-sm text-muted-foreground">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">•</span>
-                  <span>No tracking, analytics, or data collection</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">•</span>
-                  <span>Your privacy is respected</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* What Gets Synced (Cloud) */}
-          <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/20 rounded-2xl p-5 animate-fade-in" style={{ animationDelay: "400ms" }}>
-            <div className="flex items-center gap-2 mb-3">
-              <Wifi className="w-4 h-4 text-blue-400" />
-              <h4 className="font-semibold text-sm text-blue-400">What Gets Synced (Cloud Mode Only)</h4>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {['Profile Info', 'System Settings', 'Desktop Icons', 'Installed Apps', 'Messages', 'Sync History'].map(item => (
-                <span key={item} className="px-3 py-1 rounded-full bg-blue-500/10 text-xs text-blue-300 border border-blue-500/20">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Open Source Card */}
-          <div className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-2xl p-6 shadow-xl animate-fade-in" style={{ animationDelay: "450ms" }}>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
-              <div className="flex items-start gap-4 flex-1">
-                <div className="flex-shrink-0 p-3 rounded-xl bg-slate-800 border border-slate-700">
-                  <Github className="w-6 h-6 text-slate-300" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">Open Source Project</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Built by <strong className="text-cyan-400">aswdBatch</strong> and the community. 
-                    Free to explore, modify, and learn from.
-                  </p>
-                </div>
-              </div>
-              <a
-                href="https://github.com/aswdBatch/urbanshade-7e993958"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-all font-semibold text-sm"
-              >
-                <Github className="w-4 h-4" />
-                View on GitHub
-              </a>
-            </div>
-          </div>
-
-          {/* Documentation Link */}
-          <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-5 text-center animate-fade-in" style={{ animationDelay: "500ms" }}>
-            <BookOpen className="w-5 h-5 text-blue-400 inline mr-2" />
-            <span className="text-sm text-muted-foreground">
-              First time here? Check out the{" "}
-              <a 
-                href="/docs" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 font-bold underline underline-offset-2 hover:underline-offset-4 transition-all"
-              >
-                User Guide & Documentation
-              </a>
-            </span>
-          </div>
-
-          {/* Legal Links */}
-          <div className="flex justify-center gap-6 text-xs text-muted-foreground/70 animate-fade-in" style={{ animationDelay: "550ms" }}>
-            <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">
-              Terms of Service
-            </a>
-            <span>•</span>
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">
-              Privacy Policy
-            </a>
-          </div>
-        </div>
-
-        {/* Acceptance Section */}
-        <div className="space-y-4 animate-fade-in" style={{ animationDelay: "600ms" }}>
-          <label className="block cursor-pointer group">
-            <div className="bg-slate-800/50 backdrop-blur-sm border-2 border-slate-700 hover:border-cyan-500/50 rounded-2xl p-5 transition-all group-hover:scale-[1.01]">
-              <div className="flex items-start gap-4">
-                <input
-                  type="checkbox"
-                  checked={understood}
-                  onChange={(e) => setUnderstood(e.target.checked)}
-                  className="w-5 h-5 mt-0.5 cursor-pointer accent-cyan-500 flex-shrink-0"
-                />
-                <div className="flex-1">
-                  <div className="font-bold text-foreground mb-2 group-hover:text-cyan-400 transition-colors">
-                    I understand and agree to the following:
-                  </div>
-                  <ul className="text-sm text-muted-foreground space-y-1.5">
-                    <li>• This is a fictional simulation for entertainment purposes only</li>
-                    <li>• I will not enter real passwords or sensitive information</li>
-                    <li>• Data is stored locally or optionally synced to cloud via Supabase</li>
-                    <li>• I understand this is not a real operating system</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </label>
-
-          {/* Skip Installation Option */}
-          <label className="block cursor-pointer group">
-            <div className={`bg-slate-800/30 backdrop-blur-sm border-2 ${skipInstall ? 'border-amber-500/50' : 'border-slate-700/50'} hover:border-amber-500/30 rounded-xl p-4 transition-all`}>
-              <div className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={skipInstall}
-                  onChange={(e) => setSkipInstall(e.target.checked)}
-                  className="w-4 h-4 cursor-pointer accent-amber-500 flex-shrink-0"
-                />
-                <FastForward className={`w-5 h-5 ${skipInstall ? 'text-amber-500' : 'text-muted-foreground'}`} />
-                <div className="flex-1">
-                  <div className={`font-medium text-sm ${skipInstall ? 'text-amber-500' : 'text-foreground'}`}>
-                    Skip installation (quick start)
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Use default settings and create a default admin account
-                  </div>
-                </div>
-              </div>
-            </div>
-          </label>
-
+          {/* Expandable Details */}
           <button
-            onClick={() => onAccept(skipInstall)}
-            disabled={!understood}
-            className="w-full px-8 py-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-3 group shadow-2xl shadow-cyan-500/20 hover:scale-[1.02] disabled:hover:scale-100 disabled:shadow-none"
+            onClick={() => setShowDetails(!showDetails)}
+            className="w-full flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            {understood ? (
-              <>
-                <CheckCircle className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                {skipInstall ? "Quick Start" : "Enter UrbanShade OS"}
-              </>
-            ) : (
-              <>
-                <Lock className="w-5 h-5 opacity-50" />
-                Please accept to continue
-              </>
-            )}
+            <span>More details</span>
+            <ChevronDown className={`w-4 h-4 transition-transform ${showDetails ? 'rotate-180' : ''}`} />
           </button>
-        </div>
 
-        {/* Footer */}
-        <div className="mt-6 text-center text-xs text-muted-foreground/60 space-y-1 animate-fade-in" style={{ animationDelay: "700ms" }}>
-          <div>By proceeding, you acknowledge this is a simulation and agree to use it responsibly.</div>
-          <div>© 2025 UrbanShade OS Project • Not affiliated with any real organization</div>
+          {showDetails && (
+            <div className="space-y-4 animate-fade-in">
+              {/* Contributors */}
+              <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
+                <div className="flex items-center gap-2 mb-4">
+                  <Users className="w-5 h-5 text-primary" />
+                  <span className="font-semibold text-sm">Made by</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {CONTRIBUTORS.map((contributor) => (
+                    <div key={contributor.name} className="text-center">
+                      <div className={`w-12 h-12 mx-auto rounded-xl bg-gradient-to-br ${contributor.color} flex items-center justify-center mb-2`}>
+                        {contributor.icon}
+                      </div>
+                      <p className="text-xs font-medium truncate">{contributor.name}</p>
+                      <p className="text-[10px] text-muted-foreground truncate">{contributor.role}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-700/50 text-center">
+                  <a
+                    href="/team"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Meet the full team →
+                  </a>
+                </div>
+              </div>
+
+              {/* Links */}
+              <div className="flex flex-wrap justify-center gap-3">
+                <a
+                  href="https://github.com/aswdBatch/urbanshade-OS"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm hover:bg-slate-700/50 transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                  GitHub
+                </a>
+                <a
+                  href="/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm hover:bg-slate-700/50 transition-colors"
+                >
+                  📖 Documentation
+                </a>
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm hover:bg-slate-700/50 transition-colors"
+                >
+                  Terms
+                </a>
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm hover:bg-slate-700/50 transition-colors"
+                >
+                  Privacy
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* Acceptance */}
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 cursor-pointer hover:border-cyan-500/30 transition-colors">
+              <input
+                type="checkbox"
+                checked={understood}
+                onChange={(e) => setUnderstood(e.target.checked)}
+                className="w-5 h-5 mt-0.5 accent-cyan-500 cursor-pointer"
+              />
+              <div>
+                <p className="font-medium text-sm">I understand this is a simulation</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  I won't enter real passwords and understand all data is fictional.
+                </p>
+              </div>
+            </label>
+
+            <label className="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800/20 border border-slate-700/30 cursor-pointer hover:border-amber-500/30 transition-colors">
+              <input
+                type="checkbox"
+                checked={skipInstall}
+                onChange={(e) => setSkipInstall(e.target.checked)}
+                className="w-4 h-4 accent-amber-500 cursor-pointer"
+              />
+              <FastForward className={`w-5 h-5 ${skipInstall ? 'text-amber-400' : 'text-muted-foreground'}`} />
+              <div>
+                <span className={`text-sm ${skipInstall ? 'text-amber-400' : ''}`}>Quick start</span>
+                <span className="text-xs text-muted-foreground ml-2">Skip installation wizard</span>
+              </div>
+            </label>
+
+            <button
+              onClick={() => onAccept(skipInstall)}
+              disabled={!understood}
+              className="w-full py-4 rounded-xl font-bold text-lg transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-xl shadow-cyan-500/20 hover:shadow-cyan-500/30 hover:scale-[1.02] disabled:hover:scale-100 disabled:shadow-none"
+            >
+              {understood ? (
+                <>
+                  <CheckCircle className="w-5 h-5" />
+                  {skipInstall ? "Quick Start" : "Enter UrbanShade OS"}
+                </>
+              ) : (
+                <>
+                  <Lock className="w-5 h-5 opacity-50" />
+                  Accept to continue
+                </>
+              )}
+            </button>
+          </div>
+
         </div>
       </div>
     </div>

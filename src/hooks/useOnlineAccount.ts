@@ -14,6 +14,8 @@ export interface OnlineProfile {
   settings: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+  equipped_title_id: string | null;
+  equipped_badge_id: string | null;
 }
 
 export const useOnlineAccount = () => {

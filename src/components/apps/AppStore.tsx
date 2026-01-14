@@ -89,6 +89,7 @@ const AVAILABLE_APPS: StoreApp[] = [
   { id: "fortune", name: "Fortune Cookie", category: "Entertainment", description: "Receive mysterious fortunes, lucky numbers, and cryptic messages from the facility. What does your future hold?", version: "1.0.0", size: "0.3 MB", rating: 4.5, downloads: "24.7K", new: true, permissions: [], lastUpdate: '2026-01-13' },
   { id: "shop", name: "Kroner Shop", category: "Lifestyle", description: "Spend your hard-earned Kroner on themes, titles, badges, wallpapers, and profile effects. Customize your UrbanShade experience!", version: "1.0.0", size: "2.1 MB", rating: 4.9, downloads: "89.3K", featured: true, new: true, permissions: ['Network'], lastUpdate: '2026-01-13' },
   { id: "certificate-viewer", name: "Certificate Viewer", category: "Lifestyle", description: "View all your earned certificates from Battle Pass completions and Epic/Legendary achievements.", version: "1.0.0", size: "1.8 MB", rating: 4.8, downloads: "45.2K", new: true, permissions: [], lastUpdate: '2026-01-13' },
+  { id: "inventory", name: "Inventory", category: "Lifestyle", description: "View and manage your collected items, titles, badges, and themes. Equip items to show off on your profile!", version: "1.0.0", size: "1.5 MB", rating: 4.9, downloads: "78.6K", featured: true, new: true, permissions: ['Network'], lastUpdate: '2026-01-14' },
 ].map(app => ({ ...app, reviews: generateReviews(app.name) }));
 
 interface DownloadState {

@@ -58,6 +58,7 @@ import { CertificateViewer } from "./apps/CertificateViewer";
 import { DiceRoller } from "./apps/DiceRoller";
 import { ReactionTest } from "./apps/ReactionTest";
 import { FortuneApp } from "./apps/FortuneApp";
+import { Inventory } from "./apps/Inventory";
 
 interface WindowData {
   id: string;
@@ -269,6 +270,8 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         return <Shop />;
       case "certificate-viewer":
         return <CertificateViewer />;
+      case "inventory":
+        return <Inventory />;
       default:
         return (
           <div className="p-4 text-muted-foreground">
