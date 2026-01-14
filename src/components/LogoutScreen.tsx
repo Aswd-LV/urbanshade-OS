@@ -46,7 +46,7 @@ export const LogoutScreen = ({ onComplete, username = "User" }: LogoutScreenProp
         {/* Logo */}
         <div className={`mb-8 transition-opacity duration-500 ${logoVisible ? 'opacity-100' : 'opacity-0'}`}>
           <img 
-            src="/favicon.png" 
+            src="/favicon.svg" 
             alt="UrbanShade" 
             className="w-20 h-20"
           />

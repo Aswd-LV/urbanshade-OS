@@ -55,6 +55,9 @@ import { SignalInterceptor } from "./apps/SignalInterceptor";
 import { UntitledCardGame } from "./apps/UntitledCardGame";
 import { Shop } from "./apps/Shop";
 import { CertificateViewer } from "./apps/CertificateViewer";
+import { DiceRoller } from "./apps/DiceRoller";
+import { ReactionTest } from "./apps/ReactionTest";
+import { FortuneApp } from "./apps/FortuneApp";
 
 interface WindowData {
   id: string;
@@ -206,6 +209,12 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
       case "ucg":
       case "untitled-card-game":
         return <UntitledCardGame />;
+      case "dice-roller":
+        return <DiceRoller />;
+      case "reaction-test":
+        return <ReactionTest />;
+      case "fortune":
+        return <FortuneApp />;
       case "chat":
         return <InstantChat />;
       case "video-call":

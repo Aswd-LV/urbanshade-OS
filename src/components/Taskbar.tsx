@@ -180,9 +180,7 @@ export const Taskbar = ({
             data-start-button
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all duration-200"
           >
-            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center text-primary-foreground font-bold text-sm">
-              U
-            </div>
+            <img src="/favicon.svg" alt="U" className="w-7 h-7" />
             <span className="text-sm font-medium text-muted-foreground">Start</span>
           </button>
 

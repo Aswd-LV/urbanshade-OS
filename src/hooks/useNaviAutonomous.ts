@@ -477,8 +477,8 @@ export const sendPushNotification = async (title: string, body: string) => {
   if (Notification.permission === 'granted') {
     new Notification(title, {
       body,
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
+      icon: '/favicon.svg',
+      badge: '/favicon.svg',
       tag: 'navi-notification',
       requireInteraction: true
     });
@@ -488,8 +488,8 @@ export const sendPushNotification = async (title: string, body: string) => {
     if (permission === 'granted') {
       new Notification(title, {
         body,
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
+        icon: '/favicon.svg',
+        badge: '/favicon.svg',
         tag: 'navi-notification',
         requireInteraction: true
       });

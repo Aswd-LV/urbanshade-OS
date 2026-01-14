@@ -63,7 +63,7 @@ export const RebootScreen = ({ onComplete }: RebootScreenProps) => {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center">
         <img 
-          src="/favicon.png" 
+          src="/favicon.svg" 
           alt="UrbanShade" 
           className="w-20 h-20 animate-pulse"
         />
@@ -84,7 +84,7 @@ export const RebootScreen = ({ onComplete }: RebootScreenProps) => {
         {/* Logo */}
         <div className={`mb-10 transition-opacity duration-500 ${logoVisible ? 'opacity-100' : 'opacity-0'}`}>
           <img 
-            src="/favicon.png" 
+            src="/favicon.svg" 
             alt="UrbanShade" 
             className="w-20 h-20"
           />

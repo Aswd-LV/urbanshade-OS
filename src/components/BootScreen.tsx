@@ -153,7 +153,7 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <img 
-              src="/favicon.png" 
+              src="/favicon.svg" 
               alt="UrbanShade" 
               className="w-20 h-20 animate-pulse"
             />
@@ -176,7 +176,7 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
       {/* Centered Logo */}
       <div className="flex-1 flex items-center justify-center">
         <img 
-          src="/favicon.png" 
+          src="/favicon.svg" 
           alt="UrbanShade" 
           className={`w-24 h-24 transition-opacity duration-500 ${logoVisible ? 'opacity-100' : 'opacity-0'}`}
         />
