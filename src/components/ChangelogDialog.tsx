@@ -5,17 +5,30 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight, Info, Paintbrush, Bot } from "lucide-react";
 import { VERSION, getShortVersion } from "@/lib/versionInfo";
 
-export const ChangelogDialog = () => {
-  const [open, setOpen] = useState(false);
+interface ChangelogDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: ChangelogDialogProps = {}) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState(getShortVersion());
   const currentVersion = getShortVersion();
+  
+  // Support both controlled and uncontrolled modes
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (onOpenChange || (() => {})) : setInternalOpen;
 
   useEffect(() => {
+    // Only auto-open on first visit if not controlled
+    if (isControlled) return;
+    
     const lastSeenVersion = localStorage.getItem("urbanshade_last_seen_version");
     if (lastSeenVersion !== currentVersion) {
-      setOpen(true);
+      setInternalOpen(true);
     }
-  }, []);
+  }, [isControlled, currentVersion]);
 
   const handleClose = () => {
     localStorage.setItem("urbanshade_last_seen_version", currentVersion);

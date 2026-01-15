@@ -120,7 +120,6 @@ export const SecurityCameras = () => {
   ];
 
   const [selectedCamera, setSelectedCamera] = useState(cameras[0]);
-  const [showMap, setShowMap] = useState(false);
   const [scanLineY, setScanLineY] = useState(0);
   const [frameCounter, setFrameCounter] = useState(0);
   const [auxPower, setAuxPower] = useState(85);
@@ -150,17 +149,6 @@ export const SecurityCameras = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Tab key to toggle map
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        setShowMap(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   const handlePing = () => {
     if (auxPower < 5) {
@@ -224,19 +212,6 @@ export const SecurityCameras = () => {
 
   const currentTime = new Date();
   const timestamp = `${currentTime.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })} ${currentTime.toLocaleTimeString('en-US', { hour12: false })}:${String(frameCounter % 30).padStart(2, '0')}`;
-
-  if (showMap) {
-    return (
-      <div className="relative h-full">
-        <FacilityMap />
-        <div className="absolute top-4 right-4 bg-background/95 border border-border px-4 py-2.5 text-xs font-mono z-50 backdrop-blur-sm rounded-lg">
-          <span className="text-muted-foreground">PRESS</span>{" "}
-          <kbd className="px-2 py-1 bg-muted border border-border rounded text-foreground font-bold">Tab</kbd>{" "}
-          <span className="text-muted-foreground">TO CLOSE</span>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full bg-background font-mono overflow-hidden">
@@ -379,25 +354,6 @@ export const SecurityCameras = () => {
             </div>
 
             {/* Action buttons */}
-            <button 
-              onClick={() => setShowMap(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-muted border border-border text-foreground text-xs font-medium hover:bg-muted/80 transition-colors rounded"
-            >
-              <MapPin className="w-3 h-3" />
-              <span>MAP</span>
-              <kbd className="text-[9px] px-1.5 py-0.5 bg-background rounded ml-1">Tab</kbd>
-            </button>
-
-            <button 
-              onClick={handlePing}
-              disabled={auxPower < 5}
-              className="flex items-center gap-2 px-3 py-2 bg-muted border border-border text-foreground text-xs font-medium hover:bg-muted/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed rounded"
-            >
-              <Radio className="w-3 h-3" />
-              <span>PING ({pingCount})</span>
-              <span className="text-muted-foreground text-[9px]">5AP</span>
-            </button>
-
             <button 
               onClick={handleSpeaker}
               disabled={auxPower < 10 || speakerActive}
