@@ -29,6 +29,16 @@ import Features from "./pages/docs/Features";
 import Safety from "./pages/docs/Safety";
 import Moderation from "./pages/docs/Moderation";
 
+// Developer docs
+import DevDocsIndex from "./pages/docs/dev/Index";
+import DevArchitecture from "./pages/docs/dev/Architecture";
+import DevTheming from "./pages/docs/dev/Theming";
+import DevApps from "./pages/docs/dev/Apps";
+import DevTerminal from "./pages/docs/dev/Terminal";
+import DevSystemBus from "./pages/docs/dev/SystemBus";
+import DevUUR from "./pages/docs/dev/UUR";
+import DevContributing from "./pages/docs/dev/Contributing";
+
 // Safety sub-pages
 import Badges from "./pages/docs/safety/Badges";
 import AccountSafety from "./pages/docs/safety/AccountSafety";
@@ -108,6 +118,16 @@ const App = () => (
         <Route path="/docs/moderation/navi" element={<NaviMonitor />} />
         <Route path="/docs/moderation/actions" element={<ModerationActions />} />
         <Route path="/docs/moderation/stats" element={<Statistics />} />
+        
+        {/* Developer docs */}
+        <Route path="/docs/dev" element={<DevDocsIndex />} />
+        <Route path="/docs/dev/architecture" element={<DevArchitecture />} />
+        <Route path="/docs/dev/theming" element={<DevTheming />} />
+        <Route path="/docs/dev/apps" element={<DevApps />} />
+        <Route path="/docs/dev/terminal" element={<DevTerminal />} />
+        <Route path="/docs/dev/system-bus" element={<DevSystemBus />} />
+        <Route path="/docs/dev/uur" element={<DevUUR />} />
+        <Route path="/docs/dev/contributing" element={<DevContributing />} />
         
         {/* Account Manager - nested routes */}
         <Route path="/acc-manage" element={<AccManageLayout />}>

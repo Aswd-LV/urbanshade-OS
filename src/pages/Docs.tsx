@@ -1,197 +1,122 @@
-import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Shield, Bug, BookOpen, Cpu, Package } from "lucide-react";
+import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Shield, Bug, BookOpen, Cpu, Package, Code, ChevronRight, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DocSearch } from "@/components/DocSearch";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 import { VERSION } from "@/lib/versionInfo";
-
-const docSections = [
-  {
-    title: "Getting Started",
-    description: "Learn the basics of UrbanShade OS and how to navigate the facility systems.",
-    icon: BookOpen,
-    link: "/docs/getting-started",
-    color: "from-green-500/20 to-emerald-500/20",
-    borderColor: "border-green-500/30"
-  },
-  {
-    title: "Applications",
-    description: "Complete guide to all built-in applications and their features.",
-    icon: Cpu,
-    link: "/docs/applications",
-    color: "from-blue-500/20 to-cyan-500/20",
-    borderColor: "border-blue-500/30"
-  },
-  {
-    title: "Facility Guide",
-    description: "Understanding zones, containment protocols, and facility operations.",
-    icon: Map,
-    link: "/docs/facility",
-    color: "from-purple-500/20 to-pink-500/20",
-    borderColor: "border-purple-500/30"
-  },
-  {
-    title: "Terminal Guide",
-    description: "Master the command line with our comprehensive terminal reference.",
-    icon: Terminal,
-    link: "/docs/terminal",
-    color: "from-amber-500/20 to-orange-500/20",
-    borderColor: "border-amber-500/30"
-  },
-  {
-    title: "New Features",
-    description: "UUR categories, ratings, window groups, multiple desktops, crash recovery & more.",
-    icon: Zap,
-    link: "/docs/features",
-    color: "from-cyan-500/20 to-blue-500/20",
-    borderColor: "border-cyan-500/30"
-  },
-  {
-    title: "Advanced Features",
-    description: "BIOS, Recovery Mode, Admin Panel, and other power user features.",
-    icon: Shield,
-    link: "/docs/advanced",
-    color: "from-red-500/20 to-rose-500/20",
-    borderColor: "border-red-500/30"
-  },
-  {
-    title: "UUR Repository",
-    description: "How to browse, install, rate, and submit packages to UUR.",
-    icon: Package,
-    link: "/docs/uur",
-    color: "from-teal-500/20 to-emerald-500/20",
-    borderColor: "border-teal-500/30"
-  },
-  {
-    title: "Keyboard Shortcuts",
-    description: "Quick reference for all keyboard shortcuts and hotkeys.",
-    icon: Keyboard,
-    link: "/docs/shortcuts",
-    color: "from-indigo-500/20 to-violet-500/20",
-    borderColor: "border-indigo-500/30"
-  },
-  {
-    title: "DEF-DEV Console",
-    description: "Developer documentation for the debugging and administration console.",
-    icon: Bug,
-    link: "/docs/def-dev",
-    color: "from-amber-500/20 to-yellow-500/20",
-    borderColor: "border-amber-500/30"
-  },
-  {
-    title: "Troubleshooting",
-    description: "Common issues, error codes, and how to resolve them.",
-    icon: HelpCircle,
-    link: "/docs/troubleshooting",
-    color: "from-gray-500/20 to-slate-500/20",
-    borderColor: "border-gray-500/30"
-  }
-];
+import { UrbanshadeSpinner } from "@/components/shared/UrbanshadeSpinner";
 
 const Docs = () => {
   const sections = [
     {
       icon: Rocket,
       title: "Getting Started",
-      description: "New to the facility? Start here! Learn the ropes before something inevitably goes wrong. Spoiler: Something always goes wrong.",
+      description: "New to the facility? Start here! Learn the ropes before something inevitably goes wrong.",
       link: "/docs/getting-started",
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-      borderColor: "border-green-500/30"
+      accent: "cyan"
     },
     {
       icon: Folder,
       title: "Core Applications",
-      description: "Your digital toolbox: File Explorer, Notepad, Calculator, and other apps you'll pretend to use productively. (We see your Solitaire tab.)",
+      description: "Your digital toolbox: File Explorer, Notepad, Calculator, and other apps you'll pretend to use productively.",
       link: "/docs/applications",
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      borderColor: "border-blue-500/30"
+      accent: "blue"
     },
     {
       icon: Map,
       title: "Facility Applications",
-      description: "The fun stuff! Security cameras, containment monitors, and other apps for managing your totally-not-haunted underwater base. Ghosts sold separately.",
+      description: "Security cameras, containment monitors, and apps for managing your totally-not-haunted underwater base.",
       link: "/docs/facility",
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-      borderColor: "border-purple-500/30"
+      accent: "purple"
     },
     {
       icon: Terminal,
       title: "Terminal Guide",
-      description: "Feel like a movie hacker with our command line interface. Comes with authentic typing sounds (just kidding, you have to make those yourself).",
+      description: "Feel like a movie hacker with our command line interface. Authentic typing sounds not included.",
       link: "/docs/terminal",
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-      borderColor: "border-primary/30"
+      accent: "cyan"
     },
     {
       icon: Shield,
       title: "Admin Panel",
-      description: "The control panel for chaos enthusiasts. Warning: May cause uncontrollable laughter, confusion, and questioning reality. Side effects include power trips.",
+      description: "The control panel for chaos enthusiasts. Warning: May cause uncontrollable power trips.",
       link: "/docs/admin-panel",
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-      borderColor: "border-purple-500/30"
+      accent: "purple"
     },
     {
       icon: Zap,
       title: "Advanced Features",
-      description: "BIOS, Recovery Mode, and other ways to pretend you're a systems engineer. No actual engineering degree required. Coffee addiction helps.",
+      description: "BIOS, Recovery Mode, and other ways to pretend you're a systems engineer.",
       link: "/docs/advanced",
-      color: "text-yellow-500",
-      bgColor: "bg-yellow-500/10",
-      borderColor: "border-yellow-500/30"
+      accent: "amber"
     },
     {
       icon: Keyboard,
       title: "Keyboard Shortcuts",
-      description: "Learn all the key combos because real pros don't use mice. Impress absolutely no one at parties with your ALT+F4 knowledge!",
+      description: "Learn all the key combos because real pros don't use mice.",
       link: "/docs/shortcuts",
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
-      borderColor: "border-orange-500/30"
+      accent: "orange"
     },
     {
       icon: HelpCircle,
       title: "Troubleshooting",
-      description: "When things go wrong (and they will). From 'I forgot my password' to 'Why is everything upside down and rainbow colored?'. We've seen it all.",
+      description: "When things go wrong (and they will). From 'I forgot my password' to 'Why is everything rainbow?'",
       link: "/docs/troubleshooting",
-      color: "text-red-500",
-      bgColor: "bg-red-500/10",
-      borderColor: "border-red-500/30"
+      accent: "red"
     },
     {
       icon: Bug,
       title: "DEF-DEV Console",
-      description: "Developer documentation. Real-time logging, action monitoring, storage inspection, and system debugging. For developers only.",
+      description: "Developer debugging tool. Real-time logging, action monitoring, and system debugging.",
       link: "/docs/def-dev",
-      color: "text-amber-400",
-      bgColor: "bg-amber-500/10",
-      borderColor: "border-amber-500/30"
+      accent: "amber"
     },
     {
       icon: Shield,
       title: "Safety & Badges",
-      description: "Stay safe online! Learn about user badges (Admin, Creator), how to spot scammers, and how to report rule breakers.",
+      description: "Stay safe online! Learn about user badges, how to spot scammers, and report rule breakers.",
       link: "/docs/safety",
-      color: "text-green-400",
-      bgColor: "bg-green-500/10",
-      borderColor: "border-green-500/30"
+      accent: "green"
+    },
+    {
+      icon: Code,
+      title: "Developer Docs",
+      description: "Build extensions, themes, and integrations for UrbanShade OS. Full API documentation included.",
+      link: "/docs/dev",
+      accent: "teal"
     }
   ];
 
+  const getAccentClasses = (accent: string) => {
+    const colors: Record<string, { bg: string; border: string; text: string; glow: string }> = {
+      cyan: { bg: "bg-cyan-500/10", border: "border-cyan-500/30", text: "text-cyan-400", glow: "shadow-cyan-500/20" },
+      blue: { bg: "bg-blue-500/10", border: "border-blue-500/30", text: "text-blue-400", glow: "shadow-blue-500/20" },
+      purple: { bg: "bg-purple-500/10", border: "border-purple-500/30", text: "text-purple-400", glow: "shadow-purple-500/20" },
+      amber: { bg: "bg-amber-500/10", border: "border-amber-500/30", text: "text-amber-400", glow: "shadow-amber-500/20" },
+      orange: { bg: "bg-orange-500/10", border: "border-orange-500/30", text: "text-orange-400", glow: "shadow-orange-500/20" },
+      red: { bg: "bg-red-500/10", border: "border-red-500/30", text: "text-red-400", glow: "shadow-red-500/20" },
+      green: { bg: "bg-green-500/10", border: "border-green-500/30", text: "text-green-400", glow: "shadow-green-500/20" },
+      teal: { bg: "bg-teal-500/10", border: "border-teal-500/30", text: "text-teal-400", glow: "shadow-teal-500/20" }
+    };
+    return colors[accent] || colors.cyan;
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-          <h1 className="text-xl font-bold text-primary">URBANSHADE Documentation</h1>
+      <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-900/80 backdrop-blur-xl">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img src="/favicon.svg" alt="UrbanShade" className="w-8 h-8" />
+            <div>
+              <h1 className="text-lg font-bold text-cyan-100">URBANSHADE OS</h1>
+              <p className="text-xs text-cyan-500/70">Documentation Portal</p>
+            </div>
+          </div>
           <div className="flex items-center gap-3">
             <DocSearch />
             <Link 
               to="/" 
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-all text-sm font-medium"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to App
@@ -201,145 +126,145 @@ const Docs = () => {
       </header>
 
       {/* Content */}
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-16">
+      <main className="max-w-5xl mx-auto px-6 py-16 space-y-20">
         {/* Hero */}
-        <section className="text-center space-y-6">
-          <div className="relative inline-block">
-            <img src="/favicon.svg" alt="UrbanShade" className="w-20 h-20 mx-auto animate-pulse" />
-            <div className="absolute -inset-4 bg-primary/20 blur-xl rounded-full -z-10" />
+        <section className="text-center space-y-8">
+          <div className="relative inline-flex flex-col items-center gap-6">
+            <div className="relative">
+              <img src="/favicon.svg" alt="UrbanShade" className="w-24 h-24" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 blur-2xl rounded-full -z-10" />
+            </div>
+            <UrbanshadeSpinner size="lg" className="opacity-80" />
           </div>
           
-          <h2 className="text-5xl font-bold">
-            Welcome to <span className="text-primary">URBANSHADE OS</span>
-          </h2>
-          
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            The only operating system designed for managing fictional underwater research facilities. 
-            Now with 100% fewer actual containment breaches than the real thing! (We hope. We think. Probably.) 🐙
-          </p>
+          <div className="space-y-4">
+            <h2 className="text-5xl font-light text-white">
+              Welcome to <span className="font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">URBANSHADE OS</span>
+            </h2>
+            
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+              The only operating system designed for managing fictional underwater research facilities. 
+              Now with 100% fewer actual containment breaches than the real thing! 🐙
+            </p>
+          </div>
 
-          <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-              🌊 Depth: 8,247m Below Sea Level
-            </span>
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-              🔬 100% Fictional (Sadly)
-            </span>
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-              🎮 0% Actual OS Functionality
-            </span>
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-              ☕ Powered by Too Much Coffee
-            </span>
+          <div className="flex flex-wrap justify-center gap-3">
+            {[
+              { emoji: "🌊", text: "Depth: 8,247m Below Sea Level" },
+              { emoji: "🔬", text: "100% Fictional" },
+              { emoji: "🎮", text: "0% Actual OS Functionality" },
+              { emoji: "☕", text: "Powered by Too Much Coffee" }
+            ].map((badge, i) => (
+              <span 
+                key={i}
+                className="px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700 text-sm text-slate-300"
+              >
+                {badge.emoji} {badge.text}
+              </span>
+            ))}
           </div>
         </section>
 
         {/* What is this */}
-        <section className="p-8 rounded-xl bg-gradient-to-br from-primary/20 via-blue-500/10 to-purple-500/20 border-2 border-primary/40 shadow-xl">
-          <h3 className="text-3xl font-bold mb-6 text-primary">So, what exactly is this thing?</h3>
-          <div className="space-y-4 text-muted-foreground leading-relaxed">
-            <p className="text-lg">
-              <strong className="text-foreground">URBANSHADE OS</strong> is a web-based simulation of a 
-              retro-futuristic operating system, lovingly ripped off— err, <em>inspired by</em> the game Pressure. 
-              It's like playing pretend, but with more terminal commands, fewer real consequences, and significantly 
-              more underwater-themed existential dread.
-            </p>
-            <p>
-              Everything here runs in your browser. Your "files" aren't real files (sorry, they can't help with your taxes). 
-              Your "passwords" are stored in localStorage (please, <strong className="text-yellow-400">PLEASE</strong> don't use real passwords). 
-              The containment units contain nothing but your imagination and maybe some JSON data. 
-              And the crushing pressure of the deep ocean? That's just JavaScript trying to parse your code.
-            </p>
-            <p className="text-primary font-semibold text-lg border-l-4 border-primary pl-4 bg-black/30 py-3 rounded">
-              <strong>TL;DR:</strong> It's a fun, interactive experience that lets you roleplay as an underwater 
-              facility operator. Click things, explore, break stuff, fix stuff, and try not to trigger too many 
-              simulated emergencies. The monsters aren't real, the stress is optional, but the entertainment is guaranteed! 🐙✨
-            </p>
-            <p className="text-sm text-muted-foreground italic">
-              (Legal disclaimer: Any resemblance to real underwater research stations containing anomalous entities 
-              is purely coincidental and definitely not a government cover-up. Any claims otherwise will be investigated 
-              by entities that definitely don't exist.)
-            </p>
+        <section className="relative p-8 rounded-2xl bg-gradient-to-br from-cyan-500/10 via-slate-800/50 to-blue-600/10 border border-cyan-500/20 overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 blur-3xl rounded-full" />
+          <div className="relative space-y-4">
+            <h3 className="text-2xl font-bold text-cyan-100">So, what exactly is this thing?</h3>
+            <div className="space-y-4 text-slate-400 leading-relaxed">
+              <p>
+                <strong className="text-white">URBANSHADE OS</strong> is a web-based simulation of a 
+                retro-futuristic operating system, lovingly <em>inspired by</em> the game Pressure. 
+                It's like playing pretend, but with more terminal commands and fewer real consequences.
+              </p>
+              <p>
+                Everything runs in your browser. Your "files" aren't real files. 
+                Your "passwords" are stored in localStorage (<strong className="text-amber-400">please don't use real passwords</strong>). 
+                The containment units contain nothing but your imagination and some JSON data.
+              </p>
+              <div className="p-4 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
+                <p className="text-cyan-100 font-medium">
+                  <strong>TL;DR:</strong> It's a fun, interactive experience that lets you roleplay as an underwater 
+                  facility operator. Click things, explore, break stuff, fix stuff! 🐙✨
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* Documentation Sections */}
-        <section className="space-y-6">
-          <h3 className="text-2xl font-bold text-center">Choose Your Adventure</h3>
-          <p className="text-center text-muted-foreground">
-            Pick a topic and dive in. Get it? Dive? Because we're underwater? ...okay that joke's getting old. 
-            Just pick something already. 🤿
-          </p>
+        <section className="space-y-8">
+          <div className="text-center space-y-2">
+            <h3 className="text-2xl font-bold text-white">Choose Your Adventure</h3>
+            <p className="text-slate-400">Pick a topic and dive in. Get it? Dive? Because we're underwater? 🤿</p>
+          </div>
           
           <div className="grid gap-4 md:grid-cols-2">
-            {sections.map((section, index) => (
-              <Link
-                key={index}
-                to={section.link}
-                className={`p-6 rounded-xl ${section.bgColor} border ${section.borderColor} hover:scale-[1.02] transition-all group`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`w-12 h-12 rounded-lg bg-black/40 flex items-center justify-center flex-shrink-0`}>
-                    <section.icon className={`w-6 h-6 ${section.color}`} />
+            {sections.map((section, index) => {
+              const colors = getAccentClasses(section.accent);
+              return (
+                <Link
+                  key={index}
+                  to={section.link}
+                  className={`group p-5 rounded-xl ${colors.bg} border ${colors.border} hover:shadow-xl ${colors.glow} transition-all duration-300 hover:-translate-y-1`}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-lg bg-slate-900/80 border border-slate-700 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      <section.icon className={`w-5 h-5 ${colors.text}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className={`font-semibold ${colors.text}`}>
+                          {section.title}
+                        </h4>
+                        <ChevronRight className={`w-4 h-4 ${colors.text} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
+                      </div>
+                      <p className="text-sm text-slate-400 mt-1 line-clamp-2">
+                        {section.description}
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <h4 className={`font-bold text-lg ${section.color} group-hover:underline`}>
-                      {section.title}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {section.description}
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </section>
 
         {/* Quick Tips */}
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold">Quick Tips for New Recruits</h3>
+          <h3 className="text-xl font-bold text-white text-center">Quick Tips for New Recruits</h3>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
-              <div className="text-3xl mb-2">🔑</div>
-              <p className="text-sm text-muted-foreground">
-                Press <kbd className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">DEL</kbd> during 
-                boot to access BIOS. On Chromebook? Just type "del" like a normal person.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
-              <div className="text-3xl mb-2">🔄</div>
-              <p className="text-sm text-muted-foreground">
-                Press <kbd className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">F2</kbd> during 
-                boot for Recovery Mode. Because sometimes things go REALLY wrong.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10 text-center">
-              <div className="text-3xl mb-2">🤫</div>
-              <p className="text-sm text-muted-foreground">
-                Type <code className="px-2 py-0.5 bg-black/60 rounded border border-white/20 text-xs">secret</code> in 
-                Terminal for admin access. Shh, it's a secret. (Not really, everyone knows.)
-              </p>
-            </div>
+            {[
+              { emoji: "🔑", key: "DEL", text: "Press during boot to access BIOS. On Chromebook? Just type 'del'." },
+              { emoji: "🔄", key: "F2", text: "Press during boot for Recovery Mode. For when things go REALLY wrong." },
+              { emoji: "🤫", key: "secret", text: "Type in Terminal for admin access. Shh, it's a secret. (Not really.)" }
+            ].map((tip, i) => (
+              <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-slate-700 text-center space-y-2">
+                <div className="text-2xl">{tip.emoji}</div>
+                <kbd className="inline-block px-3 py-1 bg-slate-900 rounded-lg border border-slate-600 text-cyan-400 text-sm font-mono">
+                  {tip.key}
+                </kbd>
+                <p className="text-sm text-slate-400">{tip.text}</p>
+              </div>
+            ))}
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="text-center pt-8 border-t border-white/10 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            URBANSHADE OS Documentation • v{VERSION.shortVersion} • © 2025 Urbanshade Corporation  
-          </p>
-          <p className="text-xs text-muted-foreground max-w-2xl mx-auto">
+        <footer className="text-center pt-8 border-t border-slate-800 space-y-4">
+          <div className="flex items-center justify-center gap-4 text-sm">
+            <span className="text-slate-500">URBANSHADE OS Documentation</span>
+            <span className="w-1 h-1 rounded-full bg-slate-600" />
+            <span className="text-cyan-500/70">v{VERSION.shortVersion}</span>
+            <span className="w-1 h-1 rounded-full bg-slate-600" />
+            <span className="text-slate-500">© 2025 Urbanshade Corporation</span>
+          </div>
+          <p className="text-xs text-slate-600 max-w-xl mx-auto">
             This is a fictional simulation for entertainment purposes. No actual deep-sea facilities 
-            were harmed in the making of this software. Any resemblance to real underwater research 
-            stations containing anomalous entities is purely coincidental and definitely not a government cover-up. 🐙
+            were harmed in the making of this software. 🐙
           </p>
-          <p className="text-xs text-yellow-400 italic">
-            (If you're reading this from an actual underwater facility, please send help. And snacks. 
-            Preferably waterproof snacks. Do those exist? Asking for a friend.)
-          </p>
-          <Link to="/" className="inline-block text-primary hover:underline text-sm font-semibold">
-            ← Return to Simulation (Escape the Docs)
+          <Link to="/" className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 text-sm font-medium transition-colors">
+            <ArrowLeft className="w-4 h-4" />
+            Return to Simulation
           </Link>
         </footer>
       </main>
