@@ -129,12 +129,12 @@ const Docs = () => {
       <main className="max-w-5xl mx-auto px-6 py-16 space-y-20">
         {/* Hero */}
         <section className="text-center space-y-8">
-          <div className="relative inline-flex flex-col items-center gap-4">
+          <div className="relative inline-flex flex-col items-center gap-6">
             <div className="relative">
               <img src="/favicon.svg" alt="UrbanShade" className="w-24 h-24" />
               <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 blur-2xl rounded-full -z-10" />
             </div>
-            <UrbanshadeSpinner size="md" />
+            <UrbanshadeSpinner size="lg" className="opacity-80" />
           </div>
           
           <div className="space-y-4">

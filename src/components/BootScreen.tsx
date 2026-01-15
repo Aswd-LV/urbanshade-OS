@@ -45,27 +45,16 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
     setStages(bootStages);
   }, [isFastBoot]);
 
-  // Safe mode detection during initial delay (3 seconds)
+  // Extended logo display phase (6 seconds total now)
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'F8' && safeModeDelay) {
-        e.preventDefault();
-        setSafeModePressed(true);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    
-    // After 3 seconds, end the safe mode window
     const delayTimer = setTimeout(() => {
       setSafeModeDelay(false);
-    }, 3000);
+    }, 6000);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
       clearTimeout(delayTimer);
     };
-  }, [safeModeDelay]);
+  }, []);
 
   // Logo phase animation - starts after safe mode delay ends (or immediately if safe mode pressed)
   useEffect(() => {
@@ -139,18 +128,15 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
     return stage.label + '...';
   };
 
-  // During safe mode delay period - show logo with F8 prompt
+  // During logo display period - just show the logo
   if (safeModeDelay) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center">
         <img 
           src="/favicon.svg" 
           alt="UrbanShade" 
-          className="w-24 h-24 mb-4 animate-pulse"
+          className="w-24 h-24 animate-pulse"
         />
-        <p className="text-slate-600 text-xs font-mono">
-          Press <kbd className="px-2 py-1 bg-slate-800 rounded text-cyan-400 font-bold border border-slate-700 mx-1">F8</kbd> for Safe Mode
-        </p>
       </div>
     );
   }
