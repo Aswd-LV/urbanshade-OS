@@ -1,7 +1,8 @@
 // UrbanShade OS v3.1 - Redesigned Disclaimer Screen
 import { useState, useEffect } from "react";
-import { CheckCircle, ShieldCheck, Github, AlertTriangle, Cloud, Database, Users, Crown, Code, TestTube, Lightbulb, ChevronDown, Sparkles, Terminal, Zap, Lock, FastForward } from "lucide-react";
+import { CheckCircle, ShieldCheck, Github, AlertTriangle, Cloud, Database, Users, Crown, Code, TestTube, Lightbulb, ChevronDown, Sparkles, Zap, Lock, FastForward, FileText, ExternalLink, ScrollText } from "lucide-react";
 import { VERSION } from "@/lib/versionInfo";
+import { ChangelogDialog } from "./ChangelogDialog";
 
 // Team data
 const CONTRIBUTORS = [
@@ -40,6 +41,7 @@ export const DisclaimerScreen = ({ onAccept }: DisclaimerScreenProps) => {
   const [skipInstall, setSkipInstall] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -62,8 +64,8 @@ export const DisclaimerScreen = ({ onAccept }: DisclaimerScreenProps) => {
           
           {/* Hero Section */}
           <div className="text-center space-y-4">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 animate-pulse">
-              <Terminal className="w-10 h-10 text-cyan-400" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
+              <img src="/favicon.svg" alt="UrbanShade" className="w-12 h-12" />
             </div>
             
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
@@ -149,6 +151,41 @@ export const DisclaimerScreen = ({ onAccept }: DisclaimerScreenProps) => {
 
           {showDetails && (
             <div className="space-y-4 animate-fade-in">
+              {/* Quick Actions */}
+              <div className="grid sm:grid-cols-2 gap-3">
+                {/* View Changelog */}
+                <button
+                  onClick={() => setShowChangelog(true)}
+                  className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 text-left hover:bg-slate-700/50 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <ScrollText className="w-5 h-5 text-cyan-400" />
+                    <div>
+                      <p className="text-sm font-medium">View Changelog</p>
+                      <p className="text-xs text-muted-foreground">See what's new in {VERSION.displayVersion}</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground ml-auto group-hover:text-cyan-400 transition-colors" />
+                  </div>
+                </button>
+                
+                {/* Documentation */}
+                <a
+                  href="/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 text-left hover:bg-slate-700/50 transition-colors group"
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-purple-400" />
+                    <div>
+                      <p className="text-sm font-medium">Documentation</p>
+                      <p className="text-xs text-muted-foreground">Learn how to use UrbanShade</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground ml-auto group-hover:text-purple-400 transition-colors" />
+                  </div>
+                </a>
+              </div>
+
               {/* Contributors */}
               <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
                 <div className="flex items-center gap-2 mb-4">
@@ -190,14 +227,6 @@ export const DisclaimerScreen = ({ onAccept }: DisclaimerScreenProps) => {
                   GitHub
                 </a>
                 <a
-                  href="/docs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm hover:bg-slate-700/50 transition-colors"
-                >
-                  📖 Documentation
-                </a>
-                <a
                   href="/terms"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -216,6 +245,9 @@ export const DisclaimerScreen = ({ onAccept }: DisclaimerScreenProps) => {
               </div>
             </div>
           )}
+
+          {/* Changelog Dialog */}
+          <ChangelogDialog open={showChangelog} onOpenChange={setShowChangelog} />
 
           {/* Acceptance */}
           <div className="space-y-3">
