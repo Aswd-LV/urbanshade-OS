@@ -585,8 +585,7 @@ export const Messages = () => {
                       return (
                         <div key={request.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 mb-1">
                           <div className="flex items-center gap-2">
-                            <UserAvatar 
-                              avatarUrl={friendUser?.avatar_url}
+                          <UserAvatar 
                               username={friendUser?.username || 'U'}
                               size="sm"
                             />

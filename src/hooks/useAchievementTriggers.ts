@@ -403,6 +403,19 @@ export async function trackContainmentLoreRead(): Promise<void> {
 export async function trackContainmentSubjectEncounter(subjectId: string): Promise<void> {
   const userId = await getCurrentUserId();
   if (!userId) return;
+
+  // Track encountered subjects
+  const storedEncounters = localStorage.getItem(CONTAINMENT_STORAGE.ENCOUNTERED_SUBJECTS);
+  const encountered: string[] = storedEncounters ? JSON.parse(storedEncounters) : [];
+  
+  if (!encountered.includes(subjectId)) {
+    encountered.push(subjectId);
+    localStorage.setItem(CONTAINMENT_STORAGE.ENCOUNTERED_SUBJECTS, JSON.stringify(encountered));
+    
+    if (encountered.length >= 5) {
+      await grantAchievement(userId, 'containment_all_subjects');
+    }
+  }
 }
 
 // Dark Web Achievement tracking
