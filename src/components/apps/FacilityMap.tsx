@@ -1,16 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { MapPin, AlertTriangle, CheckCircle, XCircle, Users, Crosshair, ZoomIn, ZoomOut, RotateCcw, Move, Download, Skull, Shield, FlaskConical, HardHat, Zap, Radio, Eye, Search, Layers } from "lucide-react";
+import { MapPin, AlertTriangle, CheckCircle, XCircle, Users, Crosshair, ZoomIn, ZoomOut, RotateCcw, Move, Skull, Shield, FlaskConical, HardHat, Zap, Radio, Search, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { CRTEffect } from "@/components/shared/CRTEffect";
 import { PowerMeter } from "@/components/shared/PowerMeter";
-import { RadarScanner } from "@/components/shared/RadarScanner";
-import { GlitchText } from "@/components/shared/GlitchText";
 import { cn } from "@/lib/utils";
 
 type ZoneType = "light" | "heavy" | "entrance" | "surface";
-type TeamId = "exrP" | "scientists" | "foundation" | "chaos";
 
 interface Room {
   id: string;
@@ -45,28 +41,10 @@ export const FacilityMap = () => {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [showScanner, setShowScanner] = useState(false);
-  const [accessTier, setAccessTier] = useState(1);
   const [auxPower, setAuxPower] = useState(85);
   const [searchQuery, setSearchQuery] = useState("");
   const maxPower = 110;
   const mapRef = useRef<HTMLDivElement>(null);
-
-  // Scanner state
-  const [zoneEnabled, setZoneEnabled] = useState<Record<ZoneType, boolean>>({
-    surface: true,
-    light: true,
-    entrance: true,
-    heavy: true,
-  });
-  const [teamDetection, setTeamDetection] = useState<Record<TeamId, boolean>>({
-    exrP: true,
-    scientists: true,
-    foundation: false,
-    chaos: true,
-  });
-  const [isScanning, setIsScanning] = useState(false);
-  const [scanSuspended, setScanSuspended] = useState(true);
 
   const [personnel, setPersonnel] = useState<PersonnelStats>({
     scps: 1,
@@ -77,12 +55,12 @@ export const FacilityMap = () => {
     chaos: 0,
   });
 
-  // Zone definitions with colors
-  const zones: { id: ZoneType; name: string; color: string; bgColor: string; borderColor: string }[] = [
-    { id: "surface", name: "Surface Zone", color: "text-emerald-400", bgColor: "bg-emerald-600", borderColor: "border-emerald-500" },
-    { id: "light", name: "Light Containment", color: "text-amber-400", bgColor: "bg-amber-600", borderColor: "border-amber-500" },
-    { id: "heavy", name: "Heavy Containment", color: "text-red-400", bgColor: "bg-red-600", borderColor: "border-red-500" },
-    { id: "entrance", name: "Entrance Zone", color: "text-blue-400", bgColor: "bg-blue-600", borderColor: "border-blue-500" },
+  // Zone definitions
+  const zones: { id: ZoneType; name: string; color: string }[] = [
+    { id: "surface", name: "Surface Zone", color: "emerald" },
+    { id: "light", name: "Light Containment", color: "amber" },
+    { id: "heavy", name: "Heavy Containment", color: "red" },
+    { id: "entrance", name: "Entrance Zone", color: "blue" },
   ];
 
   // Rooms per zone
@@ -181,47 +159,33 @@ export const FacilityMap = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "operational": return "border-emerald-500/60 bg-emerald-500/10";
-      case "warning": return "border-amber-500/60 bg-amber-500/15";
-      case "critical": return "border-red-500/70 bg-red-500/20";
-      case "offline": return "border-gray-600/50 bg-gray-800/30";
-      default: return "border-gray-600/50 bg-gray-800/30";
+      case "operational": return "border-cyan-500/40 bg-cyan-500/5";
+      case "warning": return "border-amber-500/50 bg-amber-500/10";
+      case "critical": return "border-red-500/60 bg-red-500/15";
+      case "offline": return "border-slate-600/40 bg-slate-800/20";
+      default: return "border-slate-600/40 bg-slate-800/20";
     }
   };
 
   const getStatusGlow = (status: string) => {
     switch (status) {
-      case "operational": return "shadow-emerald-500/30";
-      case "warning": return "shadow-amber-500/40";
-      case "critical": return "shadow-red-500/50";
+      case "operational": return "shadow-cyan-500/20";
+      case "warning": return "shadow-amber-500/30";
+      case "critical": return "shadow-red-500/40";
       default: return "";
     }
-  };
-
-  const getZoneBorderColor = (zone: ZoneType) => {
-    const z = zones.find(z => z.id === zone);
-    return z?.borderColor || "border-gray-500";
   };
 
   const getSpecialIcon = (special?: string) => {
     switch (special) {
       case "scp": return <Skull className="w-3 h-3 text-red-400" />;
-      case "checkpoint": return <Shield className="w-3 h-3 text-blue-400" />;
+      case "checkpoint": return <Shield className="w-3 h-3 text-cyan-400" />;
       case "elevator": return <span className="text-[10px] text-cyan-400 font-bold">▲▼</span>;
       case "tesla": return <Zap className="w-3 h-3 text-yellow-400" />;
       case "nuke": return <span className="text-[10px] text-red-400 font-bold">☢</span>;
       case "servers": return <span className="text-[10px] text-cyan-400">◈</span>;
       case "microhid": return <span className="text-[10px] text-purple-400 font-bold">⚡</span>;
       default: return null;
-    }
-  };
-
-  const getTeamColor = (team: TeamId) => {
-    switch (team) {
-      case "exrP": return "text-orange-400";
-      case "scientists": return "text-white";
-      case "foundation": return "text-blue-400";
-      case "chaos": return "text-green-400";
     }
   };
 
@@ -236,11 +200,6 @@ export const FacilityMap = () => {
           const key = [room.id, connRoom.id].sort().join("-");
           if (!processed.has(key)) {
             processed.add(key);
-            const zoneData = zones.find(z => z.id === selectedZone);
-            const strokeColor = selectedZone === "heavy" ? "rgba(239, 68, 68, 0.4)" : 
-                              selectedZone === "light" ? "rgba(245, 158, 11, 0.4)" :
-                              selectedZone === "entrance" ? "rgba(59, 130, 246, 0.4)" :
-                              "rgba(16, 185, 129, 0.4)";
             connections.push(
               <line
                 key={key}
@@ -248,11 +207,9 @@ export const FacilityMap = () => {
                 y1={room.y + room.height / 2}
                 x2={connRoom.x + connRoom.width / 2}
                 y2={connRoom.y + connRoom.height / 2}
-                stroke={strokeColor}
-                strokeWidth="3"
-                strokeDasharray="8 4"
-                className="animate-pulse"
-                style={{ animationDuration: '3s' }}
+                stroke="rgba(34, 211, 238, 0.15)"
+                strokeWidth="2"
+                strokeDasharray="6 3"
               />
             );
           }
@@ -262,176 +219,59 @@ export const FacilityMap = () => {
     return connections;
   };
 
-  // Breach Scanner View
-  if (showScanner) {
-    return (
-      <div className="h-full bg-[#050508] font-mono flex flex-col relative">
-        <CRTEffect intensity="low" tint="cyan" />
-        
-        {/* Header */}
-        <div className="border-b border-cyan-500/20 p-4 flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-3">
-            <Radio className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-lg font-bold text-cyan-400 tracking-wider">BREACH SCANNER</h2>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className={cn(
-              "text-xs font-mono",
-              scanSuspended ? "text-amber-400" : "text-emerald-400 animate-pulse"
-            )}>
-              {scanSuspended ? "SCAN SEQUENCE SUSPENDED" : "● SCANNING..."}
-            </span>
-            <button 
-              onClick={() => setShowScanner(false)}
-              className="px-4 py-2 text-xs text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-colors"
-            >
-              RETURN TO MAP <kbd className="ml-2 px-1.5 bg-black/50 rounded">Space</kbd>
-            </button>
-          </div>
-        </div>
+  const formatTimestamp = () => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+  };
 
-        {/* Scanner Content */}
-        <div className="flex-1 p-6 overflow-auto relative z-10">
-          <div className="max-w-5xl mx-auto grid grid-cols-3 gap-6">
-            {/* Radar display */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="text-xs text-cyan-600 uppercase tracking-widest">Radar Display</div>
-              <RadarScanner 
-                isScanning={isScanning}
-                size={220}
-                blips={[
-                  { id: '1', x: 30, y: 40, type: 'hostile', label: 'SCP-106' },
-                  { id: '2', x: 70, y: 60, type: 'friendly', label: 'MTF-E11' },
-                  { id: '3', x: 50, y: 80, type: 'neutral', label: 'D-9341' },
-                ]}
-              />
-            </div>
-
-            {/* Zone Selection */}
-            <div className="space-y-4">
-              <div className="text-xs text-cyan-600 uppercase tracking-widest">Select Zones to Scan</div>
-              <div className="grid grid-cols-1 gap-2">
-                {zones.map(zone => (
-                  <button
-                    key={zone.id}
-                    onClick={() => setZoneEnabled(z => ({ ...z, [zone.id]: !z[zone.id] }))}
-                    className={cn(
-                      "p-3 border text-xs font-bold transition-all",
-                      zoneEnabled[zone.id] 
-                        ? `${zone.bgColor} text-white border-white/20 shadow-lg` 
-                        : "bg-gray-800/50 text-gray-400 border-gray-600/30 hover:bg-gray-800"
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{zone.name}</span>
-                      <span className={cn(
-                        "px-2 py-0.5 text-[10px] rounded",
-                        zoneEnabled[zone.id] ? "bg-white/20" : "bg-gray-700"
-                      )}>
-                        {zoneEnabled[zone.id] ? "ON" : "OFF"}
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Team Detection */}
-            <div className="space-y-4">
-              <div className="text-xs text-cyan-600 uppercase tracking-widest">Select Teams to Detect</div>
-              <div className="space-y-2">
-                {(["exrP", "scientists", "foundation", "chaos"] as TeamId[]).map(team => (
-                  <label
-                    key={team}
-                    className={cn(
-                      "flex items-center gap-3 p-3 border cursor-pointer transition-all",
-                      teamDetection[team]
-                        ? "bg-cyan-500/10 border-cyan-500/30"
-                        : "bg-gray-800/30 border-gray-700/30 hover:bg-gray-800/50"
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={teamDetection[team]}
-                      onChange={() => setTeamDetection(t => ({ ...t, [team]: !t[team] }))}
-                      className="w-4 h-4 accent-cyan-500"
-                    />
-                    <span className={cn("text-sm font-medium", getTeamColor(team))}>
-                      {team === "exrP" ? "EXR-P Personnel" :
-                       team === "scientists" ? "Scientists" :
-                       team === "foundation" ? "Foundation Personnel" : "Chaos Insurgency"}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Status */}
-        <div className="border-t border-cyan-500/20 p-4 flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-8">
-            <div>
-              <div className="text-[10px] text-cyan-600 mb-1">ACCESS TIER {accessTier}</div>
-              <div className="w-28 h-2 bg-black border border-cyan-500/30">
-                <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400" style={{ width: `${(accessTier / 5) * 100}%` }} />
-              </div>
-            </div>
-            <PowerMeter current={auxPower} max={maxPower} />
-          </div>
-          <Button 
-            onClick={() => {
-              if (auxPower < 50) {
-                toast.error("Insufficient power");
-                return;
-              }
-              setAuxPower(p => p - 50);
-              setScanSuspended(false);
-              setIsScanning(true);
-              setTimeout(() => {
-                setIsScanning(false);
-                setScanSuspended(true);
-                toast.success("Scan complete - 3 entities detected");
-              }, 4000);
-            }}
-            disabled={isScanning || auxPower < 50}
-            className="bg-cyan-500/20 border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/30 px-6"
-          >
-            {isScanning ? "SCANNING..." : "INITIATE SCAN (50 AP)"}
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const [timestamp, setTimestamp] = useState(formatTimestamp());
+  
+  useEffect(() => {
+    const interval = setInterval(() => setTimestamp(formatTimestamp()), 100);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="flex h-full bg-[#050508] font-mono relative">
-      <CRTEffect intensity="low" tint="cyan" showNoise={false} />
+    <div className="flex h-full bg-slate-950 font-mono relative overflow-hidden">
+      {/* Scanline effect */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-50 opacity-[0.03]"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)'
+        }}
+      />
       
       {/* Map View */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        {/* HUD Overlay - Top */}
+        <div className="absolute top-3 left-3 z-40 space-y-1 text-[10px] font-mono text-cyan-500/60">
+          <div>FACILITY MAP SYSTEM v2.4.1</div>
+          <div>{timestamp}</div>
+          <div className="text-cyan-400">ZONE: {zones.find(z => z.id === selectedZone)?.name.toUpperCase()}</div>
+        </div>
+
         {/* Stats Panel - Top */}
-        <div className="bg-black/60 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3 flex items-center gap-6">
+        <div className="bg-slate-900/80 backdrop-blur border-b border-cyan-500/20 px-4 py-3 flex items-center gap-6 relative z-10">
           {/* Personnel stats */}
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2 text-xs">
               <Skull className="w-4 h-4 text-red-500" />
-              <span className="text-gray-500">SCPs:</span>
+              <span className="text-slate-500">SCPs:</span>
               <span className="font-bold text-red-400">{personnel.scps}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <Shield className="w-4 h-4 text-blue-400" />
-              <span className="text-gray-500">MTF:</span>
+              <span className="text-slate-500">MTF:</span>
               <span className="font-bold text-blue-400">{personnel.mtf}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <FlaskConical className="w-4 h-4 text-white" />
-              <span className="text-gray-500">Scientists:</span>
+              <span className="text-slate-500">Scientists:</span>
               <span className="font-bold text-white">{personnel.scientists}</span>
             </div>
             <div className="flex items-center gap-2 text-xs">
               <HardHat className="w-4 h-4 text-orange-400" />
-              <span className="text-gray-500">EXR-P:</span>
+              <span className="text-slate-500">EXR-P:</span>
               <span className="font-bold text-orange-400">{personnel.exrP}</span>
             </div>
           </div>
@@ -446,22 +286,18 @@ export const FacilityMap = () => {
                 placeholder="Search rooms..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-36 h-7 pl-7 pr-2 text-xs bg-black/50 border border-cyan-500/30 text-cyan-400 placeholder:text-cyan-600/50 focus:outline-none focus:border-cyan-500/50"
+                className="w-36 h-7 pl-7 pr-2 text-xs bg-slate-900/80 border border-cyan-500/30 text-cyan-400 placeholder:text-cyan-600/50 focus:outline-none focus:border-cyan-500/50"
               />
             </div>
             
-            <Button size="sm" variant="ghost" onClick={() => setShowScanner(true)} className="h-7 px-3 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/30">
-              <Radio className="w-3 h-3 mr-1.5" />
-              <span className="text-xs">SCANNER</span>
-            </Button>
             <div className="flex border border-cyan-500/30">
-              <Button size="sm" variant="ghost" onClick={() => handleZoom(0.1)} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none">
+              <Button size="sm" variant="ghost" onClick={() => handleZoom(0.1)} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none text-cyan-400">
                 <ZoomIn className="w-3 h-3" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => handleZoom(-0.1)} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none border-l border-cyan-500/30">
+              <Button size="sm" variant="ghost" onClick={() => handleZoom(-0.1)} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none border-l border-cyan-500/30 text-cyan-400">
                 <ZoomOut className="w-3 h-3" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none border-l border-cyan-500/30">
+              <Button size="sm" variant="ghost" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none border-l border-cyan-500/30 text-cyan-400">
                 <RotateCcw className="w-3 h-3" />
               </Button>
             </div>
@@ -471,13 +307,7 @@ export const FacilityMap = () => {
         {/* Map Canvas */}
         <div 
           ref={mapRef}
-          className="flex-1 overflow-hidden relative"
-          style={{
-            background: `
-              radial-gradient(circle at 50% 50%, rgba(0,40,60,0.3) 0%, transparent 70%),
-              linear-gradient(180deg, #050508 0%, #0a0a12 100%)
-            `
-          }}
+          className="flex-1 overflow-hidden relative bg-slate-950"
           onMouseDown={handlePanStart}
           onMouseMove={handlePanMove}
           onMouseUp={handlePanEnd}
@@ -499,8 +329,8 @@ export const FacilityMap = () => {
                 width: '800px',
                 height: '600px',
                 backgroundImage: `
-                  linear-gradient(rgba(0, 200, 255, 0.06) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0, 200, 255, 0.06) 1px, transparent 1px)
+                  linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px)
                 `,
                 backgroundSize: '40px 40px'
               }}
@@ -519,10 +349,10 @@ export const FacilityMap = () => {
                 onMouseEnter={() => setHoveredRoom(room)}
                 onMouseLeave={() => setHoveredRoom(null)}
                 className={cn(
-                  "absolute cursor-pointer transition-all duration-200 border-2 rounded-sm",
+                  "absolute cursor-pointer transition-all duration-200 border",
                   getStatusColor(room.status),
-                  selectedRoom?.id === room.id && "ring-2 ring-cyan-400/60 ring-offset-1 ring-offset-transparent",
-                  hoveredRoom?.id === room.id && "brightness-125 scale-[1.02]",
+                  selectedRoom?.id === room.id && "ring-1 ring-cyan-400/50",
+                  hoveredRoom?.id === room.id && "brightness-125",
                   room.status === "critical" && "animate-pulse",
                   getStatusGlow(room.status),
                   room.status !== "offline" && "shadow-lg"
@@ -534,6 +364,12 @@ export const FacilityMap = () => {
                   height: `${room.height}px`,
                 }}
               >
+                {/* Corner brackets */}
+                <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-cyan-500/50" />
+                <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-cyan-500/50" />
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-cyan-500/50" />
+                <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-cyan-500/50" />
+                
                 <div className="flex flex-col h-full justify-between p-2">
                   <div className="flex items-start justify-between">
                     {getSpecialIcon(room.special)}
@@ -544,14 +380,14 @@ export const FacilityMap = () => {
                       <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
                     )}
                   </div>
-                  <div className="text-[9px] font-bold text-white/90 text-center leading-tight uppercase tracking-wide">
+                  <div className="text-[9px] font-bold text-cyan-300/90 text-center leading-tight uppercase tracking-wide">
                     {room.shortName}
                   </div>
                 </div>
 
                 {/* Hover tooltip */}
                 {hoveredRoom?.id === room.id && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-black/95 border border-cyan-500/40 text-[10px] whitespace-nowrap z-50 pointer-events-none">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900/95 border border-cyan-500/40 text-[10px] whitespace-nowrap z-50 pointer-events-none">
                     <div className="text-cyan-400 font-bold">{room.name}</div>
                     <div className="text-cyan-600">{room.status.toUpperCase()}</div>
                   </div>
@@ -587,42 +423,36 @@ export const FacilityMap = () => {
           </div>
 
           {/* Legend */}
-          <div className="absolute bottom-4 left-4 bg-black/90 border border-cyan-500/30 p-3 text-[10px] space-y-2 z-10 backdrop-blur-sm">
+          <div className="absolute bottom-4 left-4 bg-slate-900/90 border border-cyan-500/30 p-3 text-[10px] space-y-2 z-10 backdrop-blur-sm">
             <div className="font-bold text-xs text-cyan-400 mb-2 tracking-wider">LEGEND</div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border-2 border-emerald-500/60 bg-emerald-500/10 rounded-sm" />
-              <span className="text-gray-400">Operational</span>
+              <div className="w-4 h-3 border border-cyan-500/40 bg-cyan-500/5" />
+              <span className="text-slate-400">Operational</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border-2 border-amber-500/60 bg-amber-500/15 rounded-sm" />
-              <span className="text-gray-400">Warning</span>
+              <div className="w-4 h-3 border border-amber-500/50 bg-amber-500/10" />
+              <span className="text-slate-400">Warning</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border-2 border-red-500/70 bg-red-500/20 rounded-sm" />
-              <span className="text-gray-400">Critical</span>
+              <div className="w-4 h-3 border border-red-500/60 bg-red-500/15" />
+              <span className="text-slate-400">Critical</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border-2 border-gray-600/50 bg-gray-800/30 rounded-sm" />
-              <span className="text-gray-400">Offline</span>
+              <div className="w-4 h-3 border border-slate-600/40 bg-slate-800/20" />
+              <span className="text-slate-400">Offline</span>
             </div>
           </div>
 
           {/* Controls hint */}
-          <div className="absolute bottom-4 right-4 bg-black/90 border border-cyan-500/30 px-4 py-2 text-[10px] text-cyan-600 z-10 backdrop-blur-sm">
+          <div className="absolute bottom-4 right-4 bg-slate-900/90 border border-cyan-500/30 px-4 py-2 text-[10px] text-cyan-600 z-10 backdrop-blur-sm">
             <Move className="w-3 h-3 inline mr-1.5" />
             Shift+Drag to pan • Scroll to zoom
           </div>
         </div>
 
         {/* Bottom Status Bar */}
-        <div className="bg-black/60 backdrop-blur-sm border-t border-cyan-500/20 px-4 py-2.5 flex items-center justify-between">
+        <div className="bg-slate-900/80 backdrop-blur border-t border-cyan-500/20 px-4 py-2.5 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-8">
-            <div>
-              <div className="text-[10px] text-cyan-600 mb-1">ACCESS TIER {accessTier}</div>
-              <div className="w-28 h-2 bg-black border border-cyan-500/30">
-                <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400" style={{ width: `${(accessTier / 5) * 100}%` }} />
-              </div>
-            </div>
             <PowerMeter current={auxPower} max={maxPower} compact />
           </div>
           <div className="text-[10px] text-cyan-600">
@@ -632,7 +462,7 @@ export const FacilityMap = () => {
       </div>
 
       {/* Right Sidebar - Zones */}
-      <div className="w-56 border-l border-cyan-500/20 bg-black/60 backdrop-blur-sm flex flex-col relative z-10">
+      <div className="w-56 border-l border-cyan-500/20 bg-slate-900/80 backdrop-blur flex flex-col relative z-10">
         <div className="p-4 border-b border-cyan-500/20">
           <div className="flex items-center gap-2 mb-4">
             <Layers className="w-4 h-4 text-cyan-400" />
@@ -647,8 +477,8 @@ export const FacilityMap = () => {
                 className={cn(
                   "w-full text-left p-3 transition-all text-xs font-medium border",
                   selectedZone === zone.id 
-                    ? `${zone.bgColor} text-white border-white/20 shadow-lg` 
-                    : "bg-gray-900/50 hover:bg-gray-800/70 text-gray-400 border-gray-700/30"
+                    ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/40" 
+                    : "bg-slate-800/50 hover:bg-slate-800/70 text-slate-400 border-slate-700/30"
                 )}
               >
                 <div className="flex items-center justify-between">
@@ -668,31 +498,32 @@ export const FacilityMap = () => {
             {selectedRoom ? (
               <div className="space-y-4">
                 <div>
-                  <GlitchText 
-                    text={selectedRoom.name}
-                    className="font-bold text-sm text-white"
-                    enabled={selectedRoom.status === "critical"}
-                  />
+                  <div className={cn(
+                    "font-bold text-sm",
+                    selectedRoom.status === "critical" ? "text-red-400" : "text-white"
+                  )}>
+                    {selectedRoom.name}
+                  </div>
                   <div className="text-[10px] text-cyan-600 uppercase tracking-widest mt-1">
                     {zones.find(z => z.id === selectedRoom.zone)?.name}
                   </div>
                 </div>
 
-                <div className="p-3 bg-black/50 border border-cyan-500/20">
+                <div className="p-3 bg-slate-800/50 border border-cyan-500/20">
                   <div className="text-[10px] text-cyan-600 mb-1.5">STATUS</div>
                   <div className={cn(
                     "font-bold uppercase text-sm",
-                    selectedRoom.status === "operational" && "text-emerald-400",
+                    selectedRoom.status === "operational" && "text-cyan-400",
                     selectedRoom.status === "warning" && "text-amber-400",
                     selectedRoom.status === "critical" && "text-red-400 animate-pulse",
-                    selectedRoom.status === "offline" && "text-gray-400"
+                    selectedRoom.status === "offline" && "text-slate-400"
                   )}>
                     {selectedRoom.status}
                   </div>
                 </div>
 
                 {selectedRoom.special && (
-                  <div className="p-3 bg-black/50 border border-cyan-500/20">
+                  <div className="p-3 bg-slate-800/50 border border-cyan-500/20">
                     <div className="text-[10px] text-cyan-600 mb-1.5">TYPE</div>
                     <div className="font-bold uppercase text-sm text-cyan-400 flex items-center gap-2">
                       {getSpecialIcon(selectedRoom.special)}
@@ -701,7 +532,7 @@ export const FacilityMap = () => {
                   </div>
                 )}
 
-                <div className="p-3 bg-black/50 border border-cyan-500/20">
+                <div className="p-3 bg-slate-800/50 border border-cyan-500/20">
                   <div className="text-[10px] text-cyan-600 mb-2">CONNECTED TO</div>
                   <div className="space-y-1">
                     {selectedRoom.connections.map(connId => {
@@ -729,21 +560,19 @@ export const FacilityMap = () => {
                 )}
               </div>
             ) : (
-              <div className="text-center text-gray-500 text-xs py-8">
+              <div className="text-center text-slate-500 text-xs py-8">
                 <MapPin className="w-8 h-8 mx-auto mb-3 opacity-30" />
                 Select a room to view details
               </div>
             )}
 
             {entityEscaped && (
-              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/40 animate-pulse">
-                <div className="flex items-center gap-2 mb-2">
-                  <Skull className="w-4 h-4 text-red-400" />
-                  <span className="text-xs font-bold text-red-400 tracking-wider">SCP BREACH</span>
+              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/40">
+                <div className="flex items-center gap-2 text-red-400">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="text-[10px] font-bold tracking-wider">BREACH ACTIVE</span>
                 </div>
-                <p className="text-[10px] text-red-300">
-                  SCP-106 has breached containment. All personnel proceed to nearest checkpoint.
-                </p>
+                <p className="text-[10px] text-red-400/70 mt-1">Entity escaped containment</p>
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock, Crown, Shield, Sparkles, Bot, UserPlus, UserCheck, Heart, Inbox } from "lucide-react";
+import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock, Crown, Shield, Sparkles, Bot, UserPlus, UserCheck, Heart, Inbox, Reply, ThumbsUp, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +10,10 @@ import { useMessages, Message } from "@/hooks/useMessages";
 import { useFriends } from "@/hooks/useFriends";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { supabase } from "@/integrations/supabase/client";
+import { UserAvatar } from "@/components/shared/UserAvatar";
+import { ProfileCard } from "@/components/shared/ProfileCard";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 // Badge component for Admin/Creator/VIP/Bot
 const UserBadge = ({ username, role, isVip, isBot }: { username: string; role?: string; isVip?: boolean; isBot?: boolean }) => {
@@ -17,7 +21,6 @@ const UserBadge = ({ username, role, isVip, isBot }: { username: string; role?: 
   const isAdmin = role === 'admin';
   const isNaviBot = username.toLowerCase() === 'navi' || username.toLowerCase() === 'system' || isBot;
   
-  // Badge hierarchy: Creator > Bot > Admin > VIP
   if (isCreator) {
     return (
       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 ml-1">
@@ -56,6 +59,9 @@ const UserBadge = ({ username, role, isVip, isBot }: { username: string; role?: 
   
   return null;
 };
+
+// Quick reactions for messages
+const REACTIONS = ["👍", "❤️", "😊", "🎉", "👀"];
 
 export const Messages = () => {
   const { user, isOnlineMode } = useOnlineAccount();
@@ -97,12 +103,18 @@ export const Messages = () => {
   const [showAswdPopup, setShowAswdPopup] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [starredLocal, setStarredLocal] = useState<Set<string>>(new Set());
+  const [reactions, setReactions] = useState<Record<string, string[]>>({});
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
-  // Load starred messages from localStorage
+  // Load starred messages and reactions from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('urbanshade_starred_messages');
-    if (saved) {
-      setStarredLocal(new Set(JSON.parse(saved)));
+    const savedStarred = localStorage.getItem('urbanshade_starred_messages');
+    if (savedStarred) {
+      setStarredLocal(new Set(JSON.parse(savedStarred)));
+    }
+    const savedReactions = localStorage.getItem('urbanshade_message_reactions');
+    if (savedReactions) {
+      setReactions(JSON.parse(savedReactions));
     }
   }, []);
 
@@ -139,9 +151,24 @@ export const Messages = () => {
     localStorage.setItem('urbanshade_starred_messages', JSON.stringify([...newStarred]));
   };
 
+  const addReaction = (messageId: string, emoji: string) => {
+    const newReactions = { ...reactions };
+    if (!newReactions[messageId]) {
+      newReactions[messageId] = [];
+    }
+    if (newReactions[messageId].includes(emoji)) {
+      newReactions[messageId] = newReactions[messageId].filter(e => e !== emoji);
+    } else {
+      newReactions[messageId] = [...newReactions[messageId], emoji];
+    }
+    setReactions(newReactions);
+    localStorage.setItem('urbanshade_message_reactions', JSON.stringify(newReactions));
+  };
+
   const handleSelectMessage = async (msg: Message) => {
     setSelected(msg);
     setComposing(false);
+    setReplyingTo(null);
     if (!msg.read_at) {
       await markAsRead(msg.id);
     }
@@ -164,11 +191,26 @@ export const Messages = () => {
     setCompose(prev => ({ ...prev, to: username, toUserId: userId }));
     setComposing(true);
     setSelected(null);
+    setReplyingTo(null);
     
-    // Show popup when selecting Aswd
     if (username.toLowerCase() === 'aswd') {
       setShowAswdPopup(true);
     }
+  };
+
+  const handleReply = (msg: Message) => {
+    const senderName = msg.sender_profile?.display_name || msg.sender_profile?.username || "Unknown";
+    const senderId = msg.sender_id;
+    setReplyingTo(msg);
+    setCompose({
+      to: senderName,
+      toUserId: senderId,
+      subject: `Re: ${msg.subject}`,
+      body: "",
+      priority: "normal"
+    });
+    setComposing(true);
+    setSelected(null);
   };
 
   const handleSendMessage = async () => {
@@ -183,13 +225,22 @@ export const Messages = () => {
     }
 
     setIsSending(true);
-    const result = await sendMessage(compose.toUserId, compose.subject, compose.body, compose.priority);
+    
+    // Include reply quote if replying
+    let finalBody = compose.body;
+    if (replyingTo) {
+      const quotedText = replyingTo.body.slice(0, 100) + (replyingTo.body.length > 100 ? '...' : '');
+      finalBody = `> ${quotedText}\n\n${compose.body}`;
+    }
+    
+    const result = await sendMessage(compose.toUserId, compose.subject, finalBody, compose.priority);
     setIsSending(false);
 
     if (result.success) {
       toast.success("Message sent!");
       setCompose({ to: "", toUserId: "", subject: "", body: "", priority: "normal" });
       setComposing(false);
+      setReplyingTo(null);
     } else if (result.error === 'rate_limited') {
       setShowRateLimitDialog(true);
     } else {
@@ -251,12 +302,10 @@ export const Messages = () => {
     return `${Math.ceil(mins / 60)} hour${Math.ceil(mins / 60) > 1 ? 's' : ''}`;
   };
 
-  // Check if message is a NAVI broadcast
   const isNaviBroadcast = (msg: Message) => {
     return (msg as any).message_type === 'navi_broadcast';
   };
 
-  // Get friend user data
   const getFriendUser = (friend: any) => {
     const currentUserId = user?.id;
     if (friend.user_id === currentUserId) {
@@ -377,7 +426,7 @@ export const Messages = () => {
           </div>
           
           <Button 
-            onClick={() => { setComposing(true); setSelected(null); }} 
+            onClick={() => { setComposing(true); setSelected(null); setReplyingTo(null); }} 
             className="w-full" 
             size="sm"
             disabled={isRateLimited}
@@ -432,48 +481,90 @@ export const Messages = () => {
                 <div
                   key={msg.id}
                   onClick={() => handleSelectMessage(msg)}
-                  className={`p-3 border-b border-border cursor-pointer transition-colors ${
-                    selected?.id === msg.id ? "bg-primary/20" : "hover:bg-muted/50"
-                  } ${!msg.read_at ? "bg-primary/5" : ""} ${isNaviBroadcast(msg) ? "bg-cyan-500/5 border-l-2 border-l-cyan-500" : ""}`}
+                  className={cn(
+                    "p-3 border-b border-border cursor-pointer transition-colors",
+                    selected?.id === msg.id ? "bg-primary/20" : "hover:bg-muted/50",
+                    !msg.read_at ? "bg-primary/5" : "",
+                    isNaviBroadcast(msg) ? "bg-cyan-500/5 border-l-2 border-l-cyan-500" : ""
+                  )}
                 >
-                  <div className="flex items-start justify-between mb-1">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {isNaviBroadcast(msg) && <Bot className="w-3 h-3 text-cyan-400 flex-shrink-0" />}
-                      {msg.priority !== "normal" && !isNaviBroadcast(msg) && (
-                        <AlertTriangle className={`w-3 h-3 flex-shrink-0 ${getPriorityColor(msg.priority)}`} />
-                      )}
-                      <span className={`font-medium text-sm truncate ${!msg.read_at ? "text-primary font-bold" : ""}`}>
-                        {isNaviBroadcast(msg) ? "NAVI System" : (msg.sender_profile?.display_name || msg.sender_profile?.username || "Unknown")}
-                      </span>
-                      {!isNaviBroadcast(msg) && (
-                        <UserBadge 
-                          username={msg.sender_profile?.username || ''} 
-                          role={msg.sender_profile?.role} 
+                  <div className="flex items-start gap-3">
+                    {/* Avatar */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button 
+                          className="flex-shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <UserAvatar 
+                            avatarUrl={msg.sender_profile?.avatar_url}
+                            username={msg.sender_profile?.username || 'U'}
+                            size="sm"
+                            showOnlineStatus={false}
+                          />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0 w-auto" align="start">
+                        <ProfileCard 
+                          userId={msg.sender_id}
+                          username={msg.sender_profile?.username || 'Unknown'}
+                          displayName={msg.sender_profile?.display_name}
+                          avatarUrl={msg.sender_profile?.avatar_url}
+                          role={msg.sender_profile?.role}
+                          isOnline={msg.sender_profile?.is_online}
                         />
+                      </PopoverContent>
+                    </Popover>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1 flex-1 min-w-0">
+                          {isNaviBroadcast(msg) && <Bot className="w-3 h-3 text-cyan-400 flex-shrink-0" />}
+                          {msg.priority !== "normal" && !isNaviBroadcast(msg) && (
+                            <AlertTriangle className={`w-3 h-3 flex-shrink-0 ${getPriorityColor(msg.priority)}`} />
+                          )}
+                          <span className={`font-medium text-sm truncate ${!msg.read_at ? "text-primary font-bold" : ""}`}>
+                            {isNaviBroadcast(msg) ? "NAVI System" : (msg.sender_profile?.display_name || msg.sender_profile?.username || "Unknown")}
+                          </span>
+                          {!isNaviBroadcast(msg) && (
+                            <UserBadge 
+                              username={msg.sender_profile?.username || ''} 
+                              role={msg.sender_profile?.role} 
+                            />
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleStar(msg.id);
+                            }}
+                            className="hover:scale-110 transition-transform p-1"
+                          >
+                            <Star
+                              className={`w-3 h-3 ${
+                                starredLocal.has(msg.id) ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"
+                              }`}
+                            />
+                          </button>
+                          <span className="text-xs text-muted-foreground">{formatTime(msg.created_at)}</span>
+                        </div>
+                      </div>
+                      <div className={`text-sm mb-1 truncate ${!msg.read_at ? "font-semibold" : ""}`}>
+                        {msg.subject}
+                      </div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {msg.body.slice(0, 60)}...
+                      </div>
+                      {/* Reactions display */}
+                      {reactions[msg.id] && reactions[msg.id].length > 0 && (
+                        <div className="flex gap-1 mt-1">
+                          {reactions[msg.id].map((emoji, i) => (
+                            <span key={i} className="text-xs bg-muted/50 px-1.5 py-0.5 rounded">{emoji}</span>
+                          ))}
+                        </div>
                       )}
                     </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleStar(msg.id);
-                        }}
-                        className="hover:scale-110 transition-transform p-1"
-                      >
-                        <Star
-                          className={`w-3 h-3 ${
-                            starredLocal.has(msg.id) ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"
-                          }`}
-                        />
-                      </button>
-                      <span className="text-xs text-muted-foreground">{formatTime(msg.created_at)}</span>
-                    </div>
-                  </div>
-                  <div className={`text-sm mb-1 truncate ${!msg.read_at ? "font-semibold" : ""}`}>
-                    {msg.subject}
-                  </div>
-                  <div className="text-xs text-muted-foreground line-clamp-1">
-                    {msg.body.substring(0, 60)}...
                   </div>
                 </div>
               ))
@@ -482,128 +573,161 @@ export const Messages = () => {
 
           {/* Friends Tab */}
           <TabsContent value="friends" className="flex-1 overflow-y-auto m-0">
-            {/* Pending Friend Requests */}
-            {pendingRequests.length > 0 && (
-              <div className="p-2 border-b border-border">
-                <div className="text-xs font-bold text-muted-foreground mb-2 px-2">PENDING REQUESTS</div>
-                {pendingRequests.map(req => {
-                  const requestUser = req.user_profile;
-                  return (
-                    <div key={req.id} className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <UserPlus className="w-4 h-4 text-amber-400" />
-                          <span className="font-medium text-sm">
-                            {requestUser?.display_name || requestUser?.username || 'Unknown'}
-                          </span>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button 
-                            size="sm" 
-                            className="h-6 text-xs bg-green-600 hover:bg-green-500"
-                            onClick={() => handleAcceptFriend(req.id)}
-                          >
-                            Accept
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="h-6 text-xs"
-                            onClick={() => handleDeclineFriend(req.id)}
-                          >
-                            Decline
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Friends List */}
             {friendsLoading ? (
               <div className="flex items-center justify-center h-32">
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
-            ) : friends.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground text-sm">
-                <Heart className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>No friends yet</p>
-                <p className="text-xs mt-1">Message someone to add them as a friend!</p>
-              </div>
             ) : (
-              <div className="p-1">
-                <div className="text-xs font-bold text-muted-foreground mb-2 px-2">YOUR FRIENDS</div>
-                {friends.map(friend => {
-                  const friendUser = getFriendUser(friend);
-                  return (
-                    <div
-                      key={friend.id}
-                      onClick={() => friendUser && selectRecipient(friendUser.user_id, friendUser.display_name || friendUser.username)}
-                      className="p-2 hover:bg-muted/50 rounded cursor-pointer flex items-center gap-3"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                        <UserCheck className="w-4 h-4 text-primary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {friendUser?.display_name || friendUser?.username || 'Unknown'}
+              <div>
+                {/* Pending Requests */}
+                {pendingRequests.length > 0 && (
+                  <div className="p-2 border-b border-border">
+                    <div className="text-xs text-muted-foreground mb-2 font-medium">Friend Requests</div>
+                    {pendingRequests.map((request) => {
+                      const friendUser = getFriendUser(request);
+                      return (
+                        <div key={request.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30 mb-1">
+                          <div className="flex items-center gap-2">
+                            <UserAvatar 
+                              avatarUrl={friendUser?.avatar_url}
+                              username={friendUser?.username || 'U'}
+                              size="sm"
+                            />
+                            <span className="text-sm font-medium">{friendUser?.display_name || friendUser?.username}</span>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="ghost" className="h-6 px-2" onClick={() => handleAcceptFriend(request.id)}>
+                              <UserCheck className="w-3 h-3" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-6 px-2 text-destructive" onClick={() => handleDeclineFriend(request.id)}>
+                              <X className="w-3 h-3" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">@{friendUser?.username}</div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Friends List */}
+                {friends.length === 0 && pendingRequests.length === 0 ? (
+                  <div className="p-4 text-center text-muted-foreground text-sm">
+                    <Heart className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    No friends yet
+                  </div>
+                ) : (
+                  friends.map((friend) => {
+                    const friendUser = getFriendUser(friend);
+                    return (
+                      <div
+                        key={friend.id}
+                        className="p-3 border-b border-border hover:bg-muted/50 cursor-pointer"
+                        onClick={() => selectRecipient(friendUser?.user_id || '', friendUser?.username || '')}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <button onClick={(e) => e.stopPropagation()}>
+                                <UserAvatar 
+                                  avatarUrl={friendUser?.avatar_url}
+                                  username={friendUser?.username || 'U'}
+                                  size="sm"
+                                  showOnlineStatus
+                                  isOnline={friendUser?.is_online}
+                                />
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="p-0 w-auto" align="start">
+                              <ProfileCard 
+                                userId={friendUser?.user_id}
+                                username={friendUser?.username || 'Unknown'}
+                                displayName={friendUser?.display_name}
+                                avatarUrl={friendUser?.avatar_url}
+                                role={friendUser?.role}
+                                isOnline={friendUser?.is_online}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <div>
+                            <div className="font-medium text-sm">{friendUser?.display_name || friendUser?.username}</div>
+                            <div className="text-xs text-muted-foreground">@{friendUser?.username}</div>
+                          </div>
+                        </div>
                       </div>
-                      <Send className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             )}
           </TabsContent>
 
-          {/* All Users Tab */}
-          <TabsContent value="users" className="flex-1 overflow-y-auto m-0 p-1">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-32">
-                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : users.length === 0 ? (
+          {/* Users Tab */}
+          <TabsContent value="users" className="flex-1 overflow-y-auto m-0">
+            {users.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground text-sm">
                 <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p>No other users found</p>
+                No users found
               </div>
             ) : (
-              users.map(u => (
+              users.map((u) => (
                 <div
                   key={u.user_id}
-                  className="p-2 hover:bg-muted/50 rounded cursor-pointer flex items-center gap-3"
+                  className="p-3 border-b border-border hover:bg-muted/50"
                 >
-                  <div 
-                    className="flex-1 flex items-center gap-3"
-                    onClick={() => selectRecipient(u.user_id, u.display_name || u.username)}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold">
-                      {(u.username || '?')[0].toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm truncate flex items-center gap-1">
-                        {u.display_name || u.username}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button>
+                            <UserAvatar 
+                              avatarUrl={u.avatar_url}
+                              username={u.username || 'U'}
+                              size="sm"
+                              showOnlineStatus
+                              isOnline={u.is_online}
+                            />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-0 w-auto" align="start">
+                          <ProfileCard 
+                            userId={u.user_id}
+                            username={u.username || 'Unknown'}
+                            displayName={u.display_name}
+                            avatarUrl={u.avatar_url}
+                            role={u.role}
+                            isOnline={u.is_online}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-sm">{u.display_name || u.username}</span>
+                          <UserBadge username={u.username || ''} role={u.role} />
+                        </div>
+                        <div className="text-xs text-muted-foreground">@{u.username}</div>
                       </div>
-                      <div className="text-xs text-muted-foreground">@{u.username}</div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7"
+                        onClick={() => selectRecipient(u.user_id, u.username || '')}
+                      >
+                        <Mail className="w-3 h-3" />
+                      </Button>
+                      {!isFriend(u.user_id) && u.user_id !== user?.id && (
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-7"
+                          onClick={() => handleFriendRequest(u.user_id)}
+                        >
+                          <UserPlus className="w-3 h-3" />
+                        </Button>
+                      )}
                     </div>
                   </div>
-                  {!isFriend(u.user_id) && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 w-7 p-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFriendRequest(u.user_id);
-                      }}
-                    >
-                      <UserPlus className="w-4 h-4" />
-                    </Button>
-                  )}
                 </div>
               ))
             )}
@@ -611,256 +735,179 @@ export const Messages = () => {
         </Tabs>
       </div>
 
-      {/* Message Content / Compose */}
-      <div className="flex-1 flex flex-col bg-background/50">
+      {/* Right Panel - Message View / Compose */}
+      <div className="flex-1 flex flex-col">
         {composing ? (
-          <div className="flex-1 p-6 overflow-y-auto">
-            <div className="max-w-2xl mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold">New Message</h3>
-                <Button variant="ghost" size="icon" onClick={() => setComposing(false)}>
-                  <X className="w-4 h-4" />
-                </Button>
+          // Compose View
+          <div className="p-4 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold">
+                {replyingTo ? "Reply to Message" : "New Message"}
+              </h3>
+              <Button variant="ghost" size="icon" onClick={() => { setComposing(false); setReplyingTo(null); }}>
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            {/* Reply quote */}
+            {replyingTo && (
+              <div className="mb-3 p-3 bg-muted/30 rounded-lg border-l-2 border-primary">
+                <div className="flex items-center gap-2 mb-1">
+                  <Reply className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">
+                    Replying to {replyingTo.sender_profile?.display_name || replyingTo.sender_profile?.username}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground line-clamp-2">{replyingTo.body}</p>
               </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">To</label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={compose.to}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setCompose(prev => ({ ...prev, to: value, toUserId: "" }));
-                        // Try to match with existing user
-                        const matchedUser = users.find(u => 
-                          u.username.toLowerCase() === value.toLowerCase() ||
-                          u.display_name?.toLowerCase() === value.toLowerCase()
-                        );
-                        if (matchedUser) {
-                          setCompose(prev => ({ ...prev, toUserId: matchedUser.user_id }));
-                          if (matchedUser.username.toLowerCase() === 'aswd') {
-                            setShowAswdPopup(true);
-                          }
-                        }
-                      }}
-                      placeholder="Type username or select from friends..."
-                      className="flex-1"
-                    />
-                  </div>
-                  
-                  {/* User suggestions when typing */}
-                  {compose.to && !compose.toUserId && (
-                    <div className="mt-2 p-2 rounded-lg border border-border bg-card max-h-32 overflow-y-auto">
-                      <p className="text-xs text-muted-foreground mb-2 px-2">Suggestions:</p>
-                      {users.filter(u => 
-                        u.username.toLowerCase().includes(compose.to.toLowerCase()) ||
-                        u.display_name?.toLowerCase().includes(compose.to.toLowerCase())
-                      ).slice(0, 5).map(u => (
-                        <div
-                          key={u.user_id}
-                          onClick={() => selectRecipient(u.user_id, u.display_name || u.username)}
-                          className="p-2 hover:bg-muted rounded cursor-pointer text-sm"
-                        >
-                          <div className="font-medium">{u.display_name || u.username}</div>
-                          <div className="text-xs text-muted-foreground">@{u.username}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Quick friends selection */}
-                  {!compose.to && friends.length > 0 && (
-                    <div className="mt-2 p-2 rounded-lg border border-border bg-card">
-                      <p className="text-xs text-muted-foreground mb-2 px-2 flex items-center gap-1">
-                        <Heart className="w-3 h-3" /> Quick select from friends:
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {friends.slice(0, 5).map(friend => {
-                          const friendUser = getFriendUser(friend);
-                          return (
-                            <Button
-                              key={friend.id}
-                              variant="outline"
-                              size="sm"
-                              className="h-7 text-xs"
-                              onClick={() => friendUser && selectRecipient(friendUser.user_id, friendUser.display_name || friendUser.username)}
-                            >
-                              {friendUser?.display_name || friendUser?.username}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Priority</label>
-                  <select
-                    value={compose.priority}
-                    onChange={(e) => setCompose(prev => ({ ...prev, priority: e.target.value as Message["priority"] }))}
-                    className="w-full px-3 py-2 rounded-lg bg-muted/50 border border-border"
-                  >
-                    <option value="normal">Normal</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Subject</label>
-                  <Input
-                    value={compose.subject}
-                    onChange={(e) => setCompose(prev => ({ ...prev, subject: e.target.value }))}
-                    placeholder="Subject"
-                    maxLength={100}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Message</label>
-                  <Textarea
-                    value={compose.body}
-                    onChange={(e) => setCompose(prev => ({ ...prev, body: e.target.value.slice(0, 750) }))}
-                    placeholder="Type your message..."
-                    rows={10}
-                    className="resize-none"
-                    maxLength={750}
-                  />
-                  <div className={`text-xs mt-1 text-right ${compose.body.length > 700 ? 'text-yellow-500' : 'text-muted-foreground'} ${compose.body.length >= 750 ? 'text-destructive' : ''}`}>
-                    {compose.body.length}/750
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={handleSendMessage} 
-                  className="w-full" 
-                  disabled={isSending || isRateLimited || !compose.toUserId}
-                >
-                  {isSending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4 mr-2" />
-                      Send Message
-                    </>
-                  )}
-                </Button>
+            )}
+            
+            <div className="space-y-3 flex-1">
+              <div>
+                <label className="text-xs text-muted-foreground">To</label>
+                <Input 
+                  value={compose.to} 
+                  readOnly 
+                  placeholder="Select a recipient from the left panel"
+                  className="bg-muted/30"
+                />
               </div>
+              <div>
+                <label className="text-xs text-muted-foreground">Subject</label>
+                <Input 
+                  value={compose.subject}
+                  onChange={(e) => setCompose(p => ({ ...p, subject: e.target.value }))}
+                  placeholder="Enter subject..."
+                />
+              </div>
+              <div className="flex-1 flex flex-col">
+                <label className="text-xs text-muted-foreground mb-1">Message</label>
+                <Textarea 
+                  value={compose.body}
+                  onChange={(e) => setCompose(p => ({ ...p, body: e.target.value }))}
+                  placeholder="Type your message..."
+                  className="flex-1 min-h-[200px] resize-none"
+                />
+                <div className="text-xs text-muted-foreground mt-1 text-right">
+                  {compose.body.length}/750
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => { setComposing(false); setReplyingTo(null); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleSendMessage} disabled={isSending || isRateLimited}>
+                {isSending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+                Send
+              </Button>
             </div>
           </div>
         ) : selected ? (
-          <>
-            <div className="p-4 border-b border-border bg-card/30">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    {isNaviBroadcast(selected) && <Bot className="w-5 h-5 text-cyan-400" />}
-                    {selected.priority !== "normal" && !isNaviBroadcast(selected) && (
-                      <AlertTriangle className={`w-4 h-4 ${getPriorityColor(selected.priority)}`} />
-                    )}
-                    <h3 className="font-bold text-lg">{selected.subject}</h3>
-                  </div>
-                  <div className="text-sm text-muted-foreground flex items-center flex-wrap gap-1">
-                    <span>From:</span>
-                    <span className="text-foreground font-medium">
-                      {isNaviBroadcast(selected) ? "NAVI System" : (selected.sender_profile?.display_name || selected.sender_profile?.username || "Unknown")}
-                    </span>
-                    {!isNaviBroadcast(selected) && (
-                      <UserBadge 
-                        username={selected.sender_profile?.username || ''} 
-                        role={selected.sender_profile?.role} 
+          // Message View
+          <div className="flex flex-col h-full">
+            <div className="p-4 border-b border-border">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button>
+                        <UserAvatar 
+                          avatarUrl={selected.sender_profile?.avatar_url}
+                          username={selected.sender_profile?.username || 'U'}
+                          size="md"
+                        />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="p-0 w-auto" align="start">
+                      <ProfileCard 
+                        userId={selected.sender_id}
+                        username={selected.sender_profile?.username || 'Unknown'}
+                        displayName={selected.sender_profile?.display_name}
+                        avatarUrl={selected.sender_profile?.avatar_url}
+                        role={selected.sender_profile?.role}
+                        isOnline={selected.sender_profile?.is_online}
                       />
-                    )}
-                    <span>• {formatTime(selected.created_at)}</span>
+                    </PopoverContent>
+                  </Popover>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold">{selected.subject}</h3>
+                      {selected.priority !== "normal" && (
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          selected.priority === "urgent" ? "bg-destructive/20 text-destructive" : "bg-yellow-500/20 text-yellow-500"
+                        }`}>
+                          {selected.priority}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className="font-medium">
+                        {isNaviBroadcast(selected) ? "NAVI System" : (selected.sender_profile?.display_name || selected.sender_profile?.username)}
+                      </span>
+                      {!isNaviBroadcast(selected) && (
+                        <UserBadge 
+                          username={selected.sender_profile?.username || ''} 
+                          role={selected.sender_profile?.role} 
+                        />
+                      )}
+                      <span>•</span>
+                      <span>{new Date(selected.created_at).toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDelete(selected.id)}
-                  className="text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-
-              {selected.priority === "urgent" && (
-                <div className="p-2 rounded bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold">
-                  ⚠ URGENT MESSAGE
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1 p-6 overflow-y-auto">
-              {/* NAVI Broadcast Banner */}
-              {isNaviBroadcast(selected) && (
-                <div className="mb-4 px-3 py-2 rounded-lg bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/40 flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs text-cyan-400 font-medium">
-                    System Broadcast • Sent by NAVI to all users
-                  </span>
-                </div>
-              )}
-              
-              {/* Admin/Creator/VIP Verification Banner */}
-              {!isNaviBroadcast(selected) && selected.sender_profile?.username?.toLowerCase() === 'aswd' && (
-                <div className="mb-4 px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/40 flex items-center gap-2">
-                  <Crown className="w-4 h-4 text-yellow-400" />
-                  <span className="text-xs text-yellow-400 font-medium">
-                    Verified Creator • This is Aswd, the developer of UrbanShade OS. Say hi!
-                  </span>
-                </div>
-              )}
-              
-              {!isNaviBroadcast(selected) && selected.sender_profile?.role === 'admin' && selected.sender_profile?.username?.toLowerCase() !== 'aswd' && (
-                <div className="mb-4 px-3 py-2 rounded-lg bg-green-500/15 border border-green-500/30 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-green-400" />
-                  <span className="text-xs text-green-400 font-medium">
-                    Verified Admin • This user is part of the UrbanShade team
-                  </span>
-                </div>
-              )}
-              
-              {!isNaviBroadcast(selected) && selected.sender_profile?.is_vip && selected.sender_profile?.role !== 'admin' && selected.sender_profile?.username?.toLowerCase() !== 'aswd' && (
-                <div className="mb-4 px-3 py-2 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs text-purple-400 font-medium">
-                    Trusted VIP • This user has been recognized by Aswd and is trustworthy
-                  </span>
-                </div>
-              )}
-              
-              <pre className="text-sm whitespace-pre-wrap font-sans leading-relaxed">
-                {selected.body}
-              </pre>
-              
-              {/* Add friend button if not already friends */}
-              {!isNaviBroadcast(selected) && selected.sender_id && !isFriend(selected.sender_id) && (
-                <div className="mt-6 pt-4 border-t border-border">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                    onClick={() => handleFriendRequest(selected.sender_id)}
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Add {selected.sender_profile?.display_name || selected.sender_profile?.username} as Friend
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => handleReply(selected)}>
+                    <Reply className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => toggleStar(selected.id)}>
+                    <Star className={`w-4 h-4 ${starredLocal.has(selected.id) ? "fill-yellow-500 text-yellow-500" : ""}`} />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete(selected.id)}>
+                    <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
+              </div>
+            </div>
+            
+            <div className="flex-1 p-4 overflow-y-auto">
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <p className="whitespace-pre-wrap">{selected.body}</p>
+              </div>
+            </div>
+            
+            {/* Reactions bar */}
+            <div className="p-3 border-t border-border flex items-center gap-2">
+              <span className="text-xs text-muted-foreground mr-2">React:</span>
+              {REACTIONS.map(emoji => (
+                <button
+                  key={emoji}
+                  onClick={() => addReaction(selected.id, emoji)}
+                  className={cn(
+                    "text-lg hover:scale-125 transition-transform p-1 rounded",
+                    reactions[selected.id]?.includes(emoji) && "bg-primary/20"
+                  )}
+                >
+                  {emoji}
+                </button>
+              ))}
+              {reactions[selected.id] && reactions[selected.id].length > 0 && (
+                <div className="ml-4 flex gap-1">
+                  {reactions[selected.id].map((emoji, i) => (
+                    <span key={i} className="text-sm bg-muted px-2 py-1 rounded-full">{emoji}</span>
+                  ))}
+                </div>
               )}
             </div>
-          </>
+          </div>
         ) : (
+          // No message selected
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
-              <Mail className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Select a message or compose a new one</p>
-              <p className="text-xs mt-1">Click refresh to check for new messages</p>
+              <MessageCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>Select a message to read</p>
+              <p className="text-sm mt-1">or compose a new one</p>
             </div>
           </div>
         )}

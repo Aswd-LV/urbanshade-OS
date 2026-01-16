@@ -676,6 +676,58 @@ export const ACHIEVEMENTS: Achievement[] = [
     rarity: 'epic',
     points: 100,
   },
+
+  // Dark Web Exploration
+  {
+    id: 'dark_explorer',
+    name: 'Into The Depths',
+    description: 'Connect to a dark VPN server for the first time',
+    icon: '🕳️',
+    category: 'special',
+    rarity: 'rare',
+    points: 50,
+    hidden: true,
+  },
+  {
+    id: 'dark_reader',
+    name: 'Forbidden Knowledge',
+    description: 'Read classified documents on the dark web',
+    icon: '📜',
+    category: 'special',
+    rarity: 'epic',
+    points: 75,
+    hidden: true,
+  },
+  {
+    id: 'black_market_visitor',
+    name: 'Underground Economy',
+    description: 'Visit the black market site',
+    icon: '💰',
+    category: 'special',
+    rarity: 'rare',
+    points: 50,
+    hidden: true,
+  },
+  {
+    id: 'void_traveler',
+    name: 'Void Walker',
+    description: 'Access the void - where reality becomes negotiable',
+    icon: '👁️',
+    category: 'special',
+    rarity: 'legendary',
+    points: 100,
+    hidden: true,
+  },
+  {
+    id: 'dark_web_master',
+    name: 'Shadow Operative',
+    description: 'Visit all dark web sites',
+    icon: '🦇',
+    category: 'special',
+    rarity: 'legendary',
+    points: 150,
+    hidden: true,
+  },
 ];
 
 export const getAchievementById = (id: string): Achievement | undefined => {

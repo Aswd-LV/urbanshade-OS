@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { vpnState } from "@/lib/vpnState";
 import { toast } from "sonner";
+import { trackDarkWebVisit, trackDarkVPNConnect } from "@/hooks/useAchievementTriggers";
 
 interface Page {
   url: string;
@@ -11,6 +12,7 @@ interface Page {
   content: JSX.Element;
   requiresVPN?: boolean;
   requiresDarkVPN?: boolean;
+  darkSiteId?: 'depths' | 'blackmarket' | 'void';
 }
 
 export const Browser = () => {
@@ -372,6 +374,7 @@ export const Browser = () => {
       url: "depths.urbanshade.local",
       title: "THE DEPTHS - Classified",
       requiresDarkVPN: true,
+      darkSiteId: 'depths',
       content: (
         <div className="p-6 max-w-3xl mx-auto">
           <div className="mb-6 p-4 rounded-lg bg-red-950/30 border border-red-500/30">
@@ -427,6 +430,7 @@ export const Browser = () => {
       url: "blackmarket.urbanshade.local",
       title: "The Black Market",
       requiresDarkVPN: true,
+      darkSiteId: 'blackmarket',
       content: (
         <div className="p-6 max-w-3xl mx-auto">
           <div className="mb-6 p-4 rounded-lg bg-purple-950/30 border border-purple-500/30">
@@ -483,6 +487,7 @@ export const Browser = () => {
       url: "void.urbanshade.local",
       title: "V̷͎̓O̶̜͝I̵̛̜D̵̰̊",
       requiresDarkVPN: true,
+      darkSiteId: 'void',
       content: (
         <div className="p-6 max-w-3xl mx-auto min-h-[60vh] flex flex-col items-center justify-center">
           <div className="text-center space-y-6 animate-pulse">
@@ -533,6 +538,11 @@ export const Browser = () => {
           description: "Try the Abyss Node or Void Relay in the VPN app."
         });
         return;
+      }
+      
+      // Track dark web visits for achievements
+      if (page.darkSiteId) {
+        trackDarkWebVisit(page.darkSiteId);
       }
       
       setCurrentUrl(url);

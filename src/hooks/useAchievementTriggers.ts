@@ -403,6 +403,50 @@ export async function trackContainmentLoreRead(): Promise<void> {
 export async function trackContainmentSubjectEncounter(subjectId: string): Promise<void> {
   const userId = await getCurrentUserId();
   if (!userId) return;
+}
+
+// Dark Web Achievement tracking
+const DARK_WEB_STORAGE = {
+  VISITED_SITES: 'dark_web_visited_sites',
+  CONNECTED_TO_DARK: 'dark_web_connected',
+};
+
+export async function trackDarkVPNConnect(): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  const connected = localStorage.getItem(DARK_WEB_STORAGE.CONNECTED_TO_DARK);
+  if (!connected) {
+    localStorage.setItem(DARK_WEB_STORAGE.CONNECTED_TO_DARK, 'true');
+    await grantAchievement(userId, 'dark_explorer');
+  }
+}
+
+export async function trackDarkWebVisit(siteId: 'depths' | 'blackmarket' | 'void'): Promise<void> {
+  const userId = await getCurrentUserId();
+  if (!userId) return;
+
+  const stored = localStorage.getItem(DARK_WEB_STORAGE.VISITED_SITES);
+  const visitedSites: string[] = stored ? JSON.parse(stored) : [];
+  
+  if (!visitedSites.includes(siteId)) {
+    visitedSites.push(siteId);
+    localStorage.setItem(DARK_WEB_STORAGE.VISITED_SITES, JSON.stringify(visitedSites));
+    
+    // Grant individual site achievements
+    if (siteId === 'depths') {
+      await grantAchievement(userId, 'dark_reader');
+    } else if (siteId === 'blackmarket') {
+      await grantAchievement(userId, 'black_market_visitor');
+    } else if (siteId === 'void') {
+      await grantAchievement(userId, 'void_traveler');
+    }
+    
+    // Check if all sites visited
+    if (visitedSites.includes('depths') && visitedSites.includes('blackmarket') && visitedSites.includes('void')) {
+      await grantAchievement(userId, 'dark_web_master');
+    }
+  }
 
   const stored = localStorage.getItem(CONTAINMENT_STORAGE.ENCOUNTERED_SUBJECTS);
   const encountered: string[] = stored ? JSON.parse(stored) : [];
@@ -496,6 +540,15 @@ export function useAchievementTriggers() {
     await trackContainmentLoreRead();
   }, []);
 
+  // Dark Web triggers
+  const triggerDarkVPNConnect = useCallback(async () => {
+    await trackDarkVPNConnect();
+  }, []);
+
+  const triggerDarkWebVisit = useCallback(async (siteId: 'depths' | 'blackmarket' | 'void') => {
+    await trackDarkWebVisit(siteId);
+  }, []);
+
   return {
     triggerAppOpen,
     triggerChatMessage,
@@ -515,5 +568,8 @@ export function useAchievementTriggers() {
     triggerContainmentDeath,
     triggerContainmentCloseCall,
     triggerContainmentLoreRead,
+    // Dark Web
+    triggerDarkVPNConnect,
+    triggerDarkWebVisit,
   };
 }
