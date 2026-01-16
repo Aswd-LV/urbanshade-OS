@@ -64,13 +64,13 @@ const Troubleshooting = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
+      <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary">Troubleshooting</h1>
+          <h1 className="text-xl font-bold text-cyan-400">Troubleshooting</h1>
           <Link 
             to="/docs" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Docs
@@ -80,25 +80,25 @@ const Troubleshooting = () => {
 
       <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
         <section className="text-center space-y-4">
-          <HelpCircle className="w-16 h-16 mx-auto text-primary" />
-          <h2 className="text-4xl font-bold">Houston, We Have a Problem</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <HelpCircle className="w-16 h-16 mx-auto text-cyan-400" />
+          <h2 className="text-4xl font-bold text-white">Houston, We Have a Problem</h2>
+          <p className="text-slate-400 max-w-2xl mx-auto">
             Something went wrong? Don't worry, it's probably not a real containment breach. 
             Let's figure out what's happening.
           </p>
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold">The Universal Fix</h3>
-          <div className="p-6 rounded-lg bg-primary/10 border border-primary/30 space-y-4">
+          <h3 className="text-2xl font-bold text-white">The Universal Fix</h3>
+          <div className="p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/30 space-y-4">
             <div className="flex items-center gap-3">
-              <RotateCcw className="w-8 h-8 text-primary" />
-              <p className="text-lg font-bold">Have you tried turning it off and on again?</p>
+              <RotateCcw className="w-8 h-8 text-cyan-400" />
+              <p className="text-lg font-bold text-white">Have you tried turning it off and on again?</p>
             </div>
-            <p className="text-muted-foreground">
+            <p className="text-slate-400">
               Seriously though, most issues can be fixed by:
             </p>
-            <ol className="space-y-2 ml-4 text-muted-foreground">
+            <ol className="space-y-2 ml-4 text-slate-400">
               <li>1. Refreshing the page (Ctrl+R or Cmd+R)</li>
               <li>2. Hard refreshing (Ctrl+Shift+R or Cmd+Shift+R)</li>
               <li>3. Clearing localStorage and starting fresh</li>
@@ -108,15 +108,15 @@ const Troubleshooting = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold">Frequently Asked Questions</h3>
+          <h3 className="text-2xl font-bold text-white">Frequently Asked Questions</h3>
           <div className="space-y-4">
             {faqs.map((faq, i) => (
-              <div key={i} className="p-4 rounded-lg bg-black/40 border border-white/10">
+              <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-cyan-500/20">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-1" />
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-1" />
                   <div className="space-y-2">
-                    <h4 className="font-bold">{faq.question}</h4>
-                    <p className="text-sm text-muted-foreground">{faq.answer}</p>
+                    <h4 className="font-bold text-white">{faq.question}</h4>
+                    <p className="text-sm text-slate-400">{faq.answer}</p>
                     <div className="flex items-center gap-2 text-xs">
                       <CheckCircle className="w-4 h-4 text-green-500" />
                       <span className="text-green-500">{faq.solution}</span>
@@ -129,23 +129,23 @@ const Troubleshooting = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold">Known Issues & "Features"</h3>
-          <p className="text-muted-foreground">
+          <h3 className="text-2xl font-bold text-white">Known Issues & "Features"</h3>
+          <p className="text-slate-400">
             Some things that might seem like bugs are actually intentional. Or we're just calling them features. Same thing, really.
           </p>
           <div className="space-y-3">
             {knownIssues.map((item, i) => (
-              <div key={i} className="p-4 rounded-lg bg-black/40 border border-white/10 flex items-start gap-3">
+              <div key={i} className="p-4 rounded-xl bg-slate-800/50 border border-cyan-500/20 flex items-start gap-3">
                 {item.status === "feature" ? (
                   <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
                 ) : item.status === "known" ? (
-                  <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                  <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0" />
                 ) : (
                   <XCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
                 )}
                 <div>
-                  <p className="font-bold text-sm">{item.issue}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{item.workaround}</p>
+                  <p className="font-bold text-sm text-white">{item.issue}</p>
+                  <p className="text-xs text-slate-400 mt-1">{item.workaround}</p>
                 </div>
               </div>
             ))}
@@ -153,65 +153,65 @@ const Troubleshooting = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold">Nuclear Options</h3>
-          <div className="p-6 rounded-lg bg-destructive/10 border border-destructive/30 space-y-4">
-            <p className="text-muted-foreground">
+          <h3 className="text-2xl font-bold text-white">Nuclear Options</h3>
+          <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/30 space-y-4">
+            <p className="text-slate-400">
               If nothing else works, here are the last resort options:
             </p>
             <div className="space-y-3">
-              <div className="p-3 rounded bg-black/40">
-                <p className="font-bold text-sm">Clear Site Data</p>
-                <p className="text-xs text-muted-foreground mt-1">
+              <div className="p-3 rounded-lg bg-slate-900/50">
+                <p className="font-bold text-sm text-white">Clear Site Data</p>
+                <p className="text-xs text-slate-400 mt-1">
                   Open DevTools (F12) → Application → Storage → Clear site data
                 </p>
               </div>
-              <div className="p-3 rounded bg-black/40">
-                <p className="font-bold text-sm">Factory Reset via Recovery</p>
-                <p className="text-xs text-muted-foreground mt-1">
+              <div className="p-3 rounded-lg bg-slate-900/50">
+                <p className="font-bold text-sm text-white">Factory Reset via Recovery</p>
+                <p className="text-xs text-slate-400 mt-1">
                   Press F2 during boot → Select Factory Reset → Confirm
                 </p>
               </div>
-              <div className="p-3 rounded bg-black/40">
-                <p className="font-bold text-sm">Manual localStorage Clear</p>
-                <p className="text-xs text-muted-foreground mt-1">
+              <div className="p-3 rounded-lg bg-slate-900/50">
+                <p className="font-bold text-sm text-white">Manual localStorage Clear</p>
+                <p className="text-xs text-slate-400 mt-1">
                   Open DevTools Console → Type: localStorage.clear() → Refresh
                 </p>
               </div>
             </div>
-            <p className="text-xs text-destructive">
+            <p className="text-xs text-red-400">
               ⚠️ All of these will delete your saved data. Export first if you want to keep anything!
             </p>
           </div>
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold">DEF-DEV Debugging</h3>
-          <div className="p-6 rounded-lg bg-amber-500/10 border border-amber-500/30 space-y-4">
-            <p className="text-muted-foreground">
+          <h3 className="text-2xl font-bold text-white">DEF-DEV Debugging</h3>
+          <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-4">
+            <p className="text-slate-400">
               If you have Developer Mode enabled, DEF-DEV provides powerful debugging tools:
             </p>
             <div className="space-y-3">
-              <div className="p-3 rounded bg-black/40">
+              <div className="p-3 rounded-lg bg-slate-900/50">
                 <p className="font-bold text-sm text-amber-400">Console Tab</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-slate-400 mt-1">
                   View real-time logs with error simplification - great for understanding what went wrong
                 </p>
               </div>
-              <div className="p-3 rounded bg-black/40">
+              <div className="p-3 rounded-lg bg-slate-900/50">
                 <p className="font-bold text-sm text-amber-400">Actions Tab</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-slate-400 mt-1">
                   Monitor all system events and user interactions
                 </p>
               </div>
-              <div className="p-3 rounded bg-black/40">
+              <div className="p-3 rounded-lg bg-slate-900/50">
                 <p className="font-bold text-sm text-amber-400">Storage Tab</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-slate-400 mt-1">
                   Inspect and edit localStorage entries directly
                 </p>
               </div>
-              <div className="p-3 rounded bg-black/40">
+              <div className="p-3 rounded-lg bg-slate-900/50">
                 <p className="font-bold text-sm text-amber-400">Recovery Images</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-slate-400 mt-1">
                   Create snapshots of your system state to restore later
                 </p>
               </div>
@@ -222,18 +222,18 @@ const Troubleshooting = () => {
           </div>
         </section>
 
-        <section className="p-6 rounded-lg bg-primary/10 border border-primary/30">
-          <h3 className="font-bold text-primary mb-2">Still stuck?</h3>
-          <p className="text-sm text-muted-foreground">
+        <section className="p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+          <h3 className="font-bold text-cyan-400 mb-2">Still stuck?</h3>
+          <p className="text-sm text-slate-400">
             Remember, this is a fictional simulation for fun. If something really isn't working, 
             the worst case scenario is refreshing and starting over. No real submarines were 
             harmed in the making of this software.
           </p>
         </section>
 
-        <div className="flex justify-between pt-8 border-t border-white/10">
-          <Link to="/docs/shortcuts" className="text-primary hover:underline">← Keyboard Shortcuts</Link>
-          <Link to="/docs" className="text-primary hover:underline">Back to Docs Home →</Link>
+        <div className="flex justify-between pt-8 border-t border-cyan-500/20">
+          <Link to="/docs/shortcuts" className="text-cyan-400 hover:underline">← Keyboard Shortcuts</Link>
+          <Link to="/docs" className="text-cyan-400 hover:underline">Back to Docs Home →</Link>
         </div>
       </main>
     </div>

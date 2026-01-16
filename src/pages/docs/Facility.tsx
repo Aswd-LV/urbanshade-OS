@@ -62,13 +62,13 @@ const Facility = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
+      <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary">Facility Applications</h1>
+          <h1 className="text-xl font-bold text-cyan-400">Facility Applications</h1>
           <Link 
             to="/docs" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Docs
@@ -78,16 +78,16 @@ const Facility = () => {
 
       <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
         <section className="text-center space-y-4">
-          <Shield className="w-16 h-16 mx-auto text-primary" />
-          <h2 className="text-4xl font-bold">Facility Management Suite</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <Shield className="w-16 h-16 mx-auto text-cyan-400" />
+          <h2 className="text-4xl font-bold text-white">Facility Management Suite</h2>
+          <p className="text-slate-400 max-w-2xl mx-auto">
             These are the applications that keep our underwater research facility running. 
             Use them wisely. Or don't. It's a simulation - go wild.
           </p>
         </section>
 
-        <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-center">
-          <p className="text-sm text-destructive">
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-center">
+          <p className="text-sm text-red-400">
             ⚠️ <span className="font-bold">CLASSIFIED NOTICE:</span> Some facility applications 
             may contain information about specimens that definitely don't exist and events that 
             absolutely never happened. Please disregard any tentacles you may or may not see.
@@ -98,18 +98,18 @@ const Facility = () => {
           {facilityApps.map((app, index) => (
             <div 
               key={index}
-              className="p-6 rounded-lg bg-black/40 border border-white/10 hover:border-primary/30 transition-colors"
+              className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-colors"
             >
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <app.icon className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                  <app.icon className="w-6 h-6 text-cyan-400" />
                 </div>
                 <div className="space-y-2 flex-1">
-                  <h3 className="text-xl font-bold">{app.name}</h3>
-                  <p className="text-primary text-sm">{app.description}</p>
-                  <p className="text-muted-foreground text-sm">{app.details}</p>
+                  <h3 className="text-xl font-bold text-white">{app.name}</h3>
+                  <p className="text-cyan-400 text-sm">{app.description}</p>
+                  <p className="text-slate-400 text-sm">{app.details}</p>
                   {app.warning && (
-                    <p className="text-xs text-yellow-500 italic mt-2">* {app.warning}</p>
+                    <p className="text-xs text-amber-500 italic mt-2">* {app.warning}</p>
                   )}
                 </div>
               </div>
@@ -117,18 +117,18 @@ const Facility = () => {
           ))}
         </div>
 
-        <div className="p-6 rounded-lg bg-primary/10 border border-primary/30">
-          <h3 className="font-bold text-primary mb-2">🔬 Research Tip</h3>
-          <p className="text-sm text-muted-foreground">
+        <div className="p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+          <h3 className="font-bold text-cyan-400 mb-2">🔬 Research Tip</h3>
+          <p className="text-sm text-slate-400">
             For the full deep-sea research facility experience, try using the Security Cameras 
             while monitoring the Containment systems. Nothing says "immersive simulation" like 
             watching empty corridors and pretending something is lurking just off-screen.
           </p>
         </div>
 
-        <div className="flex justify-between pt-8 border-t border-white/10">
-          <Link to="/docs/applications" className="text-primary hover:underline">← Core Applications</Link>
-          <Link to="/docs/terminal" className="text-primary hover:underline">Terminal Guide →</Link>
+        <div className="flex justify-between pt-8 border-t border-cyan-500/20">
+          <Link to="/docs/applications" className="text-cyan-400 hover:underline">← Core Applications</Link>
+          <Link to="/docs/terminal" className="text-cyan-400 hover:underline">Terminal Guide →</Link>
         </div>
       </main>
     </div>

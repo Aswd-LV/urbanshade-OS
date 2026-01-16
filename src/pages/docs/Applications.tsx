@@ -72,13 +72,13 @@ const Applications = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
+      <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary">Core Applications</h1>
+          <h1 className="text-xl font-bold text-cyan-400">Core Applications</h1>
           <Link 
             to="/docs" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Docs
@@ -88,9 +88,9 @@ const Applications = () => {
 
       <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
         <section className="text-center space-y-4">
-          <Folder className="w-16 h-16 mx-auto text-primary" />
-          <h2 className="text-4xl font-bold">Your Digital Toolbox</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <Folder className="w-16 h-16 mx-auto text-cyan-400" />
+          <h2 className="text-4xl font-bold text-white">Your Digital Toolbox</h2>
+          <p className="text-slate-400 max-w-2xl mx-auto">
             URBANSHADE OS comes packed with applications designed to help you manage 
             an underwater research facility. Or, you know, just click around and have fun.
           </p>
@@ -100,42 +100,42 @@ const Applications = () => {
           {apps.map((app, index) => (
             <div 
               key={index}
-              className="p-6 rounded-lg bg-black/40 border border-white/10 hover:border-primary/30 transition-colors"
+              className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-colors"
             >
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <app.icon className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                  <app.icon className="w-6 h-6 text-cyan-400" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold">{app.name}</h3>
-                  <p className="text-primary text-sm">{app.description}</p>
-                  <p className="text-muted-foreground text-sm">{app.details}</p>
+                  <h3 className="text-xl font-bold text-white">{app.name}</h3>
+                  <p className="text-cyan-400 text-sm">{app.description}</p>
+                  <p className="text-slate-400 text-sm">{app.details}</p>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="p-6 rounded-lg bg-primary/10 border border-primary/30">
-          <h3 className="font-bold text-primary mb-2">💡 Did you know?</h3>
-          <p className="text-sm text-muted-foreground">
+        <div className="p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
+          <h3 className="font-bold text-cyan-400 mb-2">💡 Did you know?</h3>
+          <p className="text-sm text-slate-400">
             You can open multiple applications at once! Each one opens in its own window 
             that you can drag, resize, minimize, and maximize. It's like a real desktop, 
             except everything is simulated and the files aren't real. Living the dream!
           </p>
         </div>
 
-        <div className="p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-          <h3 className="font-bold text-yellow-500 mb-2">🔧 Developer Note</h3>
-          <p className="text-sm text-muted-foreground">
+        <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/30">
+          <h3 className="font-bold text-amber-500 mb-2">🔧 Developer Note</h3>
+          <p className="text-sm text-slate-400">
             If you have Developer Mode enabled, you can also access DEF-DEV for advanced 
             debugging and system analysis. Check out the DEF-DEV documentation for more info!
           </p>
         </div>
 
-        <div className="flex justify-between pt-8 border-t border-white/10">
-          <Link to="/docs/getting-started" className="text-primary hover:underline">← Getting Started</Link>
-          <Link to="/docs/facility" className="text-primary hover:underline">Facility Apps →</Link>
+        <div className="flex justify-between pt-8 border-t border-cyan-500/20">
+          <Link to="/docs/getting-started" className="text-cyan-400 hover:underline">← Getting Started</Link>
+          <Link to="/docs/facility" className="text-cyan-400 hover:underline">Facility Apps →</Link>
         </div>
       </main>
     </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { isOfflineMode } from "@/integrations/supabase/client";
 import { getBiosSettings } from "@/hooks/useBiosSettings";
+import { UrbanshadeSpinner } from "@/components/shared/UrbanshadeSpinner";
 
 interface BootScreenProps {
   onComplete: () => void;
@@ -45,7 +46,19 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
     setStages(bootStages);
   }, [isFastBoot]);
 
-  // Extended logo display phase (6 seconds total now)
+  // Handle F8 keypress for safe mode (silent - no UI indication)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F8') {
+        setSafeModePressed(true);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Extended logo display phase (6 seconds total)
   useEffect(() => {
     const delayTimer = setTimeout(() => {
       setSafeModeDelay(false);
@@ -128,15 +141,18 @@ export const BootScreen = ({ onComplete, onSafeMode }: BootScreenProps) => {
     return stage.label + '...';
   };
 
-  // During logo display period - just show the logo
+  // During logo display period - show logo with spinner
   if (safeModeDelay) {
     return (
       <div className="fixed inset-0 bg-black flex flex-col items-center justify-center">
         <img 
           src="/favicon.svg" 
           alt="UrbanShade" 
-          className="w-24 h-24 animate-pulse"
+          className="w-24 h-24"
         />
+        <div className="mt-8">
+          <UrbanshadeSpinner size="md" />
+        </div>
       </div>
     );
   }
