@@ -3,11 +3,10 @@ soon 👀
 
 
 
-## Urbanshade OS reaches 400 commits!
-This is a big thing, and im very happy for this!
+## Urbanshade OS reaches 50 PRs and 500 commits!
+Thank you everyone...
 
-Im very excited when i'll release V3.0!
-Im very thankful for everyone who helps!
+this means a lot to me...
 # Welcome to the Urbanshade OS (website)!
 ---
 ## Quick viewable status:
