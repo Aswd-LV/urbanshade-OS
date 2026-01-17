@@ -3,6 +3,7 @@ import { Shield, Power, Globe, Lock, Zap, MapPin, Activity, Skull, AlertTriangle
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { vpnState } from "@/lib/vpnState";
+import { trackDarkVPNConnect } from "@/hooks/useAchievementTriggers";
 
 interface VPNServer {
   id: string;
@@ -59,7 +60,7 @@ export const VPN = () => {
     setConnecting(true);
     toast.loading("Establishing secure connection...");
     
-    setTimeout(() => {
+    setTimeout(async () => {
       const mockIP = `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
       setVpnIP(mockIP);
       setConnected(true);
@@ -68,8 +69,9 @@ export const VPN = () => {
       toast.dismiss();
       toast.success(`Connected to ${selectedServer.name}!`);
       
-      // Show dark web hint for dark servers
+      // Track dark VPN connection for achievement
       if (selectedServer.id.startsWith("dark-")) {
+        await trackDarkVPNConnect();
         setTimeout(() => {
           toast.info("Dark network access enabled. Try visiting depths.urbanshade.local in the browser...", { duration: 5000 });
         }, 1000);

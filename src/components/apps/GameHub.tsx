@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
-import { Gamepad2, Space, Target, FileText, ArrowLeft, Trophy } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Gamepad2, Space, Target, FileText, ArrowLeft, Trophy, Zap, Dices, Cookie, Timer, RotateCcw, Plus, Minus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-type GameType = "menu" | "invaders" | "pong" | "wordle";
+type GameType = "menu" | "invaders" | "pong" | "wordle" | "reaction" | "dice" | "fortune";
 
 const WORD_LIST = [
   "apple", "brave", "crane", "dream", "eagle", "flame", "grape", "heart", "ivory", "joker",
@@ -14,6 +15,24 @@ const WORD_LIST = [
   "input", "joint", "known", "learn", "money", "never", "order", "power", "quick", "right",
   "small", "think", "under", "value", "world", "xerox", "yield", "zones", "audio", "blank",
   "clear", "depth", "every", "fresh", "green", "human", "issue", "judge", "kings", "level"
+];
+
+const FORTUNES = [
+  "The deep calls to those who listen.",
+  "Something lurks in the pressure of your future.",
+  "The specimens have noted your presence.",
+  "Trust not the calm waters ahead.",
+  "A path opens where none existed before.",
+  "Your clearance level will soon be... adjusted.",
+  "The abyss gazes back with interest.",
+  "Fortune favors the brave. The deep does not.",
+  "Change approaches from unexpected depths.",
+  "What you seek seeks you in return.",
+  "Beware the one who watches from Terminal 7.",
+  "An old friend remembers what you forgot.",
+  "The lights will flicker. Count them.",
+  "Your reflection knows something you don't.",
+  "Z-13 has noted your browsing history.",
 ];
 
 // Alien Invaders Game
@@ -28,7 +47,6 @@ const AlienInvaders = ({ onBack }: { onBack: () => void }) => {
   const [gameOver, setGameOver] = useState(false);
   const [alienDir, setAlienDir] = useState(1);
 
-  // Initialize aliens
   useEffect(() => {
     const initialAliens: { x: number; y: number }[] = [];
     for (let row = 0; row < 3; row++) {
@@ -56,15 +74,12 @@ const AlienInvaders = ({ onBack }: { onBack: () => void }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Game loop
   useEffect(() => {
     if (gameOver || aliens.length === 0) return;
 
     const interval = setInterval(() => {
-      // Move bullets
       setBullets(prev => prev.map(b => ({ ...b, y: b.y - 1 })).filter(b => b.y >= 0));
 
-      // Check collisions
       setAliens(prevAliens => {
         const newAliens = [...prevAliens];
         setBullets(prevBullets => {
@@ -82,7 +97,6 @@ const AlienInvaders = ({ onBack }: { onBack: () => void }) => {
         return newAliens;
       });
 
-      // Move aliens
       setAliens(prev => {
         if (prev.length === 0) return prev;
         const rightMost = Math.max(...prev.map(a => a.x));
@@ -106,7 +120,6 @@ const AlienInvaders = ({ onBack }: { onBack: () => void }) => {
           y: moveDown ? a.y + 1 : a.y
         }));
 
-        // Check if aliens reached bottom
         if (newAliens.some(a => a.y >= GRID_HEIGHT - 1)) {
           setGameOver(true);
         }
@@ -118,7 +131,6 @@ const AlienInvaders = ({ onBack }: { onBack: () => void }) => {
     return () => clearInterval(interval);
   }, [gameOver, alienDir, aliens.length]);
 
-  // Win condition
   useEffect(() => {
     if (aliens.length === 0 && score > 0) {
       setGameOver(true);
@@ -127,24 +139,17 @@ const AlienInvaders = ({ onBack }: { onBack: () => void }) => {
 
   const renderGrid = () => {
     const grid: string[][] = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(" "));
-    
-    // Draw aliens
     aliens.forEach(a => {
       if (a.y >= 0 && a.y < GRID_HEIGHT && a.x >= 0 && a.x < GRID_WIDTH) {
         grid[a.y][a.x] = "W";
       }
     });
-    
-    // Draw bullets
     bullets.forEach(b => {
       if (b.y >= 0 && b.y < GRID_HEIGHT) {
         grid[b.y][b.x] = "|";
       }
     });
-    
-    // Draw player
     grid[GRID_HEIGHT - 1][playerPos] = "A";
-    
     return grid.map(row => row.join("")).join("\n");
   };
 
@@ -206,7 +211,6 @@ const Pong = ({ onBack }: { onBack: () => void }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Game loop
   useEffect(() => {
     if (gameOver) return;
 
@@ -217,25 +221,21 @@ const Pong = ({ onBack }: { onBack: () => void }) => {
         let newVelX = ballVel.x;
         let newVelY = ballVel.y;
 
-        // Top/bottom collision
         if (newY <= 0 || newY >= HEIGHT - 1) {
           newVelY = -newVelY;
           newY = Math.max(0, Math.min(HEIGHT - 1, newY));
         }
 
-        // Left paddle collision
         if (newX <= 2 && newY >= leftPaddle && newY < leftPaddle + PADDLE_SIZE) {
           newVelX = 1;
           newX = 3;
         }
 
-        // Right paddle collision
         if (newX >= WIDTH - 3 && newY >= rightPaddle && newY < rightPaddle + PADDLE_SIZE) {
           newVelX = -1;
           newX = WIDTH - 4;
         }
 
-        // Score
         if (newX <= 0) {
           setScore(s => {
             const newScore = { ...s, right: s.right + 1 };
@@ -260,7 +260,6 @@ const Pong = ({ onBack }: { onBack: () => void }) => {
         return { x: newX, y: newY };
       });
 
-      // AI for right paddle
       setRightPaddle(prev => {
         if (ball.y < prev + 1 && prev > 0) return prev - 1;
         if (ball.y > prev + 1 && prev < HEIGHT - PADDLE_SIZE) return prev + 1;
@@ -273,18 +272,13 @@ const Pong = ({ onBack }: { onBack: () => void }) => {
 
   const renderGrid = () => {
     const grid: string[][] = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill(" "));
-    
-    // Draw paddles
     for (let i = 0; i < PADDLE_SIZE; i++) {
       grid[leftPaddle + i][1] = "|";
       grid[rightPaddle + i][WIDTH - 2] = "|";
     }
-    
-    // Draw ball
     if (ball.y >= 0 && ball.y < HEIGHT && ball.x >= 0 && ball.x < WIDTH) {
       grid[ball.y][ball.x] = "O";
     }
-    
     return grid.map(row => row.join("")).join("\n");
   };
 
@@ -334,7 +328,6 @@ const Wordle = ({ onBack }: { onBack: () => void }) => {
       const newGuesses = [...guesses, currentGuess];
       setGuesses(newGuesses);
       
-      // Update used letters
       const newUsedLetters = { ...usedLetters };
       currentGuess.split("").forEach((letter, i) => {
         if (targetWord[i] === letter) {
@@ -366,7 +359,7 @@ const Wordle = ({ onBack }: { onBack: () => void }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  const getLetterColor = (letter: string, index: number, word: string) => {
+  const getLetterColor = (letter: string, index: number) => {
     if (targetWord[index] === letter) return "bg-green-600 text-white";
     if (targetWord.includes(letter)) return "bg-yellow-600 text-white";
     return "bg-muted-foreground/30 text-foreground";
@@ -383,7 +376,7 @@ const Wordle = ({ onBack }: { onBack: () => void }) => {
           <div
             key={i}
             className={`w-8 h-8 flex items-center justify-center font-mono font-bold text-sm border border-border rounded ${
-              !isCurrentRow && letter !== " " ? getLetterColor(letter, i, guess) : "bg-background"
+              !isCurrentRow && letter !== " " ? getLetterColor(letter, i) : "bg-background"
             }`}
           >
             {letter}
@@ -408,15 +401,10 @@ const Wordle = ({ onBack }: { onBack: () => void }) => {
         <span className="font-mono text-sm">Wordle</span>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center p-4 gap-2">
-        {/* Past guesses */}
         {guesses.map((guess, i) => (
           <div key={i}>{renderGuess(guess)}</div>
         ))}
-        
-        {/* Current row */}
         {!gameOver && guesses.length < 6 && renderGuess("", true)}
-        
-        {/* Empty rows */}
         {Array(Math.max(0, 5 - guesses.length)).fill(null).map((_, i) => (
           <div key={`empty-${i}`} className="flex gap-1">
             {Array(5).fill(null).map((_, j) => (
@@ -436,7 +424,6 @@ const Wordle = ({ onBack }: { onBack: () => void }) => {
           </div>
         )}
 
-        {/* Keyboard */}
         <div className="mt-4 flex flex-col gap-1">
           {keyboard.map((row, i) => (
             <div key={i} className="flex justify-center gap-1">
@@ -466,80 +453,312 @@ const Wordle = ({ onBack }: { onBack: () => void }) => {
   );
 };
 
+// Reaction Test Game
+const ReactionTest = ({ onBack }: { onBack: () => void }) => {
+  type GameState = "waiting" | "ready" | "go" | "result" | "too-early";
+
+  const [gameState, setGameState] = useState<GameState>("waiting");
+  const [reactionTime, setReactionTime] = useState<number | null>(null);
+  const [startTime, setStartTime] = useState<number>(0);
+  const [scores, setScores] = useState<{ time: number }[]>(() => {
+    const saved = localStorage.getItem("urbanshade_reaction_scores");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  const startGame = () => {
+    setGameState("ready");
+    setReactionTime(null);
+    const delay = 1000 + Math.random() * 4000;
+    timeoutRef.current = setTimeout(() => {
+      setGameState("go");
+      setStartTime(Date.now());
+    }, delay);
+  };
+
+  const handleClick = () => {
+    if (gameState === "waiting") {
+      startGame();
+    } else if (gameState === "ready") {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setGameState("too-early");
+    } else if (gameState === "go") {
+      const time = Date.now() - startTime;
+      setReactionTime(time);
+      setGameState("result");
+      const newScores = [{ time }, ...scores].slice(0, 10);
+      setScores(newScores);
+      localStorage.setItem("urbanshade_reaction_scores", JSON.stringify(newScores));
+    } else {
+      startGame();
+    }
+  };
+
+  const getBestTime = () => scores.length > 0 ? Math.min(...scores.map(s => s.time)) : null;
+  const getTimeColor = (time: number) => {
+    if (time < 200) return "text-green-400";
+    if (time < 300) return "text-cyan-400";
+    if (time < 400) return "text-yellow-400";
+    return "text-red-400";
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-background">
+      <div className="flex items-center justify-between p-2 border-b border-border">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        </Button>
+        {getBestTime() && <span className="text-xs text-green-400">Best: {getBestTime()}ms</span>}
+      </div>
+      <button
+        onClick={handleClick}
+        className={`flex-1 flex flex-col items-center justify-center p-4 transition-colors ${
+          gameState === "waiting" ? "bg-muted/30" :
+          gameState === "ready" ? "bg-red-500/20" :
+          gameState === "go" ? "bg-green-500/20 animate-pulse" :
+          gameState === "too-early" ? "bg-orange-500/20" :
+          "bg-cyan-500/10"
+        }`}
+      >
+        {gameState === "waiting" && (
+          <>
+            <Zap className="w-12 h-12 text-cyan-400 mb-4" />
+            <div className="text-xl font-bold">Click to Start</div>
+          </>
+        )}
+        {gameState === "ready" && (
+          <>
+            <Timer className="w-12 h-12 text-red-400 mb-4" />
+            <div className="text-xl font-bold text-red-400">Wait for green...</div>
+          </>
+        )}
+        {gameState === "go" && (
+          <div className="text-3xl font-bold text-green-400">CLICK NOW!</div>
+        )}
+        {gameState === "too-early" && (
+          <>
+            <RotateCcw className="w-12 h-12 text-orange-400 mb-4" />
+            <div className="text-xl font-bold text-orange-400">Too Early!</div>
+          </>
+        )}
+        {gameState === "result" && reactionTime && (
+          <>
+            <Trophy className="w-12 h-12 text-cyan-400 mb-4" />
+            <div className={`text-5xl font-bold ${getTimeColor(reactionTime)}`}>{reactionTime}ms</div>
+            <div className="text-muted-foreground mt-2">Click to try again</div>
+          </>
+        )}
+      </button>
+    </div>
+  );
+};
+
+// Dice Roller
+const DiceRollerGame = ({ onBack }: { onBack: () => void }) => {
+  const [numDice, setNumDice] = useState(2);
+  const [sides, setSides] = useState(6);
+  const [currentRoll, setCurrentRoll] = useState<number[]>([]);
+  const [isRolling, setIsRolling] = useState(false);
+
+  const dicePresets = [4, 6, 8, 10, 12, 20, 100];
+
+  const rollDice = () => {
+    setIsRolling(true);
+    let iterations = 0;
+    const animate = setInterval(() => {
+      const tempRoll = Array.from({ length: numDice }, () => Math.floor(Math.random() * sides) + 1);
+      setCurrentRoll(tempRoll);
+      iterations++;
+      if (iterations >= 10) {
+        clearInterval(animate);
+        setIsRolling(false);
+      }
+    }, 50);
+  };
+
+  const total = currentRoll.reduce((a, b) => a + b, 0);
+
+  return (
+    <div className="flex flex-col h-full bg-background">
+      <div className="flex items-center justify-between p-2 border-b border-border">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        </Button>
+        <span className="font-mono text-sm">Dice Roller</span>
+      </div>
+      <div className="flex-1 p-4 flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-lg bg-muted/30 border border-border">
+            <div className="text-xs text-muted-foreground mb-2">Dice Count</div>
+            <div className="flex items-center justify-between">
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setNumDice(Math.max(1, numDice - 1))}>
+                <Minus className="w-3 h-3" />
+              </Button>
+              <span className="text-2xl font-bold text-purple-400">{numDice}</span>
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setNumDice(Math.min(10, numDice + 1))}>
+                <Plus className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-muted/30 border border-border">
+            <div className="text-xs text-muted-foreground mb-2">Sides (d{sides})</div>
+            <div className="flex flex-wrap gap-1">
+              {dicePresets.map(d => (
+                <button
+                  key={d}
+                  onClick={() => setSides(d)}
+                  className={`px-2 py-0.5 rounded text-xs font-medium ${sides === d ? "bg-purple-500 text-white" : "bg-muted/50 text-muted-foreground"}`}
+                >
+                  d{d}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 p-4 rounded-lg bg-muted/30 border border-border flex flex-col items-center justify-center">
+          {currentRoll.length > 0 ? (
+            <>
+              <div className="flex justify-center gap-2 flex-wrap mb-4">
+                {currentRoll.map((value, i) => (
+                  <div key={i} className={`w-12 h-12 rounded-lg bg-purple-500 flex items-center justify-center text-white font-bold text-lg ${isRolling ? "animate-bounce" : ""}`}>
+                    {value}
+                  </div>
+                ))}
+              </div>
+              <div className="text-3xl font-bold">Total: <span className="text-purple-400">{total}</span></div>
+            </>
+          ) : (
+            <div className="text-muted-foreground text-center">
+              <Dices className="w-10 h-10 mx-auto mb-2 opacity-30" />
+              <p>Click roll to start</p>
+            </div>
+          )}
+        </div>
+
+        <Button onClick={rollDice} disabled={isRolling} className="w-full bg-purple-500 hover:bg-purple-600">
+          {isRolling ? <RotateCcw className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2" />}
+          Roll {numDice}d{sides}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// Fortune Cookie
+const FortuneCookie = ({ onBack }: { onBack: () => void }) => {
+  const [fortune, setFortune] = useState<string | null>(null);
+  const [luckyNumbers, setLuckyNumbers] = useState<number[]>([]);
+  const [isOpening, setIsOpening] = useState(false);
+
+  const openCookie = () => {
+    setIsOpening(true);
+    setTimeout(() => {
+      setFortune(FORTUNES[Math.floor(Math.random() * FORTUNES.length)]);
+      setLuckyNumbers(Array.from({ length: 6 }, () => Math.floor(Math.random() * 49) + 1));
+      setIsOpening(false);
+    }, 1000);
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-background">
+      <div className="flex items-center justify-between p-2 border-b border-border">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4 mr-1" /> Back
+        </Button>
+        <span className="font-mono text-sm">Fortune Cookie</span>
+      </div>
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+        {fortune ? (
+          <div className="text-center space-y-6 animate-fade-in max-w-sm">
+            <Cookie className="w-16 h-16 text-amber-400 mx-auto" />
+            <p className="text-lg italic text-foreground">"{fortune}"</p>
+            <div className="text-sm text-muted-foreground">
+              Lucky numbers: <span className="text-amber-400 font-mono">{luckyNumbers.join(" - ")}</span>
+            </div>
+            <Button variant="outline" onClick={openCookie}>
+              <Cookie className="w-4 h-4 mr-2" /> Another Cookie
+            </Button>
+          </div>
+        ) : (
+          <div className="text-center">
+            <div className={`w-24 h-24 mx-auto mb-6 ${isOpening ? "animate-bounce" : ""}`}>
+              <Cookie className="w-full h-full text-amber-400" />
+            </div>
+            <Button onClick={openCookie} disabled={isOpening} className="bg-amber-500 hover:bg-amber-600">
+              {isOpening ? "Opening..." : "Open Fortune Cookie"}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Main Game Hub
 export const GameHub = () => {
   const [currentGame, setCurrentGame] = useState<GameType>("menu");
 
-  if (currentGame === "invaders") {
-    return <AlienInvaders onBack={() => setCurrentGame("menu")} />;
-  }
+  if (currentGame === "invaders") return <AlienInvaders onBack={() => setCurrentGame("menu")} />;
+  if (currentGame === "pong") return <Pong onBack={() => setCurrentGame("menu")} />;
+  if (currentGame === "wordle") return <Wordle onBack={() => setCurrentGame("menu")} />;
+  if (currentGame === "reaction") return <ReactionTest onBack={() => setCurrentGame("menu")} />;
+  if (currentGame === "dice") return <DiceRollerGame onBack={() => setCurrentGame("menu")} />;
+  if (currentGame === "fortune") return <FortuneCookie onBack={() => setCurrentGame("menu")} />;
 
-  if (currentGame === "pong") {
-    return <Pong onBack={() => setCurrentGame("menu")} />;
-  }
-
-  if (currentGame === "wordle") {
-    return <Wordle onBack={() => setCurrentGame("menu")} />;
-  }
+  const games = [
+    { id: "invaders" as GameType, name: "Alien Invaders", desc: "Defend against the alien horde", icon: Space, color: "text-green-400" },
+    { id: "pong" as GameType, name: "Pong", desc: "Classic paddle vs AI battle", icon: Target, color: "text-blue-400" },
+    { id: "wordle" as GameType, name: "Wordle", desc: "Guess the 5-letter word", icon: FileText, color: "text-yellow-400" },
+    { id: "reaction" as GameType, name: "Reaction Test", desc: "Test your reflexes", icon: Zap, color: "text-cyan-400" },
+    { id: "dice" as GameType, name: "Dice Roller", desc: "Roll virtual tabletop dice", icon: Dices, color: "text-purple-400" },
+    { id: "fortune" as GameType, name: "Fortune Cookie", desc: "Receive mysterious fortunes", icon: Cookie, color: "text-amber-400" },
+  ];
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      <div className="flex items-center gap-2 p-3 border-b border-border bg-muted/30">
-        <Gamepad2 className="w-5 h-5 text-primary" />
-        <span className="font-semibold">Game Hub</span>
+    <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="flex items-center gap-3 p-4 border-b border-border/50 bg-background/50 backdrop-blur-sm">
+        <div className="p-2 rounded-xl bg-primary/10">
+          <Gamepad2 className="w-6 h-6 text-primary" />
+        </div>
+        <div>
+          <h1 className="font-bold text-lg">Game Hub</h1>
+          <p className="text-xs text-muted-foreground">Arcade games & utilities</p>
+        </div>
       </div>
       
-      <div className="flex-1 p-4">
-        <pre className="font-mono text-xs text-primary mb-6 text-center">
-{`   ____    _    __  __ _____   _   _ _   _ ____  
-  / ___|  / \\  |  \\/  | ____| | | | | | | | __ ) 
- | |  _  / _ \\ | |\\/| |  _|   | |_| | | | |  _ \\ 
- | |_| |/ ___ \\| |  | | |___  |  _  | |_| | |_) |
-  \\____/_/   \\_\\_|  |_|_____| |_| |_|\\___/|____/ `}
-        </pre>
-
-        <div className="grid gap-3">
-          <button
-            onClick={() => setCurrentGame("invaders")}
-            className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent transition-colors text-left"
-          >
-            <Space className="w-8 h-8 text-primary" />
-            <div>
-              <h3 className="font-semibold">Alien Invaders</h3>
-              <p className="text-xs text-muted-foreground">Defend against the alien horde</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setCurrentGame("pong")}
-            className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent transition-colors text-left"
-          >
-            <Target className="w-8 h-8 text-primary" />
-            <div>
-              <h3 className="font-semibold">Pong</h3>
-              <p className="text-xs text-muted-foreground">Classic paddle vs AI battle</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setCurrentGame("wordle")}
-            className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card hover:bg-accent transition-colors text-left"
-          >
-            <FileText className="w-8 h-8 text-primary" />
-            <div>
-              <h3 className="font-semibold">Wordle</h3>
-              <p className="text-xs text-muted-foreground">Guess the 5-letter word</p>
-            </div>
-          </button>
+      <ScrollArea className="flex-1">
+        <div className="p-4 grid gap-3">
+          {games.map(game => (
+            <button
+              key={game.id}
+              onClick={() => setCurrentGame(game.id)}
+              className="flex items-center gap-4 p-4 rounded-xl border border-border/50 bg-card/50 hover:bg-card/80 hover:border-border transition-all text-left group"
+            >
+              <div className={`p-3 rounded-xl bg-muted/50 group-hover:bg-muted transition-colors ${game.color}`}>
+                <game.icon className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-semibold">{game.name}</h3>
+                <p className="text-xs text-muted-foreground">{game.desc}</p>
+              </div>
+            </button>
+          ))}
         </div>
-
-        <div className="mt-6 p-3 rounded border border-border bg-muted/30">
-          <div className="flex items-center gap-2 text-sm">
+        
+        <div className="p-4 pt-0">
+          <div className="p-3 rounded-xl border border-border/30 bg-muted/20 flex items-center gap-2 text-sm text-muted-foreground">
             <Trophy className="w-4 h-4 text-yellow-500" />
-            <span className="text-muted-foreground">All games use keyboard controls</span>
+            <span>All games use keyboard controls</span>
           </div>
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 };
