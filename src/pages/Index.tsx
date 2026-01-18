@@ -653,6 +653,10 @@ const Index = () => {
         setBugcheckData(null);
         window.open('/def-dev', '_blank');
       }}
+      onRecovery={() => {
+        setBugcheckData(null);
+        setInRecoveryMode(true);
+      }}
     />;
   }
 
@@ -679,15 +683,38 @@ const Index = () => {
   }
 
   if (inRecoveryMode) {
-    return <RecoveryMode onExit={() => {
-      setInRecoveryMode(false);
-      setNeedsRecovery(false);
-      setBooted(false);
-      setLoggedIn(false);
-      setKilledProcess("");
-      setCrashType("kernel");
-      setCustomCrashData(null);
-    }} />;
+    return <RecoveryEnvironment 
+      onContinue={() => {
+        setInRecoveryMode(false);
+        setNeedsRecovery(false);
+        setBooted(true);
+        setLoggedIn(true);
+      }}
+      onShutdown={handleShutdown}
+      onBootToBios={() => {
+        setInRecoveryMode(false);
+        setBiosComplete(false);
+      }}
+      onTerminalBoot={() => {
+        sessionStorage.setItem("urbanshade_terminal_only", "true");
+        setInRecoveryMode(false);
+        setBooted(true);
+        setLoggedIn(true);
+      }}
+      onSafeMode={() => {
+        sessionStorage.setItem("urbanshade_safe_mode", "true");
+        setSafeMode(true);
+        setInRecoveryMode(false);
+        setBooted(true);
+        setLoggedIn(true);
+      }}
+      onOfflineMode={() => {
+        sessionStorage.setItem("urbanshade_offline_mode", "true");
+        setInRecoveryMode(false);
+        setBooted(true);
+        setLoggedIn(true);
+      }}
+    />;
   }
 
   // POST Screen (Power-On Self Test) - shows before BIOS/Boot
