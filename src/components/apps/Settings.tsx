@@ -89,7 +89,6 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
   const handleSave = (key: string, value: any) => {
     saveState(key, value);
-    // Dispatch storage event for other components
     window.dispatchEvent(new Event('storage'));
   };
 
@@ -162,19 +161,18 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key) {
-        total += (localStorage.getItem(key)?.length || 0) * 2; // UTF-16 = 2 bytes
+        total += (localStorage.getItem(key)?.length || 0) * 2;
       }
     }
     return {
       used: total,
       usedMB: (total / 1024 / 1024).toFixed(2),
-      percentage: Math.min((total / (5 * 1024 * 1024)) * 100, 100) // 5MB limit
+      percentage: Math.min((total / (5 * 1024 * 1024)) * 100, 100)
     };
   };
 
   const storage = calculateStorageUsage();
 
-  // Consolidated categories - less cluttered
   const categories = [
     { id: "system", name: "System", icon: Monitor, description: "Updates, power & info" },
     { id: "display", name: "Personalization", icon: Palette, description: "Theme, sound, visuals" },
@@ -190,39 +188,105 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     cat.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const SettingCard = ({ 
+  // Simple Row component - label on left, control on right (separated)
+  const SettingRow = ({ 
     icon: Icon, 
     title, 
-    description, 
-    children,
-    className = ""
+    description,
+    children
   }: { 
     icon: any; 
     title: string; 
     description?: string; 
     children: React.ReactNode;
-    className?: string;
   }) => (
-    <div className={`flex items-center justify-between p-4 rounded-xl bg-card/50 border border-border/50 hover:bg-card/80 hover:border-border transition-all group ${className}`}>
-      <div className="flex items-center gap-4 pointer-events-none">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
-          <Icon className="w-5 h-5" />
+    <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-card/40 border border-border/30 hover:bg-card/60 transition-colors">
+      <div className="flex items-center gap-3 flex-1 min-w-0 mr-4">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <Icon className="w-4 h-4" />
         </div>
-        <div>
+        <div className="min-w-0">
           <div className="font-medium text-sm">{title}</div>
-          {description && <div className="text-xs text-muted-foreground">{description}</div>}
+          {description && <div className="text-xs text-muted-foreground truncate">{description}</div>}
         </div>
       </div>
-      <div className="flex items-center gap-3 relative z-10">
+      <div className="shrink-0">
         {children}
       </div>
     </div>
   );
 
+  // Toggle Row - specifically for switches
+  const ToggleRow = ({
+    icon: Icon,
+    title,
+    description,
+    checked,
+    onCheckedChange
+  }: {
+    icon: any;
+    title: string;
+    description?: string;
+    checked: boolean;
+    onCheckedChange: (checked: boolean) => void;
+  }) => (
+    <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-card/40 border border-border/30 hover:bg-card/60 transition-colors">
+      <div className="flex items-center gap-3 flex-1 min-w-0 mr-4">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <Icon className="w-4 h-4" />
+        </div>
+        <div className="min-w-0">
+          <div className="font-medium text-sm">{title}</div>
+          {description && <div className="text-xs text-muted-foreground truncate">{description}</div>}
+        </div>
+      </div>
+      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+    </div>
+  );
+
+  // Dropdown Row - specifically for selects
+  const SelectRow = ({
+    icon: Icon,
+    title,
+    description,
+    value,
+    onValueChange,
+    options
+  }: {
+    icon: any;
+    title: string;
+    description?: string;
+    value: string;
+    onValueChange: (value: string) => void;
+    options: { value: string; label: string }[];
+  }) => (
+    <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-card/40 border border-border/30 hover:bg-card/60 transition-colors">
+      <div className="flex items-center gap-3 flex-1 min-w-0 mr-4">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <Icon className="w-4 h-4" />
+        </div>
+        <div className="min-w-0">
+          <div className="font-medium text-sm">{title}</div>
+          {description && <div className="text-xs text-muted-foreground truncate">{description}</div>}
+        </div>
+      </div>
+      <Select value={value} onValueChange={onValueChange}>
+        <SelectTrigger className="w-32 h-8 text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="z-[99999]">
+          {options.map(opt => (
+            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
   const SectionHeader = ({ title, description }: { title: string; description?: string }) => (
-    <div className="mb-4">
-      <h3 className="text-lg font-semibold">{title}</h3>
-      {description && <p className="text-sm text-muted-foreground">{description}</p>}
+    <div className="mb-3 mt-6 first:mt-0">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      {description && <p className="text-xs text-muted-foreground">{description}</p>}
     </div>
   );
 
@@ -230,108 +294,96 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     switch (selectedCategory) {
       case "system":
         return (
-          <div className="space-y-6">
+          <div className="space-y-2">
             {/* Hero Card */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl" />
-              <div className="relative flex items-center gap-5">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/30">
-                  <Sparkles className="w-8 h-8 text-primary" />
+            <div className="p-4 rounded-lg bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 mb-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">UrbanShade OS</h2>
-                  <p className="text-muted-foreground">{VERSION.displayVersion} - {VERSION.codename}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-medium">Up to date</span>
-                    <span className="text-xs text-muted-foreground">Build {VERSION.build}</span>
-                  </div>
+                  <h2 className="text-lg font-bold">UrbanShade OS</h2>
+                  <p className="text-sm text-muted-foreground">{VERSION.displayVersion} - {VERSION.codename}</p>
+                  <span className="text-xs text-muted-foreground">Build {VERSION.build}</span>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl bg-card/50 border border-border/50">
-                <div className="text-xs text-muted-foreground mb-1">Device Name</div>
-                <div className="font-medium">{settings.deviceName || "Urbanshade Terminal"}</div>
-              </div>
-              <div className="p-4 rounded-xl bg-card/50 border border-border/50">
-                <div className="text-xs text-muted-foreground mb-1">Architecture</div>
-                <div className="font-medium">64-bit OS</div>
-              </div>
-            </div>
+            <SectionHeader title="Updates" />
+            
+            <ToggleRow
+              icon={RefreshCw}
+              title="Automatic Updates"
+              description="Keep system up to date"
+              checked={autoUpdates}
+              onCheckedChange={(checked) => { setAutoUpdates(checked); handleSave("settings_auto_updates", checked); }}
+            />
 
-            <div className="space-y-3">
-              <SettingCard icon={RefreshCw} title="Automatic Updates" description="Keep system up to date">
-                <Switch 
-                  checked={autoUpdates} 
-                  onCheckedChange={(checked) => { setAutoUpdates(checked); handleSave("settings_auto_updates", checked); }} 
-                />
-              </SettingCard>
+            <ToggleRow
+              icon={Database}
+              title="Telemetry"
+              description="Help improve the system"
+              checked={telemetry}
+              onCheckedChange={(checked) => { setTelemetry(checked); handleSave("settings_telemetry", checked); }}
+            />
 
-              <SettingCard icon={Database} title="Telemetry" description="Help improve the system">
-                <Switch 
-                  checked={telemetry} 
-                  onCheckedChange={(checked) => { setTelemetry(checked); handleSave("settings_telemetry", checked); }} 
-                />
-              </SettingCard>
-
-              <Button 
-                className="w-full h-12 rounded-xl"
-                onClick={() => {
-                  toast.success("Checking for updates...");
-                  setTimeout(() => onUpdate?.(), 2000);
-                }}
-              >
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Check for Updates
-              </Button>
-            </div>
+            <Button 
+              className="w-full h-10 mt-3"
+              onClick={() => {
+                toast.success("Checking for updates...");
+                setTimeout(() => onUpdate?.(), 2000);
+              }}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Check for Updates
+            </Button>
 
             {/* Developer Options */}
-            <Collapsible open={developerOptionsOpen} onOpenChange={setDeveloperOptionsOpen}>
+            <Collapsible open={developerOptionsOpen} onOpenChange={setDeveloperOptionsOpen} className="mt-4">
               <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-between h-14 px-5 border-amber-500/20 hover:bg-amber-500/5 rounded-xl">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                      <Code className="w-5 h-5 text-amber-500" />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-medium text-amber-500">Developer Options</div>
-                      <div className="text-xs text-muted-foreground">Advanced debugging tools</div>
-                    </div>
+                <Button variant="outline" className="w-full justify-between h-12 px-4 border-amber-500/20 hover:bg-amber-500/5">
+                  <div className="flex items-center gap-3">
+                    <Code className="w-4 h-4 text-amber-500" />
+                    <span className="text-amber-500">Developer Options</span>
                   </div>
-                  <ChevronDown className={`w-5 h-5 text-amber-500 transition-transform ${developerOptionsOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 text-amber-500 transition-transform ${developerOptionsOpen ? 'rotate-180' : ''}`} />
                 </Button>
               </CollapsibleTrigger>
               
-              <CollapsibleContent className="mt-3 space-y-3 pl-1">
-                <SettingCard icon={Code} title="Developer Mode" description="Enable DEF-DEV console access">
-                  <Switch 
-                    checked={developerMode} 
-                    onCheckedChange={(checked) => {
-                      setDeveloperMode(checked);
-                      handleSave("settings_developer_mode", checked);
-                      if (checked) {
-                        toast.success("Developer Mode enabled");
-                        window.open("/def-dev", "_blank");
-                      }
-                    }} 
-                  />
-                </SettingCard>
+              <CollapsibleContent className="mt-2 space-y-2">
+                <ToggleRow
+                  icon={Code}
+                  title="Developer Mode"
+                  description="Enable DEF-DEV console"
+                  checked={developerMode}
+                  onCheckedChange={(checked) => {
+                    setDeveloperMode(checked);
+                    handleSave("settings_developer_mode", checked);
+                    if (checked) {
+                      toast.success("Developer Mode enabled");
+                      window.open("/def-dev", "_blank");
+                    }
+                  }}
+                />
 
-                <SettingCard icon={AlertTriangle} title="OEM Unlocking" description="Requires factory reset">
-                  <Switch checked={oemUnlocked} onCheckedChange={handleOemUnlockToggle} />
-                </SettingCard>
+                <ToggleRow
+                  icon={AlertTriangle}
+                  title="OEM Unlocking"
+                  description="Requires factory reset"
+                  checked={oemUnlocked}
+                  onCheckedChange={handleOemUnlockToggle}
+                />
 
-                <SettingCard icon={Smartphone} title="USB Debugging" description="Allow USB connection debugging">
-                  <Switch 
-                    checked={usbDebugging} 
-                    onCheckedChange={(checked) => {
-                      setUsbDebugging(checked);
-                      handleSave("settings_usb_debugging", checked);
-                    }} 
-                  />
-                </SettingCard>
+                <ToggleRow
+                  icon={Smartphone}
+                  title="USB Debugging"
+                  description="Allow USB debugging"
+                  checked={usbDebugging}
+                  onCheckedChange={(checked) => {
+                    setUsbDebugging(checked);
+                    handleSave("settings_usb_debugging", checked);
+                  }}
+                />
 
                 <Button 
                   variant="outline" 
@@ -348,284 +400,223 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
 
       case "display":
         return (
-          <div className="space-y-6">
-            <SectionHeader title="Appearance" description="Customize how your system looks" />
+          <div className="space-y-2">
+            <SectionHeader title="Appearance" />
             
-            <div className="space-y-3">
-              <SettingCard icon={Palette} title="Theme" description="Choose your visual style">
-                <Select value={theme} onValueChange={handleThemeChange}>
-                  <SelectTrigger className="w-32 h-9 rounded-lg">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="z-[99999] bg-background border border-border rounded-lg">
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
-                    <SelectItem value="midnight">Midnight</SelectItem>
-                    <SelectItem value="ocean">Ocean</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingCard>
+            <SelectRow
+              icon={Palette}
+              title="Theme"
+              description="Visual style"
+              value={theme}
+              onValueChange={handleThemeChange}
+              options={[
+                { value: "dark", label: "Dark" },
+                { value: "light", label: "Light" },
+                { value: "system", label: "System" },
+                { value: "midnight", label: "Midnight" },
+                { value: "ocean", label: "Ocean" },
+              ]}
+            />
 
-              <SettingCard icon={Sparkles} title="Accent Color" description="Highlight color">
-                <Select value={accentColor} onValueChange={(v) => { setAccentColor(v); handleSave("settings_accent_color", v); }}>
-                  <SelectTrigger className="w-32 h-9 rounded-lg">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="z-[99999] bg-background border border-border rounded-lg">
-                    <SelectItem value="cyan">Cyan</SelectItem>
-                    <SelectItem value="purple">Purple</SelectItem>
-                    <SelectItem value="green">Green</SelectItem>
-                    <SelectItem value="orange">Orange</SelectItem>
-                    <SelectItem value="pink">Pink</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingCard>
+            <SelectRow
+              icon={Sparkles}
+              title="Accent Color"
+              description="Highlight color"
+              value={accentColor}
+              onValueChange={(v) => { setAccentColor(v); handleSave("settings_accent_color", v); }}
+              options={[
+                { value: "cyan", label: "Cyan" },
+                { value: "purple", label: "Purple" },
+                { value: "green", label: "Green" },
+                { value: "orange", label: "Orange" },
+                { value: "pink", label: "Pink" },
+              ]}
+            />
 
-              <SettingCard icon={Eye} title="Transparency Effects" description="Glass-like UI elements">
-                <Switch 
-                  checked={transparency} 
-                  onCheckedChange={(checked) => { setTransparency(checked); handleSave("settings_transparency", checked); }} 
-                />
-              </SettingCard>
+            <ToggleRow
+              icon={Eye}
+              title="Transparency Effects"
+              description="Glass-like UI"
+              checked={transparency}
+              onCheckedChange={(checked) => { setTransparency(checked); handleSave("settings_transparency", checked); }}
+            />
 
-              <SettingCard icon={Zap} title="Animations" description="Motion and transitions">
-                <Switch 
-                  checked={animations} 
-                  onCheckedChange={(checked) => { setAnimations(checked); handleSave("settings_animations", checked); }} 
-                />
-              </SettingCard>
-            </div>
+            <ToggleRow
+              icon={Zap}
+              title="Animations"
+              description="Motion and transitions"
+              checked={animations}
+              onCheckedChange={(checked) => { setAnimations(checked); handleSave("settings_animations", checked); }}
+            />
 
-            <SectionHeader title="Sound" description="Audio settings" />
+            <SectionHeader title="Sound" />
             
-            <div className="space-y-3">
-              <div className="p-5 rounded-xl bg-card/50 border border-border/50">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Volume2 className="w-5 h-5 text-primary" />
-                    </div>
-                    <span className="font-medium">Master Volume</span>
-                  </div>
-                  <span className="text-sm font-mono text-muted-foreground">{volume[0]}%</span>
-                </div>
-                <Slider 
-                  value={volume} 
-                  max={100} 
-                  step={1}
-                  onValueChange={(v) => { setVolume(v); handleSave("settings_volume", v); }}
-                  className="w-full"
-                />
-              </div>
-
-              <SettingCard icon={muteEnabled ? X : Volume2} title="Mute" description="Silence all sounds">
-                <Switch 
-                  checked={muteEnabled} 
-                  onCheckedChange={(checked) => { setMuteEnabled(checked); handleSave("settings_mute", checked); }} 
-                />
-              </SettingCard>
-
-              <SettingCard icon={Zap} title="Sound Effects" description="System sounds and alerts">
-                <Switch 
-                  checked={soundEffects} 
-                  onCheckedChange={(checked) => { setSoundEffects(checked); handleSave("settings_sound_effects", checked); }} 
-                />
-              </SettingCard>
-            </div>
-
-            <SectionHeader title="Display" description="Screen settings" />
-
-            <div className="space-y-3">
-              <SettingCard icon={Monitor} title="Resolution" description="Display resolution">
-                <Select value={resolution} onValueChange={(v) => { setResolution(v); handleSave("settings_resolution", v); }}>
-                  <SelectTrigger className="w-36 h-9 rounded-lg">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="z-[99999] bg-background border border-border rounded-lg">
-                    <SelectItem value="1920x1080">1920 × 1080</SelectItem>
-                    <SelectItem value="2560x1440">2560 × 1440</SelectItem>
-                    <SelectItem value="3840x2160">3840 × 2160</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingCard>
-
-              <div className="p-5 rounded-xl bg-card/50 border border-border/50">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                      <Moon className="w-5 h-5 text-amber-500" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-sm">Night Light</div>
-                      <div className="text-xs text-muted-foreground">Reduce blue light</div>
-                    </div>
-                  </div>
-                  <Switch 
-                    checked={nightLight} 
-                    onCheckedChange={(checked) => { setNightLight(checked); handleSave("settings_night_light", checked); }} 
-                  />
-                </div>
-                {nightLight && (
-                  <div className="pt-3 border-t border-border/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-muted-foreground">Intensity</span>
-                      <span className="text-xs font-mono">{nightLightIntensity[0]}%</span>
-                    </div>
-                    <Slider 
-                      value={nightLightIntensity} 
-                      max={100} 
-                      step={5}
-                      onValueChange={(v) => { setNightLightIntensity(v); handleSave("settings_night_light_intensity", v); }}
-                      className="w-full"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        );
-
-      case "network":
-        return (
-          <div className="space-y-6">
-            <SectionHeader title="Network" description="Manage your connections" />
-
-            <div className="space-y-3">
-              <SettingCard icon={Wifi} title="Wi-Fi" description={wifiEnabled ? "Connected to URBANSHADE-SECURE" : "Disconnected"}>
-                <Switch 
-                  checked={wifiEnabled} 
-                  onCheckedChange={(checked) => { setWifiEnabled(checked); handleSave("settings_wifi", checked); }} 
-                />
-              </SettingCard>
-
-              <SettingCard icon={Lock} title="VPN" description={vpnEnabled ? "Connected" : "Not connected"}>
-                <Switch 
-                  checked={vpnEnabled} 
-                  onCheckedChange={(checked) => { setVpnEnabled(checked); handleSave("settings_vpn", checked); }} 
-                />
-              </SettingCard>
-            </div>
-
-            {wifiEnabled && (
-              <div className="space-y-3">
-                <SectionHeader title="Available Networks" />
-                {[
-                  { name: "URBANSHADE-SECURE", signal: 4, connected: true, secured: true },
-                  { name: "FACILITY-GUEST", signal: 3, connected: false, secured: false },
-                  { name: "SCP-NETWORK", signal: 2, connected: false, secured: true },
-                ].map(network => (
-                  <div key={network.name} className={`flex items-center justify-between p-4 rounded-xl border transition-colors cursor-pointer ${
-                    network.connected 
-                      ? 'bg-primary/5 border-primary/30' 
-                      : 'bg-card/50 border-border/50 hover:bg-card/80'
-                  }`}>
-                    <div className="flex items-center gap-3">
-                      <Wifi className={`w-5 h-5 ${network.connected ? 'text-primary' : 'text-muted-foreground'}`} />
-                      <div>
-                        <div className="font-medium text-sm">{network.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {network.secured ? 'Secured' : 'Open'} · Signal: {network.signal}/4
-                        </div>
-                      </div>
-                    </div>
-                    {network.connected && <Check className="w-5 h-5 text-primary" />}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-
-      case "sound":
-        return (
-          <div className="space-y-6">
-            <SectionHeader title="Sound" description="Audio and volume settings" />
-
-            <div className="p-5 rounded-xl bg-card/50 border border-border/50">
-              <div className="flex items-center justify-between mb-4">
+            <div className="py-3 px-4 rounded-lg bg-card/40 border border-border/30">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Volume2 className="w-5 h-5 text-primary" />
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Volume2 className="w-4 h-4 text-primary" />
                   </div>
-                  <span className="font-medium">Master Volume</span>
+                  <span className="text-sm font-medium">Master Volume</span>
                 </div>
-                <span className="text-sm font-mono text-muted-foreground">{volume[0]}%</span>
+                <span className="text-xs font-mono text-muted-foreground">{volume[0]}%</span>
               </div>
               <Slider 
                 value={volume} 
                 max={100} 
                 step={1}
                 onValueChange={(v) => { setVolume(v); handleSave("settings_volume", v); }}
-                className="w-full"
               />
             </div>
 
-            <div className="space-y-3">
-              <SettingCard icon={muteEnabled ? X : Volume2} title="Mute" description="Silence all sounds">
-                <Switch 
-                  checked={muteEnabled} 
-                  onCheckedChange={(checked) => { setMuteEnabled(checked); handleSave("settings_mute", checked); }} 
-                />
-              </SettingCard>
+            <ToggleRow
+              icon={muteEnabled ? X : Volume2}
+              title="Mute"
+              description="Silence all sounds"
+              checked={muteEnabled}
+              onCheckedChange={(checked) => { setMuteEnabled(checked); handleSave("settings_mute", checked); }}
+            />
 
-              <SettingCard icon={Zap} title="Sound Effects" description="System sounds and alerts">
+            <ToggleRow
+              icon={Zap}
+              title="Sound Effects"
+              description="System sounds"
+              checked={soundEffects}
+              onCheckedChange={(checked) => { setSoundEffects(checked); handleSave("settings_sound_effects", checked); }}
+            />
+
+            <SectionHeader title="Display" />
+
+            <SelectRow
+              icon={Monitor}
+              title="Resolution"
+              value={resolution}
+              onValueChange={(v) => { setResolution(v); handleSave("settings_resolution", v); }}
+              options={[
+                { value: "1920x1080", label: "1920×1080" },
+                { value: "2560x1440", label: "2560×1440" },
+                { value: "3840x2160", label: "3840×2160" },
+              ]}
+            />
+
+            <div className="py-3 px-4 rounded-lg bg-card/40 border border-border/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <Moon className="w-4 h-4 text-amber-500" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">Night Light</div>
+                    <div className="text-xs text-muted-foreground">Reduce blue light</div>
+                  </div>
+                </div>
                 <Switch 
-                  checked={soundEffects} 
-                  onCheckedChange={(checked) => { setSoundEffects(checked); handleSave("settings_sound_effects", checked); }} 
+                  checked={nightLight} 
+                  onCheckedChange={(checked) => { setNightLight(checked); handleSave("settings_night_light", checked); }} 
                 />
-              </SettingCard>
+              </div>
+              {nightLight && (
+                <div className="pt-3 mt-2 border-t border-border/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-muted-foreground">Intensity</span>
+                    <span className="text-xs font-mono">{nightLightIntensity[0]}%</span>
+                  </div>
+                  <Slider 
+                    value={nightLightIntensity} 
+                    max={100} 
+                    step={5}
+                    onValueChange={(v) => { setNightLightIntensity(v); handleSave("settings_night_light_intensity", v); }}
+                  />
+                </div>
+              )}
             </div>
+          </div>
+        );
+
+      case "network":
+        return (
+          <div className="space-y-2">
+            <SectionHeader title="Connections" />
+
+            <ToggleRow
+              icon={Wifi}
+              title="Wi-Fi"
+              description={wifiEnabled ? "Connected" : "Disconnected"}
+              checked={wifiEnabled}
+              onCheckedChange={(checked) => { setWifiEnabled(checked); handleSave("settings_wifi", checked); }}
+            />
+
+            <ToggleRow
+              icon={Lock}
+              title="VPN"
+              description={vpnEnabled ? "Connected" : "Not connected"}
+              checked={vpnEnabled}
+              onCheckedChange={(checked) => { setVpnEnabled(checked); handleSave("settings_vpn", checked); }}
+            />
+
+            {wifiEnabled && (
+              <>
+                <SectionHeader title="Available Networks" />
+                {[
+                  { name: "URBANSHADE-SECURE", signal: 4, connected: true, secured: true },
+                  { name: "FACILITY-GUEST", signal: 3, connected: false, secured: false },
+                  { name: "SCP-NETWORK", signal: 2, connected: false, secured: true },
+                ].map(network => (
+                  <div key={network.name} className={`flex items-center justify-between py-3 px-4 rounded-lg border cursor-pointer transition-colors ${
+                    network.connected 
+                      ? 'bg-primary/5 border-primary/30' 
+                      : 'bg-card/40 border-border/30 hover:bg-card/60'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <Wifi className={`w-4 h-4 ${network.connected ? 'text-primary' : 'text-muted-foreground'}`} />
+                      <div>
+                        <div className="text-sm font-medium">{network.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {network.secured ? 'Secured' : 'Open'} · Signal: {network.signal}/4
+                        </div>
+                      </div>
+                    </div>
+                    {network.connected && <Check className="w-4 h-4 text-primary" />}
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         );
 
       case "storage":
         return (
-          <div className="space-y-6">
-            <SectionHeader title="Storage" description="Manage your storage space" />
+          <div className="space-y-2">
+            <SectionHeader title="Storage" />
 
-            <div className="p-5 rounded-xl bg-card/50 border border-border/50">
-              <div className="flex items-center justify-between mb-4">
+            <div className="py-3 px-4 rounded-lg bg-card/40 border border-border/30">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <HardDrive className="w-5 h-5 text-primary" />
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <HardDrive className="w-4 h-4 text-primary" />
                   </div>
                   <div>
-                    <div className="font-medium">Local Storage</div>
-                    <div className="text-xs text-muted-foreground">{storage.usedMB} MB used of 5 MB</div>
+                    <div className="text-sm font-medium">Local Storage</div>
+                    <div className="text-xs text-muted-foreground">{storage.usedMB} MB of 5 MB</div>
                   </div>
                 </div>
-                <span className="text-lg font-mono">{storage.percentage.toFixed(1)}%</span>
+                <span className="text-sm font-mono">{storage.percentage.toFixed(1)}%</span>
               </div>
-              <Progress value={storage.percentage} className="h-2" />
+              <Progress value={storage.percentage} className="h-1.5" />
             </div>
 
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full h-12 justify-start rounded-xl" onClick={handleExportSystemImage}>
-                <Download className="w-5 h-5 mr-3" />
-                Export System Image
-              </Button>
+            <SectionHeader title="Backup & Restore" />
 
-              <Button variant="outline" className="w-full h-12 justify-start rounded-xl" onClick={() => fileInputRef.current?.click()}>
-                <Upload className="w-5 h-5 mr-3" />
-                Import System Image
-              </Button>
+            <Button variant="outline" className="w-full justify-start h-10" onClick={handleExportSystemImage}>
+              <Download className="w-4 h-4 mr-2" />
+              Export System Image
+            </Button>
 
-              <Button 
-                variant="outline" 
-                className="w-full h-12 justify-start rounded-xl border-red-500/30 text-red-400 hover:bg-red-500/10"
-                onClick={() => {
-                  const keys = Object.keys(localStorage).filter(k => k.startsWith('cache_'));
-                  keys.forEach(k => localStorage.removeItem(k));
-                  toast.success(`Cleared ${keys.length} cached items`);
-                }}
-              >
-                <Trash2 className="w-5 h-5 mr-3" />
-                Clear Cache
-              </Button>
-            </div>
-
-            <input 
+            <Button variant="outline" className="w-full justify-start h-10" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="w-4 h-4 mr-2" />
+              Import System Image
+            </Button>
+            <input
               ref={fileInputRef}
               type="file"
               accept=".json"
@@ -635,163 +626,165 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
           </div>
         );
 
-      case "notifications":
+      case "accounts":
         return (
-          <div className="space-y-6">
-            <SectionHeader title="Notifications" description="Control how you receive alerts" />
+          <div className="space-y-2">
+            <SectionHeader title="Account" />
 
-            <div className="space-y-3">
-              <SettingCard icon={Bell} title="Notifications" description="Enable system notifications">
-                <Switch 
-                  checked={notificationsEnabled} 
-                  onCheckedChange={(checked) => { setNotificationsEnabled(checked); handleSave("settings_notifications", checked); }} 
-                />
-              </SettingCard>
-
-              <SettingCard icon={Moon} title="Do Not Disturb" description="Silence all notifications">
-                <Switch 
-                  checked={doNotDisturb} 
-                  onCheckedChange={(checked) => { setDoNotDisturb(checked); handleSave("settings_dnd", checked); }} 
-                />
-              </SettingCard>
-            </div>
-
-            {notificationsEnabled && (
-              <div className="p-4 rounded-xl bg-muted/20 border border-border/30">
-                <p className="text-sm text-muted-foreground">
-                  You'll receive notifications for system alerts, messages, and security events.
-                </p>
+            {user ? (
+              <div className="py-3 px-4 rounded-lg bg-card/40 border border-border/30">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium">{profile?.display_name || profile?.username}</div>
+                    <div className="text-xs text-muted-foreground">{user.email}</div>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <div className="py-4 px-4 rounded-lg bg-card/40 border border-border/30 text-center">
+                <Users className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <div className="text-sm text-muted-foreground">Not signed in</div>
+                <div className="text-xs text-muted-foreground">Sign in to sync settings</div>
               </div>
             )}
+
+            <SectionHeader title="Sync" />
+
+            <div className="py-3 px-4 rounded-lg bg-card/40 border border-border/30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Cloud className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">Cloud Sync</span>
+                </div>
+                <span className={`text-xs ${syncEnabled ? 'text-green-400' : 'text-muted-foreground'}`}>
+                  {syncEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+              {lastSyncTime && (
+                <div className="text-xs text-muted-foreground">
+                  Last sync: {new Date(lastSyncTime).toLocaleString()}
+                </div>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full mt-2"
+                onClick={manualSync}
+                disabled={isSyncing || !user}
+              >
+                {isSyncing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+                Sync Now
+              </Button>
+            </div>
           </div>
         );
 
-      case "power":
+      case "notifications":
         return (
-          <div className="space-y-6">
-            <SectionHeader title="Power" description="Battery and performance settings" />
+          <div className="space-y-2">
+            <SectionHeader title="Notifications" />
 
-            <div className="p-5 rounded-xl bg-card/50 border border-border/50">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
-                  <Battery className="w-6 h-6 text-green-500" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">100%</div>
-                  <div className="text-sm text-muted-foreground">Connected to power</div>
-                </div>
-              </div>
-            </div>
+            <ToggleRow
+              icon={Bell}
+              title="Notifications"
+              description="Show notifications"
+              checked={notificationsEnabled}
+              onCheckedChange={(checked) => { setNotificationsEnabled(checked); handleSave("settings_notifications", checked); }}
+            />
 
-            <SettingCard icon={Cpu} title="Power Mode" description="Balance performance and efficiency">
-              <Select value={powerMode} onValueChange={(v) => { setPowerMode(v); handleSave("settings_power_mode", v); }}>
-                <SelectTrigger className="w-36 h-9 rounded-lg">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="z-[99999] bg-background border border-border rounded-lg">
-                  <SelectItem value="power_saver">Power Saver</SelectItem>
-                  <SelectItem value="balanced">Balanced</SelectItem>
-                  <SelectItem value="performance">High Performance</SelectItem>
-                </SelectContent>
-              </Select>
-            </SettingCard>
+            <ToggleRow
+              icon={Moon}
+              title="Do Not Disturb"
+              description="Silence notifications"
+              checked={doNotDisturb}
+              onCheckedChange={(checked) => { setDoNotDisturb(checked); handleSave("settings_dnd", checked); }}
+            />
           </div>
         );
 
       case "about":
         return (
-          <div className="space-y-6">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20">
-              <div className="flex items-center gap-5 mb-6">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/30">
-                  <Sparkles className="w-10 h-10 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold">UrbanShade OS</h2>
-                  <p className="text-muted-foreground">Deep Ocean Edition</p>
-                </div>
-              </div>
+          <div className="space-y-2">
+            <SectionHeader title="System Information" />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-background/50">
-                  <div className="text-xs text-muted-foreground mb-1">Version</div>
-                  <div className="font-medium">{VERSION.fullVersion}</div>
-                </div>
-                <div className="p-4 rounded-xl bg-background/50">
-                  <div className="text-xs text-muted-foreground mb-1">Build</div>
-                  <div className="font-medium">{VERSION.build}</div>
-                </div>
-                <div className="p-4 rounded-xl bg-background/50">
-                  <div className="text-xs text-muted-foreground mb-1">Kernel</div>
-                  <div className="font-medium">URBCORE v5.8.2</div>
-                </div>
-                <div className="p-4 rounded-xl bg-background/50">
-                  <div className="text-xs text-muted-foreground mb-1">Architecture</div>
-                  <div className="font-medium">x64</div>
-                </div>
+            <div className="py-4 px-4 rounded-lg bg-card/40 border border-border/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">OS Name</span>
+                <span className="text-sm font-medium">UrbanShade OS</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Version</span>
+                <span className="text-sm font-medium">{VERSION.displayVersion}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Codename</span>
+                <span className="text-sm font-medium">{VERSION.codename}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Build</span>
+                <span className="text-sm font-mono">{VERSION.build}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Device</span>
+                <span className="text-sm font-medium">{settings.deviceName || "Terminal"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Architecture</span>
+                <span className="text-sm font-medium">64-bit</span>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full h-12 justify-start rounded-xl">
-                <ExternalLink className="w-5 h-5 mr-3" />
-                Documentation
-              </Button>
-              <Button variant="outline" className="w-full h-12 justify-start rounded-xl">
-                <ExternalLink className="w-5 h-5 mr-3" />
-                Report an Issue
-              </Button>
-            </div>
-
-            <div className="text-center text-xs text-muted-foreground">
-              © 2024 UrbanShade Corporation. All rights reserved.
-            </div>
+            <Button variant="outline" className="w-full" asChild>
+              <a href="https://urbanshade.lovable.app" target="_blank" rel="noreferrer">
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Visit Website
+              </a>
+            </Button>
           </div>
         );
 
       default:
-        return (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            <p>Select a category to configure</p>
-          </div>
-        );
+        return null;
     }
   };
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="h-full flex bg-background">
       {/* Sidebar */}
-      <div className="w-64 border-r border-border/50 flex flex-col">
-        <div className="p-4 border-b border-border/50">
+      <div className="w-56 border-r border-border/50 flex flex-col">
+        <div className="p-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              type="text"
+              placeholder="Search settings"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search settings..."
-              className="pl-10 bg-muted/50 border-border/50 rounded-xl"
+              className="pl-8 h-8 text-sm"
             />
           </div>
         </div>
 
-        <ScrollArea className="flex-1 p-2">
-          <div className="space-y-1">
-            {filteredCategories.map((cat) => (
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-0.5">
+            {filteredCategories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-left transition-colors ${
                   selectedCategory === cat.id
-                    ? 'bg-primary/10 text-primary border border-primary/30'
-                    : 'hover:bg-muted/50 text-foreground'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                 }`}
               >
-                <cat.icon className="w-5 h-5 flex-shrink-0" />
-                <div className="min-w-0">
-                  <div className="font-medium text-sm truncate">{cat.name}</div>
-                  <div className="text-xs text-muted-foreground truncate">{cat.description}</div>
-                </div>
+                <cat.icon className="w-4 h-4" />
+                <span className="text-sm">{cat.name}</span>
               </button>
             ))}
           </div>
@@ -799,55 +792,51 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex flex-col">
-        <div className="p-6 border-b border-border/50">
-          <h2 className="text-xl font-bold capitalize">{selectedCategory}</h2>
-        </div>
-        <ScrollArea className="flex-1 p-6">
-          {renderContent()}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="p-4 max-w-xl">
+            {renderContent()}
+          </div>
         </ScrollArea>
       </div>
 
       {/* Factory Reset Dialog */}
       <Dialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
-        <DialogContent className="bg-background border-red-500/30">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-red-400 flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-red-400">
               <AlertTriangle className="w-5 h-5" />
               Factory Reset
             </DialogTitle>
             <DialogDescription>
-              This will erase all data and settings. This action cannot be undone.
+              This will erase all data including accounts, settings, and installed apps. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowFactoryResetDialog(false)}>Cancel</Button>
-            <Button variant="destructive" onClick={handleFactoryReset}>Reset System</Button>
+            <Button variant="destructive" onClick={handleFactoryReset}>Reset Everything</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* OEM Unlock Dialog */}
+      {/* OEM Dialog */}
       <Dialog open={showOemDialog} onOpenChange={setShowOemDialog}>
-        <DialogContent className="bg-background border-amber-500/30">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-amber-400 flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-amber-400">
               <AlertTriangle className="w-5 h-5" />
               {oemUnlocked ? 'Lock OEM' : 'Unlock OEM'}
             </DialogTitle>
             <DialogDescription>
               {oemUnlocked 
                 ? 'Locking OEM will require a factory reset.'
-                : 'Unlocking OEM will allow custom system modifications but requires a factory reset.'}
+                : 'Unlocking OEM allows custom system modifications. This requires a factory reset.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowOemDialog(false)}>Cancel</Button>
-            <Button 
-              className="bg-amber-500 hover:bg-amber-600 text-black"
-              onClick={handleOemUnlockConfirm}
-            >
-              Continue & Reset
+            <Button variant="destructive" onClick={handleOemUnlockConfirm}>
+              {oemUnlocked ? 'Lock & Reset' : 'Unlock & Reset'}
             </Button>
           </DialogFooter>
         </DialogContent>
