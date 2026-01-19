@@ -101,9 +101,7 @@ const DEFAULT_SETTINGS: NaviSettings = {
   message_rolling_avg: 50,
   failed_login_rolling_avg: 15
 };
-
-// NAVI token for autonomous operations
-const NAVI_TOKEN = 'navi-autonomous-2024';
+// NAVI operations now require authenticated admin user - no client-side token
 
 export const useNaviAutonomous = () => {
   const [stats, setStats] = useState<NaviStats>({
@@ -174,11 +172,13 @@ export const useNaviAutonomous = () => {
       .slice(0, limit);
   }, []);
 
-  // Call NAVI autonomous edge function
+  // Call NAVI autonomous edge function - requires admin authentication
   const callNaviAutonomous = async (action: string, payload: Record<string, any>) => {
     try {
+      // The edge function will validate the user's JWT from the Authorization header
+      // and check if they have admin role - no client-side token needed
       const response = await supabase.functions.invoke('navi-autonomous', {
-        body: { action, naviToken: NAVI_TOKEN, ...payload }
+        body: { action, ...payload }
       });
       
       if (response.error) {
