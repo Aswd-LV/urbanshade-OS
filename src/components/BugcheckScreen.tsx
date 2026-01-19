@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { RefreshCw, Wrench, ChevronRight } from "lucide-react";
 
 export interface BugcheckData {
   code: string;
@@ -17,7 +16,7 @@ interface BugcheckScreenProps {
   onRecovery?: () => void;
 }
 
-// Real bugcheck codes with detailed descriptions
+// Bugcheck codes - expanded with new ones
 export const BUGCHECK_CODES: Record<string, { 
   hex: string; 
   severity: "CRITICAL" | "HIGH" | "MEDIUM" | "INFO"; 
@@ -27,6 +26,62 @@ export const BUGCHECK_CODES: Record<string, {
   possibleCauses: string[];
   suggestedFixes: string[];
 }> = {
+  // Data integrity
+  DATA_INCONSISTENCY_ERROR: { 
+    hex: "0x00000050", 
+    severity: "CRITICAL", 
+    category: "Data Integrity",
+    userDescription: "System data validation failed",
+    technicalDescription: "One or more localStorage keys contain corrupted or invalid data that does not match expected schema",
+    possibleCauses: ["Corrupted localStorage entry", "Schema version mismatch", "Incomplete write operation", "Browser storage corruption"],
+    suggestedFixes: ["Clear corrupted keys via Recovery", "Factory reset", "Restore from backup"]
+  },
+  SYSTEM_ERROR_HANDLE: { 
+    hex: "0x00000051", 
+    severity: "CRITICAL", 
+    category: "Error Handler",
+    userDescription: "Multiple error screens triggered simultaneously",
+    technicalDescription: "The error handling system detected concurrent error states, indicating cascading failures",
+    possibleCauses: ["Cascading errors", "Error handler recursion", "Multiple component failures", "Stack corruption"],
+    suggestedFixes: ["Immediate restart required", "Check for memory leaks", "Review recent changes"]
+  },
+  STORAGE_VALIDATION_FAILED: { 
+    hex: "0x00000052", 
+    severity: "HIGH", 
+    category: "Storage",
+    userDescription: "Storage validation check failed",
+    technicalDescription: "Periodic storage integrity check detected anomalies in saved data",
+    possibleCauses: ["Partial writes", "Concurrent modification", "Storage quota issues"],
+    suggestedFixes: ["Run storage cleanup", "Verify storage permissions"]
+  },
+  RENDER_DEADLOCK: { 
+    hex: "0x00000053", 
+    severity: "CRITICAL", 
+    category: "Rendering",
+    userDescription: "Rendering system became unresponsive",
+    technicalDescription: "React render cycle detected mutual blocking between components",
+    possibleCauses: ["Circular dependencies", "Infinite state updates", "Blocked event loop"],
+    suggestedFixes: ["Force restart", "Disable problematic components"]
+  },
+  SECURITY_VIOLATION: { 
+    hex: "0x00000054", 
+    severity: "CRITICAL", 
+    category: "Security",
+    userDescription: "Security policy violation detected",
+    technicalDescription: "An operation attempted to bypass security restrictions",
+    possibleCauses: ["Unauthorized access attempt", "Policy bypass", "Injection attack"],
+    suggestedFixes: ["Review security logs", "Enable enhanced protection"]
+  },
+  CONFIG_CORRUPTION: { 
+    hex: "0x00000055", 
+    severity: "HIGH", 
+    category: "Configuration",
+    userDescription: "System configuration is corrupted",
+    technicalDescription: "Critical configuration values are missing or invalid",
+    possibleCauses: ["Settings corruption", "Version migration failure", "Manual tampering"],
+    suggestedFixes: ["Reset settings to default", "Factory reset"]
+  },
+  // Original codes
   DESKTOP_MALFUNC: { 
     hex: "0x00000001", 
     severity: "HIGH", 
@@ -247,7 +302,8 @@ export const BUGCHECK_CODES: Record<string, {
 
 export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery }: BugcheckScreenProps) => {
   const [selectedOption, setSelectedOption] = useState(0);
-  const [showingDetails, setShowingDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [counter, setCounter] = useState(0);
 
   const codeInfo = BUGCHECK_CODES[bugcheck.code] || {
     hex: "0x000000DE",
@@ -261,154 +317,194 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
 
   // Save bugcheck to localStorage for DEF-DEV
   useEffect(() => {
-    const existing = localStorage.getItem('urbanshade_bugchecks');
-    const bugchecks = existing ? JSON.parse(existing) : [];
-    bugchecks.push({ ...bugcheck, fromError: true });
-    localStorage.setItem('urbanshade_bugchecks', JSON.stringify(bugchecks.slice(-50)));
+    try {
+      const existing = localStorage.getItem('urbanshade_bugchecks');
+      const bugchecks = existing ? JSON.parse(existing) : [];
+      bugchecks.push({ ...bugcheck, fromError: true });
+      localStorage.setItem('urbanshade_bugchecks', JSON.stringify(bugchecks.slice(-50)));
+    } catch {}
   }, [bugcheck]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp") {
-        setSelectedOption(prev => Math.max(0, prev - 1));
-      } else if (e.key === "ArrowDown") {
-        setSelectedOption(prev => Math.min(2, prev + 1));
-      } else if (e.key === "Enter") {
+      if (e.key === "ArrowUp") setSelectedOption(prev => Math.max(0, prev - 1));
+      else if (e.key === "ArrowDown") setSelectedOption(prev => Math.min(2, prev + 1));
+      else if (e.key === "Enter") {
         if (selectedOption === 0) onRestart();
-        else if (selectedOption === 1) onRestart(); // Start normally
+        else if (selectedOption === 1) onRestart();
         else if (selectedOption === 2 && onRecovery) onRecovery();
-      } else if (e.key === "F8") {
-        setShowingDetails(!showingDetails);
       }
+      else if (e.key === "F8") setShowDetails(!showDetails);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedOption, onRestart, onRecovery, showingDetails]);
+  }, [selectedOption, onRestart, onRecovery, showDetails]);
+
+  // Memory address counter animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCounter(prev => (prev + 1) % 9999);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   const options = [
-    { 
-      label: "Launch Startup Repair (recommended)", 
-      desc: "Attempt to automatically fix problems that are preventing UrbanShade from starting",
-      action: onRestart 
-    },
-    { 
-      label: "Start UrbanShade Normally", 
-      desc: "Continue to boot without making changes",
-      action: onRestart 
-    },
-    { 
-      label: "Open Recovery Environment", 
-      desc: "Access advanced recovery tools and options",
-      action: onRecovery || onReportToDev 
-    },
+    "Launch Startup Repair (recommended)",
+    "Start UrbanShade Normally", 
+    "Open Recovery Environment",
   ];
 
   return (
-    <div className="fixed inset-0 bg-[#0a0a0f] text-gray-100 flex flex-col font-mono z-[9999] overflow-hidden">
-      {/* Grey header bar */}
-      <div className="bg-gradient-to-r from-slate-700 to-slate-600 px-6 py-3">
-        <h1 className="text-lg font-bold text-white">UrbanShade Error Recovery</h1>
+    <div className="fixed inset-0 bg-black text-white font-mono flex flex-col z-[9999] select-none">
+      {/* Top border accent */}
+      <div className="h-1 bg-white" />
+
+      {/* Header */}
+      <div className="px-8 py-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">UrbanShade Error Recovery</h1>
+          <p className="text-sm text-gray-400 mt-1">A problem has been detected and the system has been halted</p>
+        </div>
+        <div className="text-right text-xs text-gray-500">
+          <div>{bugcheck.timestamp}</div>
+          <div className="font-mono">{codeInfo.hex}</div>
+        </div>
       </div>
 
+      {/* Separator */}
+      <div className="mx-8 border-t border-white/20" />
+
       {/* Main content */}
-      <div className="flex-1 p-8 max-w-4xl">
-        {/* Error title */}
-        <div className="mb-6">
-          <p className="text-lg text-slate-300 leading-relaxed">
-            UrbanShade failed to start. A recent system change might be the cause.
-          </p>
-        </div>
-
-        {/* Error info box */}
-        <div className="mb-8 p-4 bg-slate-900/50 border border-slate-700/50 rounded">
-          <div className="text-sm text-slate-400 mb-2">
-            Status: <span className="text-red-400">{codeInfo.hex}</span>
-          </div>
-          <div className="text-sm text-slate-400 mb-2">
-            Stop Code: <span className="text-cyan-400">{bugcheck.code}</span>
-          </div>
-          <div className="text-sm text-slate-400">
-            Info: <span className="text-slate-300">{codeInfo.userDescription}</span>
-          </div>
-          {bugcheck.location && (
-            <div className="text-sm text-slate-400 mt-2">
-              Location: <span className="text-slate-500">{bugcheck.location}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Options list */}
-        <div className="space-y-1">
-          {options.map((opt, i) => (
-            <div
-              key={i}
-              onClick={() => { setSelectedOption(i); opt.action?.(); }}
-              onMouseEnter={() => setSelectedOption(i)}
-              className={`p-3 cursor-pointer flex items-center gap-3 transition-colors ${
-                selectedOption === i 
-                  ? "bg-slate-700" 
-                  : "hover:bg-slate-800/50"
-              }`}
-            >
-              <ChevronRight className={`w-4 h-4 ${selectedOption === i ? "text-cyan-400" : "text-transparent"}`} />
-              <span className={selectedOption === i ? "text-white" : "text-slate-400"}>
-                {opt.label}
+      <div className="flex-1 px-8 py-6 flex gap-12">
+        {/* Left side - Error info */}
+        <div className="flex-1 space-y-6">
+          {/* Error box */}
+          <div className="border border-white p-4">
+            <div className="flex items-center gap-4 mb-3">
+              <span className="px-2 py-1 border border-white text-xs">
+                {codeInfo.severity}
               </span>
+              <span className="text-gray-400">{codeInfo.category}</span>
             </div>
-          ))}
-        </div>
+            <div className="text-lg font-bold mb-2">{bugcheck.code}</div>
+            <div className="text-sm text-gray-300">{codeInfo.userDescription}</div>
+          </div>
 
-        {/* Description panel */}
-        <div className="mt-8 p-4 bg-slate-900/30 border-l-2 border-cyan-500/50">
-          <p className="text-sm text-slate-400">
-            {options[selectedOption]?.desc}
-          </p>
-        </div>
+          {/* Technical info */}
+          <div className="space-y-2 text-xs">
+            <div className="flex gap-4">
+              <span className="text-gray-500 w-20">Address:</span>
+              <span className="font-mono">0x{counter.toString(16).padStart(8, '0').toUpperCase()}</span>
+            </div>
+            {bugcheck.location && (
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-20">Location:</span>
+                <span>{bugcheck.location}</span>
+              </div>
+            )}
+            <div className="flex gap-4">
+              <span className="text-gray-500 w-20">Build:</span>
+              <span>US-2.5.0</span>
+            </div>
+          </div>
 
-        {/* Technical details (F8 to toggle) */}
-        {showingDetails && (
-          <div className="mt-6 p-4 bg-black/50 border border-slate-700 rounded text-xs">
-            <div className="text-slate-500 mb-2">Technical Details:</div>
-            <div className="text-slate-400 mb-1">• {codeInfo.technicalDescription}</div>
-            <div className="text-slate-500 mt-3 mb-1">Possible Causes:</div>
-            {codeInfo.possibleCauses.map((cause, i) => (
-              <div key={i} className="text-slate-400">  - {cause}</div>
+          {/* Recovery options */}
+          <div className="border border-white/40 p-4 mt-8">
+            <div className="text-xs text-gray-400 mb-3">Select an option:</div>
+            {options.map((opt, i) => (
+              <div
+                key={i}
+                onClick={() => { 
+                  setSelectedOption(i);
+                  if (i === 0 || i === 1) onRestart();
+                  else if (i === 2 && onRecovery) onRecovery();
+                }}
+                onMouseEnter={() => setSelectedOption(i)}
+                className={`py-2 px-3 cursor-pointer flex items-center gap-2 ${
+                  selectedOption === i ? 'bg-white text-black' : 'hover:bg-white/10'
+                }`}
+              >
+                <span className={`w-4 ${selectedOption === i ? 'text-black' : 'text-gray-600'}`}>
+                  {selectedOption === i ? '►' : ' '}
+                </span>
+                <span className="text-sm">{opt}</span>
+              </div>
             ))}
-            {bugcheck.stackTrace && (
-              <div className="mt-3">
-                <div className="text-slate-500 mb-1">Stack Trace:</div>
-                <pre className="text-slate-500 overflow-x-auto whitespace-pre-wrap max-h-24 overflow-y-auto">
+          </div>
+        </div>
+
+        {/* Right side - Details panel */}
+        <div className="w-72 border-l border-white/20 pl-8">
+          <div className="text-xs text-gray-500 mb-4">TECHNICAL DETAILS</div>
+          
+          <div className="space-y-4 text-xs">
+            <div>
+              <div className="text-gray-500">Description</div>
+              <div className="mt-1">{codeInfo.technicalDescription}</div>
+            </div>
+            
+            <div>
+              <div className="text-gray-500">Possible Causes</div>
+              <ul className="mt-1 space-y-1">
+                {codeInfo.possibleCauses.map((cause, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-gray-600">•</span>
+                    <span>{cause}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <div className="text-gray-500">Suggested Fixes</div>
+              <ul className="mt-1 space-y-1">
+                {codeInfo.suggestedFixes.map((fix, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-gray-600">•</span>
+                    <span>{fix}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {showDetails && bugcheck.stackTrace && (
+              <div>
+                <div className="text-gray-500">Stack Trace</div>
+                <pre className="mt-1 text-[10px] overflow-x-auto whitespace-pre-wrap text-gray-400 max-h-32 overflow-y-auto">
                   {bugcheck.stackTrace}
                 </pre>
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Footer */}
-      <div className="px-8 py-4 bg-slate-900/50 border-t border-slate-800 flex items-center justify-between">
-        <div className="text-xs text-slate-500">
-          ENTER=Choose &nbsp; ↑↓=Select &nbsp; F8=Details
+      <div className="border-t border-white/20 px-8 py-4 flex items-center justify-between">
+        <div className="text-xs text-gray-500 space-x-6">
+          <span>ENTER=Choose</span>
+          <span>↑↓=Select</span>
+          <span>F8=Details</span>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={onReportToDev}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs text-amber-400 hover:bg-amber-500/10 rounded transition-colors"
+            className="px-4 py-2 text-xs border border-white/40 hover:bg-white/10 transition-colors"
           >
-            <Wrench className="w-3 h-3" />
             DEF-DEV
           </button>
           <button
             onClick={onRestart}
-            className="flex items-center gap-2 px-4 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-sm font-medium transition-colors"
+            className="px-4 py-2 text-xs bg-white text-black font-bold hover:bg-gray-200 transition-colors"
           >
-            <RefreshCw className="w-3 h-3" />
-            Restart
+            RESTART
           </button>
         </div>
       </div>
+
+      {/* Bottom border accent */}
+      <div className="h-1 bg-white" />
     </div>
   );
 };
