@@ -19,8 +19,10 @@ const GettingStarted = () => {
 
       <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
         <section className="text-center space-y-4">
-          <Rocket className="w-16 h-16 mx-auto text-cyan-400 animate-bounce" />
-          <h2 className="text-4xl font-bold text-white">Welcome Aboard, New Recruit!</h2>
+          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center">
+            <Rocket className="w-10 h-10 text-cyan-400" />
+          </div>
+          <h2 className="text-4xl font-bold text-slate-100">Welcome Aboard, New Recruit!</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
             So you've been assigned to an underwater research facility 8,247 meters below sea level. 
             Don't worry, the pressure is only... extreme. Let's get you set up!
@@ -28,32 +30,32 @@ const GettingStarted = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
-            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold">1</span>
+          <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-100">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold text-sm">1</span>
             The Installation Process
           </h3>
-          <div className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 space-y-4">
+          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 space-y-4">
             <p className="text-slate-400">
               When you first launch URBANSHADE OS, you'll be greeted by our streamlined installer. 
               Choose your installation type based on your needs:
             </p>
             <ul className="space-y-3 ml-4">
               <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5 shrink-0" />
                 <div>
                   <span className="font-bold text-cyan-300">Minimal</span>
                   <span className="text-slate-400"> - Core system only for backup terminals (~2 min)</span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5 shrink-0" />
                 <div>
                   <span className="font-bold text-cyan-300">Standard</span>
                   <span className="text-slate-400"> - Essential facility tools, recommended (~5 min)</span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5 shrink-0" />
                 <div>
                   <span className="font-bold text-cyan-300">Complete</span>
                   <span className="text-slate-400"> - All applications and research modules (~10 min)</span>
@@ -64,11 +66,11 @@ const GettingStarted = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
-            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold">2</span>
+          <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-100">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold text-sm">2</span>
             OOBE (Out of Box Experience)
           </h3>
-          <div className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 space-y-4">
+          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 space-y-4">
             <p className="text-slate-400">
               After installation, you'll go through OOBE — the Out of Box Experience. 
               This is where you personalize your facility workstation with your preferences.
@@ -80,7 +82,7 @@ const GettingStarted = () => {
               </p>
             </div>
             <div className="grid md:grid-cols-2 gap-4 mt-4">
-              <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-700">
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2">OOBE Steps</h4>
                 <ul className="text-sm text-slate-400 space-y-1">
                   <li>• Welcome screen</li>
@@ -90,7 +92,7 @@ const GettingStarted = () => {
                   <li>• Final setup</li>
                 </ul>
               </div>
-              <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-700">
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2">What You Can Configure</h4>
                 <ul className="text-sm text-slate-400 space-y-1">
                   <li>• Username & password</li>
@@ -105,13 +107,15 @@ const GettingStarted = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
-            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold">3</span>
+          <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-100">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold text-sm">3</span>
             Login Screen
           </h3>
-          <div className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 space-y-4">
+          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 space-y-4">
             <div className="flex items-center gap-4">
-              <LogIn className="w-12 h-12 text-cyan-400" />
+              <div className="w-14 h-14 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                <LogIn className="w-7 h-7 text-cyan-400" />
+              </div>
               <div>
                 <p className="text-slate-400">
                   After OOBE, you'll see the login screen. Select your user account 
@@ -135,20 +139,22 @@ const GettingStarted = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
-            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold">4</span>
+          <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-100">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold text-sm">4</span>
             Your Desktop
           </h3>
-          <div className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 space-y-4">
+          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 space-y-4">
             <div className="flex items-center gap-4">
-              <Layout className="w-12 h-12 text-cyan-400" />
+              <div className="w-14 h-14 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                <Layout className="w-7 h-7 text-cyan-400" />
+              </div>
               <p className="text-slate-400">
                 Welcome to your underwater command center! The desktop features icons, 
                 a taskbar at the bottom, and the Start Menu for accessing all applications.
               </p>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-700">
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2">Desktop Elements</h4>
                 <ul className="text-sm text-slate-400 space-y-1">
                   <li>• Desktop icons for quick access</li>
@@ -158,7 +164,7 @@ const GettingStarted = () => {
                   <li>• Quick settings panel</li>
                 </ul>
               </div>
-              <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-700">
+              <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2">Quick Actions</h4>
                 <ul className="text-sm text-slate-400 space-y-1">
                   <li>• Double-click icons to open apps</li>
@@ -173,46 +179,35 @@ const GettingStarted = () => {
         </section>
 
         <section className="space-y-6">
-          <h3 className="text-2xl font-bold flex items-center gap-3 text-white">
-            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold">5</span>
+          <h3 className="text-2xl font-bold flex items-center gap-3 text-slate-100">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center text-slate-900 font-bold text-sm">5</span>
             Keyboard Shortcuts
           </h3>
-          <div className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 space-y-4">
+          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 space-y-4">
             <p className="text-slate-400">
               Master these shortcuts to navigate like a pro:
             </p>
             <div className="grid md:grid-cols-2 gap-4 text-sm">
-              <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-700">
-                <code className="text-cyan-400">Ctrl + Shift + T</code>
-                <p className="text-slate-500 text-xs mt-1">Open Terminal</p>
-              </div>
-              <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-700">
-                <code className="text-cyan-400">Ctrl + Shift + D</code>
-                <p className="text-slate-500 text-xs mt-1">Open DEF-DEV (if enabled)</p>
-              </div>
-              <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-700">
-                <code className="text-cyan-400">Alt + F4</code>
-                <p className="text-slate-500 text-xs mt-1">Close active window</p>
-              </div>
-              <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-700">
-                <code className="text-cyan-400">Win + L</code>
-                <p className="text-slate-500 text-xs mt-1">Lock screen</p>
-              </div>
-              <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-700">
-                <code className="text-cyan-400">Win + D</code>
-                <p className="text-slate-500 text-xs mt-1">Show desktop</p>
-              </div>
-              <div className="p-3 bg-slate-900/50 rounded-lg border border-slate-700">
-                <code className="text-cyan-400">F11</code>
-                <p className="text-slate-500 text-xs mt-1">Toggle fullscreen</p>
-              </div>
+              {[
+                { key: "Ctrl + Shift + T", action: "Open Terminal" },
+                { key: "Ctrl + Shift + D", action: "Open DEF-DEV (if enabled)" },
+                { key: "Alt + F4", action: "Close active window" },
+                { key: "Win + L", action: "Lock screen" },
+                { key: "Win + D", action: "Show desktop" },
+                { key: "F11", action: "Toggle fullscreen" },
+              ].map((shortcut) => (
+                <div key={shortcut.key} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                  <code className="text-cyan-400 font-mono">{shortcut.key}</code>
+                  <p className="text-slate-500 text-xs mt-1">{shortcut.action}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        <div className="flex justify-between pt-8 border-t border-cyan-500/20">
-          <Link to="/docs" className="text-cyan-400 hover:underline">← Back to Documentation</Link>
-          <Link to="/docs/applications" className="text-cyan-400 hover:underline">Applications Guide →</Link>
+        <div className="flex justify-between pt-8 border-t border-slate-700/50">
+          <Link to="/docs" className="text-cyan-400 hover:text-cyan-300 transition-colors">← Back to Documentation</Link>
+          <Link to="/docs/applications" className="text-cyan-400 hover:text-cyan-300 transition-colors">Applications Guide →</Link>
         </div>
       </main>
     </div>

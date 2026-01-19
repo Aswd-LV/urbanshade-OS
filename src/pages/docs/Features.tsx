@@ -19,8 +19,10 @@ const Features = () => {
 
       <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
         <section className="text-center space-y-4">
-          <Zap className="w-16 h-16 mx-auto text-cyan-400" />
-          <h2 className="text-4xl font-bold text-white">Latest Features</h2>
+          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 flex items-center justify-center">
+            <Zap className="w-10 h-10 text-cyan-400" />
+          </div>
+          <h2 className="text-4xl font-bold text-slate-100">Latest Features</h2>
           <p className="text-slate-400 max-w-2xl mx-auto">
             UrbanShade OS has received a major update with tons of new features to enhance 
             your facility management experience.
@@ -30,15 +32,17 @@ const Features = () => {
         {/* Boot & Login System */}
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-            <LogIn className="w-8 h-8 text-violet-400" />
-            <h3 className="text-2xl font-bold text-white">Streamlined Boot & Login</h3>
+            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center">
+              <LogIn className="w-5 h-5 text-violet-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100">Streamlined Boot & Login</h3>
           </div>
           <div className="p-6 rounded-xl bg-violet-500/10 border border-violet-500/30 space-y-4">
             <p className="text-slate-400">
               The boot experience has been completely redesigned for a cleaner, faster startup.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-violet-400 mb-2 flex items-center gap-2">
                   <Settings className="w-4 h-4" /> Redesigned Installer
                 </h4>
@@ -46,7 +50,7 @@ const Features = () => {
                   Modern horizontal stepper with Express Setup option for quick deployment.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-violet-400 mb-2 flex items-center gap-2">
                   <Layout className="w-4 h-4" /> OOBE Wizard
                 </h4>
@@ -54,7 +58,7 @@ const Features = () => {
                   Guided Out of Box Experience for personalization and initial setup.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-violet-400 mb-2 flex items-center gap-2">
                   <LogIn className="w-4 h-4" /> Login Screen
                 </h4>
@@ -62,7 +66,7 @@ const Features = () => {
                   User selection with avatars, password entry, and smooth transitions.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-violet-400 mb-2 flex items-center gap-2">
                   <Monitor className="w-4 h-4" /> Clean Boot Screen
                 </h4>
@@ -77,15 +81,17 @@ const Features = () => {
         {/* UUR Features */}
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-            <Package className="w-8 h-8 text-cyan-400" />
-            <h3 className="text-2xl font-bold text-white">UUR Package Manager</h3>
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+              <Package className="w-5 h-5 text-cyan-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100">UUR Package Manager</h3>
           </div>
           <div className="p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/30 space-y-4">
             <p className="text-slate-400">
               The UrbanShade User Repository has been enhanced with powerful new features.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2 flex items-center gap-2">
                   <Star className="w-4 h-4" /> Ratings & Reviews
                 </h4>
@@ -93,7 +99,7 @@ const Features = () => {
                   Rate packages 1-5 stars and leave reviews to help others find quality packages.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2 flex items-center gap-2">
                   <Package className="w-4 h-4" /> Package Categories
                 </h4>
@@ -101,7 +107,7 @@ const Features = () => {
                   Browse packages by category: Apps, Utilities, Themes, Extensions, Games, and more.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2 flex items-center gap-2">
                   <Zap className="w-4 h-4" /> Featured Packages
                 </h4>
@@ -109,7 +115,7 @@ const Features = () => {
                   Discover curated packages in the Featured section, hand-picked by the UUR team.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-cyan-400 mb-2 flex items-center gap-2">
                   <Layers className="w-4 h-4" /> Dependencies
                 </h4>
@@ -124,8 +130,10 @@ const Features = () => {
         {/* DEF-DEV Features */}
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-            <Bug className="w-8 h-8 text-amber-400" />
-            <h3 className="text-2xl font-bold text-white">DEF-DEV Console Enhancements</h3>
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+              <Bug className="w-5 h-5 text-amber-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100">DEF-DEV Console Enhancements</h3>
           </div>
           <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-4">
             <p className="text-slate-400">
@@ -166,21 +174,23 @@ const Features = () => {
         {/* Desktop Features */}
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-            <Monitor className="w-8 h-8 text-purple-400" />
-            <h3 className="text-2xl font-bold text-white">Desktop Improvements</h3>
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+              <Monitor className="w-5 h-5 text-purple-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100">Desktop Improvements</h3>
           </div>
           <div className="p-6 rounded-xl bg-purple-500/10 border border-purple-500/30 space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-purple-400 mb-2 flex items-center gap-2">
                   <Layers className="w-4 h-4" /> Multiple Desktops
                 </h4>
                 <p className="text-sm text-slate-400">
                   Create up to 8 virtual desktops to organize your windows. Switch with 
-                  <kbd className="mx-1 px-1 py-0.5 bg-slate-800 rounded text-xs">Ctrl+Win+←/→</kbd>
+                  <kbd className="mx-1 px-1.5 py-0.5 bg-slate-800 rounded text-xs font-mono">Ctrl+Win+←/→</kbd>
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-purple-400 mb-2 flex items-center gap-2">
                   <Layers className="w-4 h-4" /> Window Groups
                 </h4>
@@ -188,7 +198,7 @@ const Features = () => {
                   Group related windows together. Minimize, restore, or close entire groups at once.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-purple-400 mb-2 flex items-center gap-2">
                   <FileText className="w-4 h-4" /> File Associations
                 </h4>
@@ -196,7 +206,7 @@ const Features = () => {
                   Double-click files to open them with the right app. .txt → Notepad, .img → Image Editor.
                 </p>
               </div>
-              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+              <div className="p-4 bg-slate-900/50 rounded-lg border border-slate-700/50">
                 <h4 className="font-bold text-purple-400 mb-2 flex items-center gap-2">
                   <Search className="w-4 h-4" /> Doc Search
                 </h4>
@@ -211,8 +221,10 @@ const Features = () => {
         {/* Bugcheck Features */}
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-            <Shield className="w-8 h-8 text-red-400" />
-            <h3 className="text-2xl font-bold text-white">Crash & Recovery System</h3>
+            <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+              <Shield className="w-5 h-5 text-red-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100">Crash & Recovery System</h3>
           </div>
           <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/30 space-y-4">
             <p className="text-slate-400">
@@ -254,29 +266,26 @@ const Features = () => {
         {/* Sound Effects */}
         <section className="space-y-6">
           <div className="flex items-center gap-3">
-            <Volume2 className="w-8 h-8 text-green-400" />
-            <h3 className="text-2xl font-bold text-white">Sound Effects</h3>
+            <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/30 flex items-center justify-center">
+              <Volume2 className="w-5 h-5 text-green-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-100">Sound Effects</h3>
           </div>
           <div className="p-6 rounded-xl bg-green-500/10 border border-green-500/30 space-y-4">
             <p className="text-slate-400">
               Immersive audio feedback for system events (when enabled in Settings).
             </p>
-            <ul className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-slate-400">
-              <li>🔊 Boot sounds</li>
-              <li>🔔 Notifications</li>
-              <li>📧 Messages</li>
-              <li>✓ Success</li>
-              <li>⚠ Warnings</li>
-              <li>❌ Errors</li>
-              <li>🔐 Login/Logout</li>
-              <li>📦 App open/close</li>
+            <ul className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-slate-400">
+              {["🔊 Boot sounds", "🔔 Notifications", "📧 Messages", "✓ Success", "⚠ Warnings", "❌ Errors", "🔐 Login/Logout", "📦 App open/close"].map((item) => (
+                <li key={item} className="p-2 bg-slate-900/50 rounded-lg border border-slate-700/50 text-center">{item}</li>
+              ))}
             </ul>
           </div>
         </section>
 
-        <div className="flex justify-between pt-8 border-t border-cyan-500/20">
-          <Link to="/docs/advanced" className="text-cyan-400 hover:underline">← Advanced Features</Link>
-          <Link to="/docs/def-dev" className="text-cyan-400 hover:underline">DEF-DEV Guide →</Link>
+        <div className="flex justify-between pt-8 border-t border-slate-700/50">
+          <Link to="/docs/advanced" className="text-cyan-400 hover:text-cyan-300 transition-colors">← Advanced Features</Link>
+          <Link to="/docs/def-dev" className="text-cyan-400 hover:text-cyan-300 transition-colors">DEF-DEV Guide →</Link>
         </div>
       </main>
     </div>
