@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Bug, AlertTriangle, Info, CheckCircle, Trash2, Download, Copy, Upload, Database, RefreshCw, HardDrive, FileText, X, Eye, EyeOff, Play, Terminal, Zap, Shield, Activity, ExternalLink, BookOpen, Skull, MonitorX, Cpu, MemoryStick, AlertOctagon, Power, Bomb, Send, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { loadState } from "@/lib/persistence";
+import { loadState, saveState } from "@/lib/persistence";
 import { Link } from "react-router-dom";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { commandQueue, parseTerminalCommand, TERMINAL_COMMANDS, TerminalResult } from "@/lib/commandQueue";
@@ -255,7 +255,14 @@ const DevMode = () => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
 
-  // If dev mode not enabled, show error
+  // Manual enable handler
+  const handleManualEnable = () => {
+    saveState("settings_developer_mode", true);
+    setDevModeEnabled(true);
+    toast.success("Developer Mode manually enabled");
+  };
+
+  // If dev mode not enabled, show error with manual enable option
   if (!devModeEnabled) {
     return (
       <div className="fixed inset-0 bg-slate-950 flex items-center justify-center">
@@ -267,12 +274,21 @@ const DevMode = () => {
           <p className="text-gray-400 mb-6">
             Developer Mode is not enabled on this system. Enable it in Settings → Developer Options or during installation.
           </p>
-          <button
-            onClick={() => window.location.href = "/"}
-            className="px-6 py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 rounded-lg text-cyan-400"
-          >
-            Return to System
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleManualEnable}
+              className="px-6 py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 rounded-lg text-amber-400 flex items-center justify-center gap-2"
+            >
+              <Zap className="w-4 h-4" />
+              Manual Handshake (Enable Dev Mode)
+            </button>
+            <button
+              onClick={() => window.location.href = "/"}
+              className="px-6 py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 rounded-lg text-cyan-400"
+            >
+              Return to System
+            </button>
+          </div>
         </div>
       </div>
     );
