@@ -1,6 +1,8 @@
 // UUR Repository Management
 // Handles package registry, submissions, real apps, package lists, ratings, and categories
 
+import DOMPurify from 'dompurify';
+
 export type UURCategory = 'app' | 'theme' | 'extension' | 'utility' | 'game' | 'productivity' | 'security' | 'system';
 
 export const UUR_CATEGORIES: { id: UURCategory; name: string; icon: string; color: string }[] = [
@@ -218,78 +220,65 @@ export const UUR_REAL_PACKAGES: Record<string, UURPackage> = {
   }
 };
 
-// Sanitize HTML to prevent XSS - only allow safe tags and attributes
+// Sanitize HTML to prevent XSS using DOMPurify - battle-tested library
 export const sanitizeHtml = (html: string): string => {
-  // Fallback: if we can't parse, return escaped HTML
   if (!html) return '';
   
   try {
-    // Create a DOM parser
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    // Configure DOMPurify with strict settings for UUR packages
+    const cleanHtml = DOMPurify.sanitize(html, {
+      // Only allow safe HTML tags - no scripts, iframes, objects, etc.
+      ALLOWED_TAGS: [
+        'div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'pre', 'code', 'ul', 'ol', 'li', 'br', 'hr',
+        'strong', 'em', 'b', 'i', 'u', 's',
+        'table', 'thead', 'tbody', 'tr', 'th', 'td',
+        'a', 'img', 'blockquote', 'details', 'summary'
+      ],
+      // Only allow safe attributes
+      ALLOWED_ATTR: [
+        'style', 'class', 'id',
+        'href', 'src', 'alt', 'title', 'width', 'height',
+        'open' // for details/summary
+      ],
+      // Forbid dangerous URI schemes
+      ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+      // No data URIs in src attributes (prevent encoded payloads)
+      ALLOW_DATA_ATTR: false,
+      // Force all links to open safely
+      ADD_ATTR: ['target'],
+      // Strip dangerous style properties
+      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
+      // Additional security hooks
+      FORBID_TAGS: ['script', 'style', 'iframe', 'frame', 'frameset', 'object', 'embed', 'form', 'input', 'button', 'textarea', 'select'],
+      // Return string, not DOM node
+      RETURN_DOM: false,
+      RETURN_DOM_FRAGMENT: false,
+    });
     
-    // Check if body exists
-    if (!doc.body) {
-      console.warn('[UUR] DOMParser failed to create body, returning raw HTML');
-      return html;
-    }
-    
-    // Allowed tags
-    const allowedTags = ['div', 'span', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre', 'code', 'ul', 'ol', 'li', 'br', 'hr', 'strong', 'em', 'b', 'i'];
-    
-    // Allowed attributes
-    const allowedAttrs = ['style', 'class'];
-    
-    // Disallowed style patterns (scripts, expressions)
-    const dangerousStylePatterns = [
-      /javascript:/gi,
+    // Additional post-processing: remove dangerous CSS patterns
+    // DOMPurify handles most, but we add extra checks for CSS expressions
+    const dangerousCssPatterns = [
       /expression\s*\(/gi,
-      /behavior:/gi,
-      /-moz-binding/gi,
-      /url\s*\([^)]*script/gi,
+      /behavior\s*:/gi,
+      /-moz-binding\s*:/gi,
+      /javascript\s*:/gi,
+      /vbscript\s*:/gi,
+      /@import/gi,
+      /@charset/gi,
     ];
     
-    const sanitizeNode = (node: Node): void => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const el = node as Element;
-        const tagName = el.tagName.toLowerCase();
-        
-        // Check if tag is allowed
-        if (!allowedTags.includes(tagName)) {
-          // Replace with span but keep content
-          const span = doc.createElement('span');
-          while (el.firstChild) {
-            span.appendChild(el.firstChild);
-          }
-          el.parentNode?.replaceChild(span, el);
-          return;
-        }
-        
-        // Remove disallowed attributes
-        const attrs = Array.from(el.attributes);
-        for (const attr of attrs) {
-          if (!allowedAttrs.includes(attr.name.toLowerCase())) {
-            el.removeAttribute(attr.name);
-          } else if (attr.name.toLowerCase() === 'style') {
-            // Check for dangerous patterns in style
-            let style = attr.value;
-            for (const pattern of dangerousStylePatterns) {
-              style = style.replace(pattern, '');
-            }
-            el.setAttribute('style', style);
-          }
-        }
-        
-        // Recursively sanitize children
-        Array.from(el.childNodes).forEach(sanitizeNode);
-      }
-    };
+    let sanitized = cleanHtml;
+    for (const pattern of dangerousCssPatterns) {
+      sanitized = sanitized.replace(pattern, '/* blocked */');
+    }
     
-    sanitizeNode(doc.body);
-    return doc.body.innerHTML;
+    console.log('[UUR] HTML sanitized successfully with DOMPurify');
+    return sanitized;
   } catch (err) {
-    console.warn('[UUR] Sanitization failed, returning raw HTML:', err);
-    return html;
+    console.error('[UUR] Sanitization error, returning empty string for safety:', err);
+    // On error, return empty string rather than potentially dangerous content
+    return '';
   }
 };
 

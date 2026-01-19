@@ -42,13 +42,10 @@ Deno.serve(async (req) => {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     
     const body = await req.json();
-    const { action, naviToken } = body;
+    const { action } = body;
 
-    // Validate NAVI token - simple shared secret approach
-    // In production, you'd want a more secure token mechanism
-    const expectedToken = Deno.env.get('NAVI_SECRET_TOKEN') || 'navi-autonomous-2024';
-    
-    // Allow authenticated admins OR valid NAVI token
+    // SECURITY: Only allow authenticated admin users - no shared token authentication
+    // All NAVI autonomous operations require verified admin role
     let isAuthorized = false;
     let actorId = NAVI_USER_ID;
 
@@ -66,18 +63,14 @@ Deno.serve(async (req) => {
         if (roleData) {
           isAuthorized = true;
           actorId = user.id;
+          console.log(`NAVI action authorized for admin user: ${user.id}`);
         }
       }
     }
 
-    // Check NAVI token for autonomous operations
-    if (!isAuthorized && naviToken === expectedToken) {
-      isAuthorized = true;
-      console.log('NAVI autonomous action authorized via token');
-    }
-
     if (!isAuthorized) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      console.log('NAVI autonomous action rejected: user is not authenticated admin');
+      return new Response(JSON.stringify({ error: 'Unauthorized - Admin access required' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
