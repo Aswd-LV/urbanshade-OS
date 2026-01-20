@@ -355,6 +355,14 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
     "Open Recovery Environment",
   ];
 
+  const handleOptionClick = (index: number) => {
+    setSelectedOption(index);
+    if (index === 0) onRestart();
+    else if (index === 1) onRestart();
+    else if (index === 2 && onRecovery) onRecovery();
+    else if (index === 2) onReportToDev();
+  };
+
   return (
     <div className="fixed inset-0 bg-black text-white font-mono flex flex-col z-[9999] select-none">
       {/* Top border accent */}
@@ -474,7 +482,7 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
                 <pre className="mt-1 text-[10px] overflow-x-auto whitespace-pre-wrap text-gray-400 max-h-32 overflow-y-auto">
                   {bugcheck.stackTrace}
                 </pre>
-              </div>
+              </>
             )}
           </div>
         </div>
