@@ -36,7 +36,7 @@ import { useNaviSecurity } from "@/hooks/useNaviSecurity";
 import { useBanCheck } from "@/hooks/useBanCheck";
 import { requiresBootPassword, requiresAdminPassword, verifyAdminPassword } from "@/hooks/useBiosSettings";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
-import unknown from "@/unknown";
+
 
 const Index = () => {
   // NAVI AI Security System
