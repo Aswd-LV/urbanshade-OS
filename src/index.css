@@ -531,3 +531,91 @@
   will-change: transform, opacity;
   backface-visibility: hidden;
 }
+
+/* Window Animations */
+@keyframes window-open {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes window-close {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes window-minimize {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) translateY(100%);
+  }
+}
+
+@keyframes window-maximize {
+  0% {
+    transform: scale(0.98);
+  }
+  50% {
+    transform: scale(1.01);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes window-restore {
+  0% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes window-snap {
+  0% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-window-open {
+  animation: window-open 0.15s ease-out forwards;
+}
+
+.animate-window-close {
+  animation: window-close 0.1s ease-in forwards;
+}
+
+.animate-window-minimize {
+  animation: window-minimize 0.2s ease-in forwards;
+}
+
+.animate-window-maximize {
+  animation: window-maximize 0.15s ease-out;
+}
+
+.animate-window-restore {
+  animation: window-restore 0.12s ease-out;
+}
+
+.animate-window-snap {
+  animation: window-snap 0.15s ease-out;
+}

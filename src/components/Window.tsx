@@ -206,13 +206,19 @@ export const Window = ({ title, children, zIndex, onClose, onFocus, onMinimize, 
     });
   };
 
+  // Determine animation class based on window state
+  const getAnimationClass = () => {
+    if (isMinimized) return 'animate-window-minimize';
+    if (isMaximized && !previousState) return 'animate-window-maximize';
+    if (isSnapped) return 'animate-window-snap';
+    return 'animate-window-open';
+  };
+
   return (
     <>
       <div
         ref={windowRef}
-        className={`absolute rounded-xl glass-panel shadow-2xl flex flex-col overflow-hidden gpu-accelerated ${
-          isMinimized ? 'animate-minimize' : 'animate-scale-in'
-        } ${isDragging ? '' : 'transition-all duration-200 ease-spring'}`}
+        className={`absolute rounded-xl glass-panel shadow-2xl flex flex-col overflow-hidden gpu-accelerated ${getAnimationClass()} ${isDragging ? '' : 'transition-all duration-200 ease-spring'}`}
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,

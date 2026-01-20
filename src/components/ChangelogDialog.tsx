@@ -12,7 +12,7 @@ interface ChangelogDialogProps {
 
 export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: ChangelogDialogProps = {}) => {
   const [internalOpen, setInternalOpen] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState(getShortVersion());
+  const [selectedVersion, setSelectedVersion] = useState(VERSION.fullVersion);
   const currentVersion = getShortVersion();
   
   // Support both controlled and uncontrolled modes
@@ -44,6 +44,41 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
   }
 
   const changelogs: Record<string, VersionData> = {
+    "3.0.2": {
+      icon: <Zap className="w-5 h-5" />,
+      color: "from-amber-500 to-orange-600",
+      tagline: "DEF-DEV MEGA UPDATE",
+      overview: "Massive DEF-DEV console upgrade with 17 tabs, 5 new pressure-inspired themes, window animations, and improved developer tooling.",
+      sections: {
+        "DEF-DEV Console Overhaul": [
+          "FIXED: All 17 tabs now visible and functional (was only 7)",
+          "NEW: Proper sidebar tab navigation layout",
+          "Tabs: Console, Actions, Terminal, Storage, Recovery, Bugchecks",
+          "Tabs: Performance, Network, Events, Components",
+          "Tabs: Boot Analyzer, Crash Analyzer, Memory Profiler",
+          "Tabs: Mod Manager, Supabase, FakeMod, Admin"
+        ],
+        "5 New Theme Presets": [
+          "NEW: Hadal Blacksite - Deep-sea research facility aesthetic",
+          "NEW: NAVI Terminal - CRT green retro terminal vibes",
+          "NEW: Pressure Industrial - Brutalist mechanical aesthetic",
+          "NEW: Mantle Zone - Hellish volcanic extraction zone",
+          "NEW: Oxygen Gardens - Bioluminescent alien flora"
+        ],
+        "Window Animations": [
+          "NEW: Smooth open animation (scale + fade)",
+          "NEW: Close animation with scale down",
+          "NEW: Minimize animation to taskbar",
+          "NEW: Maximize/restore animation",
+          "NEW: Snap animation feedback"
+        ],
+        "Code Quality": [
+          "Cleaned up unused imports",
+          "Improved component architecture",
+          "Better separation of concerns"
+        ]
+      }
+    },
     "3.0": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-rose-500 to-orange-600",
