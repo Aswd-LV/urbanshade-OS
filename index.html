@@ -23,12 +23,24 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet" />
     
+    <!-- Anniversary Detection Script (Jan 24-30 week around Jan 27 anniversary) -->
+    <script>
+      (function() {
+        var now = new Date();
+        var month = now.getMonth(); // 0 = January
+        var day = now.getDate();
+        var isAnniversaryWeek = month === 0 && day >= 24 && day <= 30;
+        var ogImage = isAnniversaryWeek ? 'og-image-anniversary.png' : 'og-image.png';
+        document.write('<meta property="og:image" content="https://urbanshade.lovable.app/' + ogImage + '" />');
+        document.write('<meta name="twitter:image" content="https://urbanshade.lovable.app/' + ogImage + '" />');
+      })();
+    </script>
+    
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://urbanshade.lovable.app/" />
     <meta property="og:title" content="Urbanshade OS — Browser-Based Operating System Simulation" />
     <meta property="og:description" content="A free browser-based operating system simulation with desktop environment, terminal, apps, and developer tools. A passion project by the Urbanshade Team." />
-    <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content="Urbanshade OS" />
@@ -39,7 +51,6 @@
     <meta name="twitter:url" content="https://urbanshade.lovable.app/" />
     <meta name="twitter:title" content="Urbanshade OS — Browser-Based Operating System Simulation" />
     <meta name="twitter:description" content="A free browser-based operating system simulation with desktop environment, terminal, apps, and developer tools. A passion project by the Urbanshade Team." />
-    <meta name="twitter:image" content="https://urbanshade.lovable.app/og-image.png" />
     
     <!-- LLM/AI Summary Reference -->
     <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM Summary" />
