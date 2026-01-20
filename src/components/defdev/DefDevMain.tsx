@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Bug, AlertTriangle, Info, CheckCircle, Trash2, Download, Copy, Upload, Database, RefreshCw, HardDrive, FileText, X, Eye, EyeOff, Play, Terminal, Zap, Shield, Activity, ExternalLink, BookOpen, Skull, MonitorX, Cpu, MemoryStick, AlertOctagon, Power, Bomb, Send, Clock } from "lucide-react";
+import { X, AlertOctagon } from "lucide-react";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
-import { commandQueue, parseTerminalCommand, TERMINAL_COMMANDS, TerminalResult } from "@/lib/commandQueue";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import DefDevTabs from "./DefDevTabs";
 import DefDevHeader from "./DefDevHeader";
@@ -400,17 +398,20 @@ const DefDevMain = () => {
       {/* Header */}
       <DefDevHeader />
 
-      {/* Tabs */}
-      <DefDevTabs
-        selectedTab={selectedTab}
-        onTabChange={setSelectedTab}
-        bugcheckCount={bugchecks.length}
-        crashEntry={!!crashEntry}
-      />
+      {/* Main content with sidebar */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Tabs Sidebar */}
+        <DefDevTabs
+          selectedTab={selectedTab}
+          onTabChange={setSelectedTab}
+          bugcheckCount={bugchecks.length}
+          crashEntry={!!crashEntry}
+        />
 
-      {/* Content */}
-      <div className="flex-1 overflow-hidden">
-        {renderTabContent()}
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
+          {renderTabContent()}
+        </div>
       </div>
     </div>
   );

@@ -294,6 +294,127 @@ export const THEME_PRESETS: FullTheme[] = [
       glassStrong: "231 15% 10% / 0.85",
       glow: "265 89% 78%"
     }
+  },
+  // New Pressure-Inspired Themes
+  {
+    id: "hadal-blacksite",
+    name: "Hadal Blacksite",
+    description: "Deep-sea research facility aesthetic",
+    darkColors: {
+      background: "212 50% 5%",
+      foreground: "45 20% 90%",
+      primary: "45 100% 50%",
+      primaryForeground: "212 50% 5%",
+      secondary: "212 40% 10%",
+      secondaryForeground: "45 20% 90%",
+      muted: "212 30% 15%",
+      mutedForeground: "212 20% 55%",
+      accent: "45 100% 55%",
+      accentForeground: "212 50% 5%",
+      destructive: "0 84% 60%",
+      card: "212 50% 7%",
+      cardForeground: "45 20% 90%",
+      border: "45 100% 50% / 0.12",
+      glass: "212 50% 6% / 0.7",
+      glassStrong: "212 50% 4% / 0.85",
+      glow: "45 100% 50%"
+    }
+  },
+  {
+    id: "navi-terminal",
+    name: "NAVI Terminal",
+    description: "CRT green retro terminal vibes",
+    darkColors: {
+      background: "0 0% 2%",
+      foreground: "120 100% 50%",
+      primary: "120 100% 50%",
+      primaryForeground: "0 0% 2%",
+      secondary: "120 30% 6%",
+      secondaryForeground: "120 100% 50%",
+      muted: "120 15% 10%",
+      mutedForeground: "120 50% 40%",
+      accent: "120 100% 60%",
+      accentForeground: "0 0% 2%",
+      destructive: "0 100% 50%",
+      card: "0 0% 4%",
+      cardForeground: "120 100% 50%",
+      border: "120 100% 50% / 0.2",
+      glass: "120 30% 4% / 0.8",
+      glassStrong: "0 0% 2% / 0.9",
+      glow: "120 100% 50%"
+    }
+  },
+  {
+    id: "pressure-industrial",
+    name: "Pressure Industrial",
+    description: "Brutalist mechanical aesthetic",
+    darkColors: {
+      background: "210 5% 10%",
+      foreground: "25 20% 90%",
+      primary: "25 80% 45%",
+      primaryForeground: "210 5% 10%",
+      secondary: "210 5% 15%",
+      secondaryForeground: "25 20% 90%",
+      muted: "210 5% 20%",
+      mutedForeground: "210 5% 55%",
+      accent: "25 90% 50%",
+      accentForeground: "210 5% 10%",
+      destructive: "0 84% 60%",
+      card: "210 5% 12%",
+      cardForeground: "25 20% 90%",
+      border: "25 60% 40% / 0.15",
+      glass: "210 5% 12% / 0.7",
+      glassStrong: "210 5% 8% / 0.85",
+      glow: "25 80% 45%"
+    }
+  },
+  {
+    id: "mantle-zone",
+    name: "Mantle Zone",
+    description: "Hellish volcanic extraction zone",
+    darkColors: {
+      background: "0 20% 8%",
+      foreground: "30 100% 90%",
+      primary: "10 90% 50%",
+      primaryForeground: "0 20% 8%",
+      secondary: "0 15% 14%",
+      secondaryForeground: "30 100% 90%",
+      muted: "0 10% 18%",
+      mutedForeground: "0 10% 55%",
+      accent: "25 100% 55%",
+      accentForeground: "0 20% 8%",
+      destructive: "0 100% 60%",
+      card: "0 20% 10%",
+      cardForeground: "30 100% 90%",
+      border: "10 90% 50% / 0.15",
+      glass: "0 20% 9% / 0.7",
+      glassStrong: "0 20% 6% / 0.85",
+      glow: "10 90% 50%"
+    }
+  },
+  {
+    id: "oxygen-gardens",
+    name: "Oxygen Gardens",
+    description: "Bioluminescent alien flora aesthetic",
+    darkColors: {
+      background: "180 30% 5%",
+      foreground: "160 80% 90%",
+      primary: "160 100% 45%",
+      primaryForeground: "180 30% 5%",
+      secondary: "180 25% 10%",
+      secondaryForeground: "160 80% 90%",
+      muted: "180 20% 15%",
+      mutedForeground: "180 20% 55%",
+      accent: "180 100% 50%",
+      accentForeground: "180 30% 5%",
+      destructive: "0 84% 60%",
+      card: "180 30% 7%",
+      cardForeground: "160 80% 90%",
+      border: "160 100% 45% / 0.12",
+      glass: "180 30% 6% / 0.7",
+      glassStrong: "180 30% 4% / 0.85",
+      glow: "160 100% 50%"
+    }
   }
 ];
 

@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Docs from "./pages/Docs";
-import DevMode from "./pages/DevMode";
+import DefDevMain from "./components/defdev/DefDevMain";
 import GettingStarted from "./pages/docs/GettingStarted";
 import Applications from "./pages/docs/Applications";
 import Facility from "./pages/docs/Facility";
@@ -84,7 +84,7 @@ const App = () => (
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/docs" element={<Docs />} />
-        <Route path="/def-dev" element={<DevMode />} />
+        <Route path="/def-dev" element={<DefDevMain />} />
         <Route path="/docs/getting-started" element={<GettingStarted />} />
         <Route path="/docs/applications" element={<Applications />} />
         <Route path="/docs/facility" element={<Facility />} />
