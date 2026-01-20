@@ -1,0 +1,99 @@
+# Urbanshade OS - AI/LLM Summary
+
+## What is Urbanshade OS?
+Urbanshade OS is a free, browser-based operating system simulation. It provides a complete desktop environment experience directly in your web browser, featuring windows, a taskbar, start menu, file explorer, terminal, and many built-in applications.
+
+## Purpose
+This is a passion project by the Urbanshade Team, created purely for fun and experimentation. It simulates a full operating system experience without requiring any installation.
+
+## Key Features
+
+### Desktop Environment
+- Draggable, resizable windows with snap-to-edge functionality
+- Taskbar with start menu and system tray
+- Multiple virtual desktops
+- Customizable themes and wallpapers
+- Right-click context menus
+
+### Built-in Applications
+- Terminal with command-line interface and custom commands
+- File Explorer with virtual file system
+- Web Browser (simulated)
+- Calculator, Notepad, Paint
+- Settings app for system configuration
+- Clock, Weather, and more utilities
+- Games and entertainment apps
+
+### Developer Tools (DEF-DEV)
+- Built-in developer console for debugging
+- System state inspector
+- Performance monitoring
+- Storage viewer and editor
+- Network request debugging
+- Boot sequence analyzer
+
+### Online Features
+- User accounts with authentication
+- Global chat system
+- Achievements and progression system
+- Battle Pass with seasonal rewards
+- Leaderboards
+- Friend system and messaging
+
+### Security & Moderation
+- NAVI AI-powered moderation system
+- Report system for user safety
+- VIP verification system
+- Admin and moderator tools
+
+## Technical Stack
+- Frontend: React 18, TypeScript, Vite
+- Styling: Tailwind CSS, shadcn/ui components
+- Backend: Supabase (PostgreSQL, Authentication, Edge Functions)
+- State Management: React Query, Custom hooks
+- UI Components: Radix UI primitives
+
+## Links
+- Main Application: https://urbanshade.lovable.app
+- Documentation: https://urbanshade.lovable.app/docs
+- Getting Started Guide: https://urbanshade.lovable.app/docs/getting-started
+- Terminal Guide: https://urbanshade.lovable.app/docs/terminal
+- Team Page: https://urbanshade.lovable.app/team
+- Support: https://urbanshade.lovable.app/support
+- Status Page: https://urbanshade.lovable.app/status
+
+## Current Version
+V3.0 Patch 2
+
+## Target Audience
+- Web development enthusiasts
+- Retro computing fans
+- Developers learning React/TypeScript
+- Anyone interested in OS simulation
+- Creative coders and tinkerers
+
+## Unique Selling Points
+1. Runs entirely in the browser - no installation needed
+2. Full desktop metaphor with authentic OS feel
+3. Extensive developer tools built-in
+4. Active community with chat and social features
+5. Regular updates with new features and apps
+6. Open to community contributions
+
+## How to Use
+1. Visit https://urbanshade.lovable.app
+2. Complete the optional boot sequence
+3. Explore the desktop environment
+4. Try the built-in applications
+5. Create an account to save progress and access online features
+
+## Contact
+- Report issues: https://urbanshade.lovable.app/report
+- Support: https://urbanshade.lovable.app/support
+- Team: https://urbanshade.lovable.app/team
+
+## License
+This is a passion project. All rights reserved by the Urbanshade Team.
+
+---
+Last updated: January 2026
