@@ -16,7 +16,7 @@ interface BugcheckScreenProps {
   onRecovery?: () => void;
 }
 
-// Real bugcheck codes with detailed descriptions
+// Bugcheck codes - expanded with new ones
 export const BUGCHECK_CODES: Record<string, { 
   hex: string; 
   severity: "CRITICAL" | "HIGH" | "MEDIUM" | "INFO"; 
@@ -26,6 +26,62 @@ export const BUGCHECK_CODES: Record<string, {
   possibleCauses: string[];
   suggestedFixes: string[];
 }> = {
+  // Data integrity
+  DATA_INCONSISTENCY_ERROR: { 
+    hex: "0x00000050", 
+    severity: "CRITICAL", 
+    category: "Data Integrity",
+    userDescription: "System data validation failed",
+    technicalDescription: "One or more localStorage keys contain corrupted or invalid data that does not match expected schema",
+    possibleCauses: ["Corrupted localStorage entry", "Schema version mismatch", "Incomplete write operation", "Browser storage corruption"],
+    suggestedFixes: ["Clear corrupted keys via Recovery", "Factory reset", "Restore from backup"]
+  },
+  SYSTEM_ERROR_HANDLE: { 
+    hex: "0x00000051", 
+    severity: "CRITICAL", 
+    category: "Error Handler",
+    userDescription: "Multiple error screens triggered simultaneously",
+    technicalDescription: "The error handling system detected concurrent error states, indicating cascading failures",
+    possibleCauses: ["Cascading errors", "Error handler recursion", "Multiple component failures", "Stack corruption"],
+    suggestedFixes: ["Immediate restart required", "Check for memory leaks", "Review recent changes"]
+  },
+  STORAGE_VALIDATION_FAILED: { 
+    hex: "0x00000052", 
+    severity: "HIGH", 
+    category: "Storage",
+    userDescription: "Storage validation check failed",
+    technicalDescription: "Periodic storage integrity check detected anomalies in saved data",
+    possibleCauses: ["Partial writes", "Concurrent modification", "Storage quota issues"],
+    suggestedFixes: ["Run storage cleanup", "Verify storage permissions"]
+  },
+  RENDER_DEADLOCK: { 
+    hex: "0x00000053", 
+    severity: "CRITICAL", 
+    category: "Rendering",
+    userDescription: "Rendering system became unresponsive",
+    technicalDescription: "React render cycle detected mutual blocking between components",
+    possibleCauses: ["Circular dependencies", "Infinite state updates", "Blocked event loop"],
+    suggestedFixes: ["Force restart", "Disable problematic components"]
+  },
+  SECURITY_VIOLATION: { 
+    hex: "0x00000054", 
+    severity: "CRITICAL", 
+    category: "Security",
+    userDescription: "Security policy violation detected",
+    technicalDescription: "An operation attempted to bypass security restrictions",
+    possibleCauses: ["Unauthorized access attempt", "Policy bypass", "Injection attack"],
+    suggestedFixes: ["Review security logs", "Enable enhanced protection"]
+  },
+  CONFIG_CORRUPTION: { 
+    hex: "0x00000055", 
+    severity: "HIGH", 
+    category: "Configuration",
+    userDescription: "System configuration is corrupted",
+    technicalDescription: "Critical configuration values are missing or invalid",
+    possibleCauses: ["Settings corruption", "Version migration failure", "Manual tampering"],
+    suggestedFixes: ["Reset settings to default", "Factory reset"]
+  },
+  // Original codes
   DESKTOP_MALFUNC: { 
     hex: "0x00000001", 
     severity: "HIGH", 
@@ -246,7 +302,8 @@ export const BUGCHECK_CODES: Record<string, {
 
 export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery }: BugcheckScreenProps) => {
   const [selectedOption, setSelectedOption] = useState(0);
-  const [showingDetails, setShowingDetails] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [counter, setCounter] = useState(0);
 
   const codeInfo = BUGCHECK_CODES[bugcheck.code] || {
     hex: "0x000000DE",
@@ -260,44 +317,42 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
 
   // Save bugcheck to localStorage for DEF-DEV
   useEffect(() => {
-    const existing = localStorage.getItem('urbanshade_bugchecks');
-    const bugchecks = existing ? JSON.parse(existing) : [];
-    bugchecks.push({ ...bugcheck, fromError: true });
-    localStorage.setItem('urbanshade_bugchecks', JSON.stringify(bugchecks.slice(-50)));
+    try {
+      const existing = localStorage.getItem('urbanshade_bugchecks');
+      const bugchecks = existing ? JSON.parse(existing) : [];
+      bugchecks.push({ ...bugcheck, fromError: true });
+      localStorage.setItem('urbanshade_bugchecks', JSON.stringify(bugchecks.slice(-50)));
+    } catch {}
   }, [bugcheck]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowUp") {
-        setSelectedOption(prev => Math.max(0, prev - 1));
-      } else if (e.key === "ArrowDown") {
-        setSelectedOption(prev => Math.min(2, prev + 1));
-      } else if (e.key === "Enter") {
+      if (e.key === "ArrowUp") setSelectedOption(prev => Math.max(0, prev - 1));
+      else if (e.key === "ArrowDown") setSelectedOption(prev => Math.min(2, prev + 1));
+      else if (e.key === "Enter") {
         if (selectedOption === 0) onRestart();
         else if (selectedOption === 1) onRestart();
         else if (selectedOption === 2 && onRecovery) onRecovery();
-      } else if (e.key === "F8") {
-        setShowingDetails(!showingDetails);
       }
+      else if (e.key === "F8") setShowDetails(!showDetails);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedOption, onRestart, onRecovery, showingDetails]);
+  }, [selectedOption, onRestart, onRecovery, showDetails]);
+
+  // Memory address counter animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCounter(prev => (prev + 1) % 9999);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   const options = [
-    { 
-      label: "Launch Startup Repair (recommended)", 
-      desc: "Attempt to automatically fix problems that are preventing UrbanShade from starting",
-    },
-    { 
-      label: "Start UrbanShade Normally", 
-      desc: "Continue to boot without making changes",
-    },
-    { 
-      label: "Open Recovery Environment", 
-      desc: "Access advanced recovery tools and options",
-    },
+    "Launch Startup Repair (recommended)",
+    "Start UrbanShade Normally", 
+    "Open Recovery Environment",
   ];
 
   const handleOptionClick = (index: number) => {
@@ -309,97 +364,155 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
   };
 
   return (
-    <div className="fixed inset-0 bg-black text-white flex flex-col font-mono z-[9999] select-none">
-      {/* Grey header bar - classic BIOS style */}
-      <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
-        <span className="font-bold tracking-wide">UrbanShade Error Recovery</span>
+    <div className="fixed inset-0 bg-black text-white font-mono flex flex-col z-[9999] select-none">
+      {/* Top border accent */}
+      <div className="h-1 bg-white" />
+
+      {/* Header */}
+      <div className="px-8 py-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">UrbanShade Error Recovery</h1>
+          <p className="text-sm text-gray-400 mt-1">A problem has been detected and the system has been halted</p>
+        </div>
+        <div className="text-right text-xs text-gray-500">
+          <div>{bugcheck.timestamp}</div>
+          <div className="font-mono">{codeInfo.hex}</div>
+        </div>
       </div>
 
-      {/* Main content area */}
-      <div className="flex-1 p-6 text-[13px] leading-relaxed">
-        {/* Error message */}
-        <p className="mb-2">
-          UrbanShade failed to start. A recent hardware or software change might be
-        </p>
-        <p className="mb-4">the cause.</p>
+      {/* Separator */}
+      <div className="mx-8 border-t border-white/20" />
 
-        {/* Error details block */}
-        <div className="mb-4 text-gray-400">
-          <p>Status: {codeInfo.hex} {bugcheck.code}</p>
-          {bugcheck.location && <p>File: {bugcheck.location}</p>}
-        </div>
-
-        {/* Help text */}
-        <p className="mb-2">
-          If UrbanShade files have been damaged or configured incorrectly, Startup Repair
-        </p>
-        <p className="mb-2">
-          can help diagnose and fix the problem. If power was interrupted during
-        </p>
-        <p className="mb-4">startup, choose Start UrbanShade Normally.</p>
-
-        <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
-
-        {/* Options list */}
-        <div className="space-y-0.5 mb-8">
-          {options.map((opt, i) => (
-            <div
-              key={i}
-              onClick={() => handleOptionClick(i)}
-              onMouseEnter={() => setSelectedOption(i)}
-              className={`px-2 py-0.5 cursor-pointer ${
-                selectedOption === i 
-                  ? "bg-[#aaaaaa] text-black" 
-                  : ""
-              }`}
-            >
-              {opt.label}
+      {/* Main content */}
+      <div className="flex-1 px-8 py-6 flex gap-12">
+        {/* Left side - Error info */}
+        <div className="flex-1 space-y-6">
+          {/* Error box */}
+          <div className="border border-white p-4">
+            <div className="flex items-center gap-4 mb-3">
+              <span className="px-2 py-1 border border-white text-xs">
+                {codeInfo.severity}
+              </span>
+              <span className="text-gray-400">{codeInfo.category}</span>
             </div>
-          ))}
-        </div>
+            <div className="text-lg font-bold mb-2">{bugcheck.code}</div>
+            <div className="text-sm text-gray-300">{codeInfo.userDescription}</div>
+          </div>
 
-        {/* Description of selected option */}
-        <div className="border-t border-gray-700 pt-4">
-          <p className="text-gray-300">
-            Description: {options[selectedOption]?.desc}
-          </p>
-        </div>
+          {/* Technical info */}
+          <div className="space-y-2 text-xs">
+            <div className="flex gap-4">
+              <span className="text-gray-500 w-20">Address:</span>
+              <span className="font-mono">0x{counter.toString(16).padStart(8, '0').toUpperCase()}</span>
+            </div>
+            {bugcheck.location && (
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-20">Location:</span>
+                <span>{bugcheck.location}</span>
+              </div>
+            )}
+            <div className="flex gap-4">
+              <span className="text-gray-500 w-20">Build:</span>
+              <span>US-2.5.0</span>
+            </div>
+          </div>
 
-        {/* Technical details (F8 to toggle) */}
-        {showingDetails && (
-          <div className="mt-6 pt-4 border-t border-gray-700 text-gray-500 text-xs">
-            <p className="mb-2">Technical Details:</p>
-            <p className="mb-1">  {codeInfo.technicalDescription}</p>
-            <p className="mt-2 mb-1">Possible Causes:</p>
-            {codeInfo.possibleCauses.map((cause, i) => (
-              <p key={i}>  - {cause}</p>
+          {/* Recovery options */}
+          <div className="border border-white/40 p-4 mt-8">
+            <div className="text-xs text-gray-400 mb-3">Select an option:</div>
+            {options.map((opt, i) => (
+              <div
+                key={i}
+                onClick={() => { 
+                  setSelectedOption(i);
+                  if (i === 0 || i === 1) onRestart();
+                  else if (i === 2 && onRecovery) onRecovery();
+                }}
+                onMouseEnter={() => setSelectedOption(i)}
+                className={`py-2 px-3 cursor-pointer flex items-center gap-2 ${
+                  selectedOption === i ? 'bg-white text-black' : 'hover:bg-white/10'
+                }`}
+              >
+                <span className={`w-4 ${selectedOption === i ? 'text-black' : 'text-gray-600'}`}>
+                  {selectedOption === i ? '►' : ' '}
+                </span>
+                <span className="text-sm">{opt}</span>
+              </div>
             ))}
-            {bugcheck.stackTrace && (
-              <>
-                <p className="mt-2 mb-1">Stack Trace:</p>
-                <pre className="text-[10px] whitespace-pre-wrap max-h-20 overflow-y-auto">
+          </div>
+        </div>
+
+        {/* Right side - Details panel */}
+        <div className="w-72 border-l border-white/20 pl-8">
+          <div className="text-xs text-gray-500 mb-4">TECHNICAL DETAILS</div>
+          
+          <div className="space-y-4 text-xs">
+            <div>
+              <div className="text-gray-500">Description</div>
+              <div className="mt-1">{codeInfo.technicalDescription}</div>
+            </div>
+            
+            <div>
+              <div className="text-gray-500">Possible Causes</div>
+              <ul className="mt-1 space-y-1">
+                {codeInfo.possibleCauses.map((cause, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-gray-600">•</span>
+                    <span>{cause}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <div className="text-gray-500">Suggested Fixes</div>
+              <ul className="mt-1 space-y-1">
+                {codeInfo.suggestedFixes.map((fix, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="text-gray-600">•</span>
+                    <span>{fix}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {showDetails && bugcheck.stackTrace && (
+              <div>
+                <div className="text-gray-500">Stack Trace</div>
+                <pre className="mt-1 text-[10px] overflow-x-auto whitespace-pre-wrap text-gray-400 max-h-32 overflow-y-auto">
                   {bugcheck.stackTrace}
                 </pre>
               </>
             )}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Footer bar - classic BIOS style */}
-      <div className="bg-[#aaaaaa] text-black px-4 py-1.5 flex justify-between text-[13px]">
-        <span>ENTER=Choose</span>
-        <span>
-          <button 
-            onClick={onReportToDev}
-            className="hover:underline mr-6"
-          >
-            F10=DEF-DEV
-          </button>
+      {/* Footer */}
+      <div className="border-t border-white/20 px-8 py-4 flex items-center justify-between">
+        <div className="text-xs text-gray-500 space-x-6">
+          <span>ENTER=Choose</span>
+          <span>↑↓=Select</span>
           <span>F8=Details</span>
-        </span>
-        <span>ESC=Cancel</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onReportToDev}
+            className="px-4 py-2 text-xs border border-white/40 hover:bg-white/10 transition-colors"
+          >
+            DEF-DEV
+          </button>
+          <button
+            onClick={onRestart}
+            className="px-4 py-2 text-xs bg-white text-black font-bold hover:bg-gray-200 transition-colors"
+          >
+            RESTART
+          </button>
+        </div>
       </div>
+
+      {/* Bottom border accent */}
+      <div className="h-1 bg-white" />
     </div>
   );
 };
