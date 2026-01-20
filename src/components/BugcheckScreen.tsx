@@ -482,7 +482,7 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
                 <pre className="mt-1 text-[10px] overflow-x-auto whitespace-pre-wrap text-gray-400 max-h-32 overflow-y-auto">
                   {bugcheck.stackTrace}
                 </pre>
-              </>
+              </div>
             )}
           </div>
         </div>
