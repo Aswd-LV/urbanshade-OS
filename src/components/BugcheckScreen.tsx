@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { RefreshCw, Wrench, ChevronRight } from "lucide-react";
 
 export interface BugcheckData {
   code: string;
@@ -276,7 +275,7 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
         setSelectedOption(prev => Math.min(2, prev + 1));
       } else if (e.key === "Enter") {
         if (selectedOption === 0) onRestart();
-        else if (selectedOption === 1) onRestart(); // Start normally
+        else if (selectedOption === 1) onRestart();
         else if (selectedOption === 2 && onRecovery) onRecovery();
       } else if (e.key === "F8") {
         setShowingDetails(!showingDetails);
@@ -290,124 +289,116 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
     { 
       label: "Launch Startup Repair (recommended)", 
       desc: "Attempt to automatically fix problems that are preventing UrbanShade from starting",
-      action: onRestart 
     },
     { 
       label: "Start UrbanShade Normally", 
       desc: "Continue to boot without making changes",
-      action: onRestart 
     },
     { 
       label: "Open Recovery Environment", 
       desc: "Access advanced recovery tools and options",
-      action: onRecovery || onReportToDev 
     },
   ];
 
+  const handleOptionClick = (index: number) => {
+    setSelectedOption(index);
+    if (index === 0) onRestart();
+    else if (index === 1) onRestart();
+    else if (index === 2 && onRecovery) onRecovery();
+    else if (index === 2) onReportToDev();
+  };
+
   return (
-    <div className="fixed inset-0 bg-[#0a0a0f] text-gray-100 flex flex-col font-mono z-[9999] overflow-hidden">
-      {/* Grey header bar */}
-      <div className="bg-gradient-to-r from-slate-700 to-slate-600 px-6 py-3">
-        <h1 className="text-lg font-bold text-white">UrbanShade Error Recovery</h1>
+    <div className="fixed inset-0 bg-black text-white flex flex-col font-mono z-[9999] select-none">
+      {/* Grey header bar - classic BIOS style */}
+      <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
+        <span className="font-bold tracking-wide">UrbanShade Error Recovery</span>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 p-8 max-w-4xl">
-        {/* Error title */}
-        <div className="mb-6">
-          <p className="text-lg text-slate-300 leading-relaxed">
-            UrbanShade failed to start. A recent system change might be the cause.
-          </p>
+      {/* Main content area */}
+      <div className="flex-1 p-6 text-[13px] leading-relaxed">
+        {/* Error message */}
+        <p className="mb-2">
+          UrbanShade failed to start. A recent hardware or software change might be
+        </p>
+        <p className="mb-4">the cause.</p>
+
+        {/* Error details block */}
+        <div className="mb-4 text-gray-400">
+          <p>Status: {codeInfo.hex} {bugcheck.code}</p>
+          {bugcheck.location && <p>File: {bugcheck.location}</p>}
         </div>
 
-        {/* Error info box */}
-        <div className="mb-8 p-4 bg-slate-900/50 border border-slate-700/50 rounded">
-          <div className="text-sm text-slate-400 mb-2">
-            Status: <span className="text-red-400">{codeInfo.hex}</span>
-          </div>
-          <div className="text-sm text-slate-400 mb-2">
-            Stop Code: <span className="text-cyan-400">{bugcheck.code}</span>
-          </div>
-          <div className="text-sm text-slate-400">
-            Info: <span className="text-slate-300">{codeInfo.userDescription}</span>
-          </div>
-          {bugcheck.location && (
-            <div className="text-sm text-slate-400 mt-2">
-              Location: <span className="text-slate-500">{bugcheck.location}</span>
-            </div>
-          )}
-        </div>
+        {/* Help text */}
+        <p className="mb-2">
+          If UrbanShade files have been damaged or configured incorrectly, Startup Repair
+        </p>
+        <p className="mb-2">
+          can help diagnose and fix the problem. If power was interrupted during
+        </p>
+        <p className="mb-4">startup, choose Start UrbanShade Normally.</p>
+
+        <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
 
         {/* Options list */}
-        <div className="space-y-1">
+        <div className="space-y-0.5 mb-8">
           {options.map((opt, i) => (
             <div
               key={i}
-              onClick={() => { setSelectedOption(i); opt.action?.(); }}
+              onClick={() => handleOptionClick(i)}
               onMouseEnter={() => setSelectedOption(i)}
-              className={`p-3 cursor-pointer flex items-center gap-3 transition-colors ${
+              className={`px-2 py-0.5 cursor-pointer ${
                 selectedOption === i 
-                  ? "bg-slate-700" 
-                  : "hover:bg-slate-800/50"
+                  ? "bg-[#aaaaaa] text-black" 
+                  : ""
               }`}
             >
-              <ChevronRight className={`w-4 h-4 ${selectedOption === i ? "text-cyan-400" : "text-transparent"}`} />
-              <span className={selectedOption === i ? "text-white" : "text-slate-400"}>
-                {opt.label}
-              </span>
+              {opt.label}
             </div>
           ))}
         </div>
 
-        {/* Description panel */}
-        <div className="mt-8 p-4 bg-slate-900/30 border-l-2 border-cyan-500/50">
-          <p className="text-sm text-slate-400">
-            {options[selectedOption]?.desc}
+        {/* Description of selected option */}
+        <div className="border-t border-gray-700 pt-4">
+          <p className="text-gray-300">
+            Description: {options[selectedOption]?.desc}
           </p>
         </div>
 
         {/* Technical details (F8 to toggle) */}
         {showingDetails && (
-          <div className="mt-6 p-4 bg-black/50 border border-slate-700 rounded text-xs">
-            <div className="text-slate-500 mb-2">Technical Details:</div>
-            <div className="text-slate-400 mb-1">• {codeInfo.technicalDescription}</div>
-            <div className="text-slate-500 mt-3 mb-1">Possible Causes:</div>
+          <div className="mt-6 pt-4 border-t border-gray-700 text-gray-500 text-xs">
+            <p className="mb-2">Technical Details:</p>
+            <p className="mb-1">  {codeInfo.technicalDescription}</p>
+            <p className="mt-2 mb-1">Possible Causes:</p>
             {codeInfo.possibleCauses.map((cause, i) => (
-              <div key={i} className="text-slate-400">  - {cause}</div>
+              <p key={i}>  - {cause}</p>
             ))}
             {bugcheck.stackTrace && (
-              <div className="mt-3">
-                <div className="text-slate-500 mb-1">Stack Trace:</div>
-                <pre className="text-slate-500 overflow-x-auto whitespace-pre-wrap max-h-24 overflow-y-auto">
+              <>
+                <p className="mt-2 mb-1">Stack Trace:</p>
+                <pre className="text-[10px] whitespace-pre-wrap max-h-20 overflow-y-auto">
                   {bugcheck.stackTrace}
                 </pre>
-              </div>
+              </>
             )}
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="px-8 py-4 bg-slate-900/50 border-t border-slate-800 flex items-center justify-between">
-        <div className="text-xs text-slate-500">
-          ENTER=Choose &nbsp; ↑↓=Select &nbsp; F8=Details
-        </div>
-        <div className="flex items-center gap-4">
-          <button
+      {/* Footer bar - classic BIOS style */}
+      <div className="bg-[#aaaaaa] text-black px-4 py-1.5 flex justify-between text-[13px]">
+        <span>ENTER=Choose</span>
+        <span>
+          <button 
             onClick={onReportToDev}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs text-amber-400 hover:bg-amber-500/10 rounded transition-colors"
+            className="hover:underline mr-6"
           >
-            <Wrench className="w-3 h-3" />
-            DEF-DEV
+            F10=DEF-DEV
           </button>
-          <button
-            onClick={onRestart}
-            className="flex items-center gap-2 px-4 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-sm font-medium transition-colors"
-          >
-            <RefreshCw className="w-3 h-3" />
-            Restart
-          </button>
-        </div>
+          <span>F8=Details</span>
+        </span>
+        <span>ESC=Cancel</span>
       </div>
     </div>
   );

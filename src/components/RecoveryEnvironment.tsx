@@ -1,9 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { 
-  ArrowLeft, Power, Terminal, Database, HardDrive, 
-  Shield, RefreshCw, Settings, Check, AlertTriangle,
-  Cpu, Trash2, Upload, ChevronRight
-} from "lucide-react";
 import { RecoveryTerminal } from "./RecoveryTerminal";
 
 type RecoveryScreen = 
@@ -60,7 +55,6 @@ export const RecoveryEnvironment = ({
         setRebootProgress(prev => {
           if (prev >= 100) {
             clearInterval(interval);
-            // Execute the reboot target
             setTimeout(() => {
               if (rebootTarget === "bios") onBootToBios();
               else if (rebootTarget === "safe-mode") onSafeMode();
@@ -220,16 +214,15 @@ export const RecoveryEnvironment = ({
     reader.readAsText(file);
   };
 
-  // Rebooting screen
+  // Rebooting screen - simple text
   if (screen === "rebooting") {
     return (
-      <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col items-center justify-center">
+      <div className="fixed inset-0 bg-black text-white flex flex-col items-center justify-center font-mono">
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 text-cyan-500 mx-auto mb-4 animate-spin" />
-          <div className="text-white text-sm font-mono mb-2">Restarting...</div>
-          <div className="w-48 h-1 bg-zinc-800">
+          <p className="mb-4">Restarting...</p>
+          <div className="w-48 h-1 bg-gray-800">
             <div 
-              className="h-full bg-cyan-500 transition-all"
+              className="h-full bg-gray-400 transition-all"
               style={{ width: `${rebootProgress}%` }}
             />
           </div>
@@ -248,95 +241,76 @@ export const RecoveryEnvironment = ({
     );
   }
 
-  // Utilitarian button component
-  const RecoveryButton = ({ 
-    selected, 
-    onClick, 
-    onMouseEnter,
-    icon: Icon, 
+  // Classic BIOS-style option component
+  const BiosOption = ({ 
+    index,
     label, 
-    desc,
-    number
+    onClick,
   }: { 
-    selected: boolean; 
-    onClick: () => void; 
-    onMouseEnter: () => void;
-    icon?: any; 
+    index: number;
     label: string; 
-    desc?: string;
-    number?: string;
+    onClick: () => void;
   }) => (
-    <button
+    <div
       onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      className={`w-full p-3 border text-left flex items-center gap-3 transition-colors ${
-        selected
-          ? "bg-cyan-900/40 border-cyan-600 text-white"
-          : "bg-zinc-900/60 border-zinc-700 text-zinc-300 hover:border-zinc-500"
+      onMouseEnter={() => setSelectedOption(index)}
+      className={`px-2 py-0.5 cursor-pointer text-[13px] ${
+        selectedOption === index 
+          ? "bg-[#aaaaaa] text-black" 
+          : "text-white"
       }`}
     >
-      {number && (
-        <div className={`w-6 h-6 flex items-center justify-center text-xs font-mono font-bold ${
-          selected ? "bg-cyan-500 text-black" : "bg-zinc-700 text-zinc-300"
-        }`}>
-          {number}
-        </div>
-      )}
-      {Icon && !number && (
-        <Icon className={`w-5 h-5 ${selected ? "text-cyan-400" : "text-zinc-500"}`} />
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{label}</div>
-        {desc && <div className="text-xs text-zinc-500 truncate">{desc}</div>}
-      </div>
-      {selected && <ChevronRight className="w-4 h-4 text-cyan-400" />}
-    </button>
+      {label}
+    </div>
   );
 
   // Main Menu
   if (screen === "main") {
+    const mainOptions = [
+      { label: "Continue", action: onContinue },
+      { label: "Turn off your PC", action: onShutdown },
+      { label: "Troubleshoot", action: () => { setScreen("troubleshoot"); setSelectedOption(0); } },
+    ];
+
+    const descriptions: Record<number, string> = {
+      0: "Exit and continue to UrbanShade OS",
+      1: "Turn off the system completely",
+      2: "Reset your PC or see advanced options",
+    };
+
     return (
-      <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col p-6">
+      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
-          <Shield className="w-6 h-6 text-cyan-500" />
-          <div>
-            <h1 className="text-lg font-medium text-white">Recovery Environment</h1>
-            <p className="text-xs text-zinc-500">Choose an option</p>
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
+          <span className="font-bold tracking-wide">Choose an option</span>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-6 text-[13px]">
+          <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+
+          <div className="space-y-0.5 mb-8">
+            {mainOptions.map((opt, i) => (
+              <BiosOption
+                key={i}
+                index={i}
+                label={opt.label}
+                onClick={opt.action}
+              />
+            ))}
+          </div>
+
+          <div className="border-t border-gray-700 pt-4">
+            <p className="text-gray-300">
+              Description: {descriptions[selectedOption]}
+            </p>
           </div>
         </div>
 
-        {/* Options */}
-        <div className="flex-1 max-w-lg space-y-1">
-          <RecoveryButton
-            selected={selectedOption === 0}
-            onClick={onContinue}
-            onMouseEnter={() => setSelectedOption(0)}
-            icon={ChevronRight}
-            label="Continue"
-            desc="Exit and boot to UrbanShade OS"
-          />
-          <RecoveryButton
-            selected={selectedOption === 1}
-            onClick={onShutdown}
-            onMouseEnter={() => setSelectedOption(1)}
-            icon={Power}
-            label="Turn off your PC"
-            desc="Shut down the system"
-          />
-          <RecoveryButton
-            selected={selectedOption === 2}
-            onClick={() => { setScreen("troubleshoot"); setSelectedOption(0); }}
-            onMouseEnter={() => setSelectedOption(2)}
-            icon={Settings}
-            label="Troubleshoot"
-            desc="Advanced options and recovery tools"
-          />
-        </div>
-
         {/* Footer */}
-        <div className="pt-4 border-t border-zinc-800 text-xs text-zinc-600 font-mono">
-          Use ↑↓ to navigate, Enter to select
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 flex justify-between text-[13px]">
+          <span>ENTER=Choose</span>
+          <span>ESC=Cancel</span>
         </div>
       </div>
     );
@@ -344,51 +318,59 @@ export const RecoveryEnvironment = ({
 
   // Troubleshoot
   if (screen === "troubleshoot") {
-    const options = [
-      { id: "data-recovery", icon: Database, label: "Data Recovery", desc: "Scan and repair corrupted data" },
-      { id: "terminal", icon: Terminal, label: "Terminal", desc: "Recovery command line" },
-      { id: "bios", icon: Cpu, label: "UEFI/BIOS Settings", desc: "Change firmware settings" },
-      { id: "system-image", icon: HardDrive, label: "System Image Recovery", desc: "Restore from image file" },
-      { id: "recovery-image", icon: RefreshCw, label: "DEF-DEV Snapshots", desc: "Load recovery snapshot" },
-      { id: "startup-settings", icon: Settings, label: "Startup Settings", desc: "Change boot behavior" },
+    const troubleshootOptions = [
+      { id: "data-recovery", label: "Data Recovery", action: () => { setScreen("data-recovery"); runDataRecovery(); } },
+      { id: "terminal", label: "Command Prompt", action: () => setScreen("terminal") },
+      { id: "bios", label: "UEFI Firmware Settings", action: () => initiateReboot("bios") },
+      { id: "system-image", label: "System Image Recovery", action: () => setScreen("system-image") },
+      { id: "recovery-image", label: "DEF-DEV Snapshots", action: () => setScreen("recovery-image") },
+      { id: "startup-settings", label: "Startup Settings", action: () => { setScreen("startup-settings"); setSelectedOption(0); } },
+      { id: "back", label: "Go back", action: handleBack },
     ];
 
+    const descriptions: Record<number, string> = {
+      0: "Scan and repair corrupted data entries",
+      1: "Use the Command Prompt for advanced troubleshooting",
+      2: "Change settings in your PC's UEFI firmware",
+      3: "Recover UrbanShade using a specific system image file",
+      4: "Restore from a DEF-DEV recovery snapshot",
+      5: "Change UrbanShade startup behavior",
+      6: "Return to the previous menu",
+    };
+
     return (
-      <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col p-6">
+      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
-          <button
-            onClick={handleBack}
-            className="p-1.5 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-zinc-400" />
-          </button>
-          <div>
-            <h1 className="text-lg font-medium text-white">Advanced Options</h1>
-            <p className="text-xs text-zinc-500">Select a recovery tool</p>
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
+          <span className="font-bold tracking-wide">Advanced Options</span>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-6 text-[13px]">
+          <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+
+          <div className="space-y-0.5 mb-8">
+            {troubleshootOptions.map((opt, i) => (
+              <BiosOption
+                key={opt.id}
+                index={i}
+                label={opt.label}
+                onClick={opt.action}
+              />
+            ))}
+          </div>
+
+          <div className="border-t border-gray-700 pt-4">
+            <p className="text-gray-300">
+              Description: {descriptions[selectedOption] || ""}
+            </p>
           </div>
         </div>
 
-        {/* Options Grid */}
-        <div className="flex-1 grid grid-cols-2 gap-1 max-w-2xl content-start">
-          {options.map((opt, i) => (
-            <RecoveryButton
-              key={opt.id}
-              selected={selectedOption === i}
-              onClick={() => {
-                if (opt.id === "terminal") setScreen("terminal");
-                else if (opt.id === "bios") initiateReboot("bios");
-                else if (opt.id === "data-recovery") { setScreen("data-recovery"); runDataRecovery(); }
-                else if (opt.id === "startup-settings") { setScreen("startup-settings"); setSelectedOption(0); }
-                else if (opt.id === "system-image") setScreen("system-image");
-                else if (opt.id === "recovery-image") setScreen("recovery-image");
-              }}
-              onMouseEnter={() => setSelectedOption(i)}
-              icon={opt.icon}
-              label={opt.label}
-              desc={opt.desc}
-            />
-          ))}
+        {/* Footer */}
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 flex justify-between text-[13px]">
+          <span>ENTER=Choose</span>
+          <span>ESC=Back</span>
         </div>
       </div>
     );
@@ -396,51 +378,68 @@ export const RecoveryEnvironment = ({
 
   // Startup Settings
   if (screen === "startup-settings") {
-    const settings = [
-      { id: "safe-mode", num: "1", label: "Enable Safe Mode", desc: "Minimal drivers" },
-      { id: "safe-mode-terminal", num: "2", label: "Safe Mode + Terminal", desc: "Command line only" },
-      { id: "offline-mode", num: "3", label: "Enable Offline Mode", desc: "Disable network" },
-      { id: "boot-logging", num: "4", label: "Enable Boot Logging", desc: "Log boot stages" },
-      { id: "force-verification", num: "5", label: "Force Verification", desc: "Verify data on boot" },
-      { id: "disable-auto-restart", num: "6", label: "Disable Auto-Restart", desc: "Show errors instead" },
-      { id: "clear-cache", num: "7", label: "Clear Cache & Restart", desc: "Reset temp storage" },
-      { id: "normal", num: "8", label: "Normal Restart", desc: "Boot normally" },
+    const startupSettings = [
+      { id: "safe-mode", num: "1", label: "Enable Safe Mode" },
+      { id: "safe-mode-terminal", num: "2", label: "Enable Safe Mode with Command Prompt" },
+      { id: "offline-mode", num: "3", label: "Enable Offline Mode" },
+      { id: "boot-logging", num: "4", label: "Enable Boot Logging" },
+      { id: "force-verification", num: "5", label: "Enable low-resolution video (640x480)" },
+      { id: "disable-auto-restart", num: "6", label: "Disable automatic restart on system failure" },
+      { id: "clear-cache", num: "7", label: "Clear Cache and Restart" },
+      { id: "normal", num: "8", label: "Start UrbanShade Normally" },
     ];
 
+    const descriptions: Record<number, string> = {
+      0: "Start with minimal drivers and services",
+      1: "Start with a command prompt instead of the desktop",
+      2: "Start without network connectivity",
+      3: "Create a file listing all drivers that are installed during startup",
+      4: "Start with lower resolution display mode",
+      5: "On system failure, remain at the error screen instead of restarting",
+      6: "Clear temporary cache data and restart",
+      7: "Start UrbanShade using normal settings",
+    };
+
     return (
-      <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col p-6">
+      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
-          <button
-            onClick={handleBack}
-            className="p-1.5 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-zinc-400" />
-          </button>
-          <div>
-            <h1 className="text-lg font-medium text-white">Startup Settings</h1>
-            <p className="text-xs text-zinc-500">Select to apply and restart</p>
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
+          <span className="font-bold tracking-wide">Startup Settings</span>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-6 text-[13px]">
+          <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+
+          <div className="space-y-0.5 mb-8">
+            {startupSettings.map((s, i) => (
+              <div
+                key={s.id}
+                onClick={() => applyStartupSetting(s.id)}
+                onMouseEnter={() => setSelectedOption(i)}
+                className={`px-2 py-0.5 cursor-pointer ${
+                  selectedOption === i 
+                    ? "bg-[#aaaaaa] text-black" 
+                    : "text-white"
+                }`}
+              >
+                {s.label}
+              </div>
+            ))}
+          </div>
+
+          <div className="border-t border-gray-700 pt-4">
+            <p className="text-gray-300">
+              Description: {descriptions[selectedOption] || ""}
+            </p>
           </div>
         </div>
 
-        {/* Settings List */}
-        <div className="flex-1 max-w-lg space-y-1">
-          {settings.map((s, i) => (
-            <RecoveryButton
-              key={s.id}
-              selected={selectedOption === i}
-              onClick={() => applyStartupSetting(s.id)}
-              onMouseEnter={() => setSelectedOption(i)}
-              number={s.num}
-              label={s.label}
-              desc={s.desc}
-            />
-          ))}
-        </div>
-
         {/* Footer */}
-        <div className="pt-4 border-t border-zinc-800 text-xs text-zinc-600 font-mono">
-          All options trigger a system restart
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 flex justify-between text-[13px]">
+          <span>ENTER=Choose</span>
+          <span>Press F10 to see more options</span>
+          <span>ESC=Back</span>
         </div>
       </div>
     );
@@ -449,156 +448,180 @@ export const RecoveryEnvironment = ({
   // Data Recovery
   if (screen === "data-recovery") {
     return (
-      <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col p-6">
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
-          <button
-            onClick={handleBack}
-            className="p-1.5 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-zinc-400" />
-          </button>
-          <div>
-            <h1 className="text-lg font-medium text-white">Data Recovery</h1>
-            <p className="text-xs text-zinc-500">Scanning for issues...</p>
-          </div>
+      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+        {/* Header */}
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
+          <span className="font-bold tracking-wide">Data Recovery</span>
         </div>
 
-        <div className="flex-1 max-w-lg">
-          {/* Progress */}
+        {/* Content */}
+        <div className="flex-1 p-6 text-[13px]">
+          <p className="mb-4">{recoveryStatus}</p>
+          
+          {/* Progress bar - text based */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-2 text-xs font-mono">
-              <span className="text-zinc-400">{recoveryStatus}</span>
-              <span className="text-cyan-400">{recoveryProgress}%</span>
-            </div>
-            <div className="h-1 bg-zinc-800">
-              <div 
-                className="h-full bg-cyan-500 transition-all"
-                style={{ width: `${recoveryProgress}%` }}
-              />
+            <div className="flex items-center gap-2">
+              <span>[</span>
+              <div className="flex-1 h-4 flex items-center">
+                {Array.from({ length: 20 }).map((_, i) => (
+                  <span key={i} className={i < Math.floor(recoveryProgress / 5) ? "text-white" : "text-gray-700"}>
+                    {i < Math.floor(recoveryProgress / 5) ? "█" : "░"}
+                  </span>
+                ))}
+              </div>
+              <span>]</span>
+              <span className="w-12 text-right">{recoveryProgress}%</span>
             </div>
           </div>
 
           {/* Results */}
           {recoveryProgress === 100 && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {recoveredItems.length === 0 ? (
-                <div className="p-4 bg-green-900/20 border border-green-800">
-                  <div className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-green-400" />
-                    <span className="text-green-400 text-sm">No issues found</span>
-                  </div>
-                </div>
+                <p className="text-green-400">No issues found. Your data appears to be intact.</p>
               ) : (
-                <div className="p-4 bg-amber-900/20 border border-amber-800">
-                  <div className="flex items-center gap-2 mb-3">
-                    <AlertTriangle className="w-4 h-4 text-amber-400" />
-                    <span className="text-amber-400 text-sm">{recoveredItems.length} issues found</span>
-                  </div>
-                  <div className="space-y-1 max-h-40 overflow-y-auto">
-                    {recoveredItems.map(key => (
-                      <div key={key} className="flex items-center justify-between p-2 bg-zinc-900 text-xs">
-                        <span className="font-mono text-zinc-300 truncate">{key}</span>
-                        <button
-                          onClick={() => {
-                            localStorage.removeItem(key);
-                            setRecoveredItems(prev => prev.filter(k => k !== key));
-                          }}
-                          className="p-1 text-red-400 hover:bg-red-900/30"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <>
+                  <p className="text-yellow-400">Found {recoveredItems.length} corrupted entries:</p>
+                  {recoveredItems.slice(0, 10).map((item, i) => (
+                    <p key={i} className="text-gray-400">  - {item}</p>
+                  ))}
+                  {recoveredItems.length > 10 && (
+                    <p className="text-gray-500">  ... and {recoveredItems.length - 10} more</p>
+                  )}
+                </>
               )}
-
-              <button
-                onClick={handleBack}
-                className="w-full p-3 bg-zinc-800 border border-zinc-700 text-white text-sm hover:bg-zinc-700 transition-colors"
-              >
-                Return to Advanced Options
-              </button>
+              
+              <p className="mt-6 text-gray-400">Press ESC to go back</p>
             </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-[13px]">
+          <span>ESC=Back</span>
         </div>
       </div>
     );
   }
 
-  // System Image / Recovery Image
-  if (screen === "system-image" || screen === "recovery-image") {
-    const isSystemImage = screen === "system-image";
-    
+  // System Image Recovery
+  if (screen === "system-image") {
     return (
-      <div className="fixed inset-0 bg-[#0a0a0a] flex flex-col p-6">
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-800">
-          <button
+      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+        {/* Header */}
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
+          <span className="font-bold tracking-wide">System Image Recovery</span>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-6 text-[13px]">
+          <p className="mb-4">Re-image your computer using a system image file.</p>
+          <p className="text-gray-400 mb-6">
+            A system image is a copy of the UrbanShade system files and programs.
+            It can be used to restore your PC if it becomes corrupted.
+          </p>
+
+          <div className="space-y-2 mb-8">
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onMouseEnter={() => setSelectedOption(0)}
+              className={`px-2 py-0.5 cursor-pointer ${
+                selectedOption === 0 
+                  ? "bg-[#aaaaaa] text-black" 
+                  : "text-white"
+              }`}
+            >
+              Select a system image file...
+            </div>
+            <div
+              onClick={handleBack}
+              onMouseEnter={() => setSelectedOption(1)}
+              className={`px-2 py-0.5 cursor-pointer ${
+                selectedOption === 1 
+                  ? "bg-[#aaaaaa] text-black" 
+                  : "text-white"
+              }`}
+            >
+              Cancel
+            </div>
+          </div>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImportImage}
+            accept=".img,.json"
+            className="hidden"
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 flex justify-between text-[13px]">
+          <span>ENTER=Choose</span>
+          <span>ESC=Cancel</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Recovery Image (DEF-DEV Snapshots)
+  if (screen === "recovery-image") {
+    return (
+      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+        {/* Header */}
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
+          <span className="font-bold tracking-wide">DEF-DEV Snapshots</span>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 p-6 text-[13px] overflow-auto">
+          <p className="text-gray-400 mb-6">
+            Select a recovery snapshot to restore:
+          </p>
+
+          {recoveryImages.length === 0 ? (
+            <p className="text-gray-500">No recovery snapshots available.</p>
+          ) : (
+            <div className="space-y-0.5 mb-8">
+              {recoveryImages.map((img, i) => (
+                <div
+                  key={img.name || i}
+                  onClick={() => loadRecoveryImage(img)}
+                  onMouseEnter={() => setSelectedOption(i)}
+                  className={`px-2 py-0.5 cursor-pointer ${
+                    selectedOption === i 
+                      ? "bg-[#aaaaaa] text-black" 
+                      : "text-white"
+                  }`}
+                >
+                  {img.name || `Snapshot ${i + 1}`} - {new Date(img.created || img.timestamp).toLocaleString()}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div
             onClick={handleBack}
-            className="p-1.5 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 transition-colors"
+            onMouseEnter={() => setSelectedOption(recoveryImages.length)}
+            className={`px-2 py-0.5 cursor-pointer ${
+              selectedOption === recoveryImages.length 
+                ? "bg-[#aaaaaa] text-black" 
+                : "text-white"
+            }`}
           >
-            <ArrowLeft className="w-4 h-4 text-zinc-400" />
-          </button>
-          <div>
-            <h1 className="text-lg font-medium text-white">
-              {isSystemImage ? "System Image Recovery" : "DEF-DEV Snapshots"}
-            </h1>
-            <p className="text-xs text-zinc-500">
-              {isSystemImage ? "Restore from image file" : "Load a recovery snapshot"}
-            </p>
+            Go back
           </div>
         </div>
 
-        <div className="flex-1 max-w-lg space-y-3">
-          {/* Import Button */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full p-4 border border-dashed border-zinc-600 bg-zinc-900/50 hover:border-cyan-600 hover:bg-cyan-900/10 transition-colors flex items-center justify-center gap-2 text-zinc-400"
-          >
-            <Upload className="w-5 h-5" />
-            <span className="text-sm">Import {isSystemImage ? 'System Image' : 'Snapshot'} File</span>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json"
-            onChange={handleImportImage}
-            className="hidden"
-          />
-
-          {/* Saved Images */}
-          {recoveryImages.length > 0 ? (
-            <div className="space-y-1">
-              <div className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Saved Snapshots</div>
-              {recoveryImages.map((img, i) => (
-                <button
-                  key={i}
-                  onClick={() => loadRecoveryImage(img)}
-                  className="w-full p-3 bg-zinc-900 border border-zinc-700 hover:border-cyan-600 transition-colors flex items-center gap-3 text-left"
-                >
-                  <HardDrive className="w-5 h-5 text-cyan-500" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm text-white truncate">{img.name || `Snapshot ${i + 1}`}</div>
-                    <div className="text-xs text-zinc-500">
-                      {new Date(img.timestamp).toLocaleString()}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="p-6 bg-zinc-900 border border-zinc-800 text-center">
-              <HardDrive className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-              <div className="text-sm text-zinc-400">No snapshots found</div>
-              <div className="text-xs text-zinc-600 mt-1">
-                Create snapshots in DEF-DEV or import a file
-              </div>
-            </div>
-          )}
+        {/* Footer */}
+        <div className="bg-[#aaaaaa] text-black px-4 py-1.5 flex justify-between text-[13px]">
+          <span>ENTER=Choose</span>
+          <span>ESC=Back</span>
         </div>
       </div>
     );
   }
 
+  // Fallback
   return null;
 };
