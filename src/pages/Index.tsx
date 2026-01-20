@@ -36,7 +36,7 @@ import { useNaviSecurity } from "@/hooks/useNaviSecurity";
 import { useBanCheck } from "@/hooks/useBanCheck";
 import { requiresBootPassword, requiresAdminPassword, verifyAdminPassword } from "@/hooks/useBiosSettings";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
-
+import unknown from "@/unknown";
 
 const Index = () => {
   // NAVI AI Security System
@@ -73,7 +73,9 @@ const Index = () => {
   const [crashed, setCrashed] = useState(false);
   const [crashData, setCrashData] = useState<CrashData | null>(null);
   const [killedProcess, setKilledProcess] = useState<string>("");
-  const [crashType, setCrashType] = useState<"kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload">("kernel");
+  const [crashType, setCrashType] = useState<"kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload">(
+    "kernel",
+  );
   const [loggingOut, setLoggingOut] = useState(false);
   const [isGuestMode, setIsGuestMode] = useState(false);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -127,7 +129,7 @@ const Index = () => {
       if (e.key.length === 1) {
         const newBuffer = (keyBuffer + e.key.toLowerCase()).slice(-10);
         setKeyBuffer(newBuffer);
-        
+
         // Check for typed commands
         if (newBuffer.endsWith("del") || newBuffer.endsWith("delete")) {
           if (!booted && !inRecoveryMode) {
@@ -146,7 +148,7 @@ const Index = () => {
           }
         }
       }
-      
+
       // F2 for recovery mode during boot
       if (e.key === "F2" && !booted && !inRecoveryMode) {
         e.preventDefault();
@@ -206,30 +208,12 @@ const Index = () => {
     };
 
     // Show available commands in console
-    console.log(
-      "%c[URBANSHADE OS] Console Commands Available",
-      "color: #00ffff; font-weight: bold; font-size: 14px"
-    );
-    console.log(
-      "%cadminPanel() - Access admin panel (password required)",
-      "color: #888888"
-    );
-    console.log(
-      "%cmaintenanceMode() - Enter maintenance mode",
-      "color: #888888"
-    );
-    console.log(
-      "%cnormalMode() - Return to normal mode",
-      "color: #888888"
-    );
-    console.log(
-      "%cdevMode() - Open developer console",
-      "color: #ff00ff"
-    );
-    console.log(
-      "%c\nHint: Check the HTML source for hidden secrets...",
-      "color: #ffaa00; font-style: italic"
-    );
+    console.log("%c[URBANSHADE OS] Console Commands Available", "color: #00ffff; font-weight: bold; font-size: 14px");
+    console.log("%cadminPanel() - Access admin panel (password required)", "color: #888888");
+    console.log("%cmaintenanceMode() - Enter maintenance mode", "color: #888888");
+    console.log("%cnormalMode() - Return to normal mode", "color: #888888");
+    console.log("%cdevMode() - Open developer console", "color: #ff00ff");
+    console.log("%c\nHint: Check the HTML source for hidden secrets...", "color: #ffaa00; font-style: italic");
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -240,84 +224,84 @@ const Index = () => {
   useEffect(() => {
     const handleCommand = (cmd: QueuedCommand) => {
       actionDispatcher.system(`Executing queued command: ${cmd.type}`, { source: cmd.source });
-      
+
       switch (cmd.type) {
-        case 'CRASH':
-          const crash = triggerCrash(cmd.payload.type as CrashType, { process: cmd.payload.process || 'queue.exe' });
+        case "CRASH":
+          const crash = triggerCrash(cmd.payload.type as CrashType, { process: cmd.payload.process || "queue.exe" });
           setCrashData(crash);
           setCrashed(true);
           break;
-          
-        case 'BUGCHECK':
+
+        case "BUGCHECK":
           const bugcheck = createBugcheck(cmd.payload.code, cmd.payload.description, cmd.source);
           setBugcheckData(bugcheck);
           break;
-          
-        case 'REBOOT':
+
+        case "REBOOT":
           handleReboot();
           break;
-          
-        case 'SHUTDOWN':
+
+        case "SHUTDOWN":
           handleShutdown();
           break;
-          
-        case 'LOCKDOWN':
-          setLockdownProtocol(cmd.payload.protocol || 'ALPHA');
+
+        case "LOCKDOWN":
+          setLockdownProtocol(cmd.payload.protocol || "ALPHA");
           setLockdownMode(true);
           break;
-          
-        case 'RECOVERY':
+
+        case "RECOVERY":
           setInRecoveryMode(true);
           break;
-          
-        case 'WIPE':
+
+        case "WIPE":
           localStorage.clear();
           window.location.reload();
           break;
-          
-        case 'WRITE_STORAGE':
+
+        case "WRITE_STORAGE":
           if (cmd.payload.key && cmd.payload.value !== undefined) {
             localStorage.setItem(cmd.payload.key, cmd.payload.value);
             actionDispatcher.file(`Storage write: ${cmd.payload.key}`);
           }
           break;
-          
-        case 'DELETE_STORAGE':
+
+        case "DELETE_STORAGE":
           if (cmd.payload.key) {
             localStorage.removeItem(cmd.payload.key);
             actionDispatcher.file(`Storage delete: ${cmd.payload.key}`);
           }
           break;
-          
-        case 'TOAST':
-          const toastType = cmd.payload.type || 'info';
-          if (toastType === 'success') toast.success(cmd.payload.message);
-          else if (toastType === 'error') toast.error(cmd.payload.message);
-          else if (toastType === 'warning') toast.warning(cmd.payload.message);
+
+        case "TOAST":
+          const toastType = cmd.payload.type || "info";
+          if (toastType === "success") toast.success(cmd.payload.message);
+          else if (toastType === "error") toast.error(cmd.payload.message);
+          else if (toastType === "warning") toast.warning(cmd.payload.message);
           else toast.info(cmd.payload.message);
           break;
-          
-        case 'CUSTOM':
+
+        case "CUSTOM":
           // Handle custom commands via system bus
-          systemBus.emit('CUSTOM_COMMAND', cmd.payload);
+          systemBus.emit("CUSTOM_COMMAND", cmd.payload);
           break;
       }
     };
 
     // Subscribe to command queue
     const unsubscribe = commandQueue.onAny(handleCommand);
-    
+
     // Start polling (4 times per second = 250ms)
     commandQueue.startPolling(250);
-    
+
     // Also check for legacy pending crashes/bugchecks (backwards compatibility)
-    const pendingCrash = localStorage.getItem('urbanshade_pending_crash');
+    const pendingCrash = localStorage.getItem("urbanshade_pending_crash");
     if (pendingCrash) {
-      localStorage.removeItem('urbanshade_pending_crash');
+      localStorage.removeItem("urbanshade_pending_crash");
       try {
         const data = JSON.parse(pendingCrash);
         actionDispatcher.system(`Processing legacy pending crash: ${data.type}`);
-        const crash = triggerCrash(data.type as CrashType, { process: data.process || 'admin.exe' });
+        const crash = triggerCrash(data.type as CrashType, { process: data.process || "admin.exe" });
         setCrashData(crash);
         setCrashed(true);
       } catch (e) {
@@ -325,13 +309,13 @@ const Index = () => {
       }
     }
 
-    const pendingBugcheck = localStorage.getItem('urbanshade_pending_bugcheck');
+    const pendingBugcheck = localStorage.getItem("urbanshade_pending_bugcheck");
     if (pendingBugcheck) {
-      localStorage.removeItem('urbanshade_pending_bugcheck');
+      localStorage.removeItem("urbanshade_pending_bugcheck");
       try {
         const data = JSON.parse(pendingBugcheck);
         actionDispatcher.system(`Processing legacy pending bugcheck: ${data.code}`);
-        const bugcheck = createBugcheck(data.code, data.description, 'DEF-DEV Admin');
+        const bugcheck = createBugcheck(data.code, data.description, "DEF-DEV Admin");
         setBugcheckData(bugcheck);
       } catch (e) {
         console.error("Failed to parse pending bugcheck", e);
@@ -349,7 +333,7 @@ const Index = () => {
     const unsubCrash = systemBus.on("TRIGGER_CRASH", (event) => {
       const { crashType, process } = event.payload || {};
       if (crashType) {
-        const crash = triggerCrash(crashType, { process: process || 'systembus.exe' });
+        const crash = triggerCrash(crashType, { process: process || "systembus.exe" });
         setCrashData(crash);
         setCrashed(true);
         setShowAdminPanel(false);
@@ -359,7 +343,7 @@ const Index = () => {
     const unsubBugcheck = systemBus.on("TRIGGER_BUGCHECK", (event) => {
       const { code, description } = event.payload || {};
       if (code) {
-        const bugcheck = createBugcheck(code, description || 'System Bus triggered bugcheck', 'SystemBus');
+        const bugcheck = createBugcheck(code, description || "System Bus triggered bugcheck", "SystemBus");
         setBugcheckData(bugcheck);
         setShowAdminPanel(false);
       }
@@ -437,11 +421,11 @@ const Index = () => {
       setShowingBiosTransition(false);
     }, 1500);
   };
-  
+
   const handlePostComplete = () => {
     setPostComplete(true);
   };
-  
+
   const handlePostEnterBios = () => {
     setPostComplete(true);
     setBiosComplete(false);
@@ -461,12 +445,12 @@ const Index = () => {
         status: "active",
         phone: "x1000",
         email: "admin@urbanshade.corp",
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       localStorage.setItem("urbanshade_admin", JSON.stringify(fullAdminData));
       setAdminSetupComplete(true);
-      
+
       // Show OOBE after installation if not already complete
       if (!oobeComplete) {
         localStorage.removeItem("urbanshade_oobe_complete");
@@ -484,7 +468,7 @@ const Index = () => {
         department: "Administration",
         location: "Control Room",
         status: "active",
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
       localStorage.setItem("urbanshade_admin", JSON.stringify(fallbackAdmin));
       setAdminSetupComplete(true);
@@ -516,19 +500,26 @@ const Index = () => {
     setShuttingDown(true);
   };
 
-  const handleCriticalKill = (processName: string, type: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload" = "kernel") => {
+  const handleCriticalKill = (
+    processName: string,
+    type: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload" = "kernel",
+  ) => {
     setKilledProcess(processName);
     setCrashType(type);
     setCustomCrashData(null);
     setCrashed(true);
-    
+
     // Some crash types require recovery mode
     if (type === "corruption" || type === "virus" || Math.random() < 0.3) {
       setNeedsRecovery(true);
     }
   };
 
-  const handleCustomCrash = (title: string, message: string, type: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload") => {
+  const handleCustomCrash = (
+    title: string,
+    message: string,
+    type: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload",
+  ) => {
     setCustomCrashData({ title, message });
     setKilledProcess("admin.custom");
     setCrashType(type);
@@ -542,7 +533,7 @@ const Index = () => {
       memory: "memory",
       corruption: "corruption",
       overload: "overload",
-      virus: "virus"
+      virus: "virus",
     };
     handleCriticalKill("admin.panel", crashTypes[type] || "kernel");
   };
@@ -573,30 +564,34 @@ const Index = () => {
   };
 
   if (!disclaimerAccepted) {
-    return <DisclaimerScreen onAccept={(skipInstall) => {
-      localStorage.setItem("urbanshade_disclaimer_accepted", "true");
-      setDisclaimerAccepted(true);
-      
-      if (skipInstall) {
-        // Create default admin and skip installation
-        const defaultAdmin = {
-          username: "Admin",
-          password: "admin",
-          id: "P000",
-          name: "Administrator (Admin)",
-          role: "System Administrator",
-          clearance: 5,
-          department: "Administration",
-          location: "Control Room",
-          status: "active",
-          phone: "x1000",
-          email: "admin@urbanshade.corp",
-          createdAt: new Date().toISOString()
-        };
-        localStorage.setItem("urbanshade_admin", JSON.stringify(defaultAdmin));
-        setAdminSetupComplete(true);
-      }
-    }} />;
+    return (
+      <DisclaimerScreen
+        onAccept={(skipInstall) => {
+          localStorage.setItem("urbanshade_disclaimer_accepted", "true");
+          setDisclaimerAccepted(true);
+
+          if (skipInstall) {
+            // Create default admin and skip installation
+            const defaultAdmin = {
+              username: "Admin",
+              password: "admin",
+              id: "P000",
+              name: "Administrator (Admin)",
+              role: "System Administrator",
+              clearance: 5,
+              department: "Administration",
+              location: "Control Room",
+              status: "active",
+              phone: "x1000",
+              email: "admin@urbanshade.corp",
+              createdAt: new Date().toISOString(),
+            };
+            localStorage.setItem("urbanshade_admin", JSON.stringify(defaultAdmin));
+            setAdminSetupComplete(true);
+          }
+        }}
+      />
+    );
   }
 
   if (!adminSetupComplete) {
@@ -606,7 +601,7 @@ const Index = () => {
   // NAVI AI lockout takes highest priority
   if (naviSecurity.isLockedOut && naviSecurity.lockoutTime) {
     return (
-      <NaviLockoutScreen 
+      <NaviLockoutScreen
         reason={naviSecurity.lockoutReason}
         lockoutTime={naviSecurity.lockoutTime}
         onUnlock={naviSecurity.clearLockout}
@@ -617,13 +612,7 @@ const Index = () => {
   // Ban check - permanent bans block ALL access, temp bans show popup + banner
   if (banCheck.isBanned && !banCheck.isLoading && !banCheck.isTempBan && !banCheck.isFakeBan) {
     // Permanent ban - full block
-    return (
-      <BannedScreen
-        reason={banCheck.reason}
-        expiresAt={banCheck.expiresAt}
-        isFakeBan={false}
-      />
-    );
+    return <BannedScreen reason={banCheck.reason} expiresAt={banCheck.expiresAt} isFakeBan={false} />;
   }
 
   // Fake ban - show scary screen then reveal
@@ -643,26 +632,36 @@ const Index = () => {
   }
 
   if (bugcheckData) {
-    return <BugcheckScreen 
-      bugcheck={bugcheckData} 
-      onRestart={() => {
-        setBugcheckData(null);
-        setBooted(false);
-        setLoggedIn(false);
-      }}
-      onReportToDev={() => {
-        setBugcheckData(null);
-        window.open('/def-dev', '_blank');
-      }}
-      onRecovery={() => {
-        setBugcheckData(null);
-        setInRecoveryMode(true);
-      }}
-    />;
+    return (
+      <BugcheckScreen
+        bugcheck={bugcheckData}
+        onRestart={() => {
+          setBugcheckData(null);
+          setBooted(false);
+          setLoggedIn(false);
+        }}
+        onReportToDev={() => {
+          setBugcheckData(null);
+          window.open("/def-dev", "_blank");
+        }}
+        onRecovery={() => {
+          setBugcheckData(null);
+          setInRecoveryMode(true);
+        }}
+      />
+    );
   }
 
   if (crashed) {
-    return <CrashScreen onReboot={handleCrashReboot} crashData={crashData || undefined} killedProcess={killedProcess} crashType={crashType} customData={customCrashData} />;
+    return (
+      <CrashScreen
+        onReboot={handleCrashReboot}
+        crashData={crashData || undefined}
+        killedProcess={killedProcess}
+        crashType={crashType}
+        customData={customCrashData}
+      />
+    );
   }
 
   if (loggingOut) {
@@ -684,46 +683,45 @@ const Index = () => {
   }
 
   if (inRecoveryMode) {
-    return <RecoveryEnvironment 
-      onContinue={() => {
-        setInRecoveryMode(false);
-        setNeedsRecovery(false);
-        setBooted(true);
-        setLoggedIn(true);
-      }}
-      onShutdown={handleShutdown}
-      onBootToBios={() => {
-        setInRecoveryMode(false);
-        setBiosComplete(false);
-      }}
-      onTerminalBoot={() => {
-        sessionStorage.setItem("urbanshade_terminal_only", "true");
-        setInRecoveryMode(false);
-        setBooted(true);
-        setLoggedIn(true);
-      }}
-      onSafeMode={() => {
-        sessionStorage.setItem("urbanshade_safe_mode", "true");
-        setSafeMode(true);
-        setInRecoveryMode(false);
-        setBooted(true);
-        setLoggedIn(true);
-      }}
-      onOfflineMode={() => {
-        sessionStorage.setItem("urbanshade_offline_mode", "true");
-        setInRecoveryMode(false);
-        setBooted(true);
-        setLoggedIn(true);
-      }}
-    />;
+    return (
+      <RecoveryEnvironment
+        onContinue={() => {
+          setInRecoveryMode(false);
+          setNeedsRecovery(false);
+          setBooted(true);
+          setLoggedIn(true);
+        }}
+        onShutdown={handleShutdown}
+        onBootToBios={() => {
+          setInRecoveryMode(false);
+          setBiosComplete(false);
+        }}
+        onTerminalBoot={() => {
+          sessionStorage.setItem("urbanshade_terminal_only", "true");
+          setInRecoveryMode(false);
+          setBooted(true);
+          setLoggedIn(true);
+        }}
+        onSafeMode={() => {
+          sessionStorage.setItem("urbanshade_safe_mode", "true");
+          setSafeMode(true);
+          setInRecoveryMode(false);
+          setBooted(true);
+          setLoggedIn(true);
+        }}
+        onOfflineMode={() => {
+          sessionStorage.setItem("urbanshade_offline_mode", "true");
+          setInRecoveryMode(false);
+          setBooted(true);
+          setLoggedIn(true);
+        }}
+      />
+    );
   }
 
   // POST Screen (Power-On Self Test) - shows before BIOS/Boot
   if (!postComplete) {
-    return <PostScreen 
-      onComplete={handlePostComplete} 
-      onEnterBios={handlePostEnterBios}
-    />;
+    return <PostScreen onComplete={handlePostComplete} onEnterBios={handlePostEnterBios} />;
   }
 
   if (!biosComplete) {
@@ -731,19 +729,21 @@ const Index = () => {
   }
 
   if (!booted) {
-    return <BootScreen 
-      onComplete={() => setBooted(true)} 
-      onSafeMode={() => {
-        sessionStorage.setItem("urbanshade_safe_mode", "true");
-        setSafeMode(true);
-        setBooted(true);
-      }}
-    />;
+    return (
+      <BootScreen
+        onComplete={() => setBooted(true)}
+        onSafeMode={() => {
+          sessionStorage.setItem("urbanshade_safe_mode", "true");
+          setSafeMode(true);
+          setBooted(true);
+        }}
+      />
+    );
   }
 
   // Skip login on first boot after installation
   const isFirstBoot = localStorage.getItem("urbanshade_first_boot") === "true";
-  
+
   if (!loggedIn) {
     if (isFirstBoot) {
       // Auto-login on first boot, then clear the flag
@@ -752,11 +752,11 @@ const Index = () => {
       return null;
     }
     return (
-      <UserSelectionScreen 
+      <UserSelectionScreen
         onLogin={(guest) => {
           setIsGuestMode(guest || false);
           setLoggedIn(true);
-        }} 
+        }}
         onShutdown={handleShutdown}
         onRestart={handleReboot}
       />
@@ -769,11 +769,15 @@ const Index = () => {
   }
 
   if (isUpdating) {
-    return <UpdateScreen onComplete={() => {
-      setIsUpdating(false);
-      setBooted(false);
-      setLoggedIn(false);
-    }} />;
+    return (
+      <UpdateScreen
+        onComplete={() => {
+          setIsUpdating(false);
+          setBooted(false);
+          setLoggedIn(false);
+        }}
+      />
+    );
   }
 
   if (isLocked) {
@@ -788,9 +792,9 @@ const Index = () => {
       {banCheck.isBanned && banCheck.isTempBan && banCheck.tempBanDismissed && (
         <TempBanBanner expiresAt={banCheck.expiresAt} />
       )}
-      
-      <Desktop 
-        onLogout={handleLogout} 
+
+      <Desktop
+        onLogout={handleLogout}
         onReboot={handleReboot}
         onShutdown={handleShutdown}
         onCriticalKill={handleCriticalKill}
@@ -810,22 +814,22 @@ const Index = () => {
       {maintenanceMode && <MaintenanceMode onExit={() => setMaintenanceMode(false)} />}
       {showTour && <FirstTimeTour onComplete={() => setShowTour(false)} />}
       {showAdminPanel && (
-        <AdminPanel 
-          onExit={() => setShowAdminPanel(false)} 
+        <AdminPanel
+          onExit={() => setShowAdminPanel(false)}
           onCrash={handleAdminCrash}
           onCustomCrash={handleCustomCrash}
         />
       )}
       {devModeOpen && <DevModeConsole onClose={() => setDevModeOpen(false)} />}
       <SupabaseConnectivityChecker currentRoute="main" />
-      
+
       {/* VIP Welcome Dialog */}
-      <VipWelcomeDialog 
+      <VipWelcomeDialog
         open={banCheck.showVipWelcome}
         onClose={banCheck.dismissVipWelcome}
         reason={banCheck.vipReason}
       />
-      
+
       {/* Temp ban popup (shown once, then banner persists) */}
       <TempBanPopup
         open={banCheck.isBanned && banCheck.isTempBan && !banCheck.tempBanDismissed}
