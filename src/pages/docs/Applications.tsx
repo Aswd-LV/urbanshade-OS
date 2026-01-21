@@ -1,5 +1,6 @@
 import { ArrowLeft, Folder, Terminal, Settings, Globe, FileText, Calculator, Music, Image, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const Applications = () => {
   const apps = [
@@ -72,6 +73,12 @@ const Applications = () => {
   ];
 
   return (
+    <>
+    <SEO 
+      title="Core Applications" 
+      description="Guide to core apps in Urbanshade OS - File Explorer, Terminal, Notepad, Calculator, and more."
+      path="/docs/applications"
+    />
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
       <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -139,6 +146,7 @@ const Applications = () => {
         </div>
       </main>
     </div>
+    </>
   );
 };
 

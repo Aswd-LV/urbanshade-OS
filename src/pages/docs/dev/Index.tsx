@@ -1,5 +1,6 @@
 import { ArrowLeft, Code, Palette, Puzzle, Terminal, BookOpen, Zap, ChevronRight, ExternalLink, Layers, Cpu, GitBranch, Package } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const DevDocsIndex = () => {
   const sections = [
@@ -55,6 +56,12 @@ const DevDocsIndex = () => {
   ];
 
   return (
+    <>
+    <SEO 
+      title="Developer Docs" 
+      description="Build extensions, themes, and apps for Urbanshade OS. Architecture, theming, and API documentation."
+      path="/docs/dev"
+    />
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-teal-500/20 bg-slate-900/80 backdrop-blur-xl">
@@ -193,6 +200,7 @@ const DevDocsIndex = () => {
         </footer>
       </main>
     </div>
+    </>
   );
 };
 

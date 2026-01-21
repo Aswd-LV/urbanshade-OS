@@ -44,6 +44,35 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
   }
 
   const changelogs: Record<string, VersionData> = {
+    "3.0.1": {
+      icon: <Sparkles className="w-5 h-5" />,
+      color: "from-cyan-500 to-blue-600",
+      tagline: "SEO & DISCOVERY UPDATE",
+      overview: "Enhanced discoverability with SEO improvements, new welcome modal, and documentation updates.",
+      sections: {
+        "SEO & Discoverability": [
+          "NEW: XML sitemap for improved search engine crawling",
+          "NEW: Enhanced robots.txt with AI bot permissions (GPTBot, ClaudeBot, PerplexityBot)",
+          "NEW: JSON-LD structured data (WebApplication schema)",
+          "NEW: LLM summary page (/llms.txt) for AI discoverability",
+          "NEW: Dynamic meta tags with react-helmet-async",
+          "NEW: SEO component added to all documentation pages"
+        ],
+        "Onboarding": [
+          "NEW: Streamlined welcome modal replaces multi-step tour",
+          "Quick access to documentation or start exploring",
+          "Cleaner first-time user experience"
+        ],
+        "Open Graph": [
+          "NEW: Branded OG image for social sharing",
+          "Improved social media previews on Twitter/X, Discord, etc."
+        ],
+        "Bug Fixes": [
+          "Fixed meta description typo",
+          "Fixed canonical URL configuration"
+        ]
+      }
+    },
     "3.0.2": {
       icon: <Zap className="w-5 h-5" />,
       color: "from-amber-500 to-orange-600",

@@ -1,5 +1,6 @@
 import { ArrowLeft, Keyboard } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const Shortcuts = () => {
   const bootShortcuts = [
@@ -38,6 +39,12 @@ const Shortcuts = () => {
   );
 
   return (
+    <>
+    <SEO 
+      title="Keyboard Shortcuts" 
+      description="All keyboard shortcuts and hotkeys for Urbanshade OS - boot, desktop, and terminal shortcuts."
+      path="/docs/shortcuts"
+    />
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
       <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -162,6 +169,7 @@ const Shortcuts = () => {
         </div>
       </main>
     </div>
+    </>
   );
 };
 

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { DocSearch } from "@/components/DocSearch";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 import { VERSION } from "@/lib/versionInfo";
+import SEO from "@/components/SEO";
 
 const Docs = () => {
   const sections = [
@@ -100,6 +101,12 @@ const Docs = () => {
   };
 
   return (
+    <>
+    <SEO 
+      title="Documentation" 
+      description="Complete guide to Urbanshade OS - a browser-based operating system simulation with apps, terminal, and developer tools."
+      path="/docs"
+    />
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground relative overflow-hidden">
       {/* Animated background gradients */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -295,6 +302,7 @@ const Docs = () => {
       </main>
       <SupabaseConnectivityChecker currentRoute="docs" />
     </div>
+    </>
   );
 };
 

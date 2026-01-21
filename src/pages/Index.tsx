@@ -12,7 +12,7 @@ import { InstallationScreen } from "@/components/InstallationScreen";
 import { MaintenanceMode } from "@/components/MaintenanceMode";
 import { LockdownScreen } from "@/components/LockdownScreen";
 import { NaviLockoutScreen } from "@/components/NaviLockoutScreen";
-import { FirstTimeTour } from "@/components/FirstTimeTour";
+import { WelcomeModal } from "@/components/WelcomeModal";
 import { RecoveryMode } from "@/components/RecoveryMode";
 import { RecoveryEnvironment } from "@/components/RecoveryEnvironment";
 import { DisclaimerScreen } from "@/components/DisclaimerScreen";
@@ -812,7 +812,7 @@ const Index = () => {
       />
       <ChangelogDialog />
       {maintenanceMode && <MaintenanceMode onExit={() => setMaintenanceMode(false)} />}
-      {showTour && <FirstTimeTour onComplete={() => setShowTour(false)} />}
+      {showTour && <WelcomeModal onComplete={() => setShowTour(false)} />}
       {showAdminPanel && (
         <AdminPanel
           onExit={() => setShowAdminPanel(false)}
