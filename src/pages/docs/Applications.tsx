@@ -1,152 +1,169 @@
-import { ArrowLeft, Folder, Terminal, Settings, Globe, FileText, Calculator, Music, Image, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
-import SEO from "@/components/SEO";
+import { Folder, Terminal, Settings, Globe, FileText, Calculator, Music, Image, Clock, Cpu, PenTool, Play, Archive } from "lucide-react";
+import { DocLayout, DocHero, DocSection, DocCard, DocAlert } from "@/components/docs";
 
 const Applications = () => {
-  const apps = [
+  const productivityApps = [
     {
       icon: Folder,
       name: "File Explorer",
-      description: "Browse your totally real file system",
-      details: "Navigate through directories, view documents, and pretend you're accessing classified facility data. Features include folder navigation, file previews, and that satisfying click sound (just kidding, no sound)."
-    },
-    {
-      icon: Terminal,
-      name: "Terminal",
-      description: "For when you want to feel like a hacker",
-      details: "Command-line interface with various commands. Type 'help' to see what's available. There might be some secret commands hidden in there... who knows? (We do. Check the Terminal docs.)"
-    },
-    {
-      icon: Settings,
-      name: "Settings",
-      description: "Tweak all the things",
-      details: "Configure system preferences, manage user accounts, export/import your system data, and toggle various options. It's like a control panel, but underwater!"
-    },
-    {
-      icon: Globe,
-      name: "Browser",
-      description: "Surf the intranet (it's like internet, but sadder)",
-      details: "Access the facility's internal network. Browse documentation, check the employee directory, and visit internal sites. No cat videos though, sorry."
+      description: "Browse your virtual file system, navigate directories, and manage files.",
+      features: ["Folder navigation", "File previews", "Search functionality", "Context menus"]
     },
     {
       icon: FileText,
       name: "Notepad",
-      description: "Write things down before you forget",
-      details: "A simple text editor for your notes, logs, and definitely-not-secret plans. Auto-saves to localStorage because we care about your unsaved work."
+      description: "Simple text editor for notes, logs, and documentation.",
+      features: ["Auto-save", "Syntax highlighting", "Multiple tabs", "Export options"]
     },
     {
       icon: Calculator,
       name: "Calculator",
-      description: "Math. It's what calculators do.",
-      details: "Basic arithmetic operations for when you need to calculate... things. Pressure differentials? Oxygen levels? Your remaining sanity? All possible!"
+      description: "Basic and scientific calculations for facility operations.",
+      features: ["Standard mode", "Scientific mode", "History", "Keyboard support"]
+    },
+    {
+      icon: PenTool,
+      name: "Paint",
+      description: "Image editor for diagrams, annotations, and creative work.",
+      features: ["Drawing tools", "Shapes", "Text", "Layer support"]
+    }
+  ];
+
+  const systemApps = [
+    {
+      icon: Terminal,
+      name: "Terminal",
+      description: "Command-line interface with full scripting support.",
+      features: ["50+ commands", "Tab completion", "Command history", "Scripting"]
+    },
+    {
+      icon: Settings,
+      name: "Settings",
+      description: "Configure system preferences, themes, and user accounts.",
+      features: ["Personalization", "Privacy", "System", "Accounts"]
+    },
+    {
+      icon: Cpu,
+      name: "Task Manager",
+      description: "Monitor running processes and system resources.",
+      features: ["Process list", "CPU/Memory usage", "Kill processes", "Startup apps"]
+    },
+    {
+      icon: Archive,
+      name: "Registry Editor",
+      description: "Direct access to system configuration values.",
+      features: ["Key browsing", "Value editing", "Search", "Export/Import"]
+    }
+  ];
+
+  const mediaApps = [
+    {
+      icon: Globe,
+      name: "Browser",
+      description: "Access the facility intranet and internal documentation.",
+      features: ["Tab browsing", "Bookmarks", "History", "Dev tools"]
     },
     {
       icon: Music,
       name: "Music Player",
-      description: "Tunes for the deep",
-      details: "Listen to ambient facility sounds or whatever playlist you've imagined. Perfect for setting the mood while monitoring containment breaches."
+      description: "Listen to ambient sounds and facility audio.",
+      features: ["Playlist support", "Shuffle", "Repeat", "Volume control"]
     },
     {
       icon: Image,
       name: "Image Viewer",
-      description: "Look at pictures",
-      details: "View images stored in the facility database. Specimen photos, facility schematics, or that one picture of the cafeteria's mystery meat."
+      description: "View and manage images stored in the facility database.",
+      features: ["Zoom", "Slideshow", "Rotation", "Metadata"]
+    },
+    {
+      icon: Play,
+      name: "Video Player",
+      description: "Play facility recordings and training videos.",
+      features: ["Playback controls", "Fullscreen", "Speed control", "Subtitles"]
     },
     {
       icon: Clock,
       name: "Clock",
-      description: "Time is an illusion. Lunchtime doubly so.",
-      details: "Keep track of time, even though day and night don't exist 8km underwater. Features multiple time zones for coordinating with surface operations."
-    },
-    {
-      icon: Folder,
-      name: "Task Manager",
-      description: "See what's running (and kill it if you must)",
-      details: "Monitor running applications, view system resource usage, and terminate unresponsive programs. Like Ctrl+Alt+Delete, but prettier."
-    },
-    {
-      icon: Settings,
-      name: "Registry Editor",
-      description: "Touch the forbidden settings",
-      details: "Direct access to system configuration values. Modify at your own risk - there's no 'Are you sure?' dialog here."
+      description: "Track time across multiple zones for surface coordination.",
+      features: ["World clock", "Alarms", "Timer", "Stopwatch"]
     }
   ];
 
-  return (
-    <>
-    <SEO 
-      title="Core Applications" 
-      description="Guide to core apps in Urbanshade OS - File Explorer, Terminal, Notepad, Calculator, and more."
-      path="/docs/applications"
-    />
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
-      <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-cyan-400">Core Applications</h1>
-          <Link 
-            to="/docs" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Docs
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
-        <section className="text-center space-y-4">
-          <Folder className="w-16 h-16 mx-auto text-cyan-400" />
-          <h2 className="text-4xl font-bold text-white">Your Digital Toolbox</h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            URBANSHADE OS comes packed with applications designed to help you manage 
-            an underwater research facility. Or, you know, just click around and have fun.
-          </p>
-        </section>
-
-        <div className="grid gap-6">
-          {apps.map((app, index) => (
-            <div 
-              key={index}
-              className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 hover:border-cyan-500/40 transition-colors"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                  <app.icon className="w-6 h-6 text-cyan-400" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white">{app.name}</h3>
-                  <p className="text-cyan-400 text-sm">{app.description}</p>
-                  <p className="text-slate-400 text-sm">{app.details}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
-          <h3 className="font-bold text-cyan-400 mb-2">💡 Did you know?</h3>
-          <p className="text-sm text-slate-400">
-            You can open multiple applications at once! Each one opens in its own window 
-            that you can drag, resize, minimize, and maximize. It's like a real desktop, 
-            except everything is simulated and the files aren't real. Living the dream!
-          </p>
-        </div>
-
-        <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/30">
-          <h3 className="font-bold text-amber-500 mb-2">🔧 Developer Note</h3>
-          <p className="text-sm text-slate-400">
-            If you have Developer Mode enabled, you can also access DEF-DEV for advanced 
-            debugging and system analysis. Check out the DEF-DEV documentation for more info!
-          </p>
-        </div>
-
-        <div className="flex justify-between pt-8 border-t border-cyan-500/20">
-          <Link to="/docs/getting-started" className="text-cyan-400 hover:underline">← Getting Started</Link>
-          <Link to="/docs/facility" className="text-cyan-400 hover:underline">Facility Apps →</Link>
-        </div>
-      </main>
+  const renderAppGrid = (apps: typeof productivityApps) => (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {apps.map((app) => (
+        <DocCard
+          key={app.name}
+          title={app.name}
+          description={app.description}
+          icon={app.icon}
+          accentColor="blue"
+        >
+          <div className="mt-3 flex flex-wrap gap-2">
+            {app.features.map((feature) => (
+              <span
+                key={feature}
+                className="px-2 py-0.5 text-xs rounded bg-blue-500/10 text-blue-400 border border-blue-500/20"
+              >
+                {feature}
+              </span>
+            ))}
+          </div>
+        </DocCard>
+      ))}
     </div>
-    </>
+  );
+
+  return (
+    <DocLayout
+      title="Core Applications"
+      description="Complete guide to Urbanshade OS applications - File Explorer, Terminal, Notepad, Calculator, Settings, and more."
+      keywords={["apps", "file explorer", "terminal", "notepad", "calculator", "settings", "applications"]}
+      accentColor="blue"
+      prevPage={{ title: "Getting Started", path: "/docs/getting-started" }}
+      nextPage={{ title: "Facility Apps", path: "/docs/facility" }}
+    >
+      <DocHero
+        icon={Folder}
+        title="Core Applications"
+        subtitle="Your digital toolbox for facility operations. From file management to system configuration, these are the apps you'll use every day."
+        accentColor="blue"
+      />
+
+      <DocSection title="Productivity" icon={FileText} accentColor="blue">
+        <p>Essential tools for creating, editing, and managing your work.</p>
+        {renderAppGrid(productivityApps)}
+      </DocSection>
+
+      <DocSection title="System Tools" icon={Cpu} accentColor="blue">
+        <p>Power tools for system administration and configuration.</p>
+        {renderAppGrid(systemApps)}
+
+        <DocAlert variant="warning" title="Registry Warning">
+          The Registry Editor provides direct access to system settings. Incorrect modifications 
+          may cause unexpected behavior. There's no "Are you sure?" dialog!
+        </DocAlert>
+      </DocSection>
+
+      <DocSection title="Media & Communication" icon={Globe} accentColor="blue">
+        <p>Stay connected and entertained during long shifts at the facility.</p>
+        {renderAppGrid(mediaApps)}
+      </DocSection>
+
+      <DocSection title="Tips & Tricks" icon={Settings} accentColor="blue">
+        <div className="space-y-4">
+          <DocAlert variant="tip" title="Multi-Window Workflow">
+            Open multiple apps simultaneously! Each window can be dragged, resized, 
+            minimized, and snapped to screen edges for efficient multitasking.
+          </DocAlert>
+
+          <DocAlert variant="info" title="Developer Mode">
+            Enable Developer Mode in Settings to access DEF-DEV console and additional 
+            debugging tools. Check the <a href="/docs/def-dev" className="text-blue-400 hover:underline">DEF-DEV documentation</a> for more.
+          </DocAlert>
+        </div>
+      </DocSection>
+    </DocLayout>
   );
 };
 
