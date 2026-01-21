@@ -285,6 +285,26 @@ const Index = () => {
           // Handle custom commands via system bus
           systemBus.emit("CUSTOM_COMMAND", cmd.payload);
           break;
+
+        case "HANDSHAKE_REQUEST":
+          // DEF-DEV is asking if we're alive - respond with current state
+          const currentUser = localStorage.getItem("urbanshade_current_user");
+          let username = "Unknown";
+          try {
+            if (currentUser) {
+              username = JSON.parse(currentUser).name || "Unknown";
+            }
+          } catch {}
+          
+          const handshakeResponse = {
+            status: "online" as const,
+            user: username,
+            systemState: crashed ? "crashed" : lockdownMode ? "lockdown" : loggedIn ? "desktop" : "boot",
+            timestamp: new Date().toISOString()
+          };
+          localStorage.setItem("urbanshade_handshake_response", JSON.stringify(handshakeResponse));
+          actionDispatcher.system("Handshake response sent to DEF-DEV");
+          break;
       }
     };
 
@@ -326,7 +346,7 @@ const Index = () => {
       unsubscribe();
       commandQueue.stopPolling();
     };
-  }, []);
+  }, [crashed, lockdownMode, loggedIn]);
 
   // System Bus listeners for cross-component communication
   useEffect(() => {

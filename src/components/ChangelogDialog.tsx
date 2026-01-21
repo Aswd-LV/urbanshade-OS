@@ -76,6 +76,33 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
     "3.0.2": {
       icon: <Zap className="w-5 h-5" />,
       color: "from-amber-500 to-orange-600",
+      tagline: "DEF-DEV HANDSHAKE & DOCS UPDATE",
+      overview: "DEF-DEV console gets handshake protocol for main OS communication, plus a complete documentation overhaul using shared components.",
+      sections: {
+        "DEF-DEV Console": [
+          "NEW: Manual handshake button to connect with main OS",
+          "NEW: Connection status indicator (Connected, Standalone, Waiting)",
+          "NEW: Real-time system state reporting from main OS",
+          "Cleaned up console header with improved layout",
+          "Handshake auto-triggers on page load with 3s timeout"
+        ],
+        "Documentation Overhaul": [
+          "Refactored 8 core doc pages to use shared DocLayout, DocHero, DocSection, DocCard components",
+          "Improved visual hierarchy with consistent accent colors",
+          "Added prev/next navigation to all documentation pages",
+          "Safety and Moderation hub pages redesigned",
+          "Better code examples with DocCode component"
+        ],
+        "Command Queue": [
+          "NEW: HANDSHAKE_REQUEST and HANDSHAKE_RESPONSE command types",
+          "Main OS now responds to DEF-DEV handshake requests",
+          "Includes user info and system state in response"
+        ]
+      }
+    },
+    "3.0.2-prev": {
+      icon: <Zap className="w-5 h-5" />,
+      color: "from-amber-500 to-orange-600",
       tagline: "DEF-DEV MEGA UPDATE",
       overview: "Massive DEF-DEV console upgrade with 17 tabs, 5 new pressure-inspired themes, window animations, and improved developer tooling.",
       sections: {
