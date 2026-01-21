@@ -1,5 +1,6 @@
 import { ArrowLeft, Package, Download, Star, Users, Search, Filter, Shield, Zap, Code, BookOpen, ExternalLink, CheckCircle, AlertTriangle, Terminal, RefreshCw, Trash2, Info, List, Upload, Database } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const UURDocs = () => {
   const featuredPackages = [
@@ -29,6 +30,12 @@ const UURDocs = () => {
   ];
 
   return (
+    <>
+    <SEO 
+      title="UUR Documentation" 
+      description="Urbanshade User Repository (UUR) - install packages, themes, and extensions for Urbanshade OS."
+      path="/docs/uur"
+    />
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/90 backdrop-blur-sm">
@@ -483,6 +490,7 @@ const UURDocs = () => {
         </section>
       </main>
     </div>
+    </>
   );
 };
 

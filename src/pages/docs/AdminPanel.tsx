@@ -1,8 +1,15 @@
 import { ArrowLeft, Shield, Sparkles, AlertTriangle, Skull, Eye, Palette, Zap, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const AdminPanelDocs = () => {
   return (
+    <>
+    <SEO 
+      title="Admin Panel" 
+      description="Access the powerful Admin Panel in Urbanshade OS for crash testing, system control, and chaos management."
+      path="/docs/admin-panel"
+    />
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -285,6 +292,7 @@ const AdminPanelDocs = () => {
         </div>
       </main>
     </div>
+    </>
   );
 };
 

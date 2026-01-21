@@ -1,5 +1,6 @@
 import { ArrowLeft, Camera, Shield, Zap, Map, Users, AlertTriangle, Thermometer, Activity } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const Facility = () => {
   const facilityApps = [
@@ -62,6 +63,12 @@ const Facility = () => {
   ];
 
   return (
+    <>
+    <SEO 
+      title="Facility Applications" 
+      description="Security cameras, containment monitors, facility map, and tools for managing the underwater research facility."
+      path="/docs/facility"
+    />
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
       <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -132,6 +139,7 @@ const Facility = () => {
         </div>
       </main>
     </div>
+    </>
   );
 };
 

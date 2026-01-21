@@ -1,5 +1,6 @@
 import { ArrowLeft, Shield, BookOpen, Eye, Zap, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const Moderation = () => {
   const sections = [
@@ -44,6 +45,12 @@ const Moderation = () => {
   };
 
   return (
+    <>
+    <SEO 
+      title="Moderation Guide" 
+      description="Admin guide for the moderation panel - user management, NAVI monitoring, and moderation actions."
+      path="/docs/moderation"
+    />
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground">
       <header className="sticky top-0 z-50 border-b border-cyan-500/20 bg-slate-950/80 backdrop-blur-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -96,6 +103,7 @@ const Moderation = () => {
         </div>
       </main>
     </div>
+    </>
   );
 };
 

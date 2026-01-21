@@ -1,5 +1,6 @@
 import { ArrowLeft, Bug, Terminal, Database, Activity, Shield, FileWarning, BookOpen, ChevronRight, ExternalLink, Zap, Code } from "lucide-react";
 import { Link } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 const DefDevIndex = () => {
   const sections = [
@@ -69,6 +70,12 @@ const DefDevIndex = () => {
   ];
 
   return (
+    <>
+    <SEO 
+      title="DEF-DEV Console" 
+      description="Developer debugging console for Urbanshade OS - logging, actions, storage, and system diagnostics."
+      path="/docs/def-dev"
+    />
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
@@ -199,6 +206,7 @@ const DefDevIndex = () => {
         </footer>
       </main>
     </div>
+    </>
   );
 };
 
