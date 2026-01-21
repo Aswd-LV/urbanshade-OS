@@ -30,7 +30,10 @@ export type CommandType =
   | "NETWORK_FAILURE"
   | "STORAGE_FULL"
   | "AUTH_FAILURE"
-  | "DB_ERROR";
+  | "DB_ERROR"
+  // DEF-DEV Handshake
+  | "HANDSHAKE_REQUEST"
+  | "HANDSHAKE_RESPONSE";
 
 export interface QueuedCommand {
   id: string;
