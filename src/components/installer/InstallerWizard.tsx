@@ -1,103 +1,143 @@
-import { useState, useEffect, useRef } from "react";
-import { Monitor, HardDrive, Disc, Folder, Check, ChevronRight, Shield, Settings, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronRight, ChevronLeft, HardDrive, Shield, Cpu, Zap } from "lucide-react";
 
 interface InstallerWizardProps {
   onComplete: (adminData: { username: string; password: string }) => void;
 }
 
-type Stage = "welcome" | "install-type" | "directory" | "product-key" | "installing" | "complete";
+type Stage = "welcome" | "license" | "install-type" | "installing" | "config" | "complete";
 
-const VALID_KEYS = ["URBSH-2024-FACIL-MGMT", "DEMO-KEY-URBANSHADE", "TEST-INSTALL-KEY", "DEPTH-8247-FACILITY"];
-
+// Bugcheck-inspired retro text-based installer
 export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
   const [stage, setStage] = useState<Stage>("welcome");
-  
-  // Installation options
+  const [selectedOption, setSelectedOption] = useState(0);
+  const [acceptLicense, setAcceptLicense] = useState(false);
   const [installType, setInstallType] = useState<"minimal" | "standard" | "full">("standard");
-  const [installDir, setInstallDir] = useState("C:\\URBANSHADE");
-  const [productKey, setProductKey] = useState("");
-  const [keySegments, setKeySegments] = useState(["", "", "", ""]);
-  
-  // Installation progress
   const [installProgress, setInstallProgress] = useState(0);
   const [currentAction, setCurrentAction] = useState("");
-  const [installComplete, setInstallComplete] = useState(false);
-  
-  // Configuration during install
-  const [configStep, setConfigStep] = useState(0);
-  const [timezone, setTimezone] = useState("UTC-8 Pacific");
   const [computerName, setComputerName] = useState("URBANSHADE-01");
-  const [networkType, setNetworkType] = useState("corporate");
-  const [autoUpdates, setAutoUpdates] = useState(true);
-  const [userConfigComplete, setUserConfigComplete] = useState(false);
-  
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [counter, setCounter] = useState(0);
 
-  // Installation simulation with simplified actions
+  // Keyboard navigation
   useEffect(() => {
-    if (stage === "installing" && !installComplete) {
-      const actions = [
-        "Extracting kernel files...",
-        "Installing core modules...",
-        "Configuring HAL subsystem...",
-        "Loading security certificates...",
-        "Installing system drivers...",
-        "Configuring network stack...",
-        "Setting up containment protocols...",
-        "Installing applications...",
-        "Registering components...",
-        "Applying system configuration...",
-        "Finalizing installation...",
-      ];
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (stage === "installing") return;
       
-      let actionIndex = 0;
-      let progress = 0;
-      const totalSteps = actions.length * 10;
+      const maxOptions = getMaxOptions();
       
-      const interval = setInterval(() => {
-        progress++;
-        const currentActionIndex = Math.min(Math.floor((progress / totalSteps) * actions.length), actions.length - 1);
-        
-        if (currentActionIndex !== actionIndex) {
-          actionIndex = currentActionIndex;
-          setCurrentAction(actions[actionIndex]);
-        }
-        
-        setInstallProgress((progress / totalSteps) * 100);
-        
-        if (progress >= totalSteps) {
-          clearInterval(interval);
-          setInstallComplete(true);
-          setCurrentAction("Installation complete!");
-        }
-      }, getInstallSpeed());
-      
-      return () => clearInterval(interval);
-    }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedOption(prev => Math.max(0, prev - 1));
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedOption(prev => Math.min(maxOptions - 1, prev + 1));
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        handleEnter();
+      } else if (e.key === "Escape" && canGoBack()) {
+        e.preventDefault();
+        handleBack();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [stage, selectedOption, acceptLicense]);
+
+  // Memory counter animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCounter(prev => (prev + 1) % 9999);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Installation progress simulation
+  useEffect(() => {
+    if (stage !== "installing") return;
+
+    const actions = [
+      "Initializing system core...",
+      "Extracting kernel modules...",
+      "Installing HAL subsystem...",
+      "Configuring security protocols...",
+      "Loading containment drivers...",
+      "Setting up network stack...",
+      "Installing facility applications...",
+      "Registering system components...",
+      "Applying configuration...",
+      "Finalizing installation...",
+    ];
+
+    let progress = 0;
+    const speed = installType === "minimal" ? 80 : installType === "standard" ? 60 : 45;
+
+    const interval = setInterval(() => {
+      progress += 1;
+      const actionIndex = Math.min(Math.floor((progress / 100) * actions.length), actions.length - 1);
+      setCurrentAction(actions[actionIndex]);
+      setInstallProgress(progress);
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => setStage("config"), 500);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
   }, [stage, installType]);
 
-  const getInstallSpeed = () => {
-    switch (installType) {
-      case "minimal": return 80;
-      case "standard": return 60;
-      case "full": return 45;
-      default: return 60;
+  const getMaxOptions = () => {
+    switch (stage) {
+      case "welcome": return 2;
+      case "license": return 2;
+      case "install-type": return 3;
+      case "config": return 2;
+      case "complete": return 1;
+      default: return 1;
     }
   };
 
-  const handleKeySegmentChange = (index: number, value: string) => {
-    const cleanValue = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 5);
-    const newSegments = [...keySegments];
-    newSegments[index] = cleanValue;
-    setKeySegments(newSegments);
-    setProductKey(newSegments.join("-"));
-    
-    if (cleanValue.length === 5 && index < 3) {
-      inputRefs.current[index + 1]?.focus();
-    }
+  const canGoBack = () => {
+    return ["license", "install-type"].includes(stage);
   };
 
-  const isValidKey = VALID_KEYS.includes(productKey);
+  const handleBack = () => {
+    setSelectedOption(0);
+    if (stage === "license") setStage("welcome");
+    else if (stage === "install-type") setStage("license");
+  };
+
+  const handleEnter = () => {
+    switch (stage) {
+      case "welcome":
+        if (selectedOption === 0) {
+          setStage("license");
+          setSelectedOption(0);
+        }
+        break;
+      case "license":
+        if (selectedOption === 0) {
+          setAcceptLicense(true);
+          setStage("install-type");
+          setSelectedOption(1); // Default to standard
+        }
+        break;
+      case "install-type":
+        setInstallType(["minimal", "standard", "full"][selectedOption] as "minimal" | "standard" | "full");
+        setStage("installing");
+        break;
+      case "config":
+        if (selectedOption === 0) {
+          setStage("complete");
+          setSelectedOption(0);
+        }
+        break;
+      case "complete":
+        handleFinish();
+        break;
+    }
+  };
 
   const handleFinish = () => {
     localStorage.setItem("urbanshade_first_boot", "true");
@@ -106,596 +146,343 @@ export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
     onComplete({ username: "Administrator", password: "admin" });
   };
 
-
-  const canFinish = installComplete && userConfigComplete;
-
-  // Progress steps for the top stepper
-  const steps = [
-    { id: "welcome", label: "Welcome" },
-    { id: "install-type", label: "Setup" },
-    { id: "directory", label: "Location" },
-    { id: "product-key", label: "Activate" },
-    { id: "installing", label: "Install" },
-  ];
-
-  const currentStepIndex = steps.findIndex(s => s.id === stage);
-
-  return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col">
-      {/* Header with stepper */}
-      <div className="flex-shrink-0 bg-slate-900/80 border-b border-cyan-500/20 px-6 py-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <img src="/favicon.svg" alt="UrbanShade" className="w-10 h-10" />
-              <div>
-                <div className="text-cyan-100 font-bold text-sm">URBANSHADE OS</div>
-                <div className="text-cyan-500/70 text-xs">Setup Wizard v3.0</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-cyan-500/50">
-              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span>STNDT Active</span>
-            </div>
-          </div>
-          
-          {/* Horizontal stepper */}
-          <div className="flex items-center gap-1">
-            {steps.map((step, i) => (
-              <div key={step.id} className="flex items-center flex-1">
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-all ${
-                  i < currentStepIndex 
-                    ? "bg-cyan-500/20 text-cyan-400"
-                    : i === currentStepIndex
-                      ? "bg-cyan-500 text-slate-900 font-bold"
-                      : "bg-slate-800/50 text-slate-500"
-                }`}>
-                  {i < currentStepIndex ? (
-                    <Check className="w-3 h-3" />
-                  ) : (
-                    <span className="w-4 text-center">{i + 1}</span>
-                  )}
-                  <span className="hidden sm:inline">{step.label}</span>
-                </div>
-                {i < steps.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-1 rounded ${
-                    i < currentStepIndex ? "bg-cyan-500/50" : "bg-slate-700"
-                  }`} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      
-      {/* Main content */}
-      <div className="flex-1 flex items-center justify-center p-6 overflow-auto">
-        <div className="w-full max-w-2xl">
-          {stage === "welcome" && (
-            <WelcomeScreen 
-              onNext={() => setStage("install-type")} 
-            />
-          )}
-          
-          {stage === "install-type" && (
-            <InstallTypeScreen 
-              installType={installType}
-              setInstallType={setInstallType}
-              onBack={() => setStage("welcome")}
-              onNext={() => setStage("directory")}
-            />
-          )}
-          
-          {stage === "directory" && (
-            <DirectoryScreen
-              installDir={installDir}
-              setInstallDir={setInstallDir}
-              onBack={() => setStage("install-type")}
-              onNext={() => setStage("product-key")}
-            />
-          )}
-          
-          {stage === "product-key" && (
-            <ProductKeyScreen
-              keySegments={keySegments}
-              inputRefs={inputRefs}
-              handleKeySegmentChange={handleKeySegmentChange}
-              isValidKey={isValidKey}
-              onBack={() => setStage("directory")}
-              onNext={() => setStage("installing")}
-            />
-          )}
-          
-          {stage === "installing" && (
-            <InstallingScreen
-              installProgress={installProgress}
-              currentAction={currentAction}
-              installComplete={installComplete}
-              userConfigComplete={userConfigComplete}
-              configStep={configStep}
-              setConfigStep={setConfigStep}
-              timezone={timezone}
-              setTimezone={setTimezone}
-              computerName={computerName}
-              setComputerName={setComputerName}
-              networkType={networkType}
-              setNetworkType={setNetworkType}
-              autoUpdates={autoUpdates}
-              setAutoUpdates={setAutoUpdates}
-              setUserConfigComplete={setUserConfigComplete}
-              canFinish={canFinish}
-              onFinish={handleFinish}
-            />
-          )}
-        </div>
-      </div>
-      
-      {/* Footer status */}
-      <div className="flex-shrink-0 bg-slate-900/60 border-t border-cyan-500/10 px-6 py-2">
-        <div className="max-w-3xl mx-auto flex items-center justify-between text-xs text-slate-500">
-          <span>Depth: 8,247m • Pressure: 824 atm</span>
-          <span>© 2024 UrbanShade Corporation</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Welcome screen
-const WelcomeScreen = ({ onNext }: { onNext: () => void }) => {
-  return (
-    <div className="text-center space-y-8">
+  const renderOption = (index: number, label: string, description?: string, disabled?: boolean) => (
+    <div
+      onClick={() => !disabled && setSelectedOption(index)}
+      onDoubleClick={() => !disabled && handleEnter()}
+      className={`py-2 px-4 cursor-pointer flex items-center gap-3 transition-colors ${
+        selectedOption === index 
+          ? 'bg-white text-black' 
+          : disabled 
+            ? 'text-gray-600 cursor-not-allowed'
+            : 'hover:bg-white/10'
+      }`}
+    >
+      <span className={`w-4 font-bold ${selectedOption === index ? 'text-black' : 'text-gray-500'}`}>
+        {selectedOption === index ? '►' : ' '}
+      </span>
       <div>
-        <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center overflow-hidden">
-          <img src="/favicon.svg" alt="UrbanShade" className="w-16 h-16" />
-        </div>
-        <h1 className="text-3xl font-bold text-white mb-2">Welcome to UrbanShade OS</h1>
-        <p className="text-cyan-400/70">Deep Sea Facility Management System</p>
-      </div>
-      
-      <div className="space-y-3 text-left max-w-sm mx-auto">
-        <div className="flex items-center gap-3 text-slate-300">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">1</div>
-          <span>Choose installation type</span>
-        </div>
-        <div className="flex items-center gap-3 text-slate-300">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">2</div>
-          <span>Select installation location</span>
-        </div>
-        <div className="flex items-center gap-3 text-slate-300">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">3</div>
-          <span>Activate your license</span>
-        </div>
-        <div className="flex items-center gap-3 text-slate-300">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">4</div>
-          <span>Configure system settings</span>
-        </div>
-      </div>
-      
-      <button
-        onClick={onNext}
-        className="w-full max-w-sm mx-auto py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white font-semibold shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2"
-      >
-        Begin Setup
-        <ChevronRight className="w-5 h-5" />
-      </button>
-      
-      <p className="text-xs text-slate-600 max-w-sm mx-auto">
-        Installation takes about 2-10 minutes depending on the selected configuration.
-      </p>
-    </div>
-  );
-};
-
-const InstallTypeScreen = ({ installType, setInstallType, onBack, onNext }: {
-  installType: string;
-  setInstallType: (type: "minimal" | "standard" | "full") => void;
-  onBack: () => void;
-  onNext: () => void;
-}) => (
-  <div className="space-y-6">
-    <div className="text-center mb-8">
-      <h2 className="text-2xl font-bold text-white mb-2">Choose Installation Type</h2>
-      <p className="text-slate-400">Select components based on your facility needs</p>
-    </div>
-    
-    <div className="space-y-3">
-      {[
-        { id: "minimal", label: "Minimal", desc: "Core system only — backup terminals", size: "2.4 GB", time: "~2 min" },
-        { id: "standard", label: "Standard", desc: "Essential facility tools — recommended", size: "5.7 GB", time: "~5 min", recommended: true },
-        { id: "full", label: "Complete", desc: "All applications and research modules", size: "12.3 GB", time: "~10 min" },
-      ].map(opt => (
-        <button
-          key={opt.id}
-          onClick={() => setInstallType(opt.id as "minimal" | "standard" | "full")}
-          className={`w-full p-5 rounded-xl border text-left transition-all ${
-            installType === opt.id 
-              ? "border-cyan-400 bg-cyan-500/10 shadow-lg shadow-cyan-500/10" 
-              : "border-slate-700 hover:border-slate-600 hover:bg-slate-800/50"
-          }`}
-        >
-          <div className="flex items-center gap-4">
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-              installType === opt.id ? "border-cyan-400 bg-cyan-400" : "border-slate-600"
-            }`}>
-              {installType === opt.id && <Check className="w-4 h-4 text-slate-900" />}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <span className={`font-bold ${installType === opt.id ? "text-cyan-300" : "text-slate-300"}`}>
-                  {opt.label}
-                </span>
-                {opt.recommended && (
-                  <span className="px-2 py-0.5 rounded text-[10px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                    RECOMMENDED
-                  </span>
-                )}
-              </div>
-              <div className="text-sm text-slate-500 mt-1">{opt.desc}</div>
-            </div>
-            <div className="text-right text-xs">
-              <div className="text-slate-400 font-mono">{opt.size}</div>
-              <div className="text-slate-600 flex items-center gap-1 justify-end">
-                <Clock className="w-3 h-3" />
-                {opt.time}
-              </div>
-            </div>
-          </div>
-        </button>
-      ))}
-    </div>
-    
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/30 border border-slate-700/50 text-xs">
-      <HardDrive className="w-4 h-4 text-cyan-500" />
-      <span className="text-slate-400">Available space: <span className="text-cyan-400 font-mono">847.2 GB</span></span>
-    </div>
-    
-    <div className="flex justify-between pt-4">
-      <InstallerButton variant="ghost" onClick={onBack}>← Back</InstallerButton>
-      <InstallerButton onClick={onNext}>Continue →</InstallerButton>
-    </div>
-  </div>
-);
-
-const DirectoryScreen = ({ installDir, setInstallDir, onBack, onNext }: {
-  installDir: string;
-  setInstallDir: (dir: string) => void;
-  onBack: () => void;
-  onNext: () => void;
-}) => (
-  <div className="space-y-6">
-    <div className="text-center mb-8">
-      <h2 className="text-2xl font-bold text-white mb-2">Installation Location</h2>
-      <p className="text-slate-400">Choose where to install UrbanShade OS</p>
-    </div>
-    
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-slate-800/50 border border-cyan-500/30 rounded-lg">
-          <Folder className="w-5 h-5 text-cyan-500" />
-          <input
-            type="text"
-            value={installDir}
-            onChange={(e) => setInstallDir(e.target.value)}
-            className="flex-1 bg-transparent text-cyan-300 font-mono text-sm focus:outline-none"
-          />
-        </div>
-        <InstallerButton variant="ghost">Browse</InstallerButton>
-      </div>
-      
-      <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-4 max-h-48 overflow-y-auto">
-        <div className="text-xs space-y-1 font-mono">
-          {[
-            { icon: HardDrive, name: "Local Disk (C:)", indent: 0 },
-            { icon: Folder, name: "Program Files", indent: 1 },
-            { icon: Folder, name: "URBANSHADE", indent: 1, active: true },
-            { icon: Folder, name: "System", indent: 1 },
-            { icon: Folder, name: "Users", indent: 1 },
-          ].map((item, i) => (
-            <div 
-              key={i}
-              className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${
-                item.active ? "bg-cyan-500/20 text-cyan-300" : "text-slate-400 hover:bg-slate-700/50 hover:text-cyan-300"
-              }`}
-              style={{ paddingLeft: `${item.indent * 16 + 8}px` }}
-            >
-              <item.icon className={`w-4 h-4 ${item.active ? "text-cyan-400" : "text-slate-500"}`} />
-              {item.name}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-    
-    <div className="flex justify-between pt-4">
-      <InstallerButton variant="ghost" onClick={onBack}>← Back</InstallerButton>
-      <InstallerButton onClick={onNext}>Continue →</InstallerButton>
-    </div>
-  </div>
-);
-
-const ProductKeyScreen = ({ keySegments, inputRefs, handleKeySegmentChange, isValidKey, onBack, onNext }: {
-  keySegments: string[];
-  inputRefs: React.MutableRefObject<(HTMLInputElement | null)[]>;
-  handleKeySegmentChange: (index: number, value: string) => void;
-  isValidKey: boolean;
-  onBack: () => void;
-  onNext: () => void;
-}) => (
-  <div className="space-y-6">
-    <div className="text-center mb-8">
-      <h2 className="text-2xl font-bold text-white mb-2">Activate Your License</h2>
-      <p className="text-slate-400">Enter your facility license key to continue</p>
-    </div>
-    
-    <div className="flex justify-center gap-4 mb-6">
-      <div className="w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 rounded-xl flex items-center justify-center">
-        <Disc className="w-10 h-10 text-cyan-400" />
-      </div>
-    </div>
-    
-    <div className="flex items-center gap-2 justify-center mb-6">
-      {keySegments.map((seg, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <input
-            ref={el => inputRefs.current[i] = el}
-            type="text"
-            value={seg}
-            onChange={(e) => handleKeySegmentChange(i, e.target.value)}
-            maxLength={5}
-            className="w-20 px-3 py-3 bg-slate-800/50 border border-slate-600 rounded-lg text-center font-mono text-cyan-300 uppercase focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all"
-          />
-          {i < 3 && <span className="text-slate-600 text-xl font-bold">-</span>}
-        </div>
-      ))}
-    </div>
-    
-    {isValidKey && (
-      <div className="text-center text-green-400 text-sm flex items-center justify-center gap-2">
-        <Check className="w-5 h-5" /> License validated successfully
-      </div>
-    )}
-    
-    <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-4 text-xs">
-      <div className="text-slate-400 mb-2">Demo keys for testing:</div>
-      <div className="font-mono text-cyan-400/70 space-y-1">
-        <div>URBSH-2024-FACIL-MGMT</div>
-        <div>DEMO-KEY-URBANSHADE</div>
-      </div>
-    </div>
-    
-    <div className="flex justify-between pt-4">
-      <InstallerButton variant="ghost" onClick={onBack}>← Back</InstallerButton>
-      <InstallerButton onClick={onNext} disabled={!isValidKey}>Continue →</InstallerButton>
-    </div>
-  </div>
-);
-
-const InstallingScreen = ({
-  installProgress, currentAction, installComplete,
-  userConfigComplete, configStep, setConfigStep,
-  timezone, setTimezone, computerName, setComputerName,
-  networkType, setNetworkType, autoUpdates, setAutoUpdates,
-  setUserConfigComplete, canFinish, onFinish
-}: {
-  installProgress: number;
-  currentAction: string;
-  installComplete: boolean;
-  userConfigComplete: boolean;
-  configStep: number;
-  setConfigStep: (step: number) => void;
-  timezone: string;
-  setTimezone: (tz: string) => void;
-  computerName: string;
-  setComputerName: (name: string) => void;
-  networkType: string;
-  setNetworkType: (type: string) => void;
-  autoUpdates: boolean;
-  setAutoUpdates: (updates: boolean) => void;
-  setUserConfigComplete: (complete: boolean) => void;
-  canFinish: boolean;
-  onFinish: () => void;
-}) => {
-  const configSteps = [
-    { title: "Time Zone", content: (
-      <div className="space-y-3">
-        <select 
-          value={timezone} 
-          onChange={(e) => setTimezone(e.target.value)}
-          className="w-full p-3 bg-slate-800/50 border border-slate-600 rounded-lg text-cyan-300 text-sm focus:outline-none focus:border-cyan-400"
-        >
-          <option>UTC-8 Pacific (HQ)</option>
-          <option>UTC-5 Eastern</option>
-          <option>UTC+0 London</option>
-          <option>UTC+9 Tokyo</option>
-          <option>UTC-11 Mariana Trench</option>
-        </select>
-      </div>
-    )},
-    { title: "Terminal Name", content: (
-      <div className="space-y-3">
-        <input
-          type="text"
-          value={computerName}
-          onChange={(e) => setComputerName(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""))}
-          maxLength={15}
-          className="w-full p-3 bg-slate-800/50 border border-slate-600 rounded-lg font-mono text-cyan-300 text-sm focus:outline-none focus:border-cyan-400"
-        />
-      </div>
-    )},
-    { title: "Network", content: (
-      <div className="space-y-2">
-        {[
-          { id: "corporate", label: "Facility Network" },
-          { id: "guest", label: "Guest Access" },
-          { id: "isolated", label: "Isolated Mode" },
-        ].map(opt => (
-          <label key={opt.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800/50 cursor-pointer">
-            <input
-              type="radio"
-              name="network"
-              checked={networkType === opt.id}
-              onChange={() => setNetworkType(opt.id)}
-              className="text-cyan-400"
-            />
-            <span className="text-sm text-slate-300">{opt.label}</span>
-          </label>
-        ))}
-      </div>
-    )},
-    { title: "Updates", content: (
-      <label className="flex items-center gap-3 cursor-pointer p-2">
-        <input
-          type="checkbox"
-          checked={autoUpdates}
-          onChange={(e) => setAutoUpdates(e.target.checked)}
-        />
-        <span className="text-sm text-slate-300">Enable automatic updates</span>
-      </label>
-    )},
-    { title: "Dev Mode", content: <DevModeConfig /> },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-white mb-2">
-          {installComplete && userConfigComplete ? "Ready to Launch" : "Installing UrbanShade OS"}
-        </h2>
-        <p className="text-slate-400">
-          {installComplete && userConfigComplete ? "Your system is configured and ready" : "Configure settings while files are copied"}
-        </p>
-      </div>
-      
-      {/* Main progress bar */}
-      <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-        <div className="flex justify-between text-sm mb-3">
-          <span className={installComplete ? "text-green-400 font-medium" : "text-cyan-400"}>
-            {installComplete ? "✓ Installation Complete" : `${Math.round(installProgress)}%`}
+        <span className={`text-sm ${disabled ? 'text-gray-600' : ''}`}>{label}</span>
+        {description && (
+          <span className={`text-xs ml-3 ${selectedOption === index ? 'text-black/60' : 'text-gray-500'}`}>
+            {description}
           </span>
-          <span className="text-slate-500 text-xs truncate max-w-[200px]">{currentAction}</span>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black text-white font-mono flex flex-col select-none">
+      {/* Top accent */}
+      <div className="h-1 bg-white" />
+
+      {/* Header */}
+      <div className="px-8 py-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">UrbanShade OS Setup</h1>
+          <p className="text-sm text-gray-400 mt-1">
+            {stage === "welcome" && "Welcome to the installation wizard"}
+            {stage === "license" && "License Agreement"}
+            {stage === "install-type" && "Select installation type"}
+            {stage === "installing" && "Installing UrbanShade OS..."}
+            {stage === "config" && "System Configuration"}
+            {stage === "complete" && "Installation Complete"}
+          </p>
         </div>
-        <div className="h-3 bg-slate-800 rounded-full overflow-hidden">
-          <div 
-            className={`h-full transition-all duration-300 ${installComplete ? "bg-green-500" : "bg-gradient-to-r from-cyan-600 to-cyan-400"}`}
-            style={{ width: `${installProgress}%` }}
-          />
+        <div className="text-right text-xs text-gray-500">
+          <div>Build 3.0.0</div>
+          <div className="font-mono">0x{counter.toString(16).padStart(8, '0').toUpperCase()}</div>
         </div>
       </div>
-      
-      {/* Configuration panel */}
-      {!userConfigComplete ? (
-        <div className="bg-slate-800/30 rounded-xl p-6 border border-slate-700/50">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-sm font-medium text-cyan-400">
-              Configure: {configSteps[configStep].title}
+
+      {/* Progress indicator */}
+      <div className="mx-8 mb-4">
+        <div className="flex items-center gap-2 text-xs text-gray-500">
+          {["Welcome", "License", "Type", "Install", "Config", "Done"].map((step, i) => {
+            const stages: Stage[] = ["welcome", "license", "install-type", "installing", "config", "complete"];
+            const currentIndex = stages.indexOf(stage);
+            const isActive = i === currentIndex;
+            const isComplete = i < currentIndex;
+            return (
+              <div key={step} className="flex items-center gap-2">
+                <span className={`
+                  px-2 py-0.5 border 
+                  ${isComplete ? 'border-white bg-white text-black' : ''}
+                  ${isActive ? 'border-white' : 'border-gray-700'}
+                `}>
+                  {isComplete ? '✓' : i + 1}
+                </span>
+                <span className={isActive ? 'text-white' : ''}>{step}</span>
+                {i < 5 && <span className="text-gray-700">—</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Separator */}
+      <div className="mx-8 border-t border-white/20" />
+
+      {/* Main content */}
+      <div className="flex-1 px-8 py-6 overflow-auto">
+        {stage === "welcome" && (
+          <div className="max-w-2xl space-y-6">
+            <div className="border border-white p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <img src="/favicon.svg" alt="UrbanShade" className="w-12 h-12 invert" />
+                <div>
+                  <div className="text-xl font-bold">URBANSHADE OS</div>
+                  <div className="text-sm text-gray-400">Deep Sea Facility Management System</div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                This wizard will guide you through the installation of UrbanShade OS 
+                on your facility terminal. The process takes approximately 2-10 minutes 
+                depending on your selected configuration.
+              </p>
             </div>
-            <div className="flex gap-1">
-              {configSteps.map((_, i) => (
-                <div key={i} className={`w-2 h-2 rounded-full transition-colors ${
-                  i <= configStep ? "bg-cyan-400" : "bg-slate-700"
-                }`} />
-              ))}
+
+            <div className="space-y-1">
+              <div className="text-xs text-gray-500 mb-2">Installation will:</div>
+              <div className="text-sm flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-gray-500" /> Install core system files
+              </div>
+              <div className="text-sm flex items-center gap-2">
+                <HardDrive className="w-4 h-4 text-gray-500" /> Configure storage subsystems
+              </div>
+              <div className="text-sm flex items-center gap-2">
+                <Shield className="w-4 h-4 text-gray-500" /> Set up security protocols
+              </div>
+              <div className="text-sm flex items-center gap-2">
+                <Zap className="w-4 h-4 text-gray-500" /> Initialize facility applications
+              </div>
+            </div>
+
+            <div className="border border-white/40 p-4 mt-8">
+              <div className="text-xs text-gray-400 mb-3">Select an option:</div>
+              {renderOption(0, "Continue with installation")}
+              {renderOption(1, "Cancel and exit", undefined, true)}
             </div>
           </div>
-          
-          <div className="mb-4">
-            {configSteps[configStep].content}
+        )}
+
+        {stage === "license" && (
+          <div className="max-w-2xl space-y-6">
+            <div className="border border-white p-4 h-64 overflow-y-auto text-xs text-gray-300 leading-relaxed">
+              <div className="text-white font-bold mb-4">URBANSHADE OS LICENSE AGREEMENT</div>
+              <p className="mb-3">
+                By installing this software, you acknowledge that UrbanShade OS is 
+                a simulated operating system environment for entertainment and educational 
+                purposes only.
+              </p>
+              <p className="mb-3">
+                This software does not access your real file system, modify system settings, 
+                or perform any operations outside of your web browser's sandbox environment.
+              </p>
+              <p className="mb-3">
+                All "files," "settings," and "system data" exist only within your browser's 
+                localStorage and will be lost if you clear your browser data.
+              </p>
+              <p className="mb-3">
+                The creators of UrbanShade OS are not responsible for:
+              </p>
+              <ul className="list-disc ml-6 mb-3 space-y-1">
+                <li>Confusion between real and simulated operating systems</li>
+                <li>Uncontrollable urges to explore underwater facilities</li>
+                <li>Sudden interest in containment protocols</li>
+                <li>Time lost exploring fictional terminal commands</li>
+              </ul>
+              <p className="mb-3">
+                By selecting "I Accept," you agree to have fun and not take things too seriously.
+              </p>
+              <div className="mt-6 pt-4 border-t border-white/20 text-gray-500">
+                © 2024 UrbanShade Corporation. All rights reserved.
+                <br />
+                Depth: 8,247m • Pressure: 824 atm • Document ID: LICENSE-V3.0
+              </div>
+            </div>
+
+            <div className="border border-white/40 p-4">
+              <div className="text-xs text-gray-400 mb-3">Do you accept the license agreement?</div>
+              {renderOption(0, "I Accept", "Continue installation")}
+              {renderOption(1, "I Decline", "Cancel installation", true)}
+            </div>
           </div>
-          
-          <div className="flex justify-between">
-            <InstallerButton 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setConfigStep(Math.max(0, configStep - 1))}
-              disabled={configStep === 0}
+        )}
+
+        {stage === "install-type" && (
+          <div className="max-w-2xl space-y-6">
+            <div className="text-sm text-gray-300 mb-4">
+              Select the installation type that best suits your facility needs:
+            </div>
+
+            <div className="border border-white/40 p-4">
+              <div className="text-xs text-gray-400 mb-3">Installation Types:</div>
+              {renderOption(0, "Minimal", "Core system only — 2.4 GB, ~2 min")}
+              {renderOption(1, "Standard (Recommended)", "Essential tools — 5.7 GB, ~5 min")}
+              {renderOption(2, "Complete", "All applications — 12.3 GB, ~10 min")}
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-24">Target:</span>
+                <span className="font-mono text-white">C:\URBANSHADE</span>
+              </div>
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-24">Available:</span>
+                <span className="font-mono">847.2 GB</span>
+              </div>
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-24">Required:</span>
+                <span className="font-mono">
+                  {selectedOption === 0 ? "2.4 GB" : selectedOption === 1 ? "5.7 GB" : "12.3 GB"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {stage === "installing" && (
+          <div className="max-w-2xl space-y-6">
+            <div className="border border-white p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm">Installing UrbanShade OS...</span>
+                <span className="font-mono text-sm">{installProgress}%</span>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="h-4 border border-white">
+                <div 
+                  className="h-full bg-white transition-all duration-200"
+                  style={{ width: `${installProgress}%` }}
+                />
+              </div>
+
+              <div className="mt-4 text-sm text-gray-400">{currentAction}</div>
+            </div>
+
+            {/* ASCII-style progress visualization */}
+            <div className="font-mono text-xs text-gray-500 space-y-1">
+              <div>Installing: {installType.toUpperCase()} configuration</div>
+              <div>
+                [{"█".repeat(Math.floor(installProgress / 5))}{"░".repeat(20 - Math.floor(installProgress / 5))}]
+              </div>
+              <div className="text-gray-600">
+                Memory: 0x{counter.toString(16).padStart(8, '0').toUpperCase()} | 
+                Sector: {Math.floor(installProgress * 10)} | 
+                Status: WRITING
+              </div>
+            </div>
+
+            <div className="text-xs text-gray-600">
+              Please wait while UrbanShade OS is being installed. 
+              Do not close this window or power off your terminal.
+            </div>
+          </div>
+        )}
+
+        {stage === "config" && (
+          <div className="max-w-2xl space-y-6">
+            <div className="text-sm text-gray-300 mb-4">
+              Installation complete. Configure your system settings:
+            </div>
+
+            <div className="border border-white p-4 space-y-4">
+              <div>
+                <label className="text-xs text-gray-500 block mb-2">Computer Name:</label>
+                <input
+                  type="text"
+                  value={computerName}
+                  onChange={(e) => setComputerName(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ""))}
+                  className="w-full bg-transparent border border-white/40 px-3 py-2 text-sm font-mono focus:outline-none focus:border-white"
+                  maxLength={15}
+                />
+              </div>
+            </div>
+
+            <div className="border border-white/40 p-4">
+              <div className="text-xs text-gray-400 mb-3">Ready to complete setup:</div>
+              {renderOption(0, "Apply settings and continue")}
+              {renderOption(1, "Advanced options", undefined, true)}
+            </div>
+
+            <div className="space-y-2 text-xs text-gray-500">
+              <div>✓ Core system installed</div>
+              <div>✓ Security protocols configured</div>
+              <div>✓ Facility applications ready</div>
+              <div>○ Pending: First-time setup (OOBE)</div>
+            </div>
+          </div>
+        )}
+
+        {stage === "complete" && (
+          <div className="max-w-2xl space-y-6">
+            <div className="border border-white p-6 text-center">
+              <div className="text-4xl mb-4">✓</div>
+              <div className="text-xl font-bold mb-2">Installation Complete</div>
+              <div className="text-sm text-gray-400">
+                UrbanShade OS has been successfully installed.
+              </div>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-32">Install Type:</span>
+                <span className="capitalize">{installType}</span>
+              </div>
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-32">Computer Name:</span>
+                <span className="font-mono">{computerName}</span>
+              </div>
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-32">Location:</span>
+                <span className="font-mono">C:\URBANSHADE</span>
+              </div>
+            </div>
+
+            <div className="border border-white/40 p-4">
+              {renderOption(0, "Restart and begin first-time setup")}
+            </div>
+
+            <div className="text-xs text-gray-500">
+              Your terminal will restart to complete the Out-of-Box Experience (OOBE).
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-white/20 px-8 py-4 flex items-center justify-between">
+        <div className="text-xs text-gray-500 space-x-6">
+          <span>ENTER=Select</span>
+          <span>↑↓=Navigate</span>
+          {canGoBack() && <span>ESC=Back</span>}
+        </div>
+        <div className="flex items-center gap-3">
+          {canGoBack() && (
+            <button
+              onClick={handleBack}
+              className="px-4 py-2 text-xs border border-white/40 hover:bg-white/10 transition-colors flex items-center gap-2"
             >
-              Previous
-            </InstallerButton>
-            {configStep < configSteps.length - 1 ? (
-              <InstallerButton size="sm" onClick={() => setConfigStep(configStep + 1)}>
-                Next
-              </InstallerButton>
-            ) : (
-              <InstallerButton size="sm" onClick={() => setUserConfigComplete(true)}>
-                Finish Config
-              </InstallerButton>
-            )}
-          </div>
+              <ChevronLeft className="w-3 h-3" />
+              BACK
+            </button>
+          )}
+          {stage !== "installing" && (
+            <button
+              onClick={handleEnter}
+              className="px-4 py-2 text-xs bg-white text-black font-bold hover:bg-gray-200 transition-colors flex items-center gap-2"
+            >
+              {stage === "complete" ? "FINISH" : "NEXT"}
+              <ChevronRight className="w-3 h-3" />
+            </button>
+          )}
         </div>
-      ) : (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center">
-          <Check className="w-10 h-10 text-green-400 mx-auto mb-2" />
-          <div className="text-green-300 font-medium">Configuration Complete</div>
-          <div className="text-green-500/70 text-sm">
-            {installComplete ? "Ready to launch!" : "Waiting for installation..."}
-          </div>
-        </div>
-      )}
-      
-      {canFinish && (
-        <InstallerButton onClick={onFinish} className="w-full">
-          Launch UrbanShade OS →
-        </InstallerButton>
-      )}
+      </div>
+
+      {/* Bottom accent */}
+      <div className="h-1 bg-white" />
     </div>
   );
 };
-
-const DevModeConfig = () => {
-  const [devMode, setDevMode] = useState(false);
-  
-  const handleToggle = (checked: boolean) => {
-    setDevMode(checked);
-    localStorage.setItem("urbanshade_dev_mode_install", JSON.stringify(checked));
-    localStorage.setItem("settings_developer_mode", JSON.stringify(checked));
-  };
-  
-  return (
-    <div className="space-y-3">
-      <label className="flex items-center gap-3 cursor-pointer p-2">
-        <input
-          type="checkbox"
-          checked={devMode}
-          onChange={(e) => handleToggle(e.target.checked)}
-        />
-        <div>
-          <div className="text-sm text-slate-300">Enable Developer Mode</div>
-          <div className="text-xs text-slate-500">Access DEF-DEV debug console</div>
-        </div>
-      </label>
-      {devMode && (
-        <div className="text-xs text-amber-400/70 p-2 bg-amber-500/10 rounded-lg">
-          ⚠ Advanced features will be enabled
-        </div>
-      )}
-    </div>
-  );
-};
-
-const InstallerButton = ({ children, onClick, disabled, variant = "primary", size = "md", className = "" }: { 
-  children: React.ReactNode; 
-  onClick?: () => void;
-  disabled?: boolean;
-  variant?: "primary" | "ghost";
-  size?: "sm" | "md";
-  className?: string;
-}) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className={`font-medium transition-all rounded-lg ${
-      size === "sm" ? "px-4 py-2 text-sm" : "px-6 py-3"
-    } ${
-      variant === "primary"
-        ? "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white shadow-lg shadow-cyan-500/20"
-        : "text-slate-400 hover:text-cyan-400 hover:bg-slate-800/50"
-    } ${
-      disabled ? "opacity-50 cursor-not-allowed" : ""
-    } ${className}`}
-  >
-    {children}
-  </button>
-);
-
-export default InstallerWizard;
