@@ -44,41 +44,20 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
   }
 
   const changelogs: Record<string, VersionData> = {
-    "3.0.1": {
-      icon: <Sparkles className="w-5 h-5" />,
-      color: "from-cyan-500 to-blue-600",
-      tagline: "SEO & DISCOVERY UPDATE",
-      overview: "Enhanced discoverability with SEO improvements, new welcome modal, and documentation updates.",
+    "3.0.0": {
+      icon: <Rocket className="w-5 h-5" />,
+      color: "from-cyan-500 to-purple-600",
+      tagline: "THE DEEP OCEAN RELEASE",
+      overview: "All patches consolidated into V3.0 - featuring DEF-DEV handshake, Discord-style docs hub with tag search, complete documentation overhaul, and more.",
       sections: {
-        "SEO & Discoverability": [
-          "NEW: XML sitemap for improved search engine crawling",
-          "NEW: Enhanced robots.txt with AI bot permissions (GPTBot, ClaudeBot, PerplexityBot)",
-          "NEW: JSON-LD structured data (WebApplication schema)",
-          "NEW: LLM summary page (/llms.txt) for AI discoverability",
-          "NEW: Dynamic meta tags with react-helmet-async",
-          "NEW: SEO component added to all documentation pages"
+        "Documentation Hub Redesign": [
+          "NEW: Discord-style tag-based search and filtering",
+          "NEW: Each article has 5 searchable tags",
+          "NEW: DocTOC component for section navigation in large docs",
+          "NEW: DocTag component for visual tag display",
+          "Redesigned docs hub with cleaner 3-column grid layout",
+          "All 14+ articles tagged with relevant categories"
         ],
-        "Onboarding": [
-          "NEW: Streamlined welcome modal replaces multi-step tour",
-          "Quick access to documentation or start exploring",
-          "Cleaner first-time user experience"
-        ],
-        "Open Graph": [
-          "NEW: Branded OG image for social sharing",
-          "Improved social media previews on Twitter/X, Discord, etc."
-        ],
-        "Bug Fixes": [
-          "Fixed meta description typo",
-          "Fixed canonical URL configuration"
-        ]
-      }
-    },
-    "3.0.2": {
-      icon: <Zap className="w-5 h-5" />,
-      color: "from-amber-500 to-orange-600",
-      tagline: "DEF-DEV HANDSHAKE & DOCS UPDATE",
-      overview: "DEF-DEV console gets handshake protocol for main OS communication, plus a complete documentation overhaul using shared components.",
-      sections: {
         "DEF-DEV Console": [
           "NEW: Manual handshake button to connect with main OS",
           "NEW: Connection status indicator (Connected, Standalone, Waiting)",
@@ -87,16 +66,16 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
           "Handshake auto-triggers on page load with 3s timeout"
         ],
         "Documentation Overhaul": [
-          "Refactored 8 core doc pages to use shared DocLayout, DocHero, DocSection, DocCard components",
+          "Refactored core doc pages to use shared DocLayout, DocHero, DocSection components",
           "Improved visual hierarchy with consistent accent colors",
           "Added prev/next navigation to all documentation pages",
           "Safety and Moderation hub pages redesigned",
           "Better code examples with DocCode component"
         ],
-        "Command Queue": [
-          "NEW: HANDSHAKE_REQUEST and HANDSHAKE_RESPONSE command types",
-          "Main OS now responds to DEF-DEV handshake requests",
-          "Includes user info and system state in response"
+        "Version Consolidation": [
+          "Merged all V3.0 patches (Patch 1, Patch 2) into clean V3.0 release",
+          "Updated version info across all components",
+          "Simplified version display from 'V3.0 Patch 2' to 'V3.0'"
         ]
       }
     },
