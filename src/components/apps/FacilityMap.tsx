@@ -1,9 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { MapPin, AlertTriangle, CheckCircle, XCircle, Users, Crosshair, ZoomIn, ZoomOut, RotateCcw, Move, Skull, Shield, FlaskConical, HardHat, Zap, Radio, Search, Layers } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { 
+  MapPin, ZoomIn, ZoomOut, RotateCcw, Layers, Search, 
+  Skull, Shield, Zap, Camera, AlertTriangle, CheckCircle,
+  ChevronRight, X, Users, FlaskConical, HardHat
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { PowerMeter } from "@/components/shared/PowerMeter";
 import { cn } from "@/lib/utils";
 
 type ZoneType = "light" | "heavy" | "entrance" | "surface";
@@ -20,175 +24,172 @@ interface Room {
   height: number;
   connections: string[];
   special?: "scp" | "checkpoint" | "elevator" | "tesla" | "nuke" | "servers" | "microhid";
+  hasCamera?: boolean;
 }
 
-interface PersonnelStats {
-  scps: number;
-  mtf: number;
-  scientists: number;
-  exrP: number;
-  mrP: number;
-  chaos: number;
+interface Zone {
+  id: ZoneType;
+  name: string;
+  color: string;
+  bgGradient: string;
 }
+
+const ZONES: Zone[] = [
+  { 
+    id: "surface", 
+    name: "Surface Zone", 
+    color: "emerald",
+    bgGradient: "from-emerald-500/10 to-emerald-500/5"
+  },
+  { 
+    id: "entrance", 
+    name: "Entrance Zone", 
+    color: "blue",
+    bgGradient: "from-blue-500/10 to-blue-500/5"
+  },
+  { 
+    id: "light", 
+    name: "Light Containment", 
+    color: "amber",
+    bgGradient: "from-amber-500/10 to-amber-500/5"
+  },
+  { 
+    id: "heavy", 
+    name: "Heavy Containment", 
+    color: "red",
+    bgGradient: "from-red-500/10 to-red-500/5"
+  },
+];
+
+const ROOMS: Room[] = [
+  // Heavy Containment
+  { id: "hcz-049", name: "SCP-049 Containment", shortName: "SCP-049", zone: "heavy", status: "operational", x: 80, y: 80, width: 100, height: 70, connections: ["hcz-corridor-1"], special: "scp", hasCamera: true },
+  { id: "hcz-106", name: "SCP-106 Containment", shortName: "SCP-106", zone: "heavy", status: "critical", x: 220, y: 80, width: 100, height: 70, connections: ["hcz-corridor-1", "hcz-corridor-2"], special: "scp", hasCamera: true },
+  { id: "hcz-079", name: "SCP-079 Containment", shortName: "SCP-079", zone: "heavy", status: "operational", x: 360, y: 80, width: 100, height: 70, connections: ["hcz-corridor-2"], special: "scp", hasCamera: true },
+  { id: "hcz-096", name: "SCP-096 Containment", shortName: "SCP-096", zone: "heavy", status: "warning", x: 500, y: 80, width: 100, height: 70, connections: ["hcz-corridor-3"], special: "scp", hasCamera: true },
+  { id: "hcz-corridor-1", name: "HCZ Corridor Alpha", shortName: "CORRIDOR A", zone: "heavy", status: "operational", x: 80, y: 170, width: 240, height: 35, connections: ["hcz-049", "hcz-106", "hcz-tesla"] },
+  { id: "hcz-corridor-2", name: "HCZ Corridor Beta", shortName: "CORRIDOR B", zone: "heavy", status: "operational", x: 220, y: 225, width: 240, height: 35, connections: ["hcz-106", "hcz-079", "hcz-nuke"] },
+  { id: "hcz-corridor-3", name: "HCZ Corridor Gamma", shortName: "CORRIDOR G", zone: "heavy", status: "operational", x: 400, y: 170, width: 200, height: 35, connections: ["hcz-079", "hcz-096", "hcz-servers"] },
+  { id: "hcz-tesla", name: "Tesla Gate", shortName: "TESLA", zone: "heavy", status: "operational", x: 80, y: 280, width: 80, height: 55, connections: ["hcz-corridor-1", "hcz-elev-a"], special: "tesla" },
+  { id: "hcz-nuke", name: "Alpha Warhead", shortName: "NUKE", zone: "heavy", status: "offline", x: 280, y: 280, width: 100, height: 55, connections: ["hcz-corridor-2"], special: "nuke" },
+  { id: "hcz-servers", name: "Server Room", shortName: "SERVERS", zone: "heavy", status: "operational", x: 460, y: 280, width: 100, height: 55, connections: ["hcz-corridor-3"], special: "servers", hasCamera: true },
+  { id: "hcz-microhid", name: "Micro H.I.D. Storage", shortName: "MICROHID", zone: "heavy", status: "operational", x: 460, y: 355, width: 100, height: 55, connections: ["hcz-servers"], special: "microhid" },
+  { id: "hcz-elev-a", name: "Elevator System A", shortName: "ELEV A", zone: "heavy", status: "operational", x: 80, y: 355, width: 80, height: 55, connections: ["hcz-tesla"], special: "elevator" },
+  { id: "hcz-elev-b", name: "Elevator System B", shortName: "ELEV B", zone: "heavy", status: "operational", x: 280, y: 355, width: 80, height: 55, connections: ["hcz-nuke"], special: "elevator" },
+  { id: "hcz-checkpoint", name: "HCZ/EZ Checkpoint", shortName: "CHECKPOINT", zone: "heavy", status: "operational", x: 180, y: 430, width: 180, height: 45, connections: ["hcz-elev-a", "hcz-elev-b"], special: "checkpoint", hasCamera: true },
+  // Light Containment
+  { id: "lcz-173", name: "SCP-173 Containment", shortName: "SCP-173", zone: "light", status: "operational", x: 80, y: 80, width: 100, height: 70, connections: ["lcz-corridor-1"], special: "scp", hasCamera: true },
+  { id: "lcz-914", name: "SCP-914", shortName: "SCP-914", zone: "light", status: "operational", x: 220, y: 80, width: 100, height: 70, connections: ["lcz-corridor-1"], special: "scp", hasCamera: true },
+  { id: "lcz-corridor-1", name: "LCZ Corridor", shortName: "CORRIDOR", zone: "light", status: "operational", x: 80, y: 170, width: 340, height: 35, connections: ["lcz-173", "lcz-914", "lcz-armory"] },
+  { id: "lcz-armory", name: "LCZ Armory", shortName: "ARMORY", zone: "light", status: "operational", x: 420, y: 150, width: 100, height: 70, connections: ["lcz-corridor-1"], hasCamera: true },
+  { id: "lcz-checkpoint", name: "LCZ/HCZ Checkpoint", shortName: "CHECKPOINT", zone: "light", status: "operational", x: 180, y: 250, width: 180, height: 45, connections: ["lcz-corridor-1"], special: "checkpoint", hasCamera: true },
+  // Entrance Zone
+  { id: "ez-gate-a", name: "Gate A", shortName: "GATE A", zone: "entrance", status: "operational", x: 80, y: 80, width: 110, height: 70, connections: ["ez-corridor"], special: "checkpoint", hasCamera: true },
+  { id: "ez-gate-b", name: "Gate B", shortName: "GATE B", zone: "entrance", status: "operational", x: 450, y: 80, width: 110, height: 70, connections: ["ez-corridor"], special: "checkpoint", hasCamera: true },
+  { id: "ez-corridor", name: "EZ Main Corridor", shortName: "CORRIDOR", zone: "entrance", status: "operational", x: 80, y: 170, width: 480, height: 35, connections: ["ez-gate-a", "ez-gate-b", "ez-intercom"] },
+  { id: "ez-intercom", name: "Intercom Room", shortName: "INTERCOM", zone: "entrance", status: "operational", x: 270, y: 230, width: 100, height: 55, connections: ["ez-corridor"], hasCamera: true },
+  // Surface
+  { id: "surf-helipad", name: "Helipad", shortName: "HELIPAD", zone: "surface", status: "operational", x: 180, y: 80, width: 140, height: 90, connections: ["surf-exit"], hasCamera: true },
+  { id: "surf-exit", name: "Facility Exit", shortName: "EXIT", zone: "surface", status: "operational", x: 270, y: 200, width: 100, height: 55, connections: ["surf-helipad", "surf-escape"], special: "checkpoint" },
+  { id: "surf-escape", name: "Escape Route", shortName: "ESCAPE", zone: "surface", status: "operational", x: 270, y: 280, width: 100, height: 55, connections: ["surf-exit"] },
+];
 
 export const FacilityMap = () => {
   const [selectedZone, setSelectedZone] = useState<ZoneType>("heavy");
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [hoveredRoom, setHoveredRoom] = useState<Room | null>(null);
-  const [entityEscaped, setEntityEscaped] = useState(false);
-  const [playerPos, setPlayerPos] = useState({ x: 400, y: 300 });
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [auxPower, setAuxPower] = useState(85);
   const [searchQuery, setSearchQuery] = useState("");
-  const maxPower = 110;
+  const [showSidebar, setShowSidebar] = useState(true);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const [personnel, setPersonnel] = useState<PersonnelStats>({
-    scps: 1,
-    mtf: 0,
-    scientists: 2,
-    exrP: 3,
-    mrP: 2,
-    chaos: 0,
-  });
+  const currentZone = ZONES.find(z => z.id === selectedZone)!;
+  const currentRooms = ROOMS.filter(r => r.zone === selectedZone);
+  const filteredRooms = searchQuery
+    ? currentRooms.filter(r => 
+        r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        r.shortName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : currentRooms;
 
-  // Zone definitions
-  const zones: { id: ZoneType; name: string; color: string }[] = [
-    { id: "surface", name: "Surface Zone", color: "emerald" },
-    { id: "light", name: "Light Containment", color: "amber" },
-    { id: "heavy", name: "Heavy Containment", color: "red" },
-    { id: "entrance", name: "Entrance Zone", color: "blue" },
-  ];
-
-  // Rooms per zone
-  const rooms: Room[] = [
-    // Heavy Containment
-    { id: "hcz-049", name: "SCP-049 Containment", shortName: "SCP-049", zone: "heavy", status: "operational", x: 100, y: 100, width: 100, height: 80, connections: ["hcz-corridor-1"], special: "scp" },
-    { id: "hcz-106", name: "SCP-106 Containment", shortName: "SCP-106", zone: "heavy", status: "critical", x: 250, y: 100, width: 100, height: 80, connections: ["hcz-corridor-1", "hcz-corridor-2"], special: "scp" },
-    { id: "hcz-079", name: "SCP-079 Containment", shortName: "SCP-079", zone: "heavy", status: "operational", x: 400, y: 100, width: 100, height: 80, connections: ["hcz-corridor-2"], special: "scp" },
-    { id: "hcz-096", name: "SCP-096 Containment", shortName: "SCP-096", zone: "heavy", status: "warning", x: 550, y: 100, width: 100, height: 80, connections: ["hcz-corridor-3"], special: "scp" },
-    { id: "hcz-corridor-1", name: "HCZ Corridor Alpha", shortName: "CORRIDOR A", zone: "heavy", status: "operational", x: 100, y: 200, width: 250, height: 40, connections: ["hcz-049", "hcz-106", "hcz-tesla"] },
-    { id: "hcz-corridor-2", name: "HCZ Corridor Beta", shortName: "CORRIDOR B", zone: "heavy", status: "operational", x: 250, y: 260, width: 250, height: 40, connections: ["hcz-106", "hcz-079", "hcz-nuke"] },
-    { id: "hcz-corridor-3", name: "HCZ Corridor Gamma", shortName: "CORRIDOR G", zone: "heavy", status: "operational", x: 450, y: 200, width: 200, height: 40, connections: ["hcz-079", "hcz-096", "hcz-servers"] },
-    { id: "hcz-tesla", name: "Tesla Gate", shortName: "TESLA", zone: "heavy", status: "operational", x: 100, y: 320, width: 80, height: 60, connections: ["hcz-corridor-1", "hcz-elev-a"], special: "tesla" },
-    { id: "hcz-nuke", name: "Alpha Warhead", shortName: "NUKE", zone: "heavy", status: "offline", x: 300, y: 320, width: 100, height: 60, connections: ["hcz-corridor-2"], special: "nuke" },
-    { id: "hcz-servers", name: "Server Room", shortName: "SERVERS", zone: "heavy", status: "operational", x: 500, y: 320, width: 100, height: 60, connections: ["hcz-corridor-3"], special: "servers" },
-    { id: "hcz-microhid", name: "Micro H.I.D. Storage", shortName: "MICROHID", zone: "heavy", status: "operational", x: 500, y: 400, width: 100, height: 60, connections: ["hcz-servers"], special: "microhid" },
-    { id: "hcz-elev-a", name: "Elevator System A", shortName: "ELEV A", zone: "heavy", status: "operational", x: 100, y: 400, width: 80, height: 60, connections: ["hcz-tesla"], special: "elevator" },
-    { id: "hcz-elev-b", name: "Elevator System B", shortName: "ELEV B", zone: "heavy", status: "operational", x: 300, y: 400, width: 80, height: 60, connections: ["hcz-nuke"], special: "elevator" },
-    { id: "hcz-checkpoint", name: "HCZ/EZ Checkpoint", shortName: "CHECKPOINT", zone: "heavy", status: "operational", x: 200, y: 480, width: 180, height: 50, connections: ["hcz-elev-a", "hcz-elev-b"], special: "checkpoint" },
-    // Light Containment
-    { id: "lcz-173", name: "SCP-173 Containment", shortName: "SCP-173", zone: "light", status: "operational", x: 100, y: 100, width: 100, height: 80, connections: ["lcz-corridor-1"], special: "scp" },
-    { id: "lcz-914", name: "SCP-914", shortName: "SCP-914", zone: "light", status: "operational", x: 250, y: 100, width: 100, height: 80, connections: ["lcz-corridor-1"], special: "scp" },
-    { id: "lcz-corridor-1", name: "LCZ Corridor", shortName: "CORRIDOR", zone: "light", status: "operational", x: 100, y: 200, width: 350, height: 40, connections: ["lcz-173", "lcz-914", "lcz-armory"] },
-    { id: "lcz-armory", name: "LCZ Armory", shortName: "ARMORY", zone: "light", status: "operational", x: 450, y: 180, width: 100, height: 80, connections: ["lcz-corridor-1"] },
-    { id: "lcz-checkpoint", name: "LCZ/HCZ Checkpoint", shortName: "CHECKPOINT", zone: "light", status: "operational", x: 200, y: 300, width: 180, height: 50, connections: ["lcz-corridor-1"], special: "checkpoint" },
-    // Entrance Zone
-    { id: "ez-gate-a", name: "Gate A", shortName: "GATE A", zone: "entrance", status: "operational", x: 100, y: 100, width: 120, height: 80, connections: ["ez-corridor"], special: "checkpoint" },
-    { id: "ez-gate-b", name: "Gate B", shortName: "GATE B", zone: "entrance", status: "operational", x: 500, y: 100, width: 120, height: 80, connections: ["ez-corridor"], special: "checkpoint" },
-    { id: "ez-corridor", name: "EZ Main Corridor", shortName: "CORRIDOR", zone: "entrance", status: "operational", x: 100, y: 200, width: 520, height: 40, connections: ["ez-gate-a", "ez-gate-b", "ez-intercom"] },
-    { id: "ez-intercom", name: "Intercom Room", shortName: "INTERCOM", zone: "entrance", status: "operational", x: 300, y: 280, width: 100, height: 60, connections: ["ez-corridor"] },
-    // Surface
-    { id: "surf-helipad", name: "Helipad", shortName: "HELIPAD", zone: "surface", status: "operational", x: 200, y: 100, width: 150, height: 100, connections: ["surf-exit"] },
-    { id: "surf-exit", name: "Facility Exit", shortName: "EXIT", zone: "surface", status: "operational", x: 300, y: 250, width: 100, height: 60, connections: ["surf-helipad", "surf-escape"] },
-    { id: "surf-escape", name: "Escape Route", shortName: "ESCAPE", zone: "surface", status: "operational", x: 300, y: 350, width: 100, height: 60, connections: ["surf-exit"] },
-  ];
-
-  const currentZoneRooms = rooms.filter(r => r.zone === selectedZone);
-  const filteredRooms = searchQuery 
-    ? currentZoneRooms.filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.shortName.toLowerCase().includes(searchQuery.toLowerCase()))
-    : currentZoneRooms;
-
-  useEffect(() => {
-    const checkForEscape = () => {
-      if (Math.random() < 0.01) {
-        setEntityEscaped(true);
-        setPersonnel(p => ({ ...p, scps: p.scps + 1 }));
-        toast.error("🚨 CONTAINMENT BREACH - SCP-106 HAS ESCAPED!", { duration: 10000 });
-      }
-    };
-    const interval = setInterval(checkForEscape, 300000);
-    return () => clearInterval(interval);
+  // Zoom controls
+  const handleZoom = useCallback((delta: number) => {
+    setZoom(prev => Math.max(0.5, Math.min(2.5, prev + delta)));
   }, []);
 
-  // Randomize personnel counts
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPersonnel(p => ({
-        scps: Math.max(0, p.scps + (Math.random() < 0.3 ? (Math.random() < 0.5 ? -1 : 1) : 0)),
-        mtf: Math.max(0, Math.min(12, p.mtf + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
-        scientists: Math.max(0, Math.min(8, p.scientists + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
-        exrP: Math.max(0, Math.min(10, p.exrP + (Math.random() < 0.3 ? Math.floor(Math.random() * 3) - 1 : 0))),
-        mrP: Math.max(0, Math.min(6, p.mrP + (Math.random() < 0.2 ? Math.floor(Math.random() * 2) - 1 : 0))),
-        chaos: Math.max(0, Math.min(5, p.chaos + (Math.random() < 0.2 ? Math.floor(Math.random() * 2) : 0))),
-      }));
-    }, 15000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Power regeneration
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAuxPower(p => Math.min(maxPower, p + 1));
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleZoom = (delta: number) => {
-    setZoom(prev => Math.max(0.5, Math.min(2, prev + delta)));
-  };
-
-  const handlePanStart = (e: React.MouseEvent) => {
+  // Pan controls
+  const handlePanStart = useCallback((e: React.MouseEvent) => {
     if (e.button === 2 || e.button === 1 || (e.button === 0 && e.shiftKey)) {
       setIsPanning(true);
       setPanStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
       e.preventDefault();
     }
-  };
+  }, [pan]);
 
-  const handlePanMove = (e: React.MouseEvent) => {
+  const handlePanMove = useCallback((e: React.MouseEvent) => {
     if (isPanning) {
       setPan({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
     }
-  };
+  }, [isPanning, panStart]);
 
-  const handlePanEnd = () => setIsPanning(false);
+  const handlePanEnd = useCallback(() => setIsPanning(false), []);
 
-  const getStatusColor = (status: string) => {
+  const resetView = useCallback(() => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
+  // Get status styling
+  const getStatusStyles = (status: Room['status']) => {
     switch (status) {
-      case "operational": return "border-cyan-500/40 bg-cyan-500/5";
-      case "warning": return "border-amber-500/50 bg-amber-500/10";
-      case "critical": return "border-red-500/60 bg-red-500/15";
-      case "offline": return "border-slate-600/40 bg-slate-800/20";
-      default: return "border-slate-600/40 bg-slate-800/20";
+      case "operational":
+        return {
+          border: "border-emerald-500/40",
+          bg: "bg-emerald-500/10",
+          glow: "shadow-emerald-500/20",
+          text: "text-emerald-400"
+        };
+      case "warning":
+        return {
+          border: "border-amber-500/50",
+          bg: "bg-amber-500/15",
+          glow: "shadow-amber-500/30",
+          text: "text-amber-400"
+        };
+      case "critical":
+        return {
+          border: "border-destructive/60",
+          bg: "bg-destructive/20",
+          glow: "shadow-destructive/40",
+          text: "text-destructive"
+        };
+      case "offline":
+        return {
+          border: "border-muted-foreground/30",
+          bg: "bg-muted/20",
+          glow: "",
+          text: "text-muted-foreground"
+        };
     }
   };
 
-  const getStatusGlow = (status: string) => {
-    switch (status) {
-      case "operational": return "shadow-cyan-500/20";
-      case "warning": return "shadow-amber-500/30";
-      case "critical": return "shadow-red-500/40";
-      default: return "";
-    }
-  };
-
-  const getSpecialIcon = (special?: string) => {
+  const getSpecialIcon = (special?: Room['special']) => {
     switch (special) {
-      case "scp": return <Skull className="w-3 h-3 text-red-400" />;
-      case "checkpoint": return <Shield className="w-3 h-3 text-cyan-400" />;
-      case "elevator": return <span className="text-[10px] text-cyan-400 font-bold">▲▼</span>;
-      case "tesla": return <Zap className="w-3 h-3 text-yellow-400" />;
-      case "nuke": return <span className="text-[10px] text-red-400 font-bold">☢</span>;
-      case "servers": return <span className="text-[10px] text-cyan-400">◈</span>;
-      case "microhid": return <span className="text-[10px] text-purple-400 font-bold">⚡</span>;
+      case "scp": return <Skull className="w-3.5 h-3.5" />;
+      case "checkpoint": return <Shield className="w-3.5 h-3.5" />;
+      case "elevator": return <span className="text-xs font-bold">▲▼</span>;
+      case "tesla": return <Zap className="w-3.5 h-3.5" />;
+      case "nuke": return <span className="text-xs">☢</span>;
+      case "servers": return <span className="text-xs">◈</span>;
+      case "microhid": return <Zap className="w-3.5 h-3.5" />;
       default: return null;
     }
   };
 
+  // Render connection lines
   const renderConnections = () => {
     const connections: JSX.Element[] = [];
     const processed = new Set<string>();
@@ -207,9 +208,10 @@ export const FacilityMap = () => {
                 y1={room.y + room.height / 2}
                 x2={connRoom.x + connRoom.width / 2}
                 y2={connRoom.y + connRoom.height / 2}
-                stroke="rgba(34, 211, 238, 0.15)"
+                stroke="hsl(var(--primary) / 0.15)"
                 strokeWidth="2"
-                strokeDasharray="6 3"
+                strokeDasharray="6 4"
+                className="transition-all duration-300"
               />
             );
           }
@@ -219,365 +221,386 @@ export const FacilityMap = () => {
     return connections;
   };
 
-  const formatTimestamp = () => {
-    const now = new Date();
-    return now.toLocaleTimeString('en-US', { hour12: false }) + '.' + String(now.getMilliseconds()).padStart(3, '0');
+  const handleRoomClick = (room: Room) => {
+    setSelectedRoom(room);
+    setShowSidebar(true);
   };
 
-  const [timestamp, setTimestamp] = useState(formatTimestamp());
-  
-  useEffect(() => {
-    const interval = setInterval(() => setTimestamp(formatTimestamp()), 100);
-    return () => clearInterval(interval);
-  }, []);
+  const handleCameraClick = (room: Room) => {
+    toast.info(`Opening camera: ${room.name}`);
+    // In a real implementation, this would navigate to SecurityCameras with the room selected
+  };
 
   return (
-    <div className="flex h-full bg-slate-950 font-mono relative overflow-hidden">
-      {/* Scanline effect */}
-      <div 
-        className="absolute inset-0 pointer-events-none z-50 opacity-[0.03]"
-        style={{
-          backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)'
-        }}
-      />
-      
-      {/* Map View */}
-      <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* HUD Overlay - Top */}
-        <div className="absolute top-3 left-3 z-40 space-y-1 text-[10px] font-mono text-cyan-500/60">
-          <div>FACILITY MAP SYSTEM v2.4.1</div>
-          <div>{timestamp}</div>
-          <div className="text-cyan-400">ZONE: {zones.find(z => z.id === selectedZone)?.name.toUpperCase()}</div>
-        </div>
+    <div className="flex h-full bg-background font-mono relative overflow-hidden">
+      {/* Main Map Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <div className="bg-card/80 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center gap-4">
+          {/* Zone selector */}
+          <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+            {ZONES.map(zone => (
+              <button
+                key={zone.id}
+                onClick={() => {
+                  setSelectedZone(zone.id);
+                  setSelectedRoom(null);
+                  resetView();
+                }}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                  selectedZone === zone.id
+                    ? `bg-${zone.color}-500/20 text-${zone.color}-400 border border-${zone.color}-500/30`
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+                style={{
+                  backgroundColor: selectedZone === zone.id ? `hsl(var(--${zone.color === 'red' ? 'destructive' : zone.color === 'emerald' ? 'primary' : zone.color === 'amber' ? 'warning' : 'primary'}) / 0.15)` : undefined,
+                }}
+              >
+                {zone.name}
+              </button>
+            ))}
+          </div>
 
-        {/* Stats Panel - Top */}
-        <div className="bg-slate-900/80 backdrop-blur border-b border-cyan-500/20 px-4 py-3 flex items-center gap-6 relative z-10">
-          {/* Personnel stats */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-xs">
-              <Skull className="w-4 h-4 text-red-500" />
-              <span className="text-slate-500">SCPs:</span>
-              <span className="font-bold text-red-400">{personnel.scps}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <Shield className="w-4 h-4 text-blue-400" />
-              <span className="text-slate-500">MTF:</span>
-              <span className="font-bold text-blue-400">{personnel.mtf}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <FlaskConical className="w-4 h-4 text-white" />
-              <span className="text-slate-500">Scientists:</span>
-              <span className="font-bold text-white">{personnel.scientists}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <HardHat className="w-4 h-4 text-orange-400" />
-              <span className="text-slate-500">EXR-P:</span>
-              <span className="font-bold text-orange-400">{personnel.exrP}</span>
-            </div>
+          {/* Search */}
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search rooms..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 bg-muted/50 border-border"
+            />
           </div>
-          
-          {/* Actions */}
-          <div className="ml-auto flex items-center gap-2">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-cyan-600" />
-              <input
-                type="text"
-                placeholder="Search rooms..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-36 h-7 pl-7 pr-2 text-xs bg-slate-900/80 border border-cyan-500/30 text-cyan-400 placeholder:text-cyan-600/50 focus:outline-none focus:border-cyan-500/50"
-              />
-            </div>
-            
-            <div className="flex border border-cyan-500/30">
-              <Button size="sm" variant="ghost" onClick={() => handleZoom(0.1)} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none text-cyan-400">
-                <ZoomIn className="w-3 h-3" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => handleZoom(-0.1)} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none border-l border-cyan-500/30 text-cyan-400">
-                <ZoomOut className="w-3 h-3" />
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }} className="h-7 px-2 hover:bg-cyan-500/10 rounded-none border-l border-cyan-500/30 text-cyan-400">
-                <RotateCcw className="w-3 h-3" />
-              </Button>
-            </div>
+
+          {/* Zoom controls */}
+          <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => handleZoom(0.2)} 
+              className="h-7 w-7 p-0"
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+            <span className="text-xs text-muted-foreground w-12 text-center">
+              {Math.round(zoom * 100)}%
+            </span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => handleZoom(-0.2)} 
+              className="h-7 w-7 p-0"
+            >
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <div className="w-px h-5 bg-border mx-1" />
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={resetView} 
+              className="h-7 w-7 p-0"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </Button>
           </div>
+
+          {/* Sidebar toggle */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="h-8"
+          >
+            <Layers className="w-4 h-4 mr-2" />
+            Details
+          </Button>
         </div>
 
         {/* Map Canvas */}
         <div 
           ref={mapRef}
-          className="flex-1 overflow-hidden relative bg-slate-950"
+          className={cn(
+            "flex-1 overflow-hidden relative",
+            `bg-gradient-to-br ${currentZone.bgGradient}`
+          )}
           onMouseDown={handlePanStart}
           onMouseMove={handlePanMove}
           onMouseUp={handlePanEnd}
           onMouseLeave={handlePanEnd}
           onContextMenu={(e) => e.preventDefault()}
+          style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
         >
+          {/* Grid pattern */}
+          <div 
+            className="absolute inset-0 pointer-events-none opacity-30"
+            style={{
+              backgroundImage: `
+                linear-gradient(hsl(var(--primary) / 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, hsl(var(--primary) / 0.08) 1px, transparent 1px)
+              `,
+              backgroundSize: '50px 50px',
+              transform: `translate(${pan.x % 50}px, ${pan.y % 50}px)`
+            }}
+          />
+
+          {/* Map content */}
           <div
             className="absolute"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: 'top left',
-              transition: isPanning ? 'none' : 'transform 0.1s ease-out'
+              transition: isPanning ? 'none' : 'transform 0.15s ease-out'
             }}
           >
-            {/* Blueprint grid */}
-            <div 
-              className="absolute pointer-events-none"
-              style={{
-                width: '800px',
-                height: '600px',
-                backgroundImage: `
-                  linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px)
-                `,
-                backgroundSize: '40px 40px'
-              }}
-            />
-
-            {/* Connections */}
-            <svg className="absolute pointer-events-none" style={{ width: '800px', height: '600px' }}>
+            {/* Connections SVG */}
+            <svg 
+              className="absolute pointer-events-none" 
+              style={{ width: '700px', height: '550px' }}
+            >
               {renderConnections()}
             </svg>
 
             {/* Rooms */}
-            {filteredRooms.map((room) => (
-              <div
-                key={room.id}
-                onClick={() => setSelectedRoom(room)}
-                onMouseEnter={() => setHoveredRoom(room)}
-                onMouseLeave={() => setHoveredRoom(null)}
-                className={cn(
-                  "absolute cursor-pointer transition-all duration-200 border",
-                  getStatusColor(room.status),
-                  selectedRoom?.id === room.id && "ring-1 ring-cyan-400/50",
-                  hoveredRoom?.id === room.id && "brightness-125",
-                  room.status === "critical" && "animate-pulse",
-                  getStatusGlow(room.status),
-                  room.status !== "offline" && "shadow-lg"
-                )}
-                style={{
-                  left: `${room.x}px`,
-                  top: `${room.y}px`,
-                  width: `${room.width}px`,
-                  height: `${room.height}px`,
-                }}
-              >
-                {/* Corner brackets */}
-                <div className="absolute top-0 left-0 w-2 h-2 border-l border-t border-cyan-500/50" />
-                <div className="absolute top-0 right-0 w-2 h-2 border-r border-t border-cyan-500/50" />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-l border-b border-cyan-500/50" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 border-r border-b border-cyan-500/50" />
-                
-                <div className="flex flex-col h-full justify-between p-2">
-                  <div className="flex items-start justify-between">
-                    {getSpecialIcon(room.special)}
-                    {room.status === "critical" && (
-                      <AlertTriangle className="w-3 h-3 text-red-500" />
-                    )}
-                    {room.status === "warning" && (
-                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
-                    )}
+            {filteredRooms.map((room) => {
+              const styles = getStatusStyles(room.status);
+              const isSelected = selectedRoom?.id === room.id;
+              const isHovered = hoveredRoom?.id === room.id;
+
+              return (
+                <div
+                  key={room.id}
+                  onClick={() => handleRoomClick(room)}
+                  onMouseEnter={() => setHoveredRoom(room)}
+                  onMouseLeave={() => setHoveredRoom(null)}
+                  className={cn(
+                    "absolute cursor-pointer transition-all duration-200 rounded-lg border-2 backdrop-blur-sm",
+                    styles.border,
+                    styles.bg,
+                    isSelected && "ring-2 ring-primary ring-offset-2 ring-offset-background",
+                    isHovered && !isSelected && `shadow-lg ${styles.glow}`,
+                    "hover:scale-[1.02]"
+                  )}
+                  style={{
+                    left: room.x,
+                    top: room.y,
+                    width: room.width,
+                    height: room.height,
+                  }}
+                >
+                  {/* Room content */}
+                  <div className="p-2 h-full flex flex-col justify-between">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-1">
+                      <span className={cn(
+                        "text-[10px] font-bold tracking-wide truncate",
+                        styles.text
+                      )}>
+                        {room.shortName}
+                      </span>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {room.special && (
+                          <span className={styles.text}>
+                            {getSpecialIcon(room.special)}
+                          </span>
+                        )}
+                        {room.hasCamera && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCameraClick(room);
+                            }}
+                            className="p-0.5 rounded hover:bg-primary/20 transition-colors"
+                          >
+                            <Camera className="w-3 h-3 text-primary" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status indicator */}
+                    <div className="flex items-center gap-1.5">
+                      <div className={cn(
+                        "w-1.5 h-1.5 rounded-full",
+                        room.status === 'operational' && "bg-emerald-500",
+                        room.status === 'warning' && "bg-amber-500 animate-pulse",
+                        room.status === 'critical' && "bg-destructive animate-pulse",
+                        room.status === 'offline' && "bg-muted-foreground"
+                      )} />
+                      <span className="text-[8px] uppercase text-muted-foreground tracking-wider">
+                        {room.status}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-[9px] font-bold text-cyan-300/90 text-center leading-tight uppercase tracking-wide">
-                    {room.shortName}
-                  </div>
+
+                  {/* Critical/Warning pulse effect */}
+                  {(room.status === 'critical' || room.status === 'warning') && (
+                    <div className={cn(
+                      "absolute inset-0 rounded-lg animate-pulse pointer-events-none",
+                      room.status === 'critical' ? "bg-destructive/10" : "bg-amber-500/10"
+                    )} />
+                  )}
                 </div>
-
-                {/* Hover tooltip */}
-                {hoveredRoom?.id === room.id && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900/95 border border-cyan-500/40 text-[10px] whitespace-nowrap z-50 pointer-events-none">
-                    <div className="text-cyan-400 font-bold">{room.name}</div>
-                    <div className="text-cyan-600">{room.status.toUpperCase()}</div>
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {/* Player Position */}
-            <div
-              className="absolute pointer-events-none z-50"
-              style={{
-                left: `${playerPos.x}px`,
-                top: `${playerPos.y}px`,
-                transform: 'translate(-50%, -50%)'
-              }}
-            >
-              <Crosshair className="w-6 h-6 text-emerald-400 drop-shadow-lg" />
-            </div>
-
-            {/* Entity indicator */}
-            {entityEscaped && (
-              <div
-                className="absolute w-10 h-10 bg-red-600/70 rounded-full animate-pulse flex items-center justify-center z-40"
-                style={{
-                  left: `${180 + Math.random() * 200}px`,
-                  top: `${150 + Math.random() * 150}px`,
-                  filter: "drop-shadow(0 0 15px rgba(239, 68, 68, 0.9))"
-                }}
-              >
-                <Skull className="w-5 h-5 text-white" />
-              </div>
-            )}
+              );
+            })}
           </div>
 
-          {/* Legend */}
-          <div className="absolute bottom-4 left-4 bg-slate-900/90 border border-cyan-500/30 p-3 text-[10px] space-y-2 z-10 backdrop-blur-sm">
-            <div className="font-bold text-xs text-cyan-400 mb-2 tracking-wider">LEGEND</div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border border-cyan-500/40 bg-cyan-500/5" />
-              <span className="text-slate-400">Operational</span>
+          {/* Zone info overlay */}
+          <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg px-4 py-3">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+              Active Zone
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border border-amber-500/50 bg-amber-500/10" />
-              <span className="text-slate-400">Warning</span>
+            <div className="text-sm font-bold">{currentZone.name}</div>
+            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+              <span>{filteredRooms.length} rooms</span>
+              <span>•</span>
+              <span className="text-emerald-400">
+                {filteredRooms.filter(r => r.status === 'operational').length} operational
+              </span>
+              {filteredRooms.some(r => r.status === 'critical') && (
+                <>
+                  <span>•</span>
+                  <span className="text-destructive">
+                    {filteredRooms.filter(r => r.status === 'critical').length} critical
+                  </span>
+                </>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border border-red-500/60 bg-red-500/15" />
-              <span className="text-slate-400">Critical</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-3 border border-slate-600/40 bg-slate-800/20" />
-              <span className="text-slate-400">Offline</span>
-            </div>
-          </div>
-
-          {/* Controls hint */}
-          <div className="absolute bottom-4 right-4 bg-slate-900/90 border border-cyan-500/30 px-4 py-2 text-[10px] text-cyan-600 z-10 backdrop-blur-sm">
-            <Move className="w-3 h-3 inline mr-1.5" />
-            Shift+Drag to pan • Scroll to zoom
-          </div>
-        </div>
-
-        {/* Bottom Status Bar */}
-        <div className="bg-slate-900/80 backdrop-blur border-t border-cyan-500/20 px-4 py-2.5 flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-8">
-            <PowerMeter current={auxPower} max={maxPower} compact />
-          </div>
-          <div className="text-[10px] text-cyan-600">
-            {filteredRooms.length} rooms • Zone: <span className="text-cyan-400">{zones.find(z => z.id === selectedZone)?.name}</span>
           </div>
         </div>
       </div>
 
-      {/* Right Sidebar - Zones */}
-      <div className="w-56 border-l border-cyan-500/20 bg-slate-900/80 backdrop-blur flex flex-col relative z-10">
-        <div className="p-4 border-b border-cyan-500/20">
-          <div className="flex items-center gap-2 mb-4">
-            <Layers className="w-4 h-4 text-cyan-400" />
-            <h2 className="font-bold text-sm text-cyan-400 tracking-wider">FACILITY ZONES</h2>
+      {/* Right Sidebar */}
+      {showSidebar && (
+        <div className="w-72 border-l border-border bg-card flex flex-col">
+          {/* Header */}
+          <div className="p-4 border-b border-border flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Room Details</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {selectedRoom ? selectedRoom.name : 'Select a room'}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowSidebar(false)}
+              className="h-8 w-8 p-0"
+            >
+              <X className="w-4 h-4" />
+            </Button>
           </div>
-          
-          <div className="space-y-2">
-            {zones.map(zone => (
-              <button
-                key={zone.id}
-                onClick={() => { setSelectedZone(zone.id); setSelectedRoom(null); setSearchQuery(""); }}
-                className={cn(
-                  "w-full text-left p-3 transition-all text-xs font-medium border",
-                  selectedZone === zone.id 
-                    ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/40" 
-                    : "bg-slate-800/50 hover:bg-slate-800/70 text-slate-400 border-slate-700/30"
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span>{zone.name}</span>
-                  <span className="text-[10px] opacity-70">
-                    {rooms.filter(r => r.zone === zone.id).length}
-                  </span>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Selected Room Details */}
-        <ScrollArea className="flex-1">
-          <div className="p-4">
-            {selectedRoom ? (
-              <div className="space-y-4">
-                <div>
-                  <div className={cn(
-                    "font-bold text-sm",
-                    selectedRoom.status === "critical" ? "text-red-400" : "text-white"
-                  )}>
-                    {selectedRoom.name}
+          {selectedRoom ? (
+            <ScrollArea className="flex-1">
+              <div className="p-4 space-y-4">
+                {/* Status card */}
+                <div className={cn(
+                  "rounded-lg border p-4",
+                  getStatusStyles(selectedRoom.status).border,
+                  getStatusStyles(selectedRoom.status).bg
+                )}>
+                  <div className="flex items-center gap-2 mb-2">
+                    {selectedRoom.status === 'operational' && <CheckCircle className="w-4 h-4 text-emerald-500" />}
+                    {selectedRoom.status === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-500" />}
+                    {selectedRoom.status === 'critical' && <AlertTriangle className="w-4 h-4 text-destructive" />}
+                    <span className={cn("text-sm font-medium uppercase", getStatusStyles(selectedRoom.status).text)}>
+                      {selectedRoom.status}
+                    </span>
                   </div>
-                  <div className="text-[10px] text-cyan-600 uppercase tracking-widest mt-1">
-                    {zones.find(z => z.id === selectedRoom.zone)?.name}
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedRoom.status === 'operational' && 'All systems functioning normally'}
+                    {selectedRoom.status === 'warning' && 'Anomalous activity detected'}
+                    {selectedRoom.status === 'critical' && 'Immediate attention required'}
+                    {selectedRoom.status === 'offline' && 'Systems currently offline'}
+                  </p>
                 </div>
 
-                <div className="p-3 bg-slate-800/50 border border-cyan-500/20">
-                  <div className="text-[10px] text-cyan-600 mb-1.5">STATUS</div>
-                  <div className={cn(
-                    "font-bold uppercase text-sm",
-                    selectedRoom.status === "operational" && "text-cyan-400",
-                    selectedRoom.status === "warning" && "text-amber-400",
-                    selectedRoom.status === "critical" && "text-red-400 animate-pulse",
-                    selectedRoom.status === "offline" && "text-slate-400"
-                  )}>
-                    {selectedRoom.status}
+                {/* Info grid */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Zone</div>
+                    <div className="text-sm font-medium">{currentZone.name}</div>
                   </div>
-                </div>
-
-                {selectedRoom.special && (
-                  <div className="p-3 bg-slate-800/50 border border-cyan-500/20">
-                    <div className="text-[10px] text-cyan-600 mb-1.5">TYPE</div>
-                    <div className="font-bold uppercase text-sm text-cyan-400 flex items-center gap-2">
-                      {getSpecialIcon(selectedRoom.special)}
-                      {selectedRoom.special}
+                  <div className="bg-muted/30 rounded-lg p-3">
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Type</div>
+                    <div className="text-sm font-medium capitalize">
+                      {selectedRoom.special || 'Standard'}
                     </div>
                   </div>
+                </div>
+
+                {/* Camera access */}
+                {selectedRoom.hasCamera && (
+                  <Button 
+                    className="w-full gap-2" 
+                    variant="outline"
+                    onClick={() => handleCameraClick(selectedRoom)}
+                  >
+                    <Camera className="w-4 h-4" />
+                    View Camera Feed
+                    <ChevronRight className="w-4 h-4 ml-auto" />
+                  </Button>
                 )}
 
-                <div className="p-3 bg-slate-800/50 border border-cyan-500/20">
-                  <div className="text-[10px] text-cyan-600 mb-2">CONNECTED TO</div>
+                {/* Connections */}
+                <div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                    Connected Rooms
+                  </div>
                   <div className="space-y-1">
                     {selectedRoom.connections.map(connId => {
-                      const connRoom = rooms.find(r => r.id === connId);
-                      return connRoom ? (
+                      const connRoom = ROOMS.find(r => r.id === connId);
+                      if (!connRoom) return null;
+                      return (
                         <button
                           key={connId}
                           onClick={() => setSelectedRoom(connRoom)}
-                          className="w-full text-left text-[10px] p-2 bg-cyan-500/10 hover:bg-cyan-500/20 transition-colors text-cyan-400 border border-cyan-500/20"
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-left"
                         >
-                          {connRoom.shortName}
+                          <MapPin className="w-3 h-3 text-muted-foreground" />
+                          <span className="text-sm truncate">{connRoom.shortName}</span>
+                          <ChevronRight className="w-3 h-3 text-muted-foreground ml-auto" />
                         </button>
-                      ) : null;
+                      );
                     })}
                   </div>
                 </div>
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="text-center text-muted-foreground">
+                <MapPin className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                <p className="text-sm">Click on a room to view details</p>
+              </div>
+            </div>
+          )}
 
-                {selectedRoom.status === "critical" && (
-                  <div className="p-3 bg-red-500/20 border border-red-500/40 animate-pulse">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-red-400" />
-                      <span className="text-[10px] font-bold text-red-400 tracking-wider">BREACH DETECTED</span>
-                    </div>
-                  </div>
-                )}
+          {/* Legend */}
+          <div className="p-4 border-t border-border">
+            <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Legend</div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span>Operational</span>
               </div>
-            ) : (
-              <div className="text-center text-slate-500 text-xs py-8">
-                <MapPin className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                Select a room to view details
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                <span>Warning</span>
               </div>
-            )}
-
-            {entityEscaped && (
-              <div className="mt-4 p-3 bg-red-500/20 border border-red-500/40">
-                <div className="flex items-center gap-2 text-red-400">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span className="text-[10px] font-bold tracking-wider">BREACH ACTIVE</span>
-                </div>
-                <p className="text-[10px] text-red-400/70 mt-1">Entity escaped containment</p>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-destructive" />
+                <span>Critical</span>
               </div>
-            )}
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground" />
+                <span>Offline</span>
+              </div>
+            </div>
           </div>
-        </ScrollArea>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
