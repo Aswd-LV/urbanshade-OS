@@ -2,9 +2,9 @@ import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { LucideIcon, ChevronRight } from "lucide-react";
 
-interface DocCardProps {
+export interface DocCardProps {
   title: string;
-  description: string;
+  description?: string;
   icon?: LucideIcon;
   link?: string;
   accentColor?: "cyan" | "amber" | "teal" | "green" | "purple" | "red" | "blue";
@@ -101,7 +101,7 @@ const DocCard = ({
               />
             )}
           </div>
-          <p className="text-sm text-slate-400 mt-1">{description}</p>
+          {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
         </div>
       </div>
       {children && <div className="mt-4">{children}</div>}
