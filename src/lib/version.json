@@ -1,11 +1,11 @@
 {
   "major": 3,
   "minor": 0,
-  "patch": 2,
+  "patch": 0,
   "codename": "Deep Ocean",
-  "build": 8254,
-  "fullVersion": "3.0.2",
-  "displayVersion": "V3.0 Patch 2",
+  "build": 8300,
+  "fullVersion": "3.0.0",
+  "displayVersion": "V3.0",
   "shortVersion": "3.0",
-  "releaseDate": "2026-01-21"
+  "releaseDate": "2026-01-22"
 }

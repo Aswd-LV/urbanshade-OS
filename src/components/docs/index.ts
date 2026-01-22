@@ -6,3 +6,5 @@ export { default as DocCode } from "./DocCode";
 export { default as DocAlert } from "./DocAlert";
 export { default as DocTable } from "./DocTable";
 export { default as DocNav } from "./DocNav";
+export { default as DocTOC } from "./DocTOC";
+export { default as DocTag } from "./DocTag";
