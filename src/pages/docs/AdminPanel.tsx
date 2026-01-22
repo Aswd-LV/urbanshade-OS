@@ -1,298 +1,202 @@
-import { ArrowLeft, Shield, Sparkles, AlertTriangle, Skull, Eye, Palette, Zap, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
-import SEO from "@/components/SEO";
+import { Shield, Lock, Eye, Zap, Skull, Sparkles, AlertTriangle, Palette } from "lucide-react";
+import { DocLayout, DocHero, DocSection, DocCard, DocAlert, DocCode } from "@/components/docs";
 
 const AdminPanelDocs = () => {
   return (
-    <>
-    <SEO 
-      title="Admin Panel" 
-      description="Access the powerful Admin Panel in Urbanshade OS for crash testing, system control, and chaos management."
-      path="/docs/admin-panel"
-    />
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-foreground">
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-primary">Admin Panel Guide</h1>
-          <Link 
-            to="/docs" 
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary/20 border border-primary/30 text-primary hover:bg-primary/30 transition-colors text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Docs
-          </Link>
+    <DocLayout
+      title="Admin Panel"
+      description="Access the powerful Admin Panel in UrbanShade OS for crash testing, system control, and chaos management."
+      keywords={["admin", "panel", "secret", "effects", "crash", "chaos"]}
+      accentColor="amber"
+      prevPage={{ title: "Advanced Features", path: "/docs/advanced" }}
+      nextPage={{ title: "Keyboard Shortcuts", path: "/docs/shortcuts" }}
+    >
+      <DocHero
+        icon={Shield}
+        title="The Admin Panel"
+        subtitle="The most powerful (and dangerous) tool in UrbanShade OS. With great power comes great potential for chaos. 🚨"
+        accentColor="amber"
+        badge="🔓 Secret Access"
+      />
+
+      <DocAlert variant="warning" title="Handle With Care">
+        Some actions in the Admin Panel actually affect your localStorage. 
+        Factory reset will delete everything. You've been warned!
+      </DocAlert>
+
+      <DocSection title="How to Access" icon={Lock} accentColor="amber">
+        <div className="grid gap-4 md:grid-cols-3">
+          <DocCard
+            title="Terminal Command"
+            description="Type 'secret' in the Terminal app. Classic hacker move."
+            icon={Shield}
+            accentColor="amber"
+          />
+          <DocCard
+            title="Browser Console"
+            description="Press F12 and type: adminPanel() — for when you want to feel like a real developer."
+            icon={Zap}
+            accentColor="cyan"
+          />
+          <DocCard
+            title="HTML Source"
+            description="Look for hidden comments in the HTML source code. Old school easter egg hunting."
+            icon={Eye}
+            accentColor="purple"
+          />
         </div>
-      </header>
+        <DocCode language="javascript" title="Console Access" code={`// Open browser console (F12) and type:
+adminPanel()
 
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-12">
-        <section className="text-center space-y-4">
-          <Shield className="w-16 h-16 mx-auto text-primary" />
-          <h2 className="text-4xl font-bold">The Admin Panel</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Welcome to the most powerful (and dangerous) tool in URBANSHADE OS. 
-            With great power comes great potential for hilarious chaos. You've been warned! 🚨
-          </p>
-        </section>
+// Alternative:
+window.adminPanel()`} />
+      </DocSection>
 
-        {/* Access Methods */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Lock className="w-8 h-8 text-primary" />
-            <h3 className="text-2xl font-bold">How to Access</h3>
-          </div>
-          <div className="p-6 rounded-lg bg-primary/10 border border-primary/30 space-y-4">
-            <p className="text-muted-foreground">
-              There are multiple secret ways to access the Admin Panel. Choose your favorite:
-            </p>
-            <div className="space-y-3">
-              <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-                <h4 className="font-bold text-primary mb-2">Method 1: Terminal Command</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Type <code className="bg-black/60 px-2 py-1 rounded border border-white/20">secret</code> in the Terminal app
-                </p>
-                <p className="text-xs text-gray-500 italic">
-                  Classic move. Very hacker-esque. 10/10 style points.
-                </p>
-              </div>
-              <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-                <h4 className="font-bold text-primary mb-2">Method 2: Browser Console</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Open browser console (F12) and type: <code className="bg-black/60 px-2 py-1 rounded border border-white/20">adminPanel()</code>
-                </p>
-                <p className="text-xs text-gray-500 italic">
-                  For when you want to feel like a real developer. Press F12, pretend you know JavaScript.
-                </p>
-              </div>
-              <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-                <h4 className="font-bold text-primary mb-2">Method 3: HTML Source Easter Egg</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Look for hidden comments in the HTML source code
-                </p>
-                <p className="text-xs text-gray-500 italic">
-                  Remember when we hid cheat codes in game manuals? This is like that, but nerdier.
-                </p>
-              </div>
+      <DocSection title="Visual Effects" icon={Eye} accentColor="purple">
+        <p className="text-muted-foreground mb-4">
+          Transform your interface into a psychedelic nightmare:
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          {[
+            { name: "Rainbow Mode", desc: "Pride month is all year round" },
+            { name: "Glitch Mode", desc: "Everything looks corrupted (it's a feature!)" },
+            { name: "Matrix Mode", desc: "Green monospace for that 1999 aesthetic" },
+            { name: "Blur Effect", desc: "For when you've had too much coffee" },
+            { name: "Grayscale", desc: "Turn everything sad and depressing" },
+            { name: "Invert Colors", desc: "Welcome to Opposite Day" },
+          ].map((effect) => (
+            <div key={effect.name} className="p-3 rounded-lg border border-border bg-card">
+              <div className="font-medium text-foreground">{effect.name}</div>
+              <div className="text-sm text-muted-foreground">{effect.desc}</div>
             </div>
-          </div>
-        </section>
-
-        {/* Features Overview */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Sparkles className="w-8 h-8 text-primary" />
-            <h3 className="text-2xl font-bold">Features & Capabilities</h3>
-          </div>
-          <p className="text-muted-foreground">
-            The Admin Panel is organized into several tabs, each more chaotic than the last:
-          </p>
-          
-          <div className="grid gap-4">
-            {/* Visual Tab */}
-            <div className="p-6 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/30 space-y-3">
-              <div className="flex items-center gap-3">
-                <Eye className="w-6 h-6 text-purple-400" />
-                <h4 className="text-xl font-bold text-purple-400">Visual Effects</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Transform your interface into a psychedelic nightmare! Features include:
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
-                <li>• <strong>Rainbow Mode</strong> - Because pride month is all year round</li>
-                <li>• <strong>Glitch Mode</strong> - Make everything look corrupted (it's a feature, not a bug!)</li>
-                <li>• <strong>Matrix Mode</strong> - Green monospace font for that 1999 hacker aesthetic</li>
-                <li>• <strong>Blur Effect</strong> - For when you've had one too many espressos</li>
-                <li>• <strong>Grayscale</strong> - Turn everything sad and depressing</li>
-                <li>• <strong>Invert Colors</strong> - Welcome to Opposite Day</li>
-              </ul>
-            </div>
-
-            {/* System Tab */}
-            <div className="p-6 rounded-lg bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/30 space-y-3">
-              <div className="flex items-center gap-3">
-                <Zap className="w-6 h-6 text-blue-400" />
-                <h4 className="text-xl font-bold text-blue-400">System Modifications</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Mess with the fundamental fabric of reality (well, the UI at least):
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
-                <li>• <strong>Tilt Mode</strong> - Slightly off-angle, just enough to be annoying</li>
-                <li>• <strong>Rotate 180°</strong> - For when upside-down is your thing</li>
-                <li>• <strong>Shake Screen</strong> - Earthquake simulator 3000</li>
-                <li>• <strong>Zoom 1.5x</strong> - Everything is BIG now</li>
-                <li>• <strong>Slow Motion</strong> - Watch your UI move in cinematic glory</li>
-                <li>• <strong>Flash Bang</strong> - Brief white screen. Good luck with your retinas.</li>
-              </ul>
-            </div>
-
-            {/* Security Tab */}
-            <div className="p-6 rounded-lg bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/30 space-y-3">
-              <div className="flex items-center gap-3">
-                <Shield className="w-6 h-6 text-red-400" />
-                <h4 className="text-xl font-bold text-red-400">Security Controls</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Where you can disable all the security features you carefully set up:
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
-                <li>• <strong>Toggle System Security</strong> - Turn the safety off</li>
-                <li>• <strong>Disable Authentication</strong> - Who needs passwords anyway?</li>
-                <li>• <strong>Clear BIOS Password</strong> - Forgot your password? Problem solved!</li>
-                <li>• <strong>Factory Reset</strong> - The nuclear option. Deletes everything.</li>
-              </ul>
-              <div className="p-3 rounded bg-yellow-500/10 border border-yellow-500/30">
-                <p className="text-xs text-yellow-500">
-                  ⚠️ <strong>Warning:</strong> These actually work! Your localStorage will be affected. 
-                  Don't blame us when you have to set everything up again.
-                </p>
-              </div>
-            </div>
-
-            {/* Crash Tab */}
-            <div className="p-6 rounded-lg bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500/30 space-y-3">
-              <div className="flex items-center gap-3">
-                <Skull className="w-6 h-6 text-red-400" />
-                <h4 className="text-xl font-bold text-red-400">Crash Builder</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Ever wanted to design your own blue screen of death? Now you can!
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
-                <li>• Choose from 6 crash types: Kernel Panic, Virus, Blue Screen, Memory, Corruption, Overload</li>
-                <li>• Customize the crash title and message</li>
-                <li>• Trigger crashes to freak out your friends</li>
-                <li>• Create dramatic moments for screenshots</li>
-              </ul>
-              <div className="p-3 rounded bg-blue-500/10 border border-blue-500/30">
-                <p className="text-xs text-blue-400">
-                  💡 <strong>Pro tip:</strong> Take a screenshot of a custom crash screen and send it to 
-                  your tech-illiterate relatives. Tell them your computer is broken. Enjoy the panic.
-                </p>
-              </div>
-            </div>
-
-            {/* Chaos Tab */}
-            <div className="p-6 rounded-lg bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 space-y-3">
-              <div className="flex items-center gap-3">
-                <Sparkles className="w-6 h-6 text-yellow-400" />
-                <h4 className="text-xl font-bold text-yellow-400">Chaos Engineering</h4>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                For when you want to test your mental stability:
-              </p>
-              <ul className="space-y-1 text-sm text-muted-foreground ml-4">
-                <li>• <strong>Random Chaos</strong> - Surprise me! (You'll regret this)</li>
-                <li>• <strong>Spawn Icons</strong> - Desktop icons everywhere!</li>
-                <li>• <strong>Corrupt Text</strong> - Watch all text turn into gibberish</li>
-                <li>• <strong>Trigger Lockdown</strong> - Emergency containment protocol activated</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Safety Tips */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="w-8 h-8 text-yellow-500" />
-            <h3 className="text-2xl font-bold">Safety Tips (Read This First!)</h3>
-          </div>
-          <div className="p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30 space-y-4">
-            <p className="text-muted-foreground">
-              Before you go crazy with admin powers, here are some things to keep in mind:
-            </p>
-            <ul className="space-y-2 text-sm text-muted-foreground ml-4">
-              <li className="flex items-start gap-2">
-                <span className="text-yellow-500">1.</span>
-                <span>
-                  <strong>Most effects are temporary</strong> - Refresh the page to reset everything to normal
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-yellow-500">2.</span>
-                <span>
-                  <strong>Some actions affect localStorage</strong> - Factory reset and password clearing will actually delete your data
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-yellow-500">3.</span>
-                <span>
-                  <strong>Exit button is in the top right</strong> - You'll need it when things get too chaotic
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-yellow-500">4.</span>
-                <span>
-                  <strong>Some effects stack</strong> - Enabling multiple visual effects creates... interesting results
-                </span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-yellow-500">5.</span>
-                <span>
-                  <strong>Not responsible for migraines</strong> - Rainbow Mode + Glitch Mode + Shake = ??? (Try at your own risk)
-                </span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        {/* Fun Ideas */}
-        <section className="space-y-6">
-          <div className="flex items-center gap-3">
-            <Palette className="w-8 h-8 text-primary" />
-            <h3 className="text-2xl font-bold">Fun Things to Try</h3>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-primary mb-2">🎬 Create a Horror Movie</h4>
-              <p className="text-sm text-muted-foreground">
-                Enable glitch mode, trigger a virus crash, then share screenshots. 
-                "My computer is haunted" has never been more convincing.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-primary mb-2">🎪 Maximum Chaos Mode</h4>
-              <p className="text-sm text-muted-foreground">
-                Enable Rainbow + Glitch + Rotate + Shake + Blur all at once. 
-                See how long you can last before getting dizzy.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-primary mb-2">🎨 Make It Your Own</h4>
-              <p className="text-sm text-muted-foreground">
-                Use the crash builder to create custom error messages. 
-                "ERROR: Coffee levels critically low" is always a good one.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-black/40 border border-white/10">
-              <h4 className="font-bold text-primary mb-2">🎮 Challenge Your Friends</h4>
-              <p className="text-sm text-muted-foreground">
-                Have a contest to see who can find all three access methods. 
-                Winner gets bragging rights (and maybe coffee).
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Closing */}
-        <section className="p-6 rounded-lg bg-gradient-to-br from-primary/20 to-blue-500/20 border border-primary/30">
-          <h3 className="text-xl font-bold text-primary mb-3">Remember</h3>
-          <p className="text-muted-foreground mb-2">
-            The Admin Panel is all about having fun and exploring what's possible with web interfaces. 
-            Nothing you do here will harm your actual computer (unless you somehow manage to trigger an 
-            actual nuclear meltdown, but that's on you).
-          </p>
-          <p className="text-sm text-gray-500 italic">
-            Use responsibly. Or don't. We're documentation, not your parents. 🤷
-          </p>
-        </section>
-
-        <div className="flex justify-between pt-8 border-t border-white/10">
-          <Link to="/docs/advanced" className="text-primary hover:underline">← Advanced Features</Link>
-          <Link to="/docs/shortcuts" className="text-primary hover:underline">Keyboard Shortcuts →</Link>
+          ))}
         </div>
-      </main>
-    </div>
-    </>
+      </DocSection>
+
+      <DocSection title="System Modifications" icon={Zap} accentColor="blue">
+        <p className="text-muted-foreground mb-4">
+          Mess with the fundamental fabric of reality (the UI):
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          {[
+            { name: "Tilt Mode", desc: "Slightly off-angle, just enough to be annoying" },
+            { name: "Rotate 180°", desc: "For when upside-down is your thing" },
+            { name: "Shake Screen", desc: "Earthquake simulator 3000" },
+            { name: "Zoom 1.5x", desc: "Everything is BIG now" },
+            { name: "Slow Motion", desc: "Cinematic UI movements" },
+            { name: "Flash Bang", desc: "Brief white screen. RIP retinas." },
+          ].map((mod) => (
+            <div key={mod.name} className="p-3 rounded-lg border border-border bg-card">
+              <div className="font-medium text-foreground">{mod.name}</div>
+              <div className="text-sm text-muted-foreground">{mod.desc}</div>
+            </div>
+          ))}
+        </div>
+      </DocSection>
+
+      <DocSection title="Security Controls" icon={Shield} accentColor="red">
+        <DocAlert variant="danger" title="These Actually Work">
+          Security controls affect your localStorage. Factory reset will 
+          delete all your data. Don't blame us!
+        </DocAlert>
+        <div className="grid gap-3 md:grid-cols-2 mt-4">
+          {[
+            { name: "Toggle System Security", desc: "Turn the safety off" },
+            { name: "Disable Authentication", desc: "Who needs passwords anyway?" },
+            { name: "Clear BIOS Password", desc: "Forgot your password? Problem solved!" },
+            { name: "Factory Reset", desc: "The nuclear option. Deletes everything." },
+          ].map((ctrl) => (
+            <div key={ctrl.name} className="p-3 rounded-lg border border-red-500/20 bg-red-500/5">
+              <div className="font-medium text-red-400">{ctrl.name}</div>
+              <div className="text-sm text-muted-foreground">{ctrl.desc}</div>
+            </div>
+          ))}
+        </div>
+      </DocSection>
+
+      <DocSection title="Crash Builder" icon={Skull} accentColor="red">
+        <p className="text-muted-foreground mb-4">
+          Design your own blue screen of death! Choose crash type, customize the message, 
+          and trigger it to freak out your friends.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {["Kernel Panic", "Virus", "Blue Screen", "Memory", "Corruption", "Overload"].map((type) => (
+            <span key={type} className="px-3 py-1 rounded-full text-sm border border-red-500/30 bg-red-500/10 text-red-400">
+              {type}
+            </span>
+          ))}
+        </div>
+        <DocAlert variant="tip" title="Pro Tip">
+          Take a screenshot of a custom crash screen and send it to your tech-illiterate 
+          relatives. Tell them your computer is broken. Enjoy the panic.
+        </DocAlert>
+      </DocSection>
+
+      <DocSection title="Chaos Engineering" icon={Sparkles} accentColor="amber">
+        <p className="text-muted-foreground mb-4">
+          For when you want to test your mental stability:
+        </p>
+        <div className="grid gap-3 md:grid-cols-2">
+          {[
+            { name: "Random Chaos", desc: "Surprise me! (You'll regret this)" },
+            { name: "Spawn Icons", desc: "Desktop icons everywhere!" },
+            { name: "Corrupt Text", desc: "All text becomes gibberish" },
+            { name: "Trigger Lockdown", desc: "Emergency containment activated" },
+          ].map((chaos) => (
+            <div key={chaos.name} className="p-3 rounded-lg border border-amber-500/20 bg-amber-500/5">
+              <div className="font-medium text-amber-400">{chaos.name}</div>
+              <div className="text-sm text-muted-foreground">{chaos.desc}</div>
+            </div>
+          ))}
+        </div>
+      </DocSection>
+
+      <DocSection title="Safety Tips" icon={AlertTriangle} accentColor="amber">
+        <div className="space-y-2 text-sm text-muted-foreground">
+          <div className="flex gap-3">
+            <span className="text-amber-400 font-bold">1.</span>
+            <span><strong>Most effects are temporary</strong> — refresh the page to reset</span>
+          </div>
+          <div className="flex gap-3">
+            <span className="text-amber-400 font-bold">2.</span>
+            <span><strong>Some actions affect localStorage</strong> — factory reset deletes data</span>
+          </div>
+          <div className="flex gap-3">
+            <span className="text-amber-400 font-bold">3.</span>
+            <span><strong>Exit button in top right</strong> — use it when things get chaotic</span>
+          </div>
+          <div className="flex gap-3">
+            <span className="text-amber-400 font-bold">4.</span>
+            <span><strong>Effects can stack</strong> — Rainbow + Glitch + Shake = chaos</span>
+          </div>
+        </div>
+      </DocSection>
+
+      <DocSection title="Fun Things to Try" icon={Palette} accentColor="cyan">
+        <div className="grid gap-4 md:grid-cols-2">
+          <DocCard
+            title="🎬 Create a Horror Movie"
+            description="Enable glitch mode, trigger a virus crash, share screenshots. 'My computer is haunted.'"
+            accentColor="purple"
+          />
+          <DocCard
+            title="🎪 Maximum Chaos Mode"
+            description="Enable Rainbow + Glitch + Rotate + Shake + Blur all at once. See how long you last."
+            accentColor="amber"
+          />
+          <DocCard
+            title="🎨 Custom Errors"
+            description="Use crash builder to create custom messages. 'ERROR: Coffee levels critically low.'"
+            accentColor="red"
+          />
+          <DocCard
+            title="🎮 Challenge Friends"
+            description="Contest to find all three access methods. Winner gets bragging rights."
+            accentColor="cyan"
+          />
+        </div>
+      </DocSection>
+    </DocLayout>
   );
 };
 

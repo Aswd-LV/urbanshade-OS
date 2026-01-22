@@ -20,6 +20,26 @@ interface UseKeyboardShortcutsProps {
   onLock?: () => void;
 }
 
+/**
+ * Keyboard shortcuts for UrbanShade OS
+ * 
+ * All shortcuts use SHIFT as the modifier to avoid conflicts with real OS shortcuts.
+ * This ensures users can use UrbanShade shortcuts without triggering system actions.
+ * 
+ * Shortcuts:
+ * - Shift + / : Toggle global search
+ * - Shift + Tab : Alt-tab style window switcher
+ * - Shift + Escape : Open task manager
+ * - Shift + D : Minimize all (show desktop)
+ * - Shift + E : Open file explorer
+ * - Shift + T : Open terminal
+ * - Shift + I : Open settings
+ * - Shift + L : Lock screen
+ * - Shift + Q : Close focused window
+ * - Shift + M : Minimize focused window
+ * - Shift + W : Task view
+ * - F11 : Toggle fullscreen (browser native)
+ */
 export const useKeyboardShortcuts = ({
   windows,
   onFocusWindow,
@@ -47,110 +67,112 @@ export const useKeyboardShortcuts = ({
       return;
     }
 
-    // Alt+Tab - Window switcher
-    if (e.altKey && e.key === 'Tab') {
-      e.preventDefault();
-      if (sortedWindows.length > 1) {
-        setAltTabActive(true);
-        setAltTabIndex(prev => (prev + 1) % sortedWindows.length);
+    // All shortcuts use Shift modifier (no Ctrl, no Meta, no Alt)
+    // This avoids conflicts with real OS shortcuts
+    if (!e.shiftKey || e.ctrlKey || e.metaKey || e.altKey) {
+      // Exception: F11 for fullscreen (no modifiers needed)
+      if (e.key === 'F11') {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          document.documentElement.requestFullscreen();
+        }
       }
       return;
     }
 
-    // Win key (Meta) - Toggle start menu
-    if (e.key === 'Meta' && !e.altKey && !e.ctrlKey && !e.shiftKey) {
-      e.preventDefault();
-      onToggleStartMenu();
-      return;
-    }
+    switch (e.key.toLowerCase()) {
+      // Shift + / - Toggle global search
+      case '/':
+        e.preventDefault();
+        onToggleSearch?.();
+        break;
 
-    // Ctrl+Alt+Delete - Open task manager
-    if (e.ctrlKey && e.altKey && e.key === 'Delete') {
-      e.preventDefault();
-      const taskManager = allApps.find(a => a.id === 'task-manager');
-      if (taskManager) openWindow(taskManager);
-      return;
-    }
+      // Shift + Tab - Window switcher
+      case 'tab':
+        e.preventDefault();
+        if (sortedWindows.length > 1) {
+          setAltTabActive(true);
+          setAltTabIndex(prev => (prev + 1) % sortedWindows.length);
+        }
+        break;
 
-    // Win+D - Minimize all windows (show desktop)
-    if (e.metaKey && e.key === 'd') {
-      e.preventDefault();
-      windows.forEach(w => {
-        if (!w.minimized) onMinimizeWindow(w.id);
-      });
-      return;
-    }
+      // Shift + Escape - Task manager
+      case 'escape':
+        e.preventDefault();
+        const taskManager = allApps.find(a => a.id === 'task-manager');
+        if (taskManager) openWindow(taskManager);
+        break;
 
-    // Win+E - Open file explorer
-    if (e.metaKey && e.key === 'e') {
-      e.preventDefault();
-      const explorer = allApps.find(a => a.id === 'explorer');
-      if (explorer) openWindow(explorer);
-      return;
-    }
+      // Shift + D - Show desktop (minimize all)
+      case 'd':
+        e.preventDefault();
+        windows.forEach(w => {
+          if (!w.minimized) onMinimizeWindow(w.id);
+        });
+        break;
 
-    // Win+R / Ctrl+Alt+T - Open terminal
-    if ((e.metaKey && e.key === 'r') || (e.ctrlKey && e.altKey && e.key === 't')) {
-      e.preventDefault();
-      const terminal = allApps.find(a => a.id === 'terminal');
-      if (terminal) openWindow(terminal);
-      return;
-    }
+      // Shift + E - File explorer
+      case 'e':
+        e.preventDefault();
+        const explorer = allApps.find(a => a.id === 'explorer');
+        if (explorer) openWindow(explorer);
+        break;
 
-    // Win+I - Open settings
-    if (e.metaKey && e.key === 'i') {
-      e.preventDefault();
-      const settings = allApps.find(a => a.id === 'settings');
-      if (settings) openWindow(settings);
-      return;
-    }
+      // Shift + T - Terminal
+      case 't':
+        e.preventDefault();
+        const terminal = allApps.find(a => a.id === 'terminal');
+        if (terminal) openWindow(terminal);
+        break;
 
-    // Win+S / Ctrl+Space - Open search
-    if ((e.metaKey && e.key === 's') || (e.ctrlKey && e.key === ' ')) {
-      e.preventDefault();
-      onToggleSearch?.();
-      return;
-    }
+      // Shift + I - Settings
+      case 'i':
+        e.preventDefault();
+        const settings = allApps.find(a => a.id === 'settings');
+        if (settings) openWindow(settings);
+        break;
 
-    // Win+Tab - Task View
-    if (e.metaKey && e.key === 'Tab') {
-      e.preventDefault();
-      onToggleTaskView?.();
-      return;
-    }
+      // Shift + L - Lock screen
+      case 'l':
+        e.preventDefault();
+        onLock?.();
+        break;
 
-    // Win+L - Lock screen
-    if (e.metaKey && e.key === 'l') {
-      e.preventDefault();
-      onLock?.();
-      return;
-    }
+      // Shift + Q - Close focused window
+      case 'q':
+        e.preventDefault();
+        if (sortedWindows.length > 0) {
+          onCloseWindow(sortedWindows[0].id);
+        }
+        break;
 
-    // Alt+F4 - Close focused window
-    if (e.altKey && e.key === 'F4') {
-      e.preventDefault();
-      if (sortedWindows.length > 0) {
-        onCloseWindow(sortedWindows[0].id);
-      }
-      return;
-    }
+      // Shift + M - Minimize focused window
+      case 'm':
+        e.preventDefault();
+        if (sortedWindows.length > 0) {
+          onMinimizeWindow(sortedWindows[0].id);
+        }
+        break;
 
-    // F11 - Toggle fullscreen
-    if (e.key === 'F11') {
-      e.preventDefault();
-      if (document.fullscreenElement) {
-        document.exitFullscreen();
-      } else {
-        document.documentElement.requestFullscreen();
-      }
-      return;
-    }
+      // Shift + W - Task view
+      case 'w':
+        e.preventDefault();
+        onToggleTaskView?.();
+        break;
 
+      // Shift + S - Toggle start menu (alternative)
+      case 's':
+        e.preventDefault();
+        onToggleStartMenu();
+        break;
+    }
   }, [sortedWindows, windows, onToggleStartMenu, onMinimizeWindow, onCloseWindow, openWindow, allApps, onToggleSearch, onToggleTaskView, onLock]);
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
-    // Alt released - confirm alt+tab selection
-    if (altTabActive && e.key === 'Alt') {
+    // Shift released - confirm window switcher selection
+    if (altTabActive && e.key === 'Shift') {
       setAltTabActive(false);
       if (sortedWindows[altTabIndex]) {
         onFocusWindow(sortedWindows[altTabIndex].id);
