@@ -59,6 +59,7 @@ import { DiceRoller } from "./apps/DiceRoller";
 import { ReactionTest } from "./apps/ReactionTest";
 import { FortuneApp } from "./apps/FortuneApp";
 import { Inventory } from "./apps/Inventory";
+import { SystemMessages } from "./apps/SystemMessages";
 
 interface WindowData {
   id: string;
@@ -115,6 +116,8 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         return <Terminal onCrash={(type) => onCriticalKill("terminal.exe", type)} />;
       case "task-manager":
         return <TaskManager windows={allWindows} onCloseWindow={onCloseWindow} onCriticalKill={onCriticalKill} />;
+      case "system-messages":
+        return <SystemMessages />;
       case "messages":
         return <GlobalChat />;
       case "incidents":

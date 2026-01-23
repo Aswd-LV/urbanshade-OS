@@ -944,7 +944,12 @@ const ModerationPanel = () => {
 
       if (response.error) throw response.error;
       
-      toast.success("Global notification sent!");
+      // Show as custom notification instead of toast
+      toast("Admin message", {
+        description: broadcastMessage,
+        duration: 10000,
+      });
+      
       setActivities(prev => [{
         id: Date.now().toString(),
         type: "broadcast",
