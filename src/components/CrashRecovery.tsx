@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface CrashRecoveryData {
   timestamp: string;
@@ -113,10 +113,33 @@ export const CrashRecoveryDialog = ({ onRecover, onSkip }: CrashRecoveryProps) =
   const [selectedOption, setSelectedOption] = useState(0);
   const [showPoints, setShowPoints] = useState(false);
   const [selectedPointIndex, setSelectedPointIndex] = useState(0);
+  const [showCursor, setShowCursor] = useState(false);
+  const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setRecoveryData(getCrashRecoveryData());
     setRecoveryPoints(getRecoveryPoints());
+  }, []);
+
+  // Handle cursor visibility on mouse movement
+  useEffect(() => {
+    const handleMouseMove = () => {
+      setShowCursor(true);
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+      cursorTimeoutRef.current = setTimeout(() => {
+        setShowCursor(false);
+      }, 2000);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Keyboard navigation
@@ -177,7 +200,7 @@ export const CrashRecoveryDialog = ({ onRecover, onSkip }: CrashRecoveryProps) =
 
   if (showPoints) {
     return (
-      <div className="fixed inset-0 z-[9999] bg-black text-white flex flex-col font-mono select-none">
+      <div className={`fixed inset-0 z-[9999] bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
         {/* Header */}
         <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
           <span className="font-bold tracking-wide">Select Recovery Point</span>
@@ -185,7 +208,7 @@ export const CrashRecoveryDialog = ({ onRecover, onSkip }: CrashRecoveryProps) =
 
         {/* Content */}
         <div className="flex-1 p-6 text-[13px] overflow-auto">
-          <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+          <p className="text-gray-400 mb-6">(Use ↑↓ to navigate, ENTER to select. Mouse optional.)</p>
 
           <div className="space-y-0.5 mb-8">
             {recoveryPoints.map((point, i) => (
@@ -240,7 +263,7 @@ export const CrashRecoveryDialog = ({ onRecover, onSkip }: CrashRecoveryProps) =
   }
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black text-white flex flex-col font-mono select-none">
+    <div className={`fixed inset-0 z-[9999] bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
       {/* Header */}
       <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
         <span className="font-bold tracking-wide">System Crash Detected</span>
@@ -259,7 +282,7 @@ export const CrashRecoveryDialog = ({ onRecover, onSkip }: CrashRecoveryProps) =
           <p>Info: {recoveryData.description}</p>
         </div>
 
-        <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+        <p className="text-gray-400 mb-6">(Use ↑↓ to navigate, ENTER to select. Mouse optional.)</p>
 
         {/* Options */}
         <div className="space-y-0.5 mb-8">

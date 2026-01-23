@@ -36,7 +36,9 @@ export const RecoveryEnvironment = ({
   const [recoveryImages, setRecoveryImages] = useState<any[]>([]);
   const [rebootTarget, setRebootTarget] = useState<string | null>(null);
   const [rebootProgress, setRebootProgress] = useState(0);
+  const [showCursor, setShowCursor] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load recovery images from localStorage
   useEffect(() => {
@@ -46,6 +48,27 @@ export const RecoveryEnvironment = ({
         setRecoveryImages(JSON.parse(images));
       } catch {}
     }
+  }, []);
+
+  // Handle cursor visibility on mouse movement
+  useEffect(() => {
+    const handleMouseMove = () => {
+      setShowCursor(true);
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+      cursorTimeoutRef.current = setTimeout(() => {
+        setShowCursor(false);
+      }, 2000);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Handle reboot animation
@@ -279,7 +302,7 @@ export const RecoveryEnvironment = ({
     };
 
     return (
-      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+      <div className={`fixed inset-0 bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
         {/* Header */}
         <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
           <span className="font-bold tracking-wide">Choose an option</span>
@@ -287,7 +310,7 @@ export const RecoveryEnvironment = ({
 
         {/* Content */}
         <div className="flex-1 p-6 text-[13px]">
-          <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+          <p className="text-gray-400 mb-6">(Use ↑↓ to navigate, ENTER to select. Mouse optional.)</p>
 
           <div className="space-y-0.5 mb-8">
             {mainOptions.map((opt, i) => (
@@ -339,7 +362,7 @@ export const RecoveryEnvironment = ({
     };
 
     return (
-      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+      <div className={`fixed inset-0 bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
         {/* Header */}
         <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
           <span className="font-bold tracking-wide">Advanced Options</span>
@@ -347,7 +370,7 @@ export const RecoveryEnvironment = ({
 
         {/* Content */}
         <div className="flex-1 p-6 text-[13px]">
-          <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+          <p className="text-gray-400 mb-6">(Use ↑↓ to navigate, ENTER to select. Mouse optional.)</p>
 
           <div className="space-y-0.5 mb-8">
             {troubleshootOptions.map((opt, i) => (
@@ -401,7 +424,7 @@ export const RecoveryEnvironment = ({
     };
 
     return (
-      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+      <div className={`fixed inset-0 bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
         {/* Header */}
         <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
           <span className="font-bold tracking-wide">Startup Settings</span>
@@ -409,7 +432,7 @@ export const RecoveryEnvironment = ({
 
         {/* Content */}
         <div className="flex-1 p-6 text-[13px]">
-          <p className="text-gray-400 mb-6">(Use the arrow keys to highlight your choice.)</p>
+          <p className="text-gray-400 mb-6">(Use ↑↓ to navigate, ENTER to select. Mouse optional.)</p>
 
           <div className="space-y-0.5 mb-8">
             {startupSettings.map((s, i) => (
@@ -448,7 +471,7 @@ export const RecoveryEnvironment = ({
   // Data Recovery
   if (screen === "data-recovery") {
     return (
-      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+      <div className={`fixed inset-0 bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
         {/* Header */}
         <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
           <span className="font-bold tracking-wide">Data Recovery</span>
@@ -507,7 +530,7 @@ export const RecoveryEnvironment = ({
   // System Image Recovery
   if (screen === "system-image") {
     return (
-      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+      <div className={`fixed inset-0 bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
         {/* Header */}
         <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
           <span className="font-bold tracking-wide">System Image Recovery</span>
@@ -567,7 +590,7 @@ export const RecoveryEnvironment = ({
   // Recovery Image (DEF-DEV Snapshots)
   if (screen === "recovery-image") {
     return (
-      <div className="fixed inset-0 bg-black text-white flex flex-col font-mono select-none">
+      <div className={`fixed inset-0 bg-black text-white flex flex-col font-mono select-none ${!showCursor ? 'cursor-none' : ''}`}>
         {/* Header */}
         <div className="bg-[#aaaaaa] text-black px-4 py-1.5 text-center">
           <span className="font-bold tracking-wide">DEF-DEV Snapshots</span>
@@ -576,7 +599,7 @@ export const RecoveryEnvironment = ({
         {/* Content */}
         <div className="flex-1 p-6 text-[13px] overflow-auto">
           <p className="text-gray-400 mb-6">
-            Select a recovery snapshot to restore:
+            (Use ↑↓ to navigate, ENTER to select. Mouse optional.)
           </p>
 
           {recoveryImages.length === 0 ? (
