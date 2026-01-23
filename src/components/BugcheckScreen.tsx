@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export interface BugcheckData {
   code: string;
@@ -304,6 +304,8 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
   const [selectedOption, setSelectedOption] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [counter, setCounter] = useState(0);
+  const [showCursor, setShowCursor] = useState(false);
+  const cursorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const codeInfo = BUGCHECK_CODES[bugcheck.code] || {
     hex: "0x000000DE",
@@ -324,6 +326,27 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
       localStorage.setItem('urbanshade_bugchecks', JSON.stringify(bugchecks.slice(-50)));
     } catch {}
   }, [bugcheck]);
+
+  // Handle cursor visibility on mouse movement
+  useEffect(() => {
+    const handleMouseMove = () => {
+      setShowCursor(true);
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+      cursorTimeoutRef.current = setTimeout(() => {
+        setShowCursor(false);
+      }, 2000);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (cursorTimeoutRef.current) {
+        clearTimeout(cursorTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
@@ -364,7 +387,7 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
   };
 
   return (
-    <div className="fixed inset-0 bg-black text-white font-mono flex flex-col z-[9999] select-none">
+    <div className={`fixed inset-0 bg-black text-white font-mono flex flex-col z-[9999] select-none ${!showCursor ? 'cursor-none' : ''}`}>
       {/* Top border accent */}
       <div className="h-1 bg-white" />
 
@@ -419,7 +442,7 @@ export const BugcheckScreen = ({ bugcheck, onRestart, onReportToDev, onRecovery 
 
           {/* Recovery options */}
           <div className="border border-white/40 p-4 mt-8">
-            <div className="text-xs text-gray-400 mb-3">Select an option:</div>
+            <div className="text-xs text-gray-400 mb-3">(Use ↑↓ to navigate, ENTER to select. Mouse optional.)</div>
             {options.map((opt, i) => (
               <div
                 key={i}
