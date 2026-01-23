@@ -35,7 +35,7 @@ import { Firewall } from "./apps/Firewall";
 import { Downloads } from "./apps/Downloads";
 import { PluginStore } from "./apps/PluginStore";
 import { CrashApp } from "./apps/CrashApp";
-import { Settings } from "./apps/Settings";
+import Settings from "./apps/Settings";
 import { VideoPlayer } from "./apps/VideoPlayer";
 import { ImageViewer } from "./apps/ImageViewer";
 import { PdfReader } from "./apps/PdfReader";
