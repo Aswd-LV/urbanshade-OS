@@ -258,8 +258,9 @@ const Settings = ({ onUpdate }: SettingsProps) => {
 
   // Handlers
   const handleOpenDefDev = () => {
-    systemBus.openDevMode();
-    toast.success('DEF-DEV Console launched');
+    // Navigate to /def-dev route
+    window.open('/def-dev', '_blank');
+    toast.success('DEF-DEV Console opened in new tab');
   };
 
   const handleOemUnlock = () => setShowOemDialog(true);
