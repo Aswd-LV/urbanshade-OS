@@ -91,63 +91,51 @@ export const themePresets: ThemePreset[] = [
 
   // Battle Pass Season 1: Genesis Themes
   {
-    id: "neon-pulse",
-    name: "Neon Pulse",
+    id: "digital-dawn",
+    name: "Digital Dawn",
     colors: {
-      bgGradientStart: "#0a0a1a",
-      bgGradientEnd: "#1a0a2a",
-      accentColor: "#00ffff"
+      bgGradientStart: "#0a1628",
+      bgGradientEnd: "#1a2a42",
+      accentColor: "#00d4ff"
     },
     source: 'battlepass',
     requiredLevel: 10,
     seasonId: 'genesis'
   },
   {
-    id: "cyber-grid",
-    name: "Cyber Grid",
+    id: "neon-circuit",
+    name: "Neon Circuit",
+    colors: {
+      bgGradientStart: "#0a0a1a",
+      bgGradientEnd: "#1a0a2a",
+      accentColor: "#ff00ff"
+    },
+    source: 'battlepass',
+    requiredLevel: 20,
+    seasonId: 'genesis'
+  },
+  {
+    id: "quantum-shift",
+    name: "Quantum Shift",
+    colors: {
+      bgGradientStart: "#140a20",
+      bgGradientEnd: "#201030",
+      accentColor: "#8855ff"
+    },
+    source: 'battlepass',
+    requiredLevel: 35,
+    seasonId: 'genesis'
+  },
+  {
+    id: "neural-network",
+    name: "Neural Network",
     colors: {
       bgGradientStart: "#001a00",
       bgGradientEnd: "#0a2a0a",
-      accentColor: "#00ff00"
+      accentColor: "#00ff88"
     },
     source: 'battlepass',
-    requiredLevel: 25,
-    seasonId: 'genesis'
-  },
-  {
-    id: "crimson-protocol",
-    name: "Crimson Protocol",
-    colors: {
-      bgGradientStart: "#1a0000",
-      bgGradientEnd: "#2a0a0a",
-      accentColor: "#ff3333"
-    },
-    source: 'battlepass',
-    requiredLevel: 40,
-    seasonId: 'genesis'
-  },
-  {
-    id: "frozen-core",
-    name: "Frozen Core",
-    colors: {
-      bgGradientStart: "#0a1a2a",
-      bgGradientEnd: "#1a2a3a",
-      accentColor: "#88ccff"
-    },
-    source: 'battlepass',
-    requiredLevel: 55,
-    seasonId: 'genesis'
-  },
-  {
-    id: "solar-flare",
-    name: "Solar Flare",
-    colors: {
-      bgGradientStart: "#1a1000",
-      bgGradientEnd: "#2a2010",
-      accentColor: "#ffaa00"
-    },
-    source: 'battlepass',
-    requiredLevel: 65,
+    requiredLevel: 50,
     seasonId: 'genesis'
   },
   {
@@ -159,19 +147,19 @@ export const themePresets: ThemePreset[] = [
       accentColor: "#aa55ff"
     },
     source: 'battlepass',
-    requiredLevel: 80,
+    requiredLevel: 65,
     seasonId: 'genesis'
   },
   {
     id: "genesis-prime",
-    name: "Genesis",
+    name: "Genesis Prime",
     colors: {
       bgGradientStart: "#0f0a1a",
       bgGradientEnd: "#1a1030",
-      accentColor: "#ff00ff"
+      accentColor: "#ffd700"
     },
     source: 'battlepass',
-    requiredLevel: 95,
+    requiredLevel: 80,
     seasonId: 'genesis'
   },
 
@@ -197,7 +185,7 @@ export const themePresets: ThemePreset[] = [
       accentColor: "#444444"
     },
     source: 'battlepass',
-    requiredLevel: 25,
+    requiredLevel: 20,
     seasonId: 'phantom'
   },
   {
@@ -209,7 +197,7 @@ export const themePresets: ThemePreset[] = [
       accentColor: "#8888aa"
     },
     source: 'battlepass',
-    requiredLevel: 50,
+    requiredLevel: 35,
     seasonId: 'phantom'
   },
   {
@@ -221,7 +209,31 @@ export const themePresets: ThemePreset[] = [
       accentColor: "#333355"
     },
     source: 'battlepass',
-    requiredLevel: 80,
+    requiredLevel: 55,
+    seasonId: 'phantom'
+  },
+  {
+    id: "shadow-realm",
+    name: "Shadow Realm",
+    colors: {
+      bgGradientStart: "#0a0510",
+      bgGradientEnd: "#120a18",
+      accentColor: "#5533aa"
+    },
+    source: 'battlepass',
+    requiredLevel: 70,
+    seasonId: 'phantom'
+  },
+  {
+    id: "phantom-prime",
+    name: "Phantom Prime",
+    colors: {
+      bgGradientStart: "#08080f",
+      bgGradientEnd: "#101018",
+      accentColor: "#c0c0c0"
+    },
+    source: 'battlepass',
+    requiredLevel: 85,
     seasonId: 'phantom'
   }
 ];

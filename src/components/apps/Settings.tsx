@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { 
   Monitor, Volume2, Bell, Palette, Wifi, Shield, Info, 
-  RotateCcw, Code, HardDrive, Gauge, Keyboard, Zap,
+  RotateCcw, Code, HardDrive, Gauge,
   ChevronRight, Search, Unlock, Terminal, Trash2, AlertTriangle,
   Sun, Moon, Sparkles, Lock, Check, Crown, Gift, Star, Paintbrush,
   Power, Image, Music
@@ -25,9 +25,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { systemBus } from "@/lib/systemBus";
 import { themePresets, useThemePresets, ThemePreset } from "@/hooks/useThemePresets";
 import { THEME_PRESETS, useThemeEngine } from "@/hooks/useThemeEngine";
+import { VERSION } from "@/lib/versionInfo";
 
 // ============ TYPES ============
 
@@ -216,21 +216,7 @@ const getSettingsConfig = (handlers: {
     name: 'System',
     icon: Info,
     description: 'System info and reset',
-    settings: [
-      { key: 'version', label: 'Version', type: 'info', defaultValue: '', infoValue: () => 'UrbanShade OS 2.5.0' },
-      { key: 'build', label: 'Build', type: 'info', defaultValue: '', infoValue: () => `US-${Date.now().toString(36).slice(-6).toUpperCase()}` },
-      { 
-        key: 'factory_reset', 
-        label: 'Factory Reset', 
-        description: 'Erase all data and restore to defaults', 
-        type: 'action', 
-        defaultValue: null,
-        actionLabel: 'Reset',
-        action: handlers.onFactoryReset,
-        dangerous: true,
-        icon: Trash2
-      },
-    ]
+    customRender: true,
   },
 ];
 
@@ -631,6 +617,127 @@ const Settings = ({ onUpdate }: SettingsProps) => {
     </div>
   );
 
+  // ============ SYSTEM RENDERER ============
+  const renderSystem = () => {
+    const buildId = `US-${VERSION.build}`;
+    const installDate = loadState('urbanshade_install_date', new Date().toISOString());
+    const formattedInstallDate = new Date(installDate).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+
+    return (
+      <div className="space-y-6">
+        {/* OS Information */}
+        <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg shadow-primary/20">
+              <Sparkles className="w-7 h-7 text-primary-foreground" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-foreground">UrbanShade OS</h3>
+              <p className="text-sm text-muted-foreground">Deep Ocean Edition</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 rounded-lg bg-background/50">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Version</p>
+              <p className="text-sm font-bold text-primary">{VERSION.displayVersion}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-background/50">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Codename</p>
+              <p className="text-sm font-bold text-foreground">{VERSION.codename}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Build Information */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Info className="w-4 h-4 text-primary" />
+            Build Information
+          </h4>
+          <div className="space-y-1 bg-muted/20 rounded-xl p-3">
+            <div className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-muted/30">
+              <span className="text-sm font-medium text-foreground">Build Number</span>
+              <span className="text-xs text-primary font-mono bg-primary/10 px-2 py-1 rounded">
+                {buildId}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-muted/30">
+              <span className="text-sm font-medium text-foreground">Full Version</span>
+              <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
+                {VERSION.major}.{VERSION.minor}.{VERSION.patch}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-muted/30">
+              <span className="text-sm font-medium text-foreground">Release Date</span>
+              <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
+                {VERSION.releaseDate}
+              </span>
+            </div>
+            <div className="flex items-center justify-between py-2 px-2 rounded-lg hover:bg-muted/30">
+              <span className="text-sm font-medium text-foreground">Install Date</span>
+              <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
+                {formattedInstallDate}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Storage Usage */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <HardDrive className="w-4 h-4 text-primary" />
+            Storage
+          </h4>
+          <div className="p-3 rounded-lg bg-muted/20 border border-border/30">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-muted-foreground">LocalStorage Used</span>
+              <span className="text-xs font-mono text-primary">
+                {(() => {
+                  let total = 0;
+                  for (const key in localStorage) {
+                    if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+                      total += localStorage[key].length * 2;
+                    }
+                  }
+                  return `${(total / 1024).toFixed(2)} KB`;
+                })()}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Danger Zone */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-semibold text-destructive flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" />
+            Danger Zone
+          </h4>
+          <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-foreground">Factory Reset</p>
+                <p className="text-xs text-muted-foreground">Erase all data and restore to defaults</p>
+              </div>
+              <Button 
+                variant="destructive" 
+                size="sm" 
+                onClick={handleFactoryReset}
+                className="h-8"
+              >
+                <Trash2 className="w-3.5 h-3.5 mr-2" />
+                Reset
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-full bg-background">
       {/* Sidebar */}
@@ -745,7 +852,8 @@ const Settings = ({ onUpdate }: SettingsProps) => {
 
                 {currentCategory.customRender ? (
                   currentCategory.id === 'personalization' ? renderPersonalization() :
-                  currentCategory.id === 'boot' ? renderBoot() : null
+                  currentCategory.id === 'boot' ? renderBoot() :
+                  currentCategory.id === 'system' ? renderSystem() : null
                 ) : currentCategory.settings ? (
                   <div className="space-y-1 bg-muted/20 rounded-xl p-2">
                     {currentCategory.settings.map(setting => (
