@@ -1,4 +1,4 @@
-soon 👀
+UPDATE TODAY 8PM EASTER EUROPEAN TIME 👀
 <img width="1280" height="695" alt="image" src="https://github.com/user-attachments/assets/f491ccc7-04aa-4e9e-b1c5-49414cb4fede" />
 
 
