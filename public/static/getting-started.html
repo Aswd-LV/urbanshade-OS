@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started | Urbanshade OS Documentation</title>
+  <meta name="description" content="Learn how to get started with Urbanshade OS - installation, first boot, OOBE setup, and desktop orientation guide.">
+  <meta name="keywords" content="urbanshade, getting started, installation, setup, tutorial, first boot, OOBE">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs/getting-started">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs/getting-started">
+  <meta property="og:title" content="Getting Started | Urbanshade OS Documentation">
+  <meta property="og:description" content="Learn how to get started with Urbanshade OS - installation, first boot, and desktop orientation.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #22d3ee;
+      --accent-teal: #14b8a6;
+      --border: #334155;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #0f172a 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    
+    header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    
+    .breadcrumb { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle { color: var(--text-secondary); }
+    
+    h2 {
+      font-size: 1.5rem;
+      color: var(--accent-cyan);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    h3 { font-size: 1.125rem; color: var(--text-primary); margin: 1.5rem 0 0.75rem; }
+    
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .step-list { list-style: none; counter-reset: step; }
+    
+    .step-list li {
+      counter-increment: step;
+      padding: 1rem 1rem 1rem 3.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      margin-bottom: 0.75rem;
+      position: relative;
+    }
+    
+    .step-list li::before {
+      content: counter(step);
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      background: var(--accent-cyan);
+      color: var(--bg-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .step-list li strong { color: var(--text-primary); }
+    
+    .tip-box {
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 0.5rem;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .tip-box strong { color: var(--accent-cyan); }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .feature-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .feature-item strong { color: var(--text-primary); display: block; margin-bottom: 0.25rem; }
+    .feature-item span { color: var(--text-secondary); font-size: 0.875rem; }
+    
+    code {
+      background: var(--bg-secondary);
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      color: var(--accent-cyan);
+    }
+    
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .nav-links a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    .nav-links a:hover { border-color: var(--accent-cyan); }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a { color: var(--accent-cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / <a href="/static/docs.html">Docs</a> / Getting Started
+      </nav>
+      <h1>🚀 Getting Started</h1>
+      <p class="subtitle">Your complete guide to starting with Urbanshade OS</p>
+    </header>
+    
+    <main>
+      <section>
+        <h2>Welcome to Urbanshade OS</h2>
+        <p>
+          Urbanshade OS is a browser-based operating system simulation that provides a complete 
+          desktop environment experience. This guide will walk you through your first boot and 
+          help you get familiar with the system.
+        </p>
+        
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Urbanshade OS works best on desktop browsers with JavaScript enabled. 
+          For the optimal experience, use Chrome, Firefox, Safari, or Edge.
+        </div>
+      </section>
+      
+      <section>
+        <h2>First Boot Experience</h2>
+        <p>When you first visit Urbanshade OS, you'll go through a boot sequence that mimics a real operating system:</p>
+        
+        <ol class="step-list">
+          <li>
+            <strong>BIOS Screen</strong><br>
+            <span style="color: var(--text-secondary)">The system displays a simulated BIOS/POST screen. Press any key or wait to continue.</span>
+          </li>
+          <li>
+            <strong>Boot Screen</strong><br>
+            <span style="color: var(--text-secondary)">Watch the boot animation as system components load. This can be skipped in settings later.</span>
+          </li>
+          <li>
+            <strong>Installation (First Visit Only)</strong><br>
+            <span style="color: var(--text-secondary)">A simulated installation wizard appears on your first visit. Follow the prompts to "install" the OS.</span>
+          </li>
+          <li>
+            <strong>OOBE - Out of Box Experience</strong><br>
+            <span style="color: var(--text-secondary)">Configure your username, preferences, and initial settings. This is where you personalize your experience.</span>
+          </li>
+          <li>
+            <strong>Desktop</strong><br>
+            <span style="color: var(--text-secondary)">Welcome to your new desktop! You'll see icons, a taskbar, and the start menu.</span>
+          </li>
+        </ol>
+      </section>
+      
+      <section>
+        <h2>Desktop Overview</h2>
+        <p>The Urbanshade OS desktop consists of several key components:</p>
+        
+        <div class="feature-grid">
+          <div class="feature-item">
+            <strong>🖥️ Desktop Icons</strong>
+            <span>Double-click to open apps. Right-click for options.</span>
+          </div>
+          <div class="feature-item">
+            <strong>📋 Taskbar</strong>
+            <span>Shows running apps and system tray at the bottom.</span>
+          </div>
+          <div class="feature-item">
+            <strong>🏠 Start Menu</strong>
+            <span>Click the start button or press Win key.</span>
+          </div>
+          <div class="feature-item">
+            <strong>🔔 System Tray</strong>
+            <span>Clock, notifications, and quick settings.</span>
+          </div>
+          <div class="feature-item">
+            <strong>🪟 Windows</strong>
+            <span>Drag to move, resize from edges.</span>
+          </div>
+          <div class="feature-item">
+            <strong>🎨 Themes</strong>
+            <span>Customize in Settings app.</span>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>Essential Applications</h2>
+        <p>Here are the key applications you should try first:</p>
+        
+        <h3>File Explorer</h3>
+        <p>Browse the virtual file system, create folders, and manage files. Access it from the desktop or start menu.</p>
+        
+        <h3>Terminal</h3>
+        <p>A command-line interface with custom commands. Try <code>help</code> to see available commands.</p>
+        
+        <h3>Settings</h3>
+        <p>Customize your experience - themes, wallpapers, sounds, and system preferences.</p>
+        
+        <h3>Global Chat</h3>
+        <p>Connect with other Urbanshade OS users in real-time (requires account).</p>
+      </section>
+      
+      <section>
+        <h2>Creating an Account</h2>
+        <p>While Urbanshade OS works without an account, creating one unlocks online features:</p>
+        
+        <ul style="color: var(--text-secondary); margin-left: 1.5rem;">
+          <li>Save your settings and progress across devices</li>
+          <li>Access global chat and messaging</li>
+          <li>Earn achievements and track progress</li>
+          <li>Participate in the Battle Pass system</li>
+          <li>Join leaderboards and competitions</li>
+        </ul>
+        
+        <p style="margin-top: 1rem;">To create an account, open the <strong>Account Settings</strong> app from the start menu.</p>
+      </section>
+      
+      <section>
+        <h2>Keyboard Shortcuts</h2>
+        <p>Speed up your workflow with these essential shortcuts:</p>
+        
+        <div class="feature-grid">
+          <div class="feature-item">
+            <strong>Win</strong>
+            <span>Open/close Start Menu</span>
+          </div>
+          <div class="feature-item">
+            <strong>Alt + Tab</strong>
+            <span>Switch between windows</span>
+          </div>
+          <div class="feature-item">
+            <strong>Ctrl + Shift + T</strong>
+            <span>Open Terminal</span>
+          </div>
+          <div class="feature-item">
+            <strong>Win + D</strong>
+            <span>Show desktop</span>
+          </div>
+        </div>
+        
+        <p>See the <a href="/static/shortcuts.html" style="color: var(--accent-cyan);">full shortcuts reference</a> for more.</p>
+      </section>
+      
+      <section>
+        <h2>Next Steps</h2>
+        <p>Now that you're set up, here are some things to explore:</p>
+        
+        <ol class="step-list">
+          <li>
+            <strong>Explore the Applications</strong><br>
+            <span style="color: var(--text-secondary)">Check out the full <a href="/static/applications.html" style="color: var(--accent-cyan);">applications list</a>.</span>
+          </li>
+          <li>
+            <strong>Learn Terminal Commands</strong><br>
+            <span style="color: var(--text-secondary)">Master the CLI with our <a href="/static/terminal.html" style="color: var(--accent-cyan);">terminal guide</a>.</span>
+          </li>
+          <li>
+            <strong>Customize Your Desktop</strong><br>
+            <span style="color: var(--text-secondary)">Try different themes and wallpapers in Settings.</span>
+          </li>
+          <li>
+            <strong>Join the Community</strong><br>
+            <span style="color: var(--text-secondary)">Create an account and chat with other users.</span>
+          </li>
+        </ol>
+      </section>
+      
+      <div class="nav-links">
+        <a href="/static/docs.html">← Back to Docs</a>
+        <a href="/static/applications.html">Applications →</a>
+      </div>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation</p>
+      <p style="margin-top: 0.5rem;"><a href="/">Home</a> · <a href="/static/docs.html">Docs</a> · <a href="/support">Support</a></p>
+    </footer>
+  </div>
+</body>
+</html>

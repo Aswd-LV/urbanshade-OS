@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation | Urbanshade OS</title>
+  <meta name="description" content="Complete documentation for Urbanshade OS - the browser-based operating system simulation. Learn about features, terminal commands, applications, and developer tools.">
+  <meta name="keywords" content="urbanshade, documentation, browser os, web os, terminal, applications, developer tools">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs">
+  <meta property="og:title" content="Documentation | Urbanshade OS">
+  <meta property="og:description" content="Complete documentation for Urbanshade OS - learn about features, terminal commands, applications, and developer tools.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Documentation | Urbanshade OS">
+  <meta name="twitter:description" content="Complete documentation for Urbanshade OS - learn about features, terminal commands, applications, and developer tools.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #22d3ee;
+      --accent-teal: #14b8a6;
+      --accent-amber: #f59e0b;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --border: #334155;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #0f172a 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .breadcrumb {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    
+    .breadcrumb a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+    }
+    
+    .version-badge {
+      display: inline-block;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      margin-top: 1rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .section-icon {
+      color: var(--accent-cyan);
+      margin-right: 0.5rem;
+    }
+    
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-cyan);
+    }
+    
+    .card h3 {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+    
+    .card p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+    
+    .card a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+    
+    .card a:hover {
+      text-decoration: underline;
+    }
+    
+    .card.cyan { border-left: 3px solid var(--accent-cyan); }
+    .card.teal { border-left: 3px solid var(--accent-teal); }
+    .card.amber { border-left: 3px solid var(--accent-amber); }
+    .card.purple { border-left: 3px solid var(--accent-purple); }
+    .card.red { border-left: 3px solid var(--accent-red); }
+    
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    
+    .quick-link {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    
+    .quick-link:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+    
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+    
+    .js-notice {
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      font-size: 0.875rem;
+    }
+    
+    .js-notice a {
+      color: var(--accent-cyan);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / Documentation
+      </nav>
+      <h1>📚 Documentation</h1>
+      <p class="subtitle">Complete guide to Urbanshade OS - the browser-based operating system simulation</p>
+      <span class="version-badge">V3.0 Patch 2</span>
+    </header>
+    
+    <div class="js-notice">
+      📌 This is a static version of the documentation. For the full interactive experience, 
+      <a href="/docs">visit the main documentation</a> with JavaScript enabled.
+    </div>
+    
+    <main>
+      <section>
+        <h2><span class="section-icon">🚀</span> Getting Started</h2>
+        <div class="card-grid">
+          <div class="card cyan">
+            <h3>Getting Started Guide</h3>
+            <p>New to Urbanshade OS? Start here with our step-by-step guide covering installation, first boot, and desktop basics.</p>
+            <a href="/static/getting-started.html">Read the guide →</a>
+          </div>
+          <div class="card cyan">
+            <h3>Applications</h3>
+            <p>Explore the built-in applications including File Explorer, Terminal, Calculator, Notepad, Paint, and more.</p>
+            <a href="/static/applications.html">View applications →</a>
+          </div>
+          <div class="card cyan">
+            <h3>Terminal Commands</h3>
+            <p>Master the command-line interface with our comprehensive terminal reference guide.</p>
+            <a href="/static/terminal.html">Terminal reference →</a>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2><span class="section-icon">⚡</span> Core Documentation</h2>
+        <div class="card-grid">
+          <div class="card teal">
+            <h3>Features Overview</h3>
+            <p>Discover all the features Urbanshade OS has to offer - from desktop customization to online features.</p>
+            <a href="/static/features.html">Explore features →</a>
+          </div>
+          <div class="card teal">
+            <h3>Keyboard Shortcuts</h3>
+            <p>Speed up your workflow with comprehensive keyboard shortcut reference.</p>
+            <a href="/static/shortcuts.html">View shortcuts →</a>
+          </div>
+          <div class="card teal">
+            <h3>Troubleshooting</h3>
+            <p>Having issues? Find solutions to common problems and FAQs.</p>
+            <a href="/static/troubleshooting.html">Get help →</a>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2><span class="section-icon">🛠️</span> Developer Documentation</h2>
+        <div class="card-grid">
+          <div class="card amber">
+            <h3>DEF-DEV Tools</h3>
+            <p>Built-in developer tools for debugging, state inspection, performance monitoring, and more.</p>
+            <a href="/static/defdev.html">DEF-DEV guide →</a>
+          </div>
+          <div class="card amber">
+            <h3>Developer Guide</h3>
+            <p>Architecture overview, theming, building apps, and contributing to Urbanshade OS.</p>
+            <a href="/static/dev.html">Developer docs →</a>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2><span class="section-icon">🛡️</span> Safety & Community</h2>
+        <div class="card-grid">
+          <div class="card purple">
+            <h3>Safety Center</h3>
+            <p>Learn about user badges, account security, and how to report issues.</p>
+            <a href="/static/safety.html">Safety guide →</a>
+          </div>
+          <div class="card red">
+            <h3>Moderation Guide</h3>
+            <p>For administrators - tools and procedures for community moderation.</p>
+            <a href="/static/moderation.html">Admin guide →</a>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2><span class="section-icon">🔗</span> Quick Links</h2>
+        <div class="quick-links">
+          <a href="/static/getting-started.html" class="quick-link">Getting Started</a>
+          <a href="/static/applications.html" class="quick-link">Applications</a>
+          <a href="/static/terminal.html" class="quick-link">Terminal</a>
+          <a href="/static/shortcuts.html" class="quick-link">Shortcuts</a>
+          <a href="/static/features.html" class="quick-link">Features</a>
+          <a href="/static/troubleshooting.html" class="quick-link">Troubleshooting</a>
+          <a href="/static/defdev.html" class="quick-link">DEF-DEV</a>
+          <a href="/static/dev.html" class="quick-link">Developer</a>
+          <a href="/static/safety.html" class="quick-link">Safety</a>
+          <a href="/static/terms.html" class="quick-link">Terms</a>
+          <a href="/static/privacy.html" class="quick-link">Privacy</a>
+        </div>
+      </section>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation | Version 3.0.0</p>
+      <p style="margin-top: 0.5rem;">
+        <a href="/">Home</a> · <a href="/team">Team</a> · <a href="/support">Support</a> · <a href="/llms.txt">llms.txt</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

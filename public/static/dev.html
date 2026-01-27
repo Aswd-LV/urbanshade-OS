@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Documentation | Urbanshade OS</title>
+  <meta name="description" content="Developer documentation for Urbanshade OS. Architecture overview, theming, building apps, SystemBus, and contributing guidelines.">
+  <meta name="keywords" content="urbanshade, developer, documentation, architecture, theming, apps, contributing, react, typescript">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs/dev">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs/dev">
+  <meta property="og:title" content="Developer Documentation | Urbanshade OS">
+  <meta property="og:description" content="Developer documentation for Urbanshade OS.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-teal: #14b8a6;
+      --accent-green: #22c55e;
+      --accent-cyan: #22d3ee;
+      --border: #334155;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #0a1512 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    
+    header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    
+    .breadcrumb { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--accent-teal); text-decoration: none; }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent-teal), var(--accent-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle { color: var(--text-secondary); margin-top: 0.5rem; }
+    
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent-teal);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    h3 { font-size: 1rem; color: var(--text-primary); margin: 1.5rem 0 0.75rem; }
+    
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    
+    .topic-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-teal);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    
+    .topic-card:hover {
+      border-color: var(--accent-teal);
+      transform: translateY(-2px);
+    }
+    
+    .topic-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 0.75rem 0;
+    }
+    
+    .topic-card p { font-size: 0.875rem; margin-bottom: 1rem; }
+    
+    .topic-card a {
+      color: var(--accent-teal);
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+    
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+    
+    .tech-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .tech-item strong { color: var(--accent-teal); display: block; margin-bottom: 0.25rem; }
+    .tech-item span { color: var(--text-muted); font-size: 0.8rem; }
+    
+    .code-block {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+      font-size: 0.875rem;
+    }
+    
+    .code-block code { color: var(--text-primary); }
+    .code-block .comment { color: var(--text-muted); }
+    .code-block .keyword { color: var(--accent-teal); }
+    .code-block .string { color: var(--accent-green); }
+    
+    .info-box {
+      background: rgba(20, 184, 166, 0.1);
+      border: 1px solid rgba(20, 184, 166, 0.3);
+      border-radius: 0.5rem;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .info-box strong { color: var(--accent-teal); }
+    
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .nav-links a {
+      color: var(--accent-teal);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a { color: var(--accent-teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / <a href="/static/docs.html">Docs</a> / Developer
+      </nav>
+      <h1>👩‍💻 Developer Documentation</h1>
+      <p class="subtitle">Build, customize, and contribute to Urbanshade OS</p>
+    </header>
+    
+    <main>
+      <section>
+        <h2>Technology Stack</h2>
+        <p>Urbanshade OS is built with modern web technologies:</p>
+        <div class="tech-stack">
+          <div class="tech-item">
+            <strong>React 18</strong>
+            <span>UI Library</span>
+          </div>
+          <div class="tech-item">
+            <strong>TypeScript</strong>
+            <span>Type Safety</span>
+          </div>
+          <div class="tech-item">
+            <strong>Vite</strong>
+            <span>Build Tool</span>
+          </div>
+          <div class="tech-item">
+            <strong>Tailwind CSS</strong>
+            <span>Styling</span>
+          </div>
+          <div class="tech-item">
+            <strong>Supabase</strong>
+            <span>Backend</span>
+          </div>
+          <div class="tech-item">
+            <strong>shadcn/ui</strong>
+            <span>Components</span>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>Documentation Topics</h2>
+        <div class="topic-grid">
+          <div class="topic-card">
+            <h3>🏗️ Architecture</h3>
+            <p>Understand the component hierarchy, state management, and data flow patterns used in Urbanshade OS.</p>
+          </div>
+          <div class="topic-card">
+            <h3>🎨 Theming</h3>
+            <p>Learn about the design token system, CSS variables, and how to create custom themes.</p>
+          </div>
+          <div class="topic-card">
+            <h3>📱 Building Apps</h3>
+            <p>Create desktop applications for Urbanshade OS with React components and window integration.</p>
+          </div>
+          <div class="topic-card">
+            <h3>💻 Terminal Commands</h3>
+            <p>Add custom commands to the terminal with argument parsing and output formatting.</p>
+          </div>
+          <div class="topic-card">
+            <h3>📡 SystemBus</h3>
+            <p>Use the event-driven SystemBus for inter-component communication and loose coupling.</p>
+          </div>
+          <div class="topic-card">
+            <h3>📦 UUR Packages</h3>
+            <p>Create and publish packages for the Urbanshade User Repository.</p>
+          </div>
+          <div class="topic-card">
+            <h3>🤝 Contributing</h3>
+            <p>Guidelines for contributing to Urbanshade OS - code standards, PR process, and issue templates.</p>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>Quick Start: Creating an App</h2>
+        <p>Here's a minimal example of creating an app for Urbanshade OS:</p>
+        
+        <div class="code-block">
+          <code>
+            <span class="comment">// src/components/apps/MyApp.tsx</span><br>
+            <span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">"react"</span>;<br><br>
+            <span class="keyword">interface</span> MyAppProps {<br>
+            &nbsp;&nbsp;windowId: <span class="keyword">string</span>;<br>
+            }<br><br>
+            <span class="keyword">export const</span> MyApp = ({ windowId }: MyAppProps) => {<br>
+            &nbsp;&nbsp;<span class="keyword">return</span> (<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;div className=<span class="string">"h-full flex flex-col bg-background p-4"</span>&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h1 className=<span class="string">"text-xl font-bold"</span>&gt;My App&lt;/h1&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;p className=<span class="string">"text-muted-foreground"</span>&gt;Hello, Urbanshade!&lt;/p&gt;<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>
+            &nbsp;&nbsp;);<br>
+            };
+          </code>
+        </div>
+        
+        <div class="info-box">
+          <strong>💡 Tip:</strong> Apps receive a <code style="background: var(--bg-secondary); padding: 0.125rem 0.375rem; border-radius: 0.25rem;">windowId</code> prop 
+          that uniquely identifies the window instance. Use semantic color classes like <code style="background: var(--bg-secondary); padding: 0.125rem 0.375rem; border-radius: 0.25rem;">bg-background</code> 
+          for proper theming support.
+        </div>
+      </section>
+      
+      <section>
+        <h2>Project Structure</h2>
+        <div class="code-block">
+          <code>
+            src/<br>
+            ├── components/<br>
+            │&nbsp;&nbsp;&nbsp;├── apps/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Application components</span><br>
+            │&nbsp;&nbsp;&nbsp;├── ui/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># shadcn/ui components</span><br>
+            │&nbsp;&nbsp;&nbsp;├── shared/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Shared components</span><br>
+            │&nbsp;&nbsp;&nbsp;└── ...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># System components</span><br>
+            ├── hooks/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Custom React hooks</span><br>
+            ├── lib/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Utilities and helpers</span><br>
+            ├── pages/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Route pages</span><br>
+            └── integrations/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># External integrations</span>
+          </code>
+        </div>
+      </section>
+      
+      <section>
+        <h2>Key Concepts</h2>
+        
+        <h3>State Management</h3>
+        <p>
+          Urbanshade OS uses a combination of React state, localStorage for persistence, 
+          React Query for server state, and the SystemBus for event-driven communication.
+        </p>
+        
+        <h3>Window Management</h3>
+        <p>
+          The WindowManager component handles all window operations including creation, 
+          positioning, resizing, and z-index management. Apps are rendered inside windows 
+          based on their component type.
+        </p>
+        
+        <h3>Theming</h3>
+        <p>
+          Themes are defined using CSS custom properties in index.css. The design system 
+          uses semantic tokens (--background, --foreground, --primary, etc.) that adapt 
+          based on the active theme.
+        </p>
+      </section>
+      
+      <div class="nav-links">
+        <a href="/static/defdev.html">← DEF-DEV</a>
+        <a href="/static/safety.html">Safety →</a>
+      </div>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation</p>
+      <p style="margin-top: 0.5rem;"><a href="/">Home</a> · <a href="/static/docs.html">Docs</a> · <a href="/support">Support</a></p>
+    </footer>
+  </div>
+</body>
+</html>

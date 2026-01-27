@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features | Urbanshade OS Documentation</title>
+  <meta name="description" content="Discover all features of Urbanshade OS - desktop environment, applications, online features, developer tools, and more.">
+  <meta name="keywords" content="urbanshade, features, capabilities, desktop, applications, online, developer tools">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs/features">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs/features">
+  <meta property="og:title" content="Features | Urbanshade OS Documentation">
+  <meta property="og:description" content="Discover all features of Urbanshade OS.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #22d3ee;
+      --accent-teal: #14b8a6;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-green: #22c55e;
+      --border: #334155;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #0f172a 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    
+    header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    
+    .breadcrumb { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle { color: var(--text-secondary); margin-top: 0.5rem; }
+    
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .feature-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .feature-section h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.125rem;
+      margin-bottom: 1rem;
+    }
+    
+    .feature-section h3 .icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .feature-section.desktop h3 .icon { background: rgba(34, 211, 238, 0.15); }
+    .feature-section.apps h3 .icon { background: rgba(168, 85, 247, 0.15); }
+    .feature-section.online h3 .icon { background: rgba(34, 197, 94, 0.15); }
+    .feature-section.dev h3 .icon { background: rgba(245, 158, 11, 0.15); }
+    .feature-section.security h3 .icon { background: rgba(239, 68, 68, 0.15); }
+    
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .feature-item::before {
+      content: "✓";
+      color: var(--accent-teal);
+      font-weight: bold;
+    }
+    
+    .version-info {
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 0.5rem;
+      padding: 1rem 1.5rem;
+      margin: 2rem 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .version-badge {
+      background: var(--accent-cyan);
+      color: var(--bg-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .nav-links a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a { color: var(--accent-cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / <a href="/static/docs.html">Docs</a> / Features
+      </nav>
+      <h1>✨ Features Overview</h1>
+      <p class="subtitle">Everything Urbanshade OS has to offer</p>
+    </header>
+    
+    <main>
+      <div class="version-info">
+        <span class="version-badge">V3.0</span>
+        <span style="color: var(--text-secondary);">Current stable release with all features listed below</span>
+      </div>
+      
+      <section class="feature-section desktop">
+        <h3><span class="icon">🖥️</span> Desktop Environment</h3>
+        <p style="margin-bottom: 1rem;">A complete desktop experience that mimics a real operating system.</p>
+        <div class="feature-list">
+          <div class="feature-item">Draggable windows</div>
+          <div class="feature-item">Resizable windows</div>
+          <div class="feature-item">Window snapping</div>
+          <div class="feature-item">Taskbar</div>
+          <div class="feature-item">Start menu</div>
+          <div class="feature-item">System tray</div>
+          <div class="feature-item">Desktop icons</div>
+          <div class="feature-item">Context menus</div>
+          <div class="feature-item">Multiple desktops</div>
+          <div class="feature-item">Alt+Tab switching</div>
+          <div class="feature-item">Task view</div>
+          <div class="feature-item">Notification center</div>
+        </div>
+      </section>
+      
+      <section class="feature-section apps">
+        <h3><span class="icon">📱</span> Built-in Applications</h3>
+        <p style="margin-bottom: 1rem;">Over 30 applications ready to use out of the box.</p>
+        <div class="feature-list">
+          <div class="feature-item">File Explorer</div>
+          <div class="feature-item">Terminal (50+ commands)</div>
+          <div class="feature-item">Notepad</div>
+          <div class="feature-item">Calculator</div>
+          <div class="feature-item">Paint</div>
+          <div class="feature-item">Spreadsheet</div>
+          <div class="feature-item">Settings</div>
+          <div class="feature-item">Task Manager</div>
+          <div class="feature-item">Browser</div>
+          <div class="feature-item">Music Player</div>
+          <div class="feature-item">Video Player</div>
+          <div class="feature-item">Games</div>
+        </div>
+      </section>
+      
+      <section class="feature-section online">
+        <h3><span class="icon">🌐</span> Online Features</h3>
+        <p style="margin-bottom: 1rem;">Connect with other users and sync your progress (requires account).</p>
+        <div class="feature-list">
+          <div class="feature-item">User accounts</div>
+          <div class="feature-item">Cloud sync</div>
+          <div class="feature-item">Global chat</div>
+          <div class="feature-item">Private messaging</div>
+          <div class="feature-item">Friend system</div>
+          <div class="feature-item">Achievements</div>
+          <div class="feature-item">Battle Pass</div>
+          <div class="feature-item">Leaderboards</div>
+          <div class="feature-item">User profiles</div>
+          <div class="feature-item">Custom badges</div>
+          <div class="feature-item">VIP system</div>
+          <div class="feature-item">Kroner currency</div>
+        </div>
+      </section>
+      
+      <section class="feature-section dev">
+        <h3><span class="icon">🛠️</span> Developer Tools</h3>
+        <p style="margin-bottom: 1rem;">DEF-DEV provides powerful debugging and development features.</p>
+        <div class="feature-list">
+          <div class="feature-item">Console logging</div>
+          <div class="feature-item">State inspector</div>
+          <div class="feature-item">Storage viewer</div>
+          <div class="feature-item">Network debugger</div>
+          <div class="feature-item">Performance monitor</div>
+          <div class="feature-item">Memory profiler</div>
+          <div class="feature-item">Boot analyzer</div>
+          <div class="feature-item">Crash analyzer</div>
+          <div class="feature-item">Action dispatcher</div>
+          <div class="feature-item">Command queue</div>
+          <div class="feature-item">SystemBus events</div>
+          <div class="feature-item">Recovery tools</div>
+        </div>
+      </section>
+      
+      <section class="feature-section security">
+        <h3><span class="icon">🛡️</span> Security & Moderation</h3>
+        <p style="margin-bottom: 1rem;">Keep the community safe with built-in moderation tools.</p>
+        <div class="feature-list">
+          <div class="feature-item">NAVI AI moderation</div>
+          <div class="feature-item">Report system</div>
+          <div class="feature-item">User badges</div>
+          <div class="feature-item">VIP verification</div>
+          <div class="feature-item">Admin panel</div>
+          <div class="feature-item">Mod tools</div>
+          <div class="feature-item">Ban system</div>
+          <div class="feature-item">Profanity filter</div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>🎨 Customization</h2>
+        <p>Make Urbanshade OS your own with extensive customization options:</p>
+        <div class="feature-list" style="margin-top: 1rem;">
+          <div class="feature-item">Custom themes</div>
+          <div class="feature-item">Wallpapers</div>
+          <div class="feature-item">Color schemes</div>
+          <div class="feature-item">Font settings</div>
+          <div class="feature-item">Sound effects</div>
+          <div class="feature-item">Boot sequences</div>
+          <div class="feature-item">Desktop widgets</div>
+          <div class="feature-item">Icon packs</div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>🚀 Coming Soon</h2>
+        <p>Features currently in development:</p>
+        <div class="feature-list" style="margin-top: 1rem;">
+          <div class="feature-item">Plugin system</div>
+          <div class="feature-item">UUR Package Manager</div>
+          <div class="feature-item">Custom app creation</div>
+          <div class="feature-item">Theme marketplace</div>
+        </div>
+      </section>
+      
+      <div class="nav-links">
+        <a href="/static/shortcuts.html">← Shortcuts</a>
+        <a href="/static/troubleshooting.html">Troubleshooting →</a>
+      </div>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation</p>
+      <p style="margin-top: 0.5rem;"><a href="/">Home</a> · <a href="/static/docs.html">Docs</a> · <a href="/support">Support</a></p>
+    </footer>
+  </div>
+</body>
+</html>
