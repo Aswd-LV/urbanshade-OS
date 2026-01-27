@@ -1,19 +1,15 @@
-UPDATE TODAY 8PM EASTER EUROPEAN TIME 👀
-<img width="1280" height="695" alt="image" src="https://github.com/user-attachments/assets/f491ccc7-04aa-4e9e-b1c5-49414cb4fede" />
+## Urbanshade OS is under maintnance!
+To prepare the project for V3.0, we've maintenanced the project.
+This means that it is currently unavalible, and the site will not work.
+Thank you for understanding, and i hope the wait for
+V3.0 is worth it :D
 
-
-
-## Urbanshade OS reaches 50 PRs and 500 commits!
-Thank you everyone...
-
-this means a lot to me...
-# Welcome to the Urbanshade OS (website)!
 ---
 ## Quick viewable status:
 
 
 Online/offline:
-### CURRENTLY ONLINE!
+### CURRENTLY IN MAINTNANACE!
 primary: `urbanshade.lovable.dev`
 
 secondary: `urbanshade-os.vercel.app/` (Note: urbanshade.vercel.app will take you to a Pressure inspired gambling website.)
