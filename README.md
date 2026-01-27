@@ -1,15 +1,14 @@
-## Urbanshade OS is under maintnance!
-To prepare the project for V3.0, we've maintenanced the project.
-This means that it is currently unavalible, and the site will not work.
-Thank you for understanding, and i hope the wait for
-V3.0 is worth it :D
+# VERSION #.0 IS OUTTT!!!!
+
+Sorry for the delay, i had a thing or whatever
+IM SO GLAD ITS OUTTTTT
 
 ---
 ## Quick viewable status:
 
 
 Online/offline:
-### CURRENTLY IN MAINTNANACE!
+### CURRENTLY ONILNE!
 primary: `urbanshade.lovable.dev`
 
 secondary: `urbanshade-os.vercel.app/` (Note: urbanshade.vercel.app will take you to a Pressure inspired gambling website.)
