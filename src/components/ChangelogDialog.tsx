@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, Check, Cloud, PartyPopper, Rocket, Zap, Shield, Monitor, Star, ArrowRight, Info, Paintbrush, Bot } from "lucide-react";
+import { Sparkles, Cloud, Rocket, Shield, Monitor, Star, ArrowRight, Info, Paintbrush, Heart, Gift } from "lucide-react";
 import { VERSION, getShortVersion } from "@/lib/versionInfo";
 
 interface ChangelogDialogProps {
@@ -35,163 +35,82 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
     setOpen(false);
   };
 
+  interface ChangeItem {
+    text: string;
+    isHighlight?: boolean;
+  }
+
   interface VersionData {
     icon: React.ReactNode;
     color: string;
     tagline: string;
     overview: string;
-    sections: Record<string, string[]>;
+    thankyou?: string;
+    sections: Record<string, ChangeItem[]>;
   }
 
   const changelogs: Record<string, VersionData> = {
-    "3.0.0": {
+    "3.0": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-purple-600",
       tagline: "THE DEEP OCEAN RELEASE",
-      overview: "All patches consolidated into V3.0 - featuring DEF-DEV handshake, Discord-style docs hub with tag search, complete documentation overhaul, and more.",
+      overview: "The biggest update yet! App Store redesign, Task Manager overhaul, Battle Pass system, quest tracking, Containment Breach game, Kroner currency & Shop, Certificate Viewer, and so much more.",
+      thankyou: "Thank you for being part of the UrbanShade community! Your feedback and support make this project possible. Here's to more amazing updates ahead! 💙",
       sections: {
-        "Documentation Hub Redesign": [
-          "NEW: Discord-style tag-based search and filtering",
-          "NEW: Each article has 5 searchable tags",
-          "NEW: DocTOC component for section navigation in large docs",
-          "NEW: DocTag component for visual tag display",
-          "Redesigned docs hub with cleaner 3-column grid layout",
-          "All 14+ articles tagged with relevant categories"
+        "✨ Major Features": [
+          { text: "App Store completely redesigned with Hero Banner, App of the Day, and Updates tab", isHighlight: true },
+          { text: "Task Manager rewritten with modern UI, search, sorting, and system health metrics", isHighlight: true },
+          { text: "New System Messages app for warnings, ban logs, and NAVI messages", isHighlight: true },
+          { text: "Full Battle Pass system with 100 levels and seasonal rewards", isHighlight: true },
+          { text: "Kroner economy - earn and spend currency on cosmetics", isHighlight: true },
+          { text: "Containment Breach - FNAF-style survival horror game", isHighlight: true },
+          { text: "Certificate Viewer for all earned certificates" },
+          { text: "Untitled Card Game (UCG) - 21-style card game" },
         ],
-        "DEF-DEV Console": [
-          "NEW: Manual handshake button to connect with main OS",
-          "NEW: Connection status indicator (Connected, Standalone, Waiting)",
-          "NEW: Real-time system state reporting from main OS",
-          "Cleaned up console header with improved layout",
-          "Handshake auto-triggers on page load with 3s timeout"
+        "🎨 App Store Overhaul": [
+          { text: "Immersive Hero Banner carousel for featured promotions", isHighlight: true },
+          { text: "App of the Day spotlight section" },
+          { text: "Dedicated Updates tab with version tracking and changelogs" },
+          { text: "Advanced sorting: Rating, Downloads, Size, Date, Name" },
+          { text: "New Lifestyle category with gradient backgrounds" },
+          { text: "Direct 'Open' button to launch apps after installation" },
+          { text: "Category-specific gradient backgrounds for app cards" },
         ],
-        "Documentation Overhaul": [
-          "Refactored core doc pages to use shared DocLayout, DocHero, DocSection components",
-          "Improved visual hierarchy with consistent accent colors",
-          "Added prev/next navigation to all documentation pages",
-          "Safety and Moderation hub pages redesigned",
-          "Better code examples with DocCode component"
+        "🖥️ Interface Improvements": [
+          { text: "Task Manager with mini graphs for CPU/memory usage" },
+          { text: "System health overview in Task Manager" },
+          { text: "Admin broadcasts now use custom toast notifications" },
+          { text: "DEF-DEV Console opens correctly from Settings" },
+          { text: "Documentation Hub redesign with tag-based search" },
+          { text: "DocTOC component for section navigation" },
         ],
-        "Version Consolidation": [
-          "Merged all V3.0 patches (Patch 1, Patch 2) into clean V3.0 release",
-          "Updated version info across all components",
-          "Simplified version display from 'V3.0 Patch 2' to 'V3.0'"
-        ]
-      }
-    },
-    "3.0.2-prev": {
-      icon: <Zap className="w-5 h-5" />,
-      color: "from-amber-500 to-orange-600",
-      tagline: "DEF-DEV MEGA UPDATE",
-      overview: "Massive DEF-DEV console upgrade with 17 tabs, 5 new pressure-inspired themes, window animations, and improved developer tooling.",
-      sections: {
-        "DEF-DEV Console Overhaul": [
-          "FIXED: All 17 tabs now visible and functional (was only 7)",
-          "NEW: Proper sidebar tab navigation layout",
-          "Tabs: Console, Actions, Terminal, Storage, Recovery, Bugchecks",
-          "Tabs: Performance, Network, Events, Components",
-          "Tabs: Boot Analyzer, Crash Analyzer, Memory Profiler",
-          "Tabs: Mod Manager, Supabase, FakeMod, Admin"
+        "🏆 Battle Pass & Economy": [
+          { text: "100 levels with XP progression and passive earning" },
+          { text: "Quest system with 5 rarities resetting every 6 hours" },
+          { text: "Shop app to spend Kroner on themes, titles, badges" },
+          { text: "Season 1: Genesis and Season 2: Phantom Protocol" },
+          { text: "Daily login bonus with streak multiplier" },
         ],
-        "5 New Theme Presets": [
-          "NEW: Hadal Blacksite - Deep-sea research facility aesthetic",
-          "NEW: NAVI Terminal - CRT green retro terminal vibes",
-          "NEW: Pressure Industrial - Brutalist mechanical aesthetic",
-          "NEW: Mantle Zone - Hellish volcanic extraction zone",
-          "NEW: Oxygen Gardens - Bioluminescent alien flora"
+        "🛠️ DEF-DEV Console": [
+          { text: "17 functional tabs in sidebar layout", isHighlight: true },
+          { text: "Manual handshake to connect with main OS" },
+          { text: "5 new pressure-inspired themes" },
+          { text: "Window animations: open, close, minimize, maximize" },
+          { text: "Event Recorder & Replay system" },
         ],
-        "Window Animations": [
-          "NEW: Smooth open animation (scale + fade)",
-          "NEW: Close animation with scale down",
-          "NEW: Minimize animation to taskbar",
-          "NEW: Maximize/restore animation",
-          "NEW: Snap animation feedback"
+        "🎮 Games & Apps": [
+          { text: "Containment Breach: 5 nights, 8 subjects, camera system" },
+          { text: "UCG with bot difficulty levels and score tracking" },
+          { text: "12 new Battle Pass exclusive themes" },
+          { text: "10 new achievements (48 total)" },
         ],
-        "Code Quality": [
-          "Cleaned up unused imports",
-          "Improved component architecture",
-          "Better separation of concerns"
-        ]
-      }
-    },
-    "3.0": {
-      icon: <Rocket className="w-5 h-5" />,
-      color: "from-rose-500 to-orange-600",
-      tagline: "THE YEAR UPDATE",
-      overview: "The biggest update yet! Battle Pass system, quest tracking, Containment Breach game, Kroner currency & Shop, Certificate Viewer, and much more.",
-      sections: {
-        "Kroner Economy System": [
-          "NEW: Dual currency - Lifetime Kroner (leaderboards) and Spendable Kroner (purchases)",
-          "Earn Kroner from achievements, quests, and Battle Pass rewards",
-          "Daily login bonus with streak multiplier",
-          "Gift Kroner to friends",
-          "Kroner balance shown in Personnel Center"
+        "🔧 Technical": [
+          { text: "Security Cameras and Facility Map redesign" },
+          { text: "CRT effects, radar scanner, shared components" },
+          { text: "Virtual desktops with proper window assignment" },
+          { text: "Animation speed control in Settings" },
+          { text: "Taskbar position options (bottom, top, left, right)" },
         ],
-        "Shop App": [
-          "NEW: Spend Spendable Kroner on cosmetics",
-          "Categories: Themes, Titles, Badges, Wallpapers, Profile Effects",
-          "5 rarity tiers: Common, Uncommon, Rare, Epic, Legendary",
-          "Items can be earned via Battle Pass or achievements",
-          "Limited-time items with countdown timers"
-        ],
-        "Certificate Viewer": [
-          "NEW: View all your earned certificates",
-          "Battle Pass Level 100 completion certificates",
-          "Epic and Legendary achievement certificates",
-          "Beautiful certificate display with share functionality"
-        ],
-        "Battle Pass System": [
-          "Full Battle Pass with 100 levels and seasonal rewards",
-          "Quest system with 5 rarities: Common, Uncommon, Rare, Epic, Legendary",
-          "Quests reset every 6 hours with random selection",
-          "XP progression with passive earning (1 XP/min)",
-          "Rewards: Kroner, Themes, Titles, Badges, Wallpapers, Effects",
-          "Season 1: Genesis (Q1 2025) fully planned",
-          "Season 2: Phantom Protocol (Q2 2025) pre-loaded"
-        ],
-        "Theme System Overhaul": [
-          "12 Battle Pass exclusive themes",
-          "Themes section in Settings showing all presets",
-          "Lock icons for themes not yet unlocked",
-          "Purchasable themes in Shop"
-        ],
-        "New Achievements": [
-          "10 new achievements added (48 total)",
-          "battlepass_complete - Complete a Battle Pass",
-          "quest_streak_10 - Complete 10 quests in a row",
-          "legendary_quest - Complete a Legendary quest",
-          "speed_demon, file_explorer_pro, calculator_use, and more"
-        ],
-        "Containment Breach Game": [
-          "FNAF-style horror game in the App Store",
-          "Survive 5 nights monitoring escaped memetic hazards",
-          "Camera system with periodic ping sweeps",
-          "8 unique subjects with special abilities"
-        ],
-        "Untitled Card Game (UCG)": [
-          "NEW: 21-style card game",
-          "Play against bots (Easy, Medium, Hard difficulty)",
-          "Multiple rounds with score tracking",
-          "UCG-specific achievements",
-          "NEW: Card icon (Spade) for the app"
-        ],
-        "UI Improvements": [
-          "App Store redesign with gradient backgrounds",
-          "Fixed window snapping for top taskbar layout",
-          "Improved Personnel Center with 5 tabs"
-        ],
-        "NAVI AI & Moderation": [
-          "AI-powered assistant in moderation #chat channel",
-          "Creator role - highest privilege level",
-          "Autonomous threat levels and auto-actions"
-        ],
-        "Database Additions": [
-          "shop_items table for purchasable cosmetics",
-          "user_inventory table for owned items",
-          "user_certificates table for earned certificates",
-          "profile_visitors, activity_feed, gift_transactions tables",
-          "Kroner fields on profiles (lifetime + spendable)"
-        ]
       }
     },
     "2.9": {
@@ -201,180 +120,82 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
       overview: "Complete redesign of Security Cameras and Facility Map apps with retro-modern CRT aesthetic. New shared UI components, radar scanner effects, and improved visual polish throughout.",
       sections: {
         "Security Cameras Redesign": [
-          "NEW: CRT visual effects with scanlines, noise, and vignette",
-          "NEW: Chromatic aberration and phosphor glow effects",
-          "NEW: Animated moving scanline across camera feed",
-          "NEW: Blueprint grid overlay with corner brackets",
-          "NEW: Motion detection zones with visual indicators",
-          "NEW: Compact bottom action bar with camera navigation",
-          "NEW: Signal interference animation on warning cameras",
-          "NEW: Frame counter timestamp display",
-          "Tab key toggle for facility map integration"
+          { text: "CRT visual effects with scanlines, noise, and vignette" },
+          { text: "Chromatic aberration and phosphor glow effects" },
+          { text: "Animated moving scanline across camera feed" },
+          { text: "Blueprint grid overlay with corner brackets" },
+          { text: "Motion detection zones with visual indicators" },
         ],
         "Facility Map Redesign": [
-          "NEW: Dark blueprint aesthetic with cyan grid lines",
-          "NEW: Glowing room cards with status-based colors",
-          "NEW: Animated dashed connection lines between rooms",
-          "NEW: Room hover previews with quick details",
-          "NEW: Search/filter functionality for rooms",
-          "NEW: Radar scanner with animated sweep and blips",
-          "NEW: CRT overlay effect for immersive visuals",
-          "Improved zone navigation with room counts"
+          { text: "Dark blueprint aesthetic with cyan grid lines" },
+          { text: "Glowing room cards with status-based colors" },
+          { text: "Animated dashed connection lines between rooms" },
+          { text: "Radar scanner with animated sweep and blips" },
         ],
         "New Shared Components": [
-          "NEW: CRTEffect - Reusable CRT overlay (scanlines, noise, vignette)",
-          "NEW: StatusIndicator - Unified online/offline/warning badges",
-          "NEW: PowerMeter - Consistent power display with gradients",
-          "NEW: GlitchText - Text with random glitch animations",
-          "NEW: RadarScanner - Animated radar with entity blips"
+          { text: "CRTEffect - Reusable CRT overlay" },
+          { text: "StatusIndicator - Unified online/offline badges" },
+          { text: "RadarScanner - Animated radar with entity blips" },
         ],
-        "CSS Additions": [
-          "NEW: Interlace animation for CRT effect",
-          "NEW: Scanline scroll keyframes",
-          "NEW: Glitch shake animation",
-          "NEW: Signal interference effect",
-          "NEW: Radar sweep animation",
-          "NEW: Fast blink animation for alerts"
-        ],
-        "Virtual Desktops": [
-          "Fixed window assignment - windows now properly belong to their desktop",
-          "Taskbar and Alt+Tab now filter to active desktop only",
-          "Slide animations when switching between desktops",
-          "Improved Desktop Switcher UI with window previews",
-          "Keyboard shortcuts: Ctrl+Win+←/→ to switch desktops"
-        ],
-        "Settings Overhaul": [
-          "NEW: Animation speed control (slow, normal, fast, instant)",
-          "NEW: Taskbar position (bottom, top, left, right)",
-          "NEW: Window transparency slider",
-          "NEW: Start Menu style toggle (modern/classic)",
-          "NEW: Desktop switcher visibility toggle",
-          "Enhanced appearance section with more customization"
-        ]
       }
     },
     "2.8": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-blue-600",
       tagline: "The Mass Update",
-      overview: "A massive overhaul bringing real cloud messaging, admin moderation panel, contacts system, simulation triggers, and polished UI throughout. Send real messages to other UrbanShade users!",
+      overview: "A massive overhaul bringing real cloud messaging, admin moderation panel, contacts system, simulation triggers, and polished UI throughout.",
       sections: {
         "Cloud Messaging": [
-          "NEW: Real messaging system between cloud users",
-          "Contacts/Favorites system - save frequent recipients",
-          "Message search through subjects and bodies",
-          "Message templates for quick replies",
-          "Rate limiting: 15 messages per 5 minutes, 1 hour cooldown",
-          "Max 3 pending (unread) messages at a time"
+          { text: "Real messaging system between cloud users" },
+          { text: "Contacts/Favorites system" },
+          { text: "Message search and templates" },
         ],
         "Admin Moderation Panel": [
-          "NEW: /moderation route for admin-only access",
-          "Warn users with logged reasons",
-          "Temp ban (1h, 24h, 7d, 30d) or permanent ban",
-          "FAKE BAN prank feature - shows ban then reveals joke!",
-          "Full moderation action logs",
-          "Server-side admin verification via edge function"
+          { text: "/moderation route for admin-only access" },
+          { text: "Warn, temp ban, or permanent ban users" },
+          { text: "FAKE BAN prank feature" },
         ],
-        "DEF-DEV Simulation Triggers": [
-          "NEW: Fake timeout simulation",
-          "Network failure simulation",
-          "Storage full simulation",
-          "Auth failure simulation",
-          "Database error simulation"
-        ],
-        "Quality & Polish": [
-          "Disclaimer screen updated for cloud/local mode accuracy",
-          "Export/import contacts as JSON",
-          "Changelog overview section for each version",
-          "Version updated to 2.8.0 throughout"
-        ]
       }
     },
     "2.7": {
       icon: <Cloud className="w-5 h-5" />,
       color: "from-blue-500 to-purple-600",
       tagline: "Cloud Sync Update",
-      overview: "Introducing cloud synchronization powered by Supabase. Your settings, desktop icons, and installed apps now sync across devices. UUR Manager received a complete visual redesign with advanced filtering and statistics.",
+      overview: "Introducing cloud synchronization powered by Supabase. Your settings, desktop icons, and installed apps now sync across devices.",
       sections: {
-        "Quality of Life": [
-          "Updated version numbers throughout the system to v2.7",
-          "Start Menu now shows your actual username and role",
-          "Cloud sync indicator in Start Menu when online",
-          "Copyright year updated to 2025"
-        ],
         "Online Accounts": [
-          "UUR submissions now sync to Supabase cloud storage",
-          "Better visual feedback for sync status",
-          "Connected email displayed in Settings"
+          { text: "UUR submissions sync to Supabase" },
+          { text: "Cloud sync indicator in Start Menu" },
         ],
         "UUR Manager Redesign": [
-          "Complete visual overhaul with advanced UI",
-          "New sidebar navigation with category filters",
-          "Enhanced package cards with detailed info",
-          "Statistics dashboard showing package counts"
-        ]
+          { text: "Complete visual overhaul" },
+          { text: "Sidebar navigation with category filters" },
+        ],
       }
     },
     "2.6": {
       icon: <Shield className="w-5 h-5" />,
       color: "from-green-500 to-emerald-600",
       tagline: "Security Update",
-      overview: "The foundation for online accounts is here. Sign up with email and password, and your settings automatically sync to the cloud every 2 minutes. Your data is protected with Row Level Security policies.",
+      overview: "The foundation for online accounts is here. Sign up with email and password, and your settings automatically sync to the cloud.",
       sections: {
         "Online Accounts": [
-          "Full Supabase-powered online account system",
-          "Sign up and sign in with email and password",
-          "Automatic settings sync every 2 minutes",
-          "Cloud backup of desktop icons, installed apps, and system settings"
+          { text: "Full Supabase-powered account system" },
+          { text: "Automatic settings sync every 2 minutes" },
         ],
-        "Settings Improvements": [
-          "New 'Online Account' section (visible when signed in)",
-          "View account info, email, and sync status",
-          "Sign out and switch to local mode"
-        ]
-      }
-    },
-    "2.5": {
-      icon: <Zap className="w-5 h-5" />,
-      color: "from-yellow-500 to-orange-600",
-      tagline: "UUR Manager Update",
-      overview: "The UUR package manager debuts with real built-in packages. Hello World and System Info ship as proof-of-concept apps, demonstrating the package installation system works correctly.",
-      sections: {
-        "UUR Manager": [
-          "New UUR Manager app accessible from Desktop and Terminal",
-          "Real built-in packages: Hello World and System Info",
-          "Package submission system for community contributions"
-        ],
-        "CrashScreen Redesign": [
-          "Styled crash screen with different colors per crash type",
-          "Clear labeling for testing purposes"
-        ]
       }
     },
     "2.0": {
       icon: <Monitor className="w-5 h-5" />,
       color: "from-gray-500 to-slate-600",
       tagline: "The Vite Rewrite — August 2025",
-      overview: "The foundation of modern UrbanShade. Complete rewrite from the ground up using React, TypeScript, Vite, and Tailwind CSS. This modernizes the codebase with component-based architecture for better maintainability.",
+      overview: "The foundation of modern UrbanShade. Complete rewrite from the ground up using React, TypeScript, Vite, and Tailwind CSS.",
       sections: {
         "Major Changes": [
-          "Complete rewrite using React and Tailwind CSS",
-          "Modern component-based architecture",
-          "TypeScript for better code quality",
-          "Vite for blazing fast development"
+          { text: "Complete rewrite using React and Tailwind CSS" },
+          { text: "Modern component-based architecture" },
+          { text: "TypeScript for better code quality" },
         ],
-        "Project Timeline": [
-          "Jan 27 2025 — Small beginnings",
-          "February 2025 — First API",
-          "April 2025 — First DEF-DEV iteration",
-          "May 2025 — Improved work",
-          "August 2025 — Rewrite in Vite + React",
-          "September 2025 — DEF-DEV console no longer admin-only",
-          "October 2025 — NOW PUBLIC!",
-          "November 2025 — Online features",
-          "December 2025 — A ton of bug fixes",
-          "January 2026 — Working on v3.0: THE YEAR UPDATE"
-        ]
       }
     }
   };
@@ -388,21 +209,21 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
       <DialogContent className="max-w-5xl h-[85vh] p-0 overflow-hidden animate-scale-in bg-background border-border/50 gap-0 flex flex-col">
         <div className="flex h-full min-h-0 flex-1">
           {/* Left Sidebar - Version List */}
-          <div className="w-64 bg-muted/30 border-r border-border/50 flex flex-col">
+          <div className="w-56 bg-muted/30 border-r border-border/50 flex flex-col">
             {/* Header */}
-            <div className="p-5 border-b border-border/50">
+            <div className="p-4 border-b border-border/50">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-primary-foreground font-black text-sm">
                   U
                 </div>
-                <span className="font-bold text-foreground">URBANSHADE</span>
+                <span className="font-bold text-foreground text-sm">URBANSHADE</span>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Release Notes</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Release Notes</p>
             </div>
 
             {/* Version List */}
             <ScrollArea className="flex-1">
-              <div className="p-3 space-y-1">
+              <div className="p-2 space-y-1">
                 {versions.map((version) => {
                   const data = changelogs[version];
                   const isSelected = selectedVersion === version;
@@ -412,30 +233,30 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
                     <button
                       key={version}
                       onClick={() => setSelectedVersion(version)}
-                      className={`w-full text-left p-3 rounded-xl transition-all duration-200 group ${
+                      className={`w-full text-left p-2.5 rounded-lg transition-all duration-200 group ${
                         isSelected
                           ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                           : "hover:bg-muted text-foreground"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                      <div className="flex items-center gap-2">
+                        <div className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${
                           isSelected ? "bg-primary-foreground/20" : "bg-muted"
                         }`}>
                           {data.icon}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-sm">v{version}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs">v{version}</span>
                             {isLatest && (
-                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                              <span className={`text-[9px] px-1 py-0.5 rounded font-bold ${
                                 isSelected ? "bg-primary-foreground/20" : "bg-primary/20 text-primary"
                               }`}>
                                 NEW
                               </span>
                             )}
                           </div>
-                          <p className={`text-xs whitespace-normal break-words ${
+                          <p className={`text-[10px] truncate ${
                             isSelected ? "text-primary-foreground/70" : "text-muted-foreground"
                           }`}>
                             {data.tagline}
@@ -452,23 +273,23 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
           {/* Right Content - Changelog Details */}
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Version Header */}
-            <div className={`relative px-8 py-8 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden shrink-0`}>
+            <div className={`relative px-6 py-6 bg-gradient-to-br ${versionData?.color || "from-primary to-primary/60"} overflow-hidden shrink-0`}>
               <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48cGF0aCBkPSJNMzYgMzRjMC0yIDItNCAyLTRzLTItMi00LTJjLTQgMC00IDQtNCA0czAgNCA0IDRjMiAwIDItMiAyLTJ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
               <div className="relative z-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
-                    {versionData?.icon || <Sparkles className="w-7 h-7 text-white" />}
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                    {versionData?.icon || <Sparkles className="w-6 h-6 text-white" />}
                   </div>
                   <div>
-                    <div className="flex items-center gap-3">
-                      <h1 className="text-3xl font-black text-white">Version {selectedVersion}</h1>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-2xl font-black text-white">Version {selectedVersion}</h1>
                       {isLatestVersion && (
-                        <span className="px-3 py-1 bg-white/20 backdrop-blur rounded-full text-xs font-bold text-white flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 bg-white/20 backdrop-blur rounded-full text-[10px] font-bold text-white flex items-center gap-1">
                           <Star className="w-3 h-3" /> Latest
                         </span>
                       )}
                     </div>
-                    <p className="text-white/80 text-sm mt-1">{versionData?.tagline}</p>
+                    <p className="text-white/80 text-sm mt-0.5">{versionData?.tagline}</p>
                   </div>
                 </div>
               </div>
@@ -476,13 +297,30 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
 
             {/* Changelog Content - Scrollable */}
             <ScrollArea className="flex-1 min-h-0">
-              <div className="p-6 space-y-5 pb-4">
+              <div className="p-5 space-y-4 pb-4">
+                {/* Thank You Message - Only for v3.0 */}
+                {versionData?.thankyou && (
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-rose-500/10 to-pink-500/10 border border-rose-500/20">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center shrink-0">
+                        <Heart className="w-4 h-4 text-rose-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm text-rose-400 mb-1">Thank You!</h3>
+                        <p className="text-sm text-foreground/80 leading-relaxed">
+                          {versionData.thankyou}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Update Overview */}
                 {versionData?.overview && (
-                  <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="p-3.5 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
+                    <div className="flex items-center gap-2 mb-1.5">
                       <Info className="w-4 h-4 text-primary" />
-                      <h3 className="font-bold text-sm text-primary">Update Overview</h3>
+                      <h3 className="font-bold text-xs text-primary">Update Overview</h3>
                     </div>
                     <p className="text-sm text-foreground/80 leading-relaxed">
                       {versionData.overview}
@@ -495,28 +333,38 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
                   <div 
                     key={section} 
                     className="rounded-xl border border-border/50 overflow-hidden animate-fade-in bg-card/50"
-                    style={{ animationDelay: `${sectionIndex * 80}ms` }}
+                    style={{ animationDelay: `${sectionIndex * 60}ms` }}
                   >
-                    <div className="px-5 py-3 bg-muted/50 border-b border-border/30 flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
-                        <Check className="w-3.5 h-3.5 text-primary" />
-                      </div>
+                    <div className="px-4 py-2.5 bg-muted/50 border-b border-border/30 flex items-center gap-2">
                       <h3 className="font-bold text-foreground text-sm">{section}</h3>
-                      <span className="ml-auto text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full font-medium">
-                        {items.length} {items.length === 1 ? 'change' : 'changes'}
+                      <span className="ml-auto text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-medium">
+                        {items.length}
                       </span>
                     </div>
-                    <ul className="p-4 space-y-2.5">
-                      {items.map((text, i) => (
-                        <li
-                          key={i}
-                          className="flex items-start gap-3 text-sm animate-fade-in group"
-                          style={{ animationDelay: `${(sectionIndex * 80) + (i * 40)}ms` }}
-                        >
-                          <ArrowRight className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                          <span className="text-foreground/85 leading-relaxed">{text}</span>
-                        </li>
-                      ))}
+                    <ul className="p-3 space-y-1.5">
+                      {items.map((item, i) => {
+                        const changeItem = typeof item === 'string' ? { text: item } : item;
+                        return (
+                          <li
+                            key={i}
+                            className={`flex items-start gap-2 text-sm animate-fade-in group ${
+                              changeItem.isHighlight ? 'bg-primary/5 -mx-1 px-1 py-1 rounded-lg' : ''
+                            }`}
+                            style={{ animationDelay: `${(sectionIndex * 60) + (i * 30)}ms` }}
+                          >
+                            {changeItem.isHighlight ? (
+                              <Star className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                            ) : (
+                              <ArrowRight className="w-3 h-3 text-muted-foreground mt-1 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                            )}
+                            <span className={`leading-relaxed ${
+                              changeItem.isHighlight ? 'text-foreground font-medium' : 'text-foreground/80'
+                            }`}>
+                              {changeItem.text}
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 ))}
@@ -524,11 +372,12 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
             </ScrollArea>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-border/50 bg-muted/20 flex items-center justify-between shrink-0">
-              <p className="text-xs text-muted-foreground">
+            <div className="px-5 py-3 border-t border-border/50 bg-muted/20 flex items-center justify-between shrink-0">
+              <p className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                <Gift className="w-3.5 h-3.5" />
                 Thank you for using URBANSHADE OS!
               </p>
-              <Button onClick={handleClose} className="px-8 font-bold">
+              <Button onClick={handleClose} size="sm" className="px-6 font-bold">
                 Let's Go!
               </Button>
             </div>
