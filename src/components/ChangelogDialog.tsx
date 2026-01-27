@@ -53,9 +53,9 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
     "3.0": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-purple-600",
-      tagline: "THE DEEP OCEAN RELEASE",
+      tagline: "THE YEAR UPDATE",
       overview: "The biggest update yet! App Store redesign, Task Manager overhaul, Battle Pass system, quest tracking, Containment Breach game, Kroner currency & Shop, Certificate Viewer, and so much more.",
-      thankyou: "Thank you for being part of the UrbanShade community! Your feedback and support make this project possible. Here's to more amazing updates ahead! 💙",
+      thankyou: "From the bottom of my heart, thank you to everyone who has supported UrbanShade OS since January 2025. What started as a small passion project has grown into something I never imagined possible. To my friends who helped test and debug countless builds, to the early adopters who dealt with broken features and random crashes, to the community members who submitted feedback and ideas — you are the reason this project exists. Special thanks to everyone who's been here since v0.1 ALPHA, through the complete Vite rewrite in v2.0, and now to this massive Year Update. Your patience, enthusiasm, and creativity inspire me every single day. Here's to another year of building cool things together! 💙🚀",
       sections: {
         "✨ Major Features": [
           { text: "App Store completely redesigned with Hero Banner, App of the Day, and Updates tab", isHighlight: true },
