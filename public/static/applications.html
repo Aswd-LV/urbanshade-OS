@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Applications | Urbanshade OS Documentation</title>
+  <meta name="description" content="Explore all built-in applications in Urbanshade OS - File Explorer, Terminal, Calculator, Notepad, Paint, Browser, and more.">
+  <meta name="keywords" content="urbanshade, applications, apps, file explorer, terminal, calculator, notepad, paint">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs/applications">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs/applications">
+  <meta property="og:title" content="Applications | Urbanshade OS Documentation">
+  <meta property="og:description" content="Explore all built-in applications in Urbanshade OS.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #22d3ee;
+      --accent-teal: #14b8a6;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --border: #334155;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #0f172a 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    
+    header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    
+    .breadcrumb { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle { color: var(--text-secondary); margin-top: 0.5rem; }
+    
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .app-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    
+    .app-card:hover { border-color: var(--accent-cyan); }
+    
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .app-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: rgba(34, 211, 238, 0.1);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .app-name { font-size: 1rem; font-weight: 600; }
+    
+    .app-desc { color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5; }
+    
+    .app-card.productivity .app-icon { background: rgba(34, 211, 238, 0.1); }
+    .app-card.system .app-icon { background: rgba(168, 85, 247, 0.1); }
+    .app-card.facility .app-icon { background: rgba(245, 158, 11, 0.1); }
+    .app-card.entertainment .app-icon { background: rgba(239, 68, 68, 0.1); }
+    .app-card.social .app-icon { background: rgba(34, 197, 94, 0.1); }
+    
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .nav-links a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a { color: var(--accent-cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / <a href="/static/docs.html">Docs</a> / Applications
+      </nav>
+      <h1>📱 Applications</h1>
+      <p class="subtitle">Explore all built-in applications in Urbanshade OS</p>
+    </header>
+    
+    <main>
+      <section>
+        <h2>🛠️ Productivity</h2>
+        <div class="app-grid">
+          <div class="app-card productivity">
+            <div class="app-header">
+              <div class="app-icon">📁</div>
+              <span class="app-name">File Explorer</span>
+            </div>
+            <p class="app-desc">Browse the virtual file system, create and manage files and folders. Supports drag-and-drop and context menus.</p>
+          </div>
+          <div class="app-card productivity">
+            <div class="app-header">
+              <div class="app-icon">💻</div>
+              <span class="app-name">Terminal</span>
+            </div>
+            <p class="app-desc">Command-line interface with 50+ custom commands. Supports scripting and has hidden easter eggs.</p>
+          </div>
+          <div class="app-card productivity">
+            <div class="app-header">
+              <div class="app-icon">📝</div>
+              <span class="app-name">Notepad</span>
+            </div>
+            <p class="app-desc">Simple text editor for quick notes and code snippets. Supports save/load to virtual file system.</p>
+          </div>
+          <div class="app-card productivity">
+            <div class="app-header">
+              <div class="app-icon">🧮</div>
+              <span class="app-name">Calculator</span>
+            </div>
+            <p class="app-desc">Basic and scientific calculator with history. Supports keyboard input.</p>
+          </div>
+          <div class="app-card productivity">
+            <div class="app-header">
+              <div class="app-icon">🎨</div>
+              <span class="app-name">Paint</span>
+            </div>
+            <p class="app-desc">Image editor with drawing tools, brushes, and shapes. Export to PNG.</p>
+          </div>
+          <div class="app-card productivity">
+            <div class="app-header">
+              <div class="app-icon">📊</div>
+              <span class="app-name">Spreadsheet</span>
+            </div>
+            <p class="app-desc">Basic spreadsheet application with formulas and cell formatting.</p>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>⚙️ System</h2>
+        <div class="app-grid">
+          <div class="app-card system">
+            <div class="app-header">
+              <div class="app-icon">⚙️</div>
+              <span class="app-name">Settings</span>
+            </div>
+            <p class="app-desc">Configure system preferences, themes, wallpapers, sounds, and personalization options.</p>
+          </div>
+          <div class="app-card system">
+            <div class="app-header">
+              <div class="app-icon">📈</div>
+              <span class="app-name">Task Manager</span>
+            </div>
+            <p class="app-desc">Monitor running processes, system performance, and resource usage.</p>
+          </div>
+          <div class="app-card system">
+            <div class="app-header">
+              <div class="app-icon">💾</div>
+              <span class="app-name">Disk Manager</span>
+            </div>
+            <p class="app-desc">View and manage virtual disk partitions and storage.</p>
+          </div>
+          <div class="app-card system">
+            <div class="app-header">
+              <div class="app-icon">📋</div>
+              <span class="app-name">Registry Editor</span>
+            </div>
+            <p class="app-desc">Edit system registry values (for advanced users).</p>
+          </div>
+          <div class="app-card system">
+            <div class="app-header">
+              <div class="app-icon">👤</div>
+              <span class="app-name">Account Settings</span>
+            </div>
+            <p class="app-desc">Manage your online account, profile, and security settings.</p>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>🏢 Facility</h2>
+        <p>Urbanshade OS features an immersive underwater facility theme with specialized applications:</p>
+        <div class="app-grid">
+          <div class="app-card facility">
+            <div class="app-header">
+              <div class="app-icon">📹</div>
+              <span class="app-name">Security Cameras</span>
+            </div>
+            <p class="app-desc">Monitor multiple camera feeds across the facility. Add custom IP cameras.</p>
+          </div>
+          <div class="app-card facility">
+            <div class="app-header">
+              <div class="app-icon">🔒</div>
+              <span class="app-name">Containment Monitor</span>
+            </div>
+            <p class="app-desc">Track containment status for anomalies and manage containment procedures.</p>
+          </div>
+          <div class="app-card facility">
+            <div class="app-header">
+              <div class="app-icon">🌡️</div>
+              <span class="app-name">Environmental Control</span>
+            </div>
+            <p class="app-desc">Adjust temperature, humidity, and atmospheric controls.</p>
+          </div>
+          <div class="app-card facility">
+            <div class="app-header">
+              <div class="app-icon">⚡</div>
+              <span class="app-name">Power Grid</span>
+            </div>
+            <p class="app-desc">Monitor power distribution and manage backup systems.</p>
+          </div>
+          <div class="app-card facility">
+            <div class="app-header">
+              <div class="app-icon">🗺️</div>
+              <span class="app-name">Facility Map</span>
+            </div>
+            <p class="app-desc">Interactive map of the facility with room status and navigation.</p>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>🎮 Entertainment</h2>
+        <div class="app-grid">
+          <div class="app-card entertainment">
+            <div class="app-header">
+              <div class="app-icon">🎮</div>
+              <span class="app-name">Game Hub</span>
+            </div>
+            <p class="app-desc">Play built-in games including the Containment Game survival horror.</p>
+          </div>
+          <div class="app-card entertainment">
+            <div class="app-header">
+              <div class="app-icon">🎵</div>
+              <span class="app-name">Music Player</span>
+            </div>
+            <p class="app-desc">Play audio files with playlist support and visualizer.</p>
+          </div>
+          <div class="app-card entertainment">
+            <div class="app-header">
+              <div class="app-icon">🎬</div>
+              <span class="app-name">Video Player</span>
+            </div>
+            <p class="app-desc">Watch video files with playback controls.</p>
+          </div>
+          <div class="app-card entertainment">
+            <div class="app-header">
+              <div class="app-icon">🌐</div>
+              <span class="app-name">Browser</span>
+            </div>
+            <p class="app-desc">Simulated web browser with bookmarks and history.</p>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>💬 Social & Online</h2>
+        <div class="app-grid">
+          <div class="app-card social">
+            <div class="app-header">
+              <div class="app-icon">💬</div>
+              <span class="app-name">Global Chat</span>
+            </div>
+            <p class="app-desc">Real-time chat with other Urbanshade users. Requires account.</p>
+          </div>
+          <div class="app-card social">
+            <div class="app-header">
+              <div class="app-icon">✉️</div>
+              <span class="app-name">Messages</span>
+            </div>
+            <p class="app-desc">Private messaging with friends. Requires account.</p>
+          </div>
+          <div class="app-card social">
+            <div class="app-header">
+              <div class="app-icon">🏆</div>
+              <span class="app-name">Leaderboards</span>
+            </div>
+            <p class="app-desc">View global rankings and compete with other users.</p>
+          </div>
+          <div class="app-card social">
+            <div class="app-header">
+              <div class="app-icon">🎖️</div>
+              <span class="app-name">Achievements</span>
+            </div>
+            <p class="app-desc">Track your progress and unlock achievements.</p>
+          </div>
+        </div>
+      </section>
+      
+      <div class="nav-links">
+        <a href="/static/getting-started.html">← Getting Started</a>
+        <a href="/static/terminal.html">Terminal Guide →</a>
+      </div>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation</p>
+      <p style="margin-top: 0.5rem;"><a href="/">Home</a> · <a href="/static/docs.html">Docs</a> · <a href="/support">Support</a></p>
+    </footer>
+  </div>
+</body>
+</html>
