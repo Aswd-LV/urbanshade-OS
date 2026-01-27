@@ -210,7 +210,7 @@ export const NotificationCenter = ({ open, onClose, anchorRef }: NotificationCen
   return (
     <div
       ref={panelRef}
-      className="fixed right-2 top-[52px] w-[360px] max-h-[calc(100vh-70px)] rounded-xl bg-background/95 backdrop-blur-2xl border border-border/40 z-[9998] shadow-2xl overflow-hidden animate-scale-in flex flex-col"
+      className="fixed right-2 top-[52px] w-[360px] max-h-[calc(100vh-70px)] rounded-xl bg-background/95 backdrop-blur-2xl border border-border/40 z-[99999] shadow-2xl overflow-hidden animate-scale-in flex flex-col"
     >
       {/* Header */}
       <div className="border-b border-border/30 px-4 py-3 flex items-center justify-between bg-gradient-to-b from-white/5 to-transparent flex-shrink-0">
