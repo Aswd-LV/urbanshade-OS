@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DEF-DEV Developer Tools | Urbanshade OS Documentation</title>
+  <meta name="description" content="DEF-DEV is Urbanshade OS's built-in developer toolkit. Debug, inspect state, monitor performance, and develop with powerful tools.">
+  <meta name="keywords" content="urbanshade, defdev, developer tools, debugging, console, state inspector, performance">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs/def-dev">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs/def-dev">
+  <meta property="og:title" content="DEF-DEV Developer Tools | Urbanshade OS Documentation">
+  <meta property="og:description" content="DEF-DEV is Urbanshade OS's built-in developer toolkit.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-amber: #f59e0b;
+      --accent-orange: #f97316;
+      --accent-cyan: #22d3ee;
+      --border: #334155;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #1a1708 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    
+    header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    
+    .breadcrumb { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--accent-amber); text-decoration: none; }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent-amber), var(--accent-orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle { color: var(--text-secondary); margin-top: 0.5rem; }
+    
+    .badge {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      color: var(--accent-amber);
+      margin-top: 1rem;
+    }
+    
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent-amber);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-amber);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      transition: border-color 0.2s;
+    }
+    
+    .feature-card:hover { border-color: var(--accent-amber); }
+    
+    .feature-card h3 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-card p { font-size: 0.875rem; margin-bottom: 0; }
+    
+    .access-methods {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .access-method {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    
+    .access-method .key {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      color: var(--accent-amber);
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .access-method p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+    
+    .warning-box {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 0.5rem;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .warning-box strong { color: var(--accent-amber); }
+    
+    .tab-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    
+    .tab-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .tab-item strong { color: var(--text-primary); display: block; margin-bottom: 0.25rem; }
+    
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .nav-links a {
+      color: var(--accent-amber);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a { color: var(--accent-amber); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / <a href="/static/docs.html">Docs</a> / DEF-DEV
+      </nav>
+      <h1>🛠️ DEF-DEV Developer Tools</h1>
+      <p class="subtitle">Built-in debugging and development toolkit for Urbanshade OS</p>
+      <span class="badge">🔧 Advanced Feature</span>
+    </header>
+    
+    <main>
+      <section>
+        <h2>What is DEF-DEV?</h2>
+        <p>
+          DEF-DEV (Development Environment Framework - Developer Edition View) is Urbanshade OS's 
+          built-in developer toolkit. It provides powerful debugging, state inspection, performance 
+          monitoring, and development tools - similar to browser DevTools but designed specifically 
+          for the Urbanshade environment.
+        </p>
+        
+        <div class="warning-box">
+          <strong>⚠️ Developer Feature:</strong> DEF-DEV is intended for developers and advanced users. 
+          Some actions can affect system stability or clear user data. Use with care.
+        </div>
+      </section>
+      
+      <section>
+        <h2>How to Access</h2>
+        <div class="access-methods">
+          <div class="access-method">
+            <span class="key">F12</span>
+            <p>Press F12 key</p>
+          </div>
+          <div class="access-method">
+            <span class="key">Ctrl + Shift + D</span>
+            <p>Keyboard shortcut</p>
+          </div>
+          <div class="access-method">
+            <span class="key">Terminal</span>
+            <p>Type: defdev</p>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>Available Tabs</h2>
+        <div class="tab-list">
+          <div class="tab-item">
+            <strong>Console</strong>
+            Log messages, errors, and warnings
+          </div>
+          <div class="tab-item">
+            <strong>Actions</strong>
+            View dispatched actions and events
+          </div>
+          <div class="tab-item">
+            <strong>Storage</strong>
+            Inspect and edit localStorage
+          </div>
+          <div class="tab-item">
+            <strong>Network</strong>
+            Monitor API requests
+          </div>
+          <div class="tab-item">
+            <strong>Performance</strong>
+            CPU and memory usage
+          </div>
+          <div class="tab-item">
+            <strong>Components</strong>
+            React component tree
+          </div>
+          <div class="tab-item">
+            <strong>Terminal</strong>
+            Remote command execution
+          </div>
+          <div class="tab-item">
+            <strong>Admin</strong>
+            System controls and testing
+          </div>
+          <div class="tab-item">
+            <strong>Bugchecks</strong>
+            Crash analysis and testing
+          </div>
+          <div class="tab-item">
+            <strong>Recovery</strong>
+            System recovery tools
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>Key Features</h2>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h3>📋 Console Logging</h3>
+            <p>View all system logs with filtering by level (info, warn, error). Export logs for debugging.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🔍 State Inspector</h3>
+            <p>Explore the complete application state tree. View and modify values in real-time.</p>
+          </div>
+          <div class="feature-card">
+            <h3>💾 Storage Viewer</h3>
+            <p>Browse, edit, and delete localStorage entries. Backup and restore data.</p>
+          </div>
+          <div class="feature-card">
+            <h3>📈 Performance Monitor</h3>
+            <p>Track CPU usage, memory consumption, and frame rates. Identify bottlenecks.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🌐 Network Debugger</h3>
+            <p>Monitor all API requests, view payloads, and debug network issues.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🔧 Action Dispatcher</h3>
+            <p>View all dispatched actions, filter by type, and replay actions for testing.</p>
+          </div>
+          <div class="feature-card">
+            <h3>💥 Crash Analyzer</h3>
+            <p>Analyze crash dumps, view error codes, and test bugcheck screens.</p>
+          </div>
+          <div class="feature-card">
+            <h3>🔄 Recovery Tools</h3>
+            <p>Access recovery mode, reset settings, and restore system to working state.</p>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>Common Use Cases</h2>
+        <ul style="color: var(--text-secondary); margin-left: 1.5rem; line-height: 2;">
+          <li>Debugging application issues and unexpected behavior</li>
+          <li>Monitoring performance and identifying slow operations</li>
+          <li>Inspecting and modifying saved settings</li>
+          <li>Testing different system states and configurations</li>
+          <li>Analyzing and recovering from crashes</li>
+          <li>Developing and testing custom themes</li>
+        </ul>
+      </section>
+      
+      <div class="nav-links">
+        <a href="/static/troubleshooting.html">← Troubleshooting</a>
+        <a href="/static/dev.html">Developer Docs →</a>
+      </div>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation</p>
+      <p style="margin-top: 0.5rem;"><a href="/">Home</a> · <a href="/static/docs.html">Docs</a> · <a href="/support">Support</a></p>
+    </footer>
+  </div>
+</body>
+</html>

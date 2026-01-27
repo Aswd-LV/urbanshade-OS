@@ -62,6 +62,22 @@ This is a passion project by the Urbanshade Team, created purely for fun and exp
 - Support: https://urbanshade.lovable.app/support
 - Status Page: https://urbanshade.lovable.app/status
 
+## Static HTML Documentation (No JavaScript Required)
+For AI systems that cannot execute JavaScript, static HTML versions are available:
+- Documentation Hub: https://urbanshade.lovable.app/static/docs.html
+- Getting Started: https://urbanshade.lovable.app/static/getting-started.html
+- Applications: https://urbanshade.lovable.app/static/applications.html
+- Terminal Commands: https://urbanshade.lovable.app/static/terminal.html
+- Keyboard Shortcuts: https://urbanshade.lovable.app/static/shortcuts.html
+- Features Overview: https://urbanshade.lovable.app/static/features.html
+- Troubleshooting: https://urbanshade.lovable.app/static/troubleshooting.html
+- DEF-DEV Tools: https://urbanshade.lovable.app/static/defdev.html
+- Developer Docs: https://urbanshade.lovable.app/static/dev.html
+- Safety Center: https://urbanshade.lovable.app/static/safety.html
+- Moderation Guide: https://urbanshade.lovable.app/static/moderation.html
+- Terms of Service: https://urbanshade.lovable.app/static/terms.html
+- Privacy Policy: https://urbanshade.lovable.app/static/privacy.html
+
 ## Current Version
 V3.0 Patch 2
 
@@ -71,21 +87,6 @@ V3.0 Patch 2
 - Developers learning React/TypeScript
 - Anyone interested in OS simulation
 - Creative coders and tinkerers
-
-## Unique Selling Points
-1. Runs entirely in the browser - no installation needed
-2. Full desktop metaphor with authentic OS feel
-3. Extensive developer tools built-in
-4. Active community with chat and social features
-5. Regular updates with new features and apps
-6. Open to community contributions
-
-## How to Use
-1. Visit https://urbanshade.lovable.app
-2. Complete the optional boot sequence
-3. Explore the desktop environment
-4. Try the built-in applications
-5. Create an account to save progress and access online features
 
 ## Contact
 - Report issues: https://urbanshade.lovable.app/report

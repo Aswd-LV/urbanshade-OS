@@ -3,6 +3,12 @@
 
 User-agent: *
 Allow: /
+Allow: /static/
+Allow: /llms.txt
+
+# Static HTML documentation (no JavaScript required)
+# Perfect for AI crawlers and users with JS disabled
+# See /static/ directory for full list
 
 # Google
 User-agent: Googlebot

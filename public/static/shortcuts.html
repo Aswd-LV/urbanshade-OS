@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Keyboard Shortcuts | Urbanshade OS Documentation</title>
+  <meta name="description" content="Complete keyboard shortcut reference for Urbanshade OS. Master hotkeys for windows, terminal, navigation, and productivity.">
+  <meta name="keywords" content="urbanshade, keyboard shortcuts, hotkeys, keybindings, productivity, commands">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs/shortcuts">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs/shortcuts">
+  <meta property="og:title" content="Keyboard Shortcuts | Urbanshade OS Documentation">
+  <meta property="og:description" content="Complete keyboard shortcut reference for Urbanshade OS.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #22d3ee;
+      --accent-teal: #14b8a6;
+      --border: #334155;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #0f172a 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+    
+    header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    
+    .breadcrumb { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle { color: var(--text-secondary); margin-top: 0.5rem; }
+    
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .shortcut-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 0.75rem;
+    }
+    
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    .shortcut-item:hover { border-color: rgba(34, 211, 238, 0.3); }
+    
+    .shortcut-desc { color: var(--text-secondary); font-size: 0.875rem; }
+    
+    .shortcut-keys {
+      display: flex;
+      gap: 0.25rem;
+      flex-shrink: 0;
+    }
+    
+    .key {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--accent-cyan);
+      min-width: 1.5rem;
+      text-align: center;
+    }
+    
+    .key-plus {
+      color: var(--text-muted);
+      padding: 0.25rem 0;
+    }
+    
+    .tip-box {
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 0.5rem;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .tip-box strong { color: var(--accent-cyan); }
+    
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .nav-links a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a { color: var(--accent-cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / <a href="/static/docs.html">Docs</a> / Shortcuts
+      </nav>
+      <h1>⌨️ Keyboard Shortcuts</h1>
+      <p class="subtitle">Master Urbanshade OS with these essential keyboard shortcuts</p>
+    </header>
+    
+    <main>
+      <section>
+        <h2>🖥️ Desktop & Windows</h2>
+        <div class="shortcut-grid">
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Open Start Menu</span>
+            <div class="shortcut-keys"><span class="key">Win</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Show Desktop</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">D</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Switch Windows</span>
+            <div class="shortcut-keys"><span class="key">Alt</span><span class="key-plus">+</span><span class="key">Tab</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Close Window</span>
+            <div class="shortcut-keys"><span class="key">Alt</span><span class="key-plus">+</span><span class="key">F4</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Maximize Window</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">↑</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Minimize Window</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">↓</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Snap Left</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">←</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Snap Right</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">→</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Task View</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">Tab</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Lock Screen</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">L</span></div>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>🚀 Quick Launch</h2>
+        <div class="shortcut-grid">
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Open Terminal</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">Shift</span><span class="key-plus">+</span><span class="key">T</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Open File Explorer</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">E</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Open Settings</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">I</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Open Search</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">S</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Open Notifications</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">N</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Quick Settings</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">A</span></div>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>📝 Editing</h2>
+        <div class="shortcut-grid">
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Copy</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">C</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Cut</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">X</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Paste</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">V</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Undo</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">Z</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Redo</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">Y</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Select All</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">A</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Save</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">S</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Find</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">F</span></div>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>💻 Terminal</h2>
+        <div class="shortcut-grid">
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Previous Command</span>
+            <div class="shortcut-keys"><span class="key">↑</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Next Command</span>
+            <div class="shortcut-keys"><span class="key">↓</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Auto-complete</span>
+            <div class="shortcut-keys"><span class="key">Tab</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Clear Terminal</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">L</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Cancel Command</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">C</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Go to Start of Line</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">A</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Go to End of Line</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">E</span></div>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>🛠️ Developer</h2>
+        <div class="shortcut-grid">
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Open DEF-DEV</span>
+            <div class="shortcut-keys"><span class="key">F12</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Toggle DEF-DEV</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">Shift</span><span class="key-plus">+</span><span class="key">D</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Refresh Page</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">R</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Hard Refresh</span>
+            <div class="shortcut-keys"><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">Shift</span><span class="key-plus">+</span><span class="key">R</span></div>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <h2>🖼️ Virtual Desktops</h2>
+        <div class="shortcut-grid">
+          <div class="shortcut-item">
+            <span class="shortcut-desc">New Desktop</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">D</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Close Desktop</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">F4</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Previous Desktop</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">←</span></div>
+          </div>
+          <div class="shortcut-item">
+            <span class="shortcut-desc">Next Desktop</span>
+            <div class="shortcut-keys"><span class="key">Win</span><span class="key-plus">+</span><span class="key">Ctrl</span><span class="key-plus">+</span><span class="key">→</span></div>
+          </div>
+        </div>
+      </section>
+      
+      <div class="tip-box">
+        <strong>💡 Pro Tip:</strong> You can customize some shortcuts in Settings → Keyboard → Shortcuts.
+      </div>
+      
+      <div class="nav-links">
+        <a href="/static/terminal.html">← Terminal</a>
+        <a href="/static/features.html">Features →</a>
+      </div>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation</p>
+      <p style="margin-top: 0.5rem;"><a href="/">Home</a> · <a href="/static/docs.html">Docs</a> · <a href="/support">Support</a></p>
+    </footer>
+  </div>
+</body>
+</html>

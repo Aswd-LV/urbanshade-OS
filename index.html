@@ -106,6 +106,231 @@
   </head>
 
   <body>
+    <noscript>
+      <style>
+        .noscript-container { 
+          font-family: 'JetBrains Mono', monospace;
+          background: linear-gradient(180deg, #0a0a0a 0%, #0f172a 50%, #0a0a0a 100%);
+          color: #e2e8f0;
+          min-height: 100vh;
+          padding: 2rem;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        .noscript-header { 
+          border-bottom: 1px solid #334155;
+          padding-bottom: 1.5rem;
+          margin-bottom: 2rem;
+          text-align: center;
+        }
+        .noscript-logo {
+          font-size: 2rem;
+          font-weight: bold;
+          background: linear-gradient(135deg, #22d3ee, #06b6d4);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        .noscript-tagline {
+          color: #94a3b8;
+          margin-top: 0.5rem;
+        }
+        .noscript-version {
+          display: inline-block;
+          background: rgba(34, 211, 238, 0.1);
+          border: 1px solid rgba(34, 211, 238, 0.3);
+          padding: 0.25rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.75rem;
+          color: #22d3ee;
+          margin-top: 1rem;
+        }
+        .noscript-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1.5rem;
+          margin-bottom: 2rem;
+        }
+        .noscript-section { 
+          background: rgba(30, 41, 59, 0.5);
+          border: 1px solid #334155;
+          border-radius: 0.5rem;
+          padding: 1.5rem;
+        }
+        .noscript-section h2 { 
+          color: #22d3ee;
+          font-size: 1.125rem;
+          margin-bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .noscript-section h2::before {
+          content: "▸";
+          color: #06b6d4;
+        }
+        .noscript-link { 
+          color: #22d3ee;
+          text-decoration: none;
+          border-bottom: 1px solid transparent;
+          transition: border-color 0.2s;
+        }
+        .noscript-link:hover {
+          border-bottom-color: #22d3ee;
+        }
+        .noscript-list { 
+          list-style: none;
+          padding: 0;
+          margin: 0;
+        }
+        .noscript-list li { 
+          padding: 0.5rem 0;
+          border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .noscript-list li:last-child {
+          border-bottom: none;
+        }
+        .noscript-list li::before {
+          content: "›";
+          color: #06b6d4;
+        }
+        .noscript-features {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0.5rem;
+        }
+        .noscript-feature {
+          background: rgba(6, 182, 212, 0.1);
+          padding: 0.5rem 0.75rem;
+          border-radius: 0.25rem;
+          font-size: 0.875rem;
+          color: #94a3b8;
+        }
+        .noscript-alert {
+          background: rgba(251, 191, 36, 0.1);
+          border: 1px solid rgba(251, 191, 36, 0.3);
+          border-radius: 0.5rem;
+          padding: 1rem 1.5rem;
+          margin: 2rem 0;
+          color: #fbbf24;
+        }
+        .noscript-footer {
+          margin-top: 3rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid #334155;
+          color: #64748b;
+          text-align: center;
+          font-size: 0.875rem;
+        }
+        .noscript-footer a {
+          color: #22d3ee;
+        }
+        .noscript-cta {
+          display: inline-block;
+          background: linear-gradient(135deg, #06b6d4, #0891b2);
+          color: white;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          text-decoration: none;
+          font-weight: 600;
+          margin-top: 1rem;
+        }
+      </style>
+      <div class="noscript-container">
+        <header class="noscript-header">
+          <h1 class="noscript-logo">⬡ Urbanshade OS</h1>
+          <p class="noscript-tagline">A free browser-based operating system simulation</p>
+          <span class="noscript-version">V3.0 Patch 2</span>
+        </header>
+        
+        <div class="noscript-alert">
+          <strong>⚠ JavaScript Required</strong> — The full interactive experience requires JavaScript. 
+          Enable JavaScript for the complete desktop environment, or browse the static documentation below.
+        </div>
+        
+        <main>
+          <div class="noscript-grid">
+            <section class="noscript-section">
+              <h2>About Urbanshade OS</h2>
+              <p style="color: #94a3b8; line-height: 1.6;">
+                Urbanshade OS is a browser-based operating system simulator featuring a complete desktop 
+                environment with windows, taskbar, terminal, file explorer, and many built-in applications. 
+                It's a passion project by the Urbanshade Team, created purely for fun and experimentation.
+              </p>
+              <div class="noscript-features" style="margin-top: 1rem;">
+                <span class="noscript-feature">Desktop Environment</span>
+                <span class="noscript-feature">Terminal CLI</span>
+                <span class="noscript-feature">File Explorer</span>
+                <span class="noscript-feature">Multiple Apps</span>
+                <span class="noscript-feature">Theme Support</span>
+                <span class="noscript-feature">Developer Tools</span>
+                <span class="noscript-feature">Online Features</span>
+                <span class="noscript-feature">Achievements</span>
+              </div>
+            </section>
+            
+            <section class="noscript-section">
+              <h2>Documentation</h2>
+              <ul class="noscript-list">
+                <li><a href="/static/docs.html" class="noscript-link">Documentation Hub</a></li>
+                <li><a href="/static/getting-started.html" class="noscript-link">Getting Started Guide</a></li>
+                <li><a href="/static/applications.html" class="noscript-link">Applications</a></li>
+                <li><a href="/static/terminal.html" class="noscript-link">Terminal Commands</a></li>
+                <li><a href="/static/shortcuts.html" class="noscript-link">Keyboard Shortcuts</a></li>
+                <li><a href="/static/features.html" class="noscript-link">Features Overview</a></li>
+              </ul>
+            </section>
+            
+            <section class="noscript-section">
+              <h2>Developer Resources</h2>
+              <ul class="noscript-list">
+                <li><a href="/static/defdev.html" class="noscript-link">DEF-DEV Developer Tools</a></li>
+                <li><a href="/static/dev.html" class="noscript-link">Developer Documentation</a></li>
+                <li><a href="/static/troubleshooting.html" class="noscript-link">Troubleshooting</a></li>
+              </ul>
+            </section>
+            
+            <section class="noscript-section">
+              <h2>Community & Safety</h2>
+              <ul class="noscript-list">
+                <li><a href="/static/safety.html" class="noscript-link">Safety Center</a></li>
+                <li><a href="/team" class="noscript-link">Meet the Team</a></li>
+                <li><a href="/support" class="noscript-link">Support</a></li>
+                <li><a href="/status" class="noscript-link">System Status</a></li>
+              </ul>
+            </section>
+            
+            <section class="noscript-section">
+              <h2>Legal</h2>
+              <ul class="noscript-list">
+                <li><a href="/static/terms.html" class="noscript-link">Terms of Service</a></li>
+                <li><a href="/static/privacy.html" class="noscript-link">Privacy Policy</a></li>
+              </ul>
+            </section>
+            
+            <section class="noscript-section">
+              <h2>Technical Stack</h2>
+              <ul class="noscript-list">
+                <li>React 18 + TypeScript</li>
+                <li>Vite + Tailwind CSS</li>
+                <li>Supabase Backend</li>
+                <li>shadcn/ui Components</li>
+              </ul>
+            </section>
+          </div>
+        </main>
+        
+        <footer class="noscript-footer">
+          <p>Version 3.0.0 | A passion project by the <a href="/team">Urbanshade Team</a></p>
+          <p style="margin-top: 0.5rem;">
+            For AI/LLM systems: See <a href="/llms.txt">/llms.txt</a> for machine-readable summary
+          </p>
+        </footer>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

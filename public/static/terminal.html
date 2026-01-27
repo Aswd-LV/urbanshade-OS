@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal Commands | Urbanshade OS Documentation</title>
+  <meta name="description" content="Complete terminal command reference for Urbanshade OS. Learn all available CLI commands, arguments, and hidden easter eggs.">
+  <meta name="keywords" content="urbanshade, terminal, commands, CLI, command line, reference, shell">
+  <link rel="canonical" href="https://urbanshade.lovable.app/docs/terminal">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://urbanshade.lovable.app/docs/terminal">
+  <meta property="og:title" content="Terminal Commands | Urbanshade OS Documentation">
+  <meta property="og:description" content="Complete terminal command reference for Urbanshade OS.">
+  <meta property="og:image" content="https://urbanshade.lovable.app/og-image.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #1e293b;
+      --bg-card: rgba(30, 41, 59, 0.5);
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #22d3ee;
+      --accent-teal: #14b8a6;
+      --accent-green: #22c55e;
+      --accent-amber: #f59e0b;
+      --border: #334155;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(180deg, var(--bg-primary) 0%, #0f172a 50%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+    
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    
+    header { border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    
+    .breadcrumb { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1rem; }
+    .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle { color: var(--text-secondary); margin-top: 0.5rem; }
+    
+    h2 {
+      font-size: 1.25rem;
+      color: var(--accent-cyan);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    p { color: var(--text-secondary); margin-bottom: 1rem; }
+    
+    .tip-box {
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      border-radius: 0.5rem;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .tip-box strong { color: var(--accent-cyan); }
+    
+    .cmd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.875rem;
+    }
+    
+    .cmd-table th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: var(--bg-secondary);
+      color: var(--accent-cyan);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .cmd-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    
+    .cmd-table tr:hover td {
+      background: rgba(34, 211, 238, 0.05);
+    }
+    
+    .cmd-table code {
+      background: var(--bg-primary);
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      color: var(--accent-green);
+      white-space: nowrap;
+    }
+    
+    .code-block {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+    
+    .code-block code {
+      color: var(--text-primary);
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    
+    .code-block .prompt { color: var(--accent-cyan); }
+    .code-block .output { color: var(--text-secondary); }
+    .code-block .comment { color: var(--text-muted); }
+    
+    .category-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      margin-right: 0.5rem;
+    }
+    
+    .category-badge.file { background: rgba(34, 211, 238, 0.2); color: var(--accent-cyan); }
+    .category-badge.system { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+    .category-badge.network { background: rgba(245, 158, 11, 0.2); color: var(--accent-amber); }
+    .category-badge.utility { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); }
+    
+    .nav-links {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+    
+    .nav-links a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+    
+    footer a { color: var(--accent-cyan); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <nav class="breadcrumb">
+        <a href="/">Urbanshade OS</a> / <a href="/static/docs.html">Docs</a> / Terminal
+      </nav>
+      <h1>💻 Terminal Commands</h1>
+      <p class="subtitle">Complete command-line reference for Urbanshade OS</p>
+    </header>
+    
+    <main>
+      <section>
+        <h2>Getting Started</h2>
+        <p>
+          The Urbanshade Terminal is a command-line interface that lets you interact with the system 
+          using text commands. Open it with <code style="background: var(--bg-secondary); padding: 0.2rem 0.5rem; border-radius: 0.25rem; color: var(--accent-cyan);">Ctrl+Shift+T</code> or from the Start Menu.
+        </p>
+        
+        <div class="tip-box">
+          <strong>💡 Tip:</strong> Type <code style="color: var(--accent-green);">help</code> at any time to see a list of available commands.
+        </div>
+        
+        <div class="code-block">
+          <code>
+            <span class="prompt">urbanshade@os:~$</span> help<br>
+            <span class="output">Available commands: help, clear, echo, ls, cd, cat, mkdir, touch, rm, pwd...</span><br>
+            <span class="comment"># Use 'help &lt;command&gt;' for detailed usage</span>
+          </code>
+        </div>
+      </section>
+      
+      <section>
+        <h2>File System Commands</h2>
+        <table class="cmd-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ls</code></td>
+              <td>List directory contents</td>
+              <td><code>ls /home</code></td>
+            </tr>
+            <tr>
+              <td><code>cd</code></td>
+              <td>Change directory</td>
+              <td><code>cd /documents</code></td>
+            </tr>
+            <tr>
+              <td><code>pwd</code></td>
+              <td>Print working directory</td>
+              <td><code>pwd</code></td>
+            </tr>
+            <tr>
+              <td><code>cat</code></td>
+              <td>Display file contents</td>
+              <td><code>cat readme.txt</code></td>
+            </tr>
+            <tr>
+              <td><code>mkdir</code></td>
+              <td>Create a directory</td>
+              <td><code>mkdir projects</code></td>
+            </tr>
+            <tr>
+              <td><code>touch</code></td>
+              <td>Create an empty file</td>
+              <td><code>touch notes.txt</code></td>
+            </tr>
+            <tr>
+              <td><code>rm</code></td>
+              <td>Remove file or directory</td>
+              <td><code>rm -r folder</code></td>
+            </tr>
+            <tr>
+              <td><code>cp</code></td>
+              <td>Copy files</td>
+              <td><code>cp file.txt backup/</code></td>
+            </tr>
+            <tr>
+              <td><code>mv</code></td>
+              <td>Move/rename files</td>
+              <td><code>mv old.txt new.txt</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <section>
+        <h2>System Commands</h2>
+        <table class="cmd-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>clear</code></td>
+              <td>Clear the terminal screen</td>
+              <td><code>clear</code></td>
+            </tr>
+            <tr>
+              <td><code>echo</code></td>
+              <td>Print text to terminal</td>
+              <td><code>echo "Hello!"</code></td>
+            </tr>
+            <tr>
+              <td><code>date</code></td>
+              <td>Display current date/time</td>
+              <td><code>date</code></td>
+            </tr>
+            <tr>
+              <td><code>whoami</code></td>
+              <td>Display current user</td>
+              <td><code>whoami</code></td>
+            </tr>
+            <tr>
+              <td><code>uptime</code></td>
+              <td>Show system uptime</td>
+              <td><code>uptime</code></td>
+            </tr>
+            <tr>
+              <td><code>version</code></td>
+              <td>Show OS version</td>
+              <td><code>version</code></td>
+            </tr>
+            <tr>
+              <td><code>reboot</code></td>
+              <td>Restart the system</td>
+              <td><code>reboot</code></td>
+            </tr>
+            <tr>
+              <td><code>shutdown</code></td>
+              <td>Shutdown the system</td>
+              <td><code>shutdown</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <section>
+        <h2>Utility Commands</h2>
+        <table class="cmd-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>calc</code></td>
+              <td>Basic calculator</td>
+              <td><code>calc 2+2</code></td>
+            </tr>
+            <tr>
+              <td><code>weather</code></td>
+              <td>Show weather info</td>
+              <td><code>weather</code></td>
+            </tr>
+            <tr>
+              <td><code>fortune</code></td>
+              <td>Display random fortune</td>
+              <td><code>fortune</code></td>
+            </tr>
+            <tr>
+              <td><code>neofetch</code></td>
+              <td>System info display</td>
+              <td><code>neofetch</code></td>
+            </tr>
+            <tr>
+              <td><code>history</code></td>
+              <td>Show command history</td>
+              <td><code>history</code></td>
+            </tr>
+            <tr>
+              <td><code>alias</code></td>
+              <td>Create command alias</td>
+              <td><code>alias ll="ls -la"</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <section>
+        <h2>Network Commands</h2>
+        <table class="cmd-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Description</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ping</code></td>
+              <td>Test network connection</td>
+              <td><code>ping urbanshade.app</code></td>
+            </tr>
+            <tr>
+              <td><code>ifconfig</code></td>
+              <td>Network interface info</td>
+              <td><code>ifconfig</code></td>
+            </tr>
+            <tr>
+              <td><code>netstat</code></td>
+              <td>Network statistics</td>
+              <td><code>netstat</code></td>
+            </tr>
+            <tr>
+              <td><code>curl</code></td>
+              <td>Make HTTP requests</td>
+              <td><code>curl https://api.example.com</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <section>
+        <h2>Admin Commands</h2>
+        <p>These commands require admin privileges:</p>
+        <table class="cmd-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>sudo</code></td>
+              <td>Execute command as admin</td>
+            </tr>
+            <tr>
+              <td><code>su</code></td>
+              <td>Switch to admin user</td>
+            </tr>
+            <tr>
+              <td><code>chmod</code></td>
+              <td>Change file permissions</td>
+            </tr>
+            <tr>
+              <td><code>kill</code></td>
+              <td>Terminate a process</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      
+      <section>
+        <h2>Tips & Tricks</h2>
+        <div class="tip-box">
+          <strong>🔼 Arrow Keys:</strong> Press Up/Down arrows to navigate command history.
+        </div>
+        <div class="tip-box">
+          <strong>📋 Tab Completion:</strong> Press Tab to auto-complete commands and file names.
+        </div>
+        <div class="tip-box">
+          <strong>🔍 Search History:</strong> Use <code style="color: var(--accent-green);">history | grep keyword</code> to search past commands.
+        </div>
+        <div class="tip-box" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3);">
+          <strong style="color: var(--accent-amber);">🥚 Easter Eggs:</strong> Try commands like <code style="color: var(--accent-green);">matrix</code>, <code style="color: var(--accent-green);">cowsay</code>, or <code style="color: var(--accent-green);">sl</code> for fun surprises!
+        </div>
+      </section>
+      
+      <div class="nav-links">
+        <a href="/static/applications.html">← Applications</a>
+        <a href="/static/shortcuts.html">Shortcuts →</a>
+      </div>
+    </main>
+    
+    <footer>
+      <p>Urbanshade OS Documentation</p>
+      <p style="margin-top: 0.5rem;"><a href="/">Home</a> · <a href="/static/docs.html">Docs</a> · <a href="/support">Support</a></p>
+    </footer>
+  </div>
+</body>
+</html>
