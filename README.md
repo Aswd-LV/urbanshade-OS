@@ -1,4 +1,4 @@
-# VERSION #.0 IS OUTTT!!!!
+# VERSION 3.0 IS OUTTT!!!!
 
 Sorry for the delay, i had a thing or whatever
 IM SO GLAD ITS OUTTTTT
