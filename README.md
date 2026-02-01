@@ -1,7 +1,8 @@
-# VERSION 3.0 IS OUTTT!!!!
+# !OUTAGE!
+We are currently having issues with Lovable being complete broken
+We are working on it!
 
-Sorry for the delay, i had a thing or whatever
-IM SO GLAD ITS OUTTTTT
+Standby
 
 ---
 ## Quick viewable status:
