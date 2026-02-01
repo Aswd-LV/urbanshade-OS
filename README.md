@@ -2,7 +2,7 @@
 We are currently having issues with Lovable being complete broken
 We are working on it!
 
-Standby
+Standby...
 
 ---
 ## Quick viewable status:
