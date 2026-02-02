@@ -3,6 +3,7 @@ import { Table, Plus, Trash2, Download, Upload, Calculator as CalcIcon } from "l
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { evaluate } from "mathjs";
 
 interface Cell {
   value: string;
@@ -43,10 +44,13 @@ export const Spreadsheet = () => {
             return avg.toFixed(2);
           }
         } else if (cell.formula.startsWith("=")) {
-          // Simple math evaluation
+          // Safe math evaluation using mathjs library
           const expr = cell.formula.substring(1);
-          const result = eval(expr.replace(/[A-Z]\d+/g, (ref) => getCellValue(ref) || "0"));
-          return result.toString();
+          // Replace cell references with their values
+          const safeExpr = expr.replace(/[A-Z]\d+/g, (ref) => getCellValue(ref) || "0");
+          // Use mathjs evaluate which is sandboxed and safe
+          const result = evaluate(safeExpr);
+          return String(result);
         }
       } catch (e) {
         return "#ERROR";
