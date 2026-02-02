@@ -1,8 +1,7 @@
-# !OUTAGE!
-We are currently having issues with Lovable being complete broken
-We are working on it!
+Outage fixed
+We gud people
 
-Standby...
+Huge shoutout to Lovable support
 
 ---
 ## Quick viewable status:
