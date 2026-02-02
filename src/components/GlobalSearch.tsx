@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, X, AppWindow, FileText, Settings as SettingsIcon, Calculator, Terminal, Command } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { App } from "./Desktop";
+import { evaluate } from "mathjs";
 
 interface GlobalSearchProps {
   open: boolean;
@@ -31,13 +32,13 @@ export const GlobalSearch = ({ open, onClose, apps, onOpenApp }: GlobalSearchPro
     }
   }, [open]);
 
-  // Quick math evaluation
+  // Quick math evaluation using safe mathjs library
   const mathResult = useMemo(() => {
     if (!query) return null;
     try {
-      // Simple math expressions only
+      // Only allow simple math expressions (digits, operators, parentheses, decimals)
       if (/^[\d\s+\-*/().]+$/.test(query)) {
-        const result = eval(query);
+        const result = evaluate(query);
         if (typeof result === 'number' && isFinite(result)) {
           return result;
         }
