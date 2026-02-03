@@ -519,36 +519,37 @@ export const AppStore = ({ onInstall }: { onInstall?: (appId: string) => void })
       <ScrollArea className="flex-1">
         {activeTab === "browse" && (
           <div className="p-4 space-y-4">
-            {/* Hero Banner */}
+            {/* Hero Banner - Responsive */}
             {!search && selectedCategory === "all" && (
               <div 
                 className={cn(
                   "relative rounded-2xl overflow-hidden border border-border cursor-pointer group",
-                  "bg-gradient-to-r",
+                  "bg-gradient-to-r min-h-[120px]",
                   currentHero.gradient
                 )}
                 onClick={() => heroApp && setSelectedApp(heroApp)}
               >
-                <div className="p-5">
+                <div className="p-4 md:p-5">
                   <Badge className={cn("mb-2 text-[10px]", currentHero.accentColor, "bg-background/20 border-0")}>
                     {currentHero.badge}
                   </Badge>
-                  <h2 className="text-2xl font-bold mb-1">{currentHero.title}</h2>
-                  <p className="text-sm text-muted-foreground mb-3">{currentHero.subtitle}</p>
-                  <Button size="sm" className="gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm">
-                    <Eye className="w-3.5 h-3.5" />
-                    View App
-                    <ChevronRight className="w-3.5 h-3.5" />
+                  <h2 className="text-lg md:text-2xl font-bold mb-1 line-clamp-1">{currentHero.title}</h2>
+                  <p className="text-xs md:text-sm text-muted-foreground mb-3 line-clamp-2">{currentHero.subtitle}</p>
+                  <Button size="sm" className="gap-1.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-xs md:text-sm">
+                    <Eye className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                    <span className="hidden sm:inline">View App</span>
+                    <span className="sm:hidden">View</span>
+                    <ChevronRight className="w-3 h-3 md:w-3.5 md:h-3.5" />
                   </Button>
                 </div>
                 {/* Hero dots indicator */}
-                <div className="absolute bottom-3 right-4 flex gap-1.5">
+                <div className="absolute bottom-2 md:bottom-3 right-3 md:right-4 flex gap-1.5">
                   {HERO_PROMOTIONS.map((_, i) => (
                     <button
                       key={i}
                       onClick={(e) => { e.stopPropagation(); setHeroIndex(i); }}
                       className={cn(
-                        "w-2 h-2 rounded-full transition-colors",
+                        "w-1.5 h-1.5 md:w-2 md:h-2 rounded-full transition-colors",
                         i === heroIndex ? "bg-white" : "bg-white/30"
                       )}
                     />
@@ -557,33 +558,33 @@ export const AppStore = ({ onInstall }: { onInstall?: (appId: string) => void })
               </div>
             )}
 
-            {/* App of the Day */}
+            {/* App of the Day - Responsive */}
             {!search && selectedCategory === "all" && (
-              <div className="p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <Award className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs font-semibold text-purple-400 uppercase tracking-wide">App of the Day</span>
+              <div className="p-3 md:p-4 rounded-xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+                <div className="flex items-center gap-2 mb-2 md:mb-3">
+                  <Award className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-400" />
+                  <span className="text-[10px] md:text-xs font-semibold text-purple-400 uppercase tracking-wide">App of the Day</span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 md:gap-3">
                   <div className={cn(
-                    "p-3 rounded-xl shrink-0",
+                    "p-2 md:p-3 rounded-xl shrink-0",
                     "bg-gradient-to-br",
                     CATEGORY_CONFIG[appOfTheDay.category]?.gradient || "from-muted to-muted/50"
                   )}>
                     {(() => {
                       const Icon = CATEGORY_CONFIG[appOfTheDay.category]?.icon || Package;
-                      return <Icon className={cn("w-8 h-8", CATEGORY_CONFIG[appOfTheDay.category]?.color)} />;
+                      return <Icon className={cn("w-6 h-6 md:w-8 md:h-8", CATEGORY_CONFIG[appOfTheDay.category]?.color)} />;
                     })()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold truncate">{appOfTheDay.name}</h3>
-                    <p className="text-xs text-muted-foreground line-clamp-1">{appOfTheDay.description}</p>
+                    <h3 className="font-bold text-sm md:text-base truncate">{appOfTheDay.name}</h3>
+                    <p className="text-[10px] md:text-xs text-muted-foreground line-clamp-1">{appOfTheDay.description}</p>
                     <div className="flex items-center gap-2 mt-1">
                       {renderStars(appOfTheDay.rating)}
-                      <span className="text-xs text-muted-foreground">{appOfTheDay.category}</span>
+                      <span className="text-[10px] md:text-xs text-muted-foreground hidden sm:inline">{appOfTheDay.category}</span>
                     </div>
                   </div>
-                  <Button size="sm" variant="secondary" onClick={() => setSelectedApp(appOfTheDay)} className="shrink-0">
+                  <Button size="sm" variant="secondary" onClick={() => setSelectedApp(appOfTheDay)} className="shrink-0 text-xs">
                     View
                   </Button>
                 </div>
@@ -644,14 +645,14 @@ export const AppStore = ({ onInstall }: { onInstall?: (appId: string) => void })
               })}
             </div>
 
-            {/* Trending Section */}
+            {/* Trending Section - Responsive */}
             {!search && selectedCategory === "all" && (
               <div>
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-semibold mb-2 md:mb-3 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-cyan-400" />
                   Trending Now
                 </h3>
-                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
+                <div className="flex gap-2 md:gap-3 overflow-x-auto pb-2 -mx-4 px-4">
                   {AVAILABLE_APPS.filter(a => a.featured).slice(0, 5).map((app, i) => {
                     const config = CATEGORY_CONFIG[app.category];
                     const Icon = config?.icon || Package;
@@ -660,18 +661,18 @@ export const AppStore = ({ onInstall }: { onInstall?: (appId: string) => void })
                         key={app.id}
                         onClick={() => setSelectedApp(app)}
                         className={cn(
-                          "flex-shrink-0 w-32 p-3 rounded-xl border border-border",
+                          "flex-shrink-0 w-24 md:w-32 p-2 md:p-3 rounded-xl border border-border",
                           "bg-gradient-to-br hover:border-primary/50 transition-all",
                           config?.gradient || "from-muted to-muted/50"
                         )}
                       >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-lg font-bold text-muted-foreground">#{i + 1}</span>
-                          <div className={cn("p-1.5 rounded-lg bg-background/50", config?.color)}>
-                            <Icon className="w-4 h-4" />
+                        <div className="flex items-center gap-1.5 md:gap-2 mb-1.5 md:mb-2">
+                          <span className="text-base md:text-lg font-bold text-muted-foreground">#{i + 1}</span>
+                          <div className={cn("p-1 md:p-1.5 rounded-lg bg-background/50", config?.color)}>
+                            <Icon className="w-3 h-3 md:w-4 md:h-4" />
                           </div>
                         </div>
-                        <div className="text-sm font-medium truncate text-left">{app.name}</div>
+                        <div className="text-xs md:text-sm font-medium truncate text-left">{app.name}</div>
                         <div className="flex items-center gap-1 mt-1">
                           {renderStars(app.rating)}
                         </div>
@@ -682,14 +683,14 @@ export const AppStore = ({ onInstall }: { onInstall?: (appId: string) => void })
               </div>
             )}
 
-            {/* New Releases */}
+            {/* New Releases - Responsive */}
             {!search && selectedCategory === "all" && (
               <div>
-                <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-semibold mb-2 md:mb-3 flex items-center gap-2">
                   <Zap className="w-4 h-4 text-green-400" />
                   New Releases
                 </h3>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {AVAILABLE_APPS.filter(a => a.new).slice(0, 4).map(app => {
                     const config = CATEGORY_CONFIG[app.category];
                     const Icon = config?.icon || Package;
@@ -698,19 +699,19 @@ export const AppStore = ({ onInstall }: { onInstall?: (appId: string) => void })
                         key={app.id}
                         onClick={() => setSelectedApp(app)}
                         className={cn(
-                          "flex items-center gap-3 p-3 rounded-xl border border-border text-left",
+                          "flex items-center gap-2 md:gap-3 p-2 md:p-3 rounded-xl border border-border text-left",
                           "bg-gradient-to-br hover:border-green-500/30 transition-all",
                           config?.gradient || "from-muted to-muted/50"
                         )}
                       >
-                        <div className={cn("p-2 rounded-lg bg-background/50", config?.color)}>
-                          <Icon className="w-5 h-5" />
+                        <div className={cn("p-1.5 md:p-2 rounded-lg bg-background/50 shrink-0", config?.color)}>
+                          <Icon className="w-4 h-4 md:w-5 md:h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{app.name}</div>
-                          <div className="text-xs text-muted-foreground">{app.category}</div>
+                          <div className="text-xs md:text-sm font-medium truncate">{app.name}</div>
+                          <div className="text-[10px] md:text-xs text-muted-foreground">{app.category}</div>
                         </div>
-                        <Badge className="bg-green-500/20 text-green-400 text-[10px] shrink-0">NEW</Badge>
+                        <Badge className="bg-green-500/20 text-green-400 text-[8px] md:text-[10px] shrink-0">NEW</Badge>
                       </button>
                     );
                   })}
