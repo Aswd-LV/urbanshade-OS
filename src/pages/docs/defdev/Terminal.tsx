@@ -1,135 +1,203 @@
-import { Terminal, Code, Zap, Info, AlertTriangle } from "lucide-react";
-import { DocLayout, DocHero, DocSection, DocCard, DocAlert, DocTable, DocCode } from "@/components/docs";
+import { Terminal, ChevronRight, AlertTriangle, Zap, Database, Settings, Code } from "lucide-react";
+import { Link } from "react-router-dom";
+import { DocLayout, DocSection, DocHero, DocCode, DocAlert, DocTable } from "@/components/docs";
 
 const DefDevTerminal = () => {
-  const commands = [
-    ["help", "", "Show all available commands"],
-    ["clear", "", "Clear the terminal screen"],
-    ["echo", "[message]", "Print a message to the terminal"],
-    ["status", "", "Show system status and persistence state"],
-    ["crash", "[type]", "Queue a crash screen (KERNEL_PANIC, etc.)"],
-    ["bugcheck", "[code]", "Queue a bugcheck (FATAL_EXCEPTION, etc.)"],
-    ["reboot", "", "Queue a system reboot"],
-    ["shutdown", "", "Queue a system shutdown"],
-    ["lockdown", "", "Trigger facility lockdown mode"],
-    ["recovery", "", "Boot into recovery mode"],
-    ["wipe", "", "Clear all localStorage (DANGEROUS)"],
-    ["ls", "", "List all localStorage keys"],
-    ["get", "[key]", "Get a localStorage value"],
-    ["set", "[key] [value]", "Set a localStorage value"],
-    ["del", "[key]", "Delete a localStorage key"],
-    ["toast", "[message]", "Show a toast notification"],
-    ["queue", "", "Show pending commands in queue"],
-    ["exec", "[command]", "Execute a raw command"],
-  ];
-
-  const categories = [
-    { name: "System", commands: ["crash", "bugcheck", "reboot", "shutdown", "lockdown", "recovery", "wipe"], color: "red" },
-    { name: "Storage", commands: ["ls", "get", "set", "del"], color: "cyan" },
-    { name: "Utility", commands: ["help", "clear", "echo", "status", "toast", "queue", "exec"], color: "green" },
-  ];
-
   return (
     <DocLayout
-      title="DEF-DEV Terminal"
-      description="Powerful command-line interface for executing admin commands and managing UrbanShade OS."
-      keywords={["def-dev", "terminal", "commands", "cli", "admin"]}
+      title="Terminal Commands"
+      description="Complete command reference for DEF-DEV Terminal"
       accentColor="green"
-      breadcrumbs={[{ label: "DEF-DEV", path: "/docs/def-dev" }]}
-      prevPage={{ title: "Storage Tab", path: "/docs/def-dev/storage" }}
-      nextPage={{ title: "Admin Panel", path: "/docs/def-dev/admin" }}
+      prevPage={{ title: "DEF-DEV", path: "/docs/def-dev" }}
+      nextPage={{ title: "Storage", path: "/docs/def-dev/storage" }}
     >
       <DocHero
         icon={Terminal}
         title="DEF-DEV Terminal"
-        subtitle="A powerful command-line interface for executing admin commands, managing localStorage, and controlling UrbanShade OS."
+        subtitle="Interactive command-line interface for system control and debugging"
         accentColor="green"
       />
 
-      <DocSection title="Overview" icon={Info} accentColor="green" id="overview">
-        <DocAlert variant="info">
-          The DEF-DEV Terminal provides direct access to system commands. Commands that affect the main OS use the 
-          <strong> command queue system</strong>, which the main OS polls 4 times per second.
-          Type <code className="px-1.5 py-0.5 bg-slate-800 rounded text-green-400">help</code> to see all available commands.
-        </DocAlert>
-      </DocSection>
+      <DocAlert variant="info" title="Terminal Access">
+        Access the terminal from DEF-DEV Console → Terminal tab (in the Core section), 
+        or open DEF-DEV with <code>Ctrl+Shift+D</code>.
+      </DocAlert>
 
-      <DocSection title="Command Categories" icon={Code} accentColor="green" id="categories">
-        <div className="grid md:grid-cols-3 gap-4">
-          {categories.map((cat) => (
-            <DocCard key={cat.name} title={`${cat.name} Commands`} accentColor={cat.color as any}>
-              <ul className="mt-3 space-y-1">
-                {cat.commands.map((cmd) => (
-                  <li key={cmd} className="text-sm font-mono text-slate-300">• {cmd}</li>
-                ))}
-              </ul>
-            </DocCard>
-          ))}
-        </div>
-      </DocSection>
-
-      <DocSection title="Command Reference" icon={Terminal} accentColor="amber" id="reference">
+      {/* Core Commands */}
+      <DocSection title="Core Commands" icon={Terminal} accentColor="green">
         <DocTable
-          headers={["Command", "Arguments", "Description"]}
-          rows={commands.map(([name, args, desc]) => [
-            <code key={name} className="text-green-400">{name}</code>,
-            <code key={`${name}-args`} className="text-cyan-400">{args || "—"}</code>,
-            desc
-          ])}
-          accentColor="amber"
+          headers={["Command", "Description", "Example"]}
+          rows={[
+            ["help", "Show all available commands", "help"],
+            ["help [cmd]", "Show help for specific command", "help crash"],
+            ["clear", "Clear terminal output", "clear"],
+            ["echo [msg]", "Print a message", "echo Hello World"],
+            ["date", "Show current date/time", "date"],
+            ["uptime", "Show system uptime", "uptime"],
+            ["whoami", "Show current user info", "whoami"],
+            ["status", "Show system status", "status"],
+          ]}
+          accentColor="green"
         />
       </DocSection>
 
-      <DocSection title="Usage Examples" icon={Code} accentColor="green" id="examples">
-        <div className="space-y-4">
-          <DocCode
-            title="Trigger a crash"
-            code={`$ crash KERNEL_PANIC
-→ Queued crash: KERNEL_PANIC`}
-          />
-          <DocCode
-            title="Manage localStorage"
-            code={`$ get urbanshade_settings
-→ {'theme':'dark','sound':true}
+      {/* System Commands */}
+      <DocSection title="System Commands" icon={Zap} accentColor="purple">
+        <DocTable
+          headers={["Command", "Description", "Example"]}
+          rows={[
+            ["crash [type]", "Queue a crash screen", "crash KERNEL_PANIC"],
+            ["bugcheck [code] [desc]", "Queue a bugcheck BSOD", "bugcheck FATAL_ERROR Test"],
+            ["reboot", "Queue system reboot", "reboot"],
+            ["shutdown", "Queue system shutdown", "shutdown"],
+            ["lockdown [protocol]", "Trigger lockdown mode", "lockdown ALPHA"],
+            ["recovery", "Boot into recovery mode", "recovery"],
+            ["wipe --confirm", "Wipe all data (DANGEROUS)", "wipe --confirm"],
+          ]}
+          accentColor="purple"
+        />
+        
+        <DocCode code={`# Queue a bugcheck with custom code
+$ bugcheck DATA_INCONSISTENCY Database validation failed
+Bugcheck queued: DATA_INCONSISTENCY
 
-$ set mykey myvalue
-→ Set mykey = myvalue`}
-          />
-          <DocCode
-            title="Check status"
-            code={`$ status
-DEF-DEV v2.0
-Persistence: Enabled
-Queued commands: 0
-LocalStorage keys: 12`}
-          />
-        </div>
+# Trigger lockdown protocol
+$ lockdown GAMMA
+Lockdown protocol GAMMA queued`} />
       </DocSection>
 
-      <DocSection title="Command Queue System" icon={Zap} accentColor="purple" id="queue">
+      {/* Storage Commands */}
+      <DocSection title="Storage Commands" icon={Database} accentColor="blue">
+        <DocTable
+          headers={["Command", "Description", "Example"]}
+          rows={[
+            ["ls [filter]", "List localStorage keys", "ls settings"],
+            ["get <key>", "Get a storage value", "get urbanshade_theme"],
+            ["set <key> <value>", "Queue setting a value", "set debug true"],
+            ["del <key>", "Queue deleting a key", "del temp_data"],
+          ]}
+          accentColor="blue"
+        />
+
+        <DocCode code={`# List keys containing 'settings'
+$ ls settings
+settings_theme
+settings_volume
+settings_notifications
+
+# Get a specific value
+$ get settings_theme
+"urbanshade-dark"
+
+# Set a value (queued for main OS)
+$ set mykey myvalue
+Storage write queued: mykey`} />
+      </DocSection>
+
+      {/* Utility Commands */}
+      <DocSection title="Utility Commands" icon={Settings} accentColor="cyan">
+        <DocTable
+          headers={["Command", "Description"]}
+          rows={[
+            ["toast <type> <msg>", "Queue a toast notification (success/error/info/warning)"],
+            ["queue", "Show pending commands in queue"],
+            ["exec <cmd>", "Execute a raw command"],
+          ]}
+          accentColor="cyan"
+        />
+      </DocSection>
+
+      {/* UUR Package Manager */}
+      <DocSection title="UUR Package Manager" icon={Code} accentColor="amber">
+        <DocTable
+          headers={["Command", "Description"]}
+          rows={[
+            ["uur", "Show UUR help"],
+            ["uur lst", "List installed packages"],
+            ["uur search <query>", "Search available packages"],
+          ]}
+          accentColor="amber"
+        />
+
+        <DocCode code={`# Search for packages
+$ uur search terminal
+  terminal-plus - Enhanced terminal features (v1.0.0)
+  terminal-themes - Custom terminal color schemes (v1.2.0)
+
+# List installed
+$ uur lst
+  base-system (1.0.0)
+  def-dev-tools (1.0.0)`} />
+      </DocSection>
+
+      {/* Command Queue System */}
+      <DocSection title="Command Queue System" icon={Zap} accentColor="purple">
         <div className="p-5 rounded-xl bg-purple-500/10 border border-purple-500/30">
           <h4 className="font-bold text-purple-400 mb-3 flex items-center gap-2">
             <Zap className="w-5 h-5" />
             How It Works
           </h4>
-          <div className="space-y-3 text-sm text-slate-400">
+          <div className="space-y-3 text-sm text-muted-foreground">
             <p>
               Commands like <code className="text-green-400">crash</code>, <code className="text-green-400">reboot</code>, 
-              and <code className="text-green-400">shutdown</code> don't execute immediately. They are queued to localStorage.
+              and <code className="text-green-400">set</code> don't execute immediately. They are queued to localStorage.
             </p>
             <p>
               The main OS page polls localStorage 4× per second for pending commands, then executes them.
+              This allows DEF-DEV to control the main OS from a separate window/tab.
+            </p>
+            <p>
+              Use <code className="text-green-400">queue</code> to see pending commands and 
+              <code className="text-green-400">status</code> to check if persistence is enabled.
             </p>
           </div>
         </div>
       </DocSection>
 
-      <DocSection title="Warning" icon={AlertTriangle} accentColor="red" id="warning">
-        <DocAlert variant="danger" title="Dangerous Commands">
-          The <code className="text-red-400">wipe</code> command permanently deletes all localStorage data, 
-          including settings, accounts, files, and all OS state. Use with extreme caution.
+      {/* Keyboard Shortcuts */}
+      <DocSection title="Keyboard Shortcuts" icon={Terminal} accentColor="green">
+        <DocTable
+          headers={["Shortcut", "Action"]}
+          rows={[
+            ["Enter", "Execute command"],
+            ["↑ / ↓", "Navigate command history"],
+            ["Tab", "Auto-complete (if supported)"],
+          ]}
+          accentColor="green"
+        />
+      </DocSection>
+
+      {/* Warning */}
+      <DocSection title="Dangerous Commands" icon={AlertTriangle} accentColor="red">
+        <DocAlert variant="danger" title="Data Loss Warning">
+          The <code className="text-red-400">wipe --confirm</code> command permanently deletes ALL localStorage data, 
+          including settings, accounts, files, and all OS state. This cannot be undone.
         </DocAlert>
       </DocSection>
+
+      {/* Navigation */}
+      <div className="flex gap-3 mt-8 pt-6 border-t border-border/50">
+        <Link 
+          to="/docs/def-dev"
+          className="flex-1 p-4 rounded-lg bg-muted/20 border border-border/50 hover:border-primary/50 transition-colors group"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold group-hover:text-primary transition-colors">← Back to DEF-DEV</span>
+          </div>
+          <p className="text-xs text-muted-foreground">Return to main documentation</p>
+        </Link>
+        <Link 
+          to="/docs/def-dev/storage"
+          className="flex-1 p-4 rounded-lg bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 transition-colors group"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <Database className="w-4 h-4 text-blue-400" />
+            <span className="font-semibold group-hover:text-blue-400 transition-colors">Storage Guide</span>
+            <ChevronRight className="w-4 h-4 ml-auto" />
+          </div>
+          <p className="text-xs text-muted-foreground">Learn about localStorage inspection</p>
+        </Link>
+      </div>
     </DocLayout>
   );
 };
