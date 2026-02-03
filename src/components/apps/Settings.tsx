@@ -4,7 +4,7 @@ import {
   RotateCcw, Code, HardDrive, Gauge,
   ChevronRight, Search, Unlock, Terminal, Trash2, AlertTriangle,
   Sun, Moon, Sparkles, Lock, Check, Crown, Gift, Star, Paintbrush,
-  Power, Image, Music
+  Power, Image, Music, Bug, RefreshCw
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -28,6 +28,8 @@ import { toast } from "sonner";
 import { themePresets, useThemePresets, ThemePreset } from "@/hooks/useThemePresets";
 import { THEME_PRESETS, useThemeEngine } from "@/hooks/useThemeEngine";
 import { VERSION } from "@/lib/versionInfo";
+import { commandQueue } from "@/lib/commandQueue";
+
 
 // ============ TYPES ============
 
@@ -46,6 +48,7 @@ interface SettingItem {
   actionLabel?: string;
   icon?: React.ElementType;
   options?: { value: string; label: string }[];
+  functional?: boolean; // Whether this setting actually works
 }
 
 interface SettingCategory {
@@ -71,6 +74,9 @@ const getSettingsConfig = (handlers: {
   onOpenDefDev: () => void;
   onOemUnlock: () => void;
   onFactoryReset: () => void;
+  onTriggerBugcheck: () => void;
+  onTriggerCrash: () => void;
+  onReboot: () => void;
 }): SettingCategory[] => [
   {
     id: 'personalization',
@@ -85,10 +91,10 @@ const getSettingsConfig = (handlers: {
     icon: Monitor,
     description: 'Screen brightness and visual effects',
     settings: [
-      { key: 'night_light', label: 'Night Light', description: 'Reduce blue light for eye comfort', type: 'toggle', defaultValue: false, icon: Sun },
-      { key: 'night_light_intensity', label: 'Night Light Intensity', type: 'slider', defaultValue: 30, min: 10, max: 80 },
-      { key: 'brightness', label: 'Brightness', type: 'slider', defaultValue: 80, min: 20, max: 100 },
-      { key: 'crt_effect', label: 'CRT Effect', description: 'Add retro scan lines', type: 'toggle', defaultValue: false },
+      { key: 'night_light', label: 'Night Light', description: 'Reduce blue light for eye comfort', type: 'toggle', defaultValue: false, icon: Sun, functional: true },
+      { key: 'night_light_intensity', label: 'Night Light Intensity', type: 'slider', defaultValue: 30, min: 10, max: 80, functional: true },
+      { key: 'brightness', label: 'Brightness', type: 'slider', defaultValue: 80, min: 20, max: 100, functional: true },
+      { key: 'crt_effect', label: 'CRT Effect', description: 'Add retro scan lines', type: 'toggle', defaultValue: false, functional: true },
     ]
   },
   {
@@ -97,10 +103,10 @@ const getSettingsConfig = (handlers: {
     icon: Volume2,
     description: 'Volume and audio preferences',
     settings: [
-      { key: 'volume', label: 'Master Volume', type: 'slider', defaultValue: 70, min: 0, max: 100 },
-      { key: 'mute', label: 'Mute All Sounds', type: 'toggle', defaultValue: false },
-      { key: 'sound_effects', label: 'UI Sound Effects', description: 'Play sounds for clicks and alerts', type: 'toggle', defaultValue: true },
-      { key: 'notification_sound', label: 'Notification Sounds', type: 'toggle', defaultValue: true },
+      { key: 'volume', label: 'Master Volume', type: 'slider', defaultValue: 70, min: 0, max: 100, functional: true },
+      { key: 'mute', label: 'Mute All Sounds', type: 'toggle', defaultValue: false, functional: true },
+      { key: 'sound_effects', label: 'UI Sound Effects', description: 'Play sounds for clicks and alerts', type: 'toggle', defaultValue: true, functional: true },
+      { key: 'notification_sound', label: 'Notification Sounds', type: 'toggle', defaultValue: true, functional: true },
     ]
   },
   {
@@ -109,9 +115,9 @@ const getSettingsConfig = (handlers: {
     icon: Bell,
     description: 'Manage alerts and preferences',
     settings: [
-      { key: 'notifications', label: 'Enable Notifications', type: 'toggle', defaultValue: true },
-      { key: 'dnd', label: 'Do Not Disturb', description: 'Silence all notifications', type: 'toggle', defaultValue: false, icon: Moon },
-      { key: 'toast_duration', label: 'Toast Duration (seconds)', type: 'slider', defaultValue: 4, min: 2, max: 10 },
+      { key: 'notifications', label: 'Enable Notifications', type: 'toggle', defaultValue: true, functional: true },
+      { key: 'dnd', label: 'Do Not Disturb', description: 'Silence all notifications', type: 'toggle', defaultValue: false, icon: Moon, functional: true },
+      { key: 'toast_duration', label: 'Toast Duration (seconds)', type: 'slider', defaultValue: 4, min: 2, max: 10, functional: true },
     ]
   },
   {
@@ -128,7 +134,7 @@ const getSettingsConfig = (handlers: {
     description: 'Connection settings',
     settings: [
       { key: 'wifi', label: 'Wi-Fi', description: 'Enable wireless networking', type: 'toggle', defaultValue: true },
-      { key: 'vpn', label: 'VPN', description: 'Route traffic through VPN', type: 'toggle', defaultValue: false, icon: Lock },
+      { key: 'vpn', label: 'VPN', description: 'Route traffic through VPN', type: 'toggle', defaultValue: false, icon: Lock, functional: true },
       { key: 'offline_mode', label: 'Offline Mode', description: 'Disable all network features', type: 'toggle', defaultValue: false },
     ]
   },
@@ -140,7 +146,7 @@ const getSettingsConfig = (handlers: {
     settings: [
       { key: 'telemetry', label: 'Usage Analytics', description: 'Help improve the system', type: 'toggle', defaultValue: false },
       { key: 'auto_updates', label: 'Automatic Updates', type: 'toggle', defaultValue: true },
-      { key: 'lock_after_idle', label: 'Lock After Idle', description: 'Lock screen after inactivity', type: 'toggle', defaultValue: false, icon: Lock },
+      { key: 'lock_after_idle', label: 'Lock After Idle', description: 'Lock screen after inactivity', type: 'toggle', defaultValue: false, icon: Lock, functional: true },
     ]
   },
   {
@@ -150,9 +156,9 @@ const getSettingsConfig = (handlers: {
     description: 'System optimization',
     settings: [
       { key: 'hardware_acceleration', label: 'Hardware Acceleration', description: 'Use GPU for rendering', type: 'toggle', defaultValue: true },
-      { key: 'animations', label: 'Animations', description: 'Enable UI animations', type: 'toggle', defaultValue: true },
-      { key: 'blur_effects', label: 'Blur Effects', description: 'Enable backdrop blur', type: 'toggle', defaultValue: true, icon: Sparkles },
-      { key: 'max_windows', label: 'Max Open Windows', type: 'slider', defaultValue: 10, min: 3, max: 20 },
+      { key: 'animations', label: 'Animations', description: 'Enable UI animations', type: 'toggle', defaultValue: true, functional: true },
+      { key: 'blur_effects', label: 'Blur Effects', description: 'Enable backdrop blur', type: 'toggle', defaultValue: true, icon: Sparkles, functional: true },
+      { key: 'max_windows', label: 'Max Open Windows', type: 'slider', defaultValue: 10, min: 3, max: 20, functional: true },
     ]
   },
   {
@@ -176,7 +182,7 @@ const getSettingsConfig = (handlers: {
           return `${(total / 1024).toFixed(2)} KB`;
         }
       },
-      { key: 'auto_save', label: 'Auto-Save', description: 'Automatically save changes', type: 'toggle', defaultValue: true },
+      { key: 'auto_save', label: 'Auto-Save', description: 'Automatically save changes', type: 'toggle', defaultValue: true, functional: true },
     ]
   },
   {
@@ -185,7 +191,7 @@ const getSettingsConfig = (handlers: {
     icon: Code,
     description: 'Advanced tools for developers',
     settings: [
-      { key: 'developer_mode', label: 'Developer Mode', description: 'Enable DEF-DEV console and debugging', type: 'toggle', defaultValue: false, icon: Terminal },
+      { key: 'developer_mode', label: 'Developer Mode', description: 'Enable DEF-DEV console and debugging', type: 'toggle', defaultValue: false, icon: Terminal, functional: true },
       { 
         key: 'open_defdev', 
         label: 'Open DEF-DEV Console', 
@@ -194,10 +200,48 @@ const getSettingsConfig = (handlers: {
         defaultValue: null,
         actionLabel: 'Launch',
         action: handlers.onOpenDefDev,
-        icon: Terminal
+        icon: Terminal,
+        functional: true
       },
-      { key: 'debug_overlay', label: 'Debug Overlay', description: 'Show FPS and performance info', type: 'toggle', defaultValue: false },
-      { key: 'console_logs', label: 'Verbose Console Logs', type: 'toggle', defaultValue: false },
+      { key: 'debug_overlay', label: 'Debug Overlay', description: 'Show FPS and performance info', type: 'toggle', defaultValue: false, functional: true },
+      { key: 'console_logs', label: 'Verbose Console Logs', description: 'Log detailed operations', type: 'toggle', defaultValue: false, functional: true },
+      { key: 'show_render_boxes', label: 'Show Render Boxes', description: 'Highlight component boundaries', type: 'toggle', defaultValue: false, functional: true },
+      { key: 'slow_animations', label: 'Slow Animations', description: 'Run animations at 0.25x speed', type: 'toggle', defaultValue: false, functional: true },
+      { 
+        key: 'trigger_bugcheck', 
+        label: 'Trigger Test Bugcheck', 
+        description: 'Force a BSOD-style bugcheck', 
+        type: 'action', 
+        defaultValue: null,
+        actionLabel: 'Trigger',
+        action: handlers.onTriggerBugcheck,
+        icon: Bug,
+        dangerous: true,
+        functional: true
+      },
+      { 
+        key: 'trigger_crash', 
+        label: 'Trigger Crash Screen', 
+        description: 'Force a styled crash screen', 
+        type: 'action', 
+        defaultValue: null,
+        actionLabel: 'Crash',
+        action: handlers.onTriggerCrash,
+        icon: AlertTriangle,
+        dangerous: true,
+        functional: true
+      },
+      { 
+        key: 'force_reboot', 
+        label: 'Force Reboot', 
+        description: 'Restart the system immediately', 
+        type: 'action', 
+        defaultValue: null,
+        actionLabel: 'Reboot',
+        action: handlers.onReboot,
+        icon: RefreshCw,
+        functional: true
+      },
       { 
         key: 'oem_unlock', 
         label: 'OEM Unlock', 
@@ -207,7 +251,8 @@ const getSettingsConfig = (handlers: {
         actionLabel: 'Unlock',
         action: handlers.onOemUnlock,
         dangerous: true,
-        icon: Unlock
+        icon: Unlock,
+        functional: true
       },
     ]
   },
@@ -235,6 +280,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [showLightModeWarning, setShowLightModeWarning] = useState(false);
   const [oemUnlocked, setOemUnlocked] = useState(() => loadState('settings_oem_unlocked', false));
+  const [isCompact, setIsCompact] = useState(false);
   
   // Theme hooks
   const { applyPreset, getCurrentPreset } = useThemePresets();
@@ -242,15 +288,42 @@ const Settings = ({ onUpdate }: SettingsProps) => {
   const [selectedBackgroundTheme, setSelectedBackgroundTheme] = useState<string | null>(null);
   const [themeTab, setThemeTab] = useState('presets');
 
+  // Detect compact mode
+  useEffect(() => {
+    const checkSize = () => {
+      const container = document.querySelector('[data-settings-container]');
+      if (container) {
+        setIsCompact(container.clientWidth < 600);
+      }
+    };
+    checkSize();
+    window.addEventListener('resize', checkSize);
+    return () => window.removeEventListener('resize', checkSize);
+  }, []);
+
   // Handlers
   const handleOpenDefDev = () => {
-    // Navigate to /def-dev route
     window.open('/def-dev', '_blank');
     toast.success('DEF-DEV Console opened in new tab');
   };
 
   const handleOemUnlock = () => setShowOemDialog(true);
   const handleFactoryReset = () => setShowResetDialog(true);
+
+  const handleTriggerBugcheck = () => {
+    commandQueue.queueBugcheck('DEV_TEST', 'Triggered from Settings Developer Options');
+    toast.error('Bugcheck queued - will trigger on next poll');
+  };
+
+  const handleTriggerCrash = () => {
+    commandQueue.queueCrash('KERNEL_PANIC', 'settings.exe');
+    toast.error('Crash queued - will trigger on next poll');
+  };
+
+  const handleReboot = () => {
+    commandQueue.queueReboot();
+    toast.info('Reboot queued');
+  };
 
   const confirmOemUnlock = () => {
     const newState = !oemUnlocked;
@@ -272,6 +345,9 @@ const Settings = ({ onUpdate }: SettingsProps) => {
     onOpenDefDev: handleOpenDefDev,
     onOemUnlock: handleOemUnlock,
     onFactoryReset: handleFactoryReset,
+    onTriggerBugcheck: handleTriggerBugcheck,
+    onTriggerCrash: handleTriggerCrash,
+    onReboot: handleReboot,
   });
 
   // Load settings
@@ -310,11 +386,46 @@ const Settings = ({ onUpdate }: SettingsProps) => {
       document.documentElement.style.filter = '';
     }
 
+    // CRT Effect
+    if (values.crt_effect) {
+      document.documentElement.classList.add('crt-effect');
+    } else {
+      document.documentElement.classList.remove('crt-effect');
+    }
+
     // Reduce motion
     if (!values.animations) {
       document.documentElement.classList.add('reduce-motion');
     } else {
       document.documentElement.classList.remove('reduce-motion');
+    }
+
+    // Slow animations
+    if (values.slow_animations) {
+      document.documentElement.style.setProperty('--animation-speed', '4');
+    } else {
+      document.documentElement.style.removeProperty('--animation-speed');
+    }
+
+    // Show render boxes
+    if (values.show_render_boxes) {
+      document.documentElement.classList.add('show-render-boxes');
+    } else {
+      document.documentElement.classList.remove('show-render-boxes');
+    }
+
+    // Brightness
+    if (values.brightness !== undefined && values.brightness !== 100) {
+      document.documentElement.style.setProperty('--brightness', `${values.brightness}%`);
+    } else {
+      document.documentElement.style.removeProperty('--brightness');
+    }
+
+    // Verbose console
+    if (values.console_logs) {
+      (window as any).__URBANSHADE_VERBOSE__ = true;
+    } else {
+      delete (window as any).__URBANSHADE_VERBOSE__;
     }
 
     window.dispatchEvent(new Event('storage'));
@@ -384,7 +495,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
   // Categorize themes
   const presetThemes = themePresets.filter(t => t.source === 'default');
   const battlepassThemes = themePresets.filter(t => t.source === 'battlepass');
-  const systemPresets = THEME_PRESETS.slice(0, 6); // Main system themes
+  const systemPresets = THEME_PRESETS.slice(0, 6);
 
   if (!isLoaded) {
     return (
@@ -406,7 +517,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
           <Sun className="w-4 h-4 text-primary" />
           Color Mode
         </h4>
-        <div className="grid grid-cols-2 gap-3">
+        <div className={cn("grid gap-3", isCompact ? "grid-cols-1" : "grid-cols-2")}>
           <button
             onClick={() => handleLightModeToggle(false)}
             className={cn(
@@ -446,20 +557,22 @@ const Settings = ({ onUpdate }: SettingsProps) => {
         </h4>
         
         <Tabs value={themeTab} onValueChange={setThemeTab}>
-          <TabsList className="w-full grid grid-cols-3 h-9">
+          <TabsList className={cn("w-full h-9", isCompact ? "grid-cols-2" : "grid-cols-3")}>
             <TabsTrigger value="presets" className="text-xs">Presets</TabsTrigger>
             <TabsTrigger value="battlepass" className="text-xs gap-1">
               <Crown className="w-3 h-3" />
-              Battle Pass
+              {!isCompact && "Battle Pass"}
             </TabsTrigger>
-            <TabsTrigger value="purchased" className="text-xs gap-1">
-              <Gift className="w-3 h-3" />
-              Owned
-            </TabsTrigger>
+            {!isCompact && (
+              <TabsTrigger value="purchased" className="text-xs gap-1">
+                <Gift className="w-3 h-3" />
+                Owned
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="presets" className="mt-3">
-            <div className="grid grid-cols-2 gap-2">
+            <div className={cn("grid gap-2", isCompact ? "grid-cols-1" : "grid-cols-2")}>
               {presetThemes.map(theme => (
                 <ThemeCard
                   key={theme.id}
@@ -476,10 +589,9 @@ const Settings = ({ onUpdate }: SettingsProps) => {
               <div className="text-center py-8 text-muted-foreground">
                 <Crown className="w-8 h-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No Battle Pass themes available</p>
-                <p className="text-xs mt-1">Progress in the Battle Pass to unlock themes</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className={cn("grid gap-2", isCompact ? "grid-cols-1" : "grid-cols-2")}>
                 {battlepassThemes.map(theme => (
                   <ThemeCard
                     key={theme.id}
@@ -498,7 +610,6 @@ const Settings = ({ onUpdate }: SettingsProps) => {
             <div className="text-center py-8 text-muted-foreground">
               <Gift className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No purchased themes yet</p>
-              <p className="text-xs mt-1">Visit the Shop to purchase themes</p>
             </div>
           </TabsContent>
         </Tabs>
@@ -510,7 +621,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
           <Star className="w-4 h-4 text-primary" />
           System Themes
         </h4>
-        <div className="grid grid-cols-2 gap-2">
+        <div className={cn("grid gap-2", isCompact ? "grid-cols-1" : "grid-cols-2")}>
           {systemPresets.map(theme => (
             <button
               key={theme.id}
@@ -544,7 +655,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
         </h4>
         <div className="space-y-1">
           <SettingRow
-            setting={{ key: 'blur_effects', label: 'Blur Effects', description: 'Enable backdrop blur', type: 'toggle', defaultValue: true, icon: Sparkles }}
+            setting={{ key: 'blur_effects', label: 'Blur Effects', description: 'Enable backdrop blur', type: 'toggle', defaultValue: true, icon: Sparkles, functional: true }}
             value={values.blur_effects}
             onChange={(val) => updateValue('blur_effects', val)}
           />
@@ -596,12 +707,12 @@ const Settings = ({ onUpdate }: SettingsProps) => {
         </h4>
         <div className="space-y-1">
           <SettingRow
-            setting={{ key: 'boot_logo', label: 'Show Boot Logo', description: 'Display UrbanShade logo on startup', type: 'toggle', defaultValue: true, icon: Image }}
+            setting={{ key: 'boot_logo', label: 'Show Boot Logo', description: 'Display UrbanShade logo on startup', type: 'toggle', defaultValue: true, icon: Image, functional: true }}
             value={values.boot_logo}
             onChange={(val) => updateValue('boot_logo', val)}
           />
           <SettingRow
-            setting={{ key: 'boot_sound', label: 'Boot Sound', description: 'Play sound on system startup', type: 'toggle', defaultValue: true, icon: Music }}
+            setting={{ key: 'boot_sound', label: 'Boot Sound', description: 'Play sound on system startup', type: 'toggle', defaultValue: true, icon: Music, functional: true }}
             value={values.boot_sound}
             onChange={(val) => updateValue('boot_sound', val)}
           />
@@ -640,7 +751,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
               <p className="text-sm text-muted-foreground">Deep Ocean Edition</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className={cn("grid gap-3", isCompact ? "grid-cols-1" : "grid-cols-2")}>
             <div className="p-3 rounded-lg bg-background/50">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Version</p>
               <p className="text-sm font-bold text-primary">{VERSION.displayVersion}</p>
@@ -739,29 +850,36 @@ const Settings = ({ onUpdate }: SettingsProps) => {
   };
 
   return (
-    <div className="flex h-full bg-background">
+    <div className="flex h-full bg-background" data-settings-container>
       {/* Sidebar */}
-      <div className="w-56 border-r border-border/40 bg-muted/20 flex flex-col">
-        <div className="p-4 border-b border-border/40">
-          <h2 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Palette className="w-3.5 h-3.5 text-primary" />
+      <div className={cn(
+        "border-r border-border/40 bg-muted/20 flex flex-col shrink-0",
+        isCompact ? "w-14" : "w-52"
+      )}>
+        <div className={cn("p-3 border-b border-border/40", isCompact && "px-2")}>
+          {!isCompact && (
+            <h2 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
+                <Palette className="w-3.5 h-3.5 text-primary" />
+              </div>
+              Settings
+            </h2>
+          )}
+          {!isCompact && (
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pl-8 bg-background/50 border-border/50 h-8 text-sm"
+              />
             </div>
-            Settings
-          </h2>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              placeholder="Search..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="pl-8 bg-background/50 border-border/50 h-8 text-sm"
-            />
-          </div>
+          )}
         </div>
 
         <ScrollArea className="flex-1 py-2">
-          <div className="px-2 space-y-0.5">
+          <div className={cn("space-y-0.5", isCompact ? "px-1" : "px-2")}>
             {settingsConfig.map(category => {
               const Icon = category.icon;
               const isActive = activeCategory === category.id && !searchQuery;
@@ -769,42 +887,51 @@ const Settings = ({ onUpdate }: SettingsProps) => {
                 <button
                   key={category.id}
                   onClick={() => { setActiveCategory(category.id); setSearchQuery(''); }}
+                  title={isCompact ? category.name : undefined}
                   className={cn(
-                    "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-left transition-all group text-sm",
+                    "w-full flex items-center gap-2.5 rounded-lg text-left transition-all group",
+                    isCompact ? "p-2 justify-center" : "px-2.5 py-2 text-sm",
                     isActive 
                       ? "bg-primary/15 text-primary" 
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                   )}
                 >
                   <div className={cn(
-                    "w-7 h-7 rounded-lg flex items-center justify-center transition-colors",
+                    "rounded-lg flex items-center justify-center transition-colors shrink-0",
+                    isCompact ? "w-8 h-8" : "w-7 h-7",
                     isActive ? "bg-primary/20" : "bg-muted/50 group-hover:bg-muted"
                   )}>
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon className={cn("w-3.5 h-3.5", isCompact && "w-4 h-4")} />
                   </div>
-                  <span className="font-medium flex-1">{category.name}</span>
-                  <ChevronRight className={cn(
-                    "w-3.5 h-3.5 opacity-0 group-hover:opacity-50 transition-opacity",
-                    isActive && "opacity-100"
-                  )} />
+                  {!isCompact && (
+                    <>
+                      <span className="font-medium flex-1 truncate">{category.name}</span>
+                      <ChevronRight className={cn(
+                        "w-3.5 h-3.5 opacity-0 group-hover:opacity-50 transition-opacity shrink-0",
+                        isActive && "opacity-100"
+                      )} />
+                    </>
+                  )}
                 </button>
               );
             })}
           </div>
         </ScrollArea>
 
-        <div className="p-2 border-t border-border/40">
-          <Button variant="ghost" size="sm" onClick={resetAll} className="w-full gap-2 text-xs text-muted-foreground">
-            <RotateCcw className="w-3 h-3" />
-            Reset All
-          </Button>
-        </div>
+        {!isCompact && (
+          <div className="p-2 border-t border-border/40">
+            <Button variant="ghost" size="sm" onClick={resetAll} className="w-full gap-2 text-xs text-muted-foreground">
+              <RotateCcw className="w-3 h-3" />
+              Reset All
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-w-0">
         <ScrollArea className="h-full">
-          <div className="p-6 max-w-xl">
+          <div className={cn("p-6", isCompact ? "max-w-full" : "max-w-xl")}>
             {searchQuery ? (
               <>
                 <div className="mb-6">
@@ -827,6 +954,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
                             value={values[setting.key]}
                             onChange={(val) => updateValue(setting.key, val)}
                             oemUnlocked={oemUnlocked}
+                            isCompact={isCompact}
                           />
                         ))}
                       </div>
@@ -863,6 +991,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
                         value={values[setting.key]}
                         onChange={(val) => updateValue(setting.key, val)}
                         oemUnlocked={oemUnlocked}
+                        isCompact={isCompact}
                       />
                     ))}
                   </div>
@@ -873,7 +1002,7 @@ const Settings = ({ onUpdate }: SettingsProps) => {
         </ScrollArea>
       </div>
 
-      {/* Light Mode Warning Dialog */}
+      {/* Dialogs */}
       <AlertDialog open={showLightModeWarning} onOpenChange={setShowLightModeWarning}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -894,7 +1023,6 @@ const Settings = ({ onUpdate }: SettingsProps) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* OEM Unlock Dialog */}
       <AlertDialog open={showOemDialog} onOpenChange={setShowOemDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -917,7 +1045,6 @@ const Settings = ({ onUpdate }: SettingsProps) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Factory Reset Dialog */}
       <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -991,18 +1118,22 @@ interface SettingRowProps {
   value: any;
   onChange: (value: any) => void;
   oemUnlocked?: boolean;
+  isCompact?: boolean;
 }
 
-const SettingRow = ({ setting, value, onChange, oemUnlocked }: SettingRowProps) => {
+const SettingRow = ({ setting, value, onChange, oemUnlocked, isCompact }: SettingRowProps) => {
   const Icon = setting.icon;
 
   if (setting.type === 'info') {
     const displayValue = setting.infoValue ? setting.infoValue() : value;
     return (
-      <div className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/30 transition-colors">
+      <div className={cn(
+        "flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/30 transition-colors",
+        isCompact && "flex-col items-start gap-2"
+      )}>
         <div className="flex items-center gap-2.5">
           {Icon && (
-            <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
               <Icon className="w-3.5 h-3.5 text-muted-foreground" />
             </div>
           )}
@@ -1019,34 +1150,35 @@ const SettingRow = ({ setting, value, onChange, oemUnlocked }: SettingRowProps) 
     return (
       <div className={cn(
         "flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/30 transition-colors",
-        setting.dangerous && "border border-destructive/20 bg-destructive/5"
+        setting.dangerous && "border border-destructive/20 bg-destructive/5",
+        isCompact && "flex-col items-start gap-2"
       )}>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
           {Icon && (
             <div className={cn(
-              "w-7 h-7 rounded-lg flex items-center justify-center",
+              "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
               setting.dangerous ? "bg-destructive/20" : "bg-muted/50"
             )}>
               <Icon className={cn("w-3.5 h-3.5", setting.dangerous ? "text-destructive" : "text-muted-foreground")} />
             </div>
           )}
-          <div>
-            <div className="text-sm font-medium text-foreground flex items-center gap-2">
-              {setting.label}
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-foreground flex items-center gap-2 flex-wrap">
+              <span className="truncate">{setting.label}</span>
               {setting.key === 'oem_unlock' && oemUnlocked && (
-                <span className="text-[9px] px-1.5 py-0.5 bg-amber-500/20 text-amber-500 rounded font-semibold">
+                <span className="text-[9px] px-1.5 py-0.5 bg-amber-500/20 text-amber-500 rounded font-semibold shrink-0">
                   UNLOCKED
                 </span>
               )}
             </div>
-            {setting.description && <p className="text-xs text-muted-foreground">{setting.description}</p>}
+            {setting.description && <p className="text-xs text-muted-foreground truncate">{setting.description}</p>}
           </div>
         </div>
         <Button 
           size="sm" 
           variant={setting.dangerous ? "destructive" : "secondary"}
           onClick={setting.action}
-          className="h-7 text-xs"
+          className={cn("h-7 text-xs shrink-0", isCompact && "w-full")}
         >
           {setting.key === 'oem_unlock' ? (oemUnlocked ? 'Lock' : 'Unlock') : setting.actionLabel}
         </Button>
@@ -1060,26 +1192,26 @@ const SettingRow = ({ setting, value, onChange, oemUnlocked }: SettingRowProps) 
         "flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-muted/30 transition-colors",
         setting.dangerous && "border border-destructive/20 bg-destructive/5"
       )}>
-        <div className="flex items-center gap-2.5 flex-1 pr-4">
+        <div className="flex items-center gap-2.5 flex-1 pr-4 min-w-0">
           {Icon && (
             <div className={cn(
-              "w-7 h-7 rounded-lg flex items-center justify-center",
+              "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
               setting.dangerous ? "bg-destructive/20" : "bg-muted/50"
             )}>
               <Icon className={cn("w-3.5 h-3.5", setting.dangerous ? "text-destructive" : "text-muted-foreground")} />
             </div>
           )}
-          <div>
+          <div className="min-w-0">
             <div className="text-sm font-medium text-foreground flex items-center gap-2">
-              {setting.label}
+              <span className="truncate">{setting.label}</span>
               {setting.dangerous && (
-                <span className="text-[9px] px-1.5 py-0.5 bg-destructive/20 text-destructive rounded font-semibold">DANGER</span>
+                <span className="text-[9px] px-1.5 py-0.5 bg-destructive/20 text-destructive rounded font-semibold shrink-0">DANGER</span>
               )}
             </div>
-            {setting.description && <p className="text-xs text-muted-foreground">{setting.description}</p>}
+            {setting.description && !isCompact && <p className="text-xs text-muted-foreground truncate">{setting.description}</p>}
           </div>
         </div>
-        <Switch checked={Boolean(value)} onCheckedChange={onChange} />
+        <Switch checked={Boolean(value)} onCheckedChange={onChange} className="shrink-0" />
       </div>
     );
   }
@@ -1088,8 +1220,8 @@ const SettingRow = ({ setting, value, onChange, oemUnlocked }: SettingRowProps) 
     return (
       <div className="py-2.5 px-3 rounded-lg hover:bg-muted/30 transition-colors">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-foreground">{setting.label}</span>
-          <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-0.5 rounded">{value}</span>
+          <span className="text-sm font-medium text-foreground truncate">{setting.label}</span>
+          <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-0.5 rounded shrink-0">{value}</span>
         </div>
         <Slider
           value={[value]}
