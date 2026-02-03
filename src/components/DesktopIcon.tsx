@@ -1,25 +1,69 @@
+import { useState } from "react";
 import { App } from "./Desktop";
-import { ChevronRight } from "lucide-react";
 
 interface DesktopIconProps {
   app: App;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }
 
-export const DesktopIcon = ({ app }: DesktopIconProps) => {
+export const DesktopIcon = ({ app, isSelected, onSelect }: DesktopIconProps) => {
+  const [isPressed, setIsPressed] = useState(false);
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect?.();
+  };
+
+  const handleDoubleClick = () => {
+    app.run();
+  };
+
   return (
     <div
-      className="w-[85px] flex flex-col items-center gap-1.5 text-center select-none group cursor-pointer animate-fade-in"
-      onDoubleClick={() => app.run()}
+      className={`
+        w-20 h-[88px] flex flex-col items-center gap-1.5 p-2 rounded-lg
+        select-none cursor-pointer transition-all duration-150 group
+        ${isSelected 
+          ? "bg-primary/20 ring-1 ring-primary/50" 
+          : "hover:bg-white/5"
+        }
+        ${isPressed ? "scale-95" : ""}
+      `}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      onMouseDown={() => setIsPressed(true)}
+      onMouseUp={() => setIsPressed(false)}
+      onMouseLeave={() => setIsPressed(false)}
     >
-      {/* Icon Container - Clean glass style */}
-      <div className="w-12 h-12 rounded-xl bg-background/40 backdrop-blur-sm border border-primary/10 flex items-center justify-center text-primary/70 transition-all duration-200 group-hover:bg-primary/10 group-hover:border-primary/30 group-hover:text-primary group-hover:scale-105">
+      {/* Icon Container */}
+      <div className={`
+        w-11 h-11 rounded-xl flex items-center justify-center
+        transition-all duration-200 relative
+        ${isSelected 
+          ? "bg-primary/15 text-primary shadow-lg shadow-primary/20" 
+          : "bg-background/60 backdrop-blur-sm border border-border/50 text-foreground/70 group-hover:text-primary group-hover:border-primary/30 group-hover:bg-primary/5"
+        }
+      `}>
         <div className="w-6 h-6 flex items-center justify-center [&>svg]:w-6 [&>svg]:h-6">
           {app.icon}
         </div>
+        
+        {/* Glow effect on selection */}
+        {isSelected && (
+          <div className="absolute inset-0 rounded-xl bg-primary/10 blur-md -z-10" />
+        )}
       </div>
       
-      {/* App Name - Clean minimal style */}
-      <div className="text-[11px] text-muted-foreground/80 transition-colors group-hover:text-foreground max-w-[80px] truncate leading-tight">
+      {/* App Name */}
+      <div className={`
+        text-[11px] leading-tight text-center w-full px-0.5
+        transition-colors duration-150 line-clamp-2
+        ${isSelected 
+          ? "text-foreground font-medium" 
+          : "text-foreground/70 group-hover:text-foreground"
+        }
+      `}>
         {app.name}
       </div>
     </div>

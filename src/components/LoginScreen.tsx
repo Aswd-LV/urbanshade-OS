@@ -146,33 +146,42 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   };
 
   return (
-    <div className="h-screen w-full bg-slate-900 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+    <div className="h-screen w-full bg-background relative overflow-hidden">
+      {/* Background with subtle gradient */}
+      <div 
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse 80% 50% at 50% 100%, hsl(var(--primary) / 0.08), transparent 50%), linear-gradient(to bottom, hsl(var(--background)), hsl(var(--card)))'
+        }}
+      />
       
       {/* Account tiles - TOP LEFT */}
       <div className="absolute top-6 left-6 z-10">
-        <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono mb-3">
-          <Lock className="w-4 h-4" />
-          <span>SELECT USER</span>
+        <div className="flex items-center gap-2 text-primary text-xs font-mono mb-3 opacity-70">
+          <Lock className="w-3.5 h-3.5" />
+          <span className="tracking-wider">SELECT USER</span>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {accounts.map((account) => (
             <button
               key={account.id}
               onClick={() => handleSelectAccount(account)}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left w-56 ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-left w-60 transition-all duration-200 ${
                 selectedAccount?.id === account.id
-                  ? "bg-cyan-500/20 border-cyan-500/50"
-                  : "bg-slate-800/60 border-slate-700/50 hover:bg-slate-700/60 hover:border-slate-600"
+                  ? "bg-primary/15 border border-primary/40 shadow-lg shadow-primary/10"
+                  : "bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20"
               }`}
             >
-              <div className="w-9 h-9 rounded-full bg-cyan-900/50 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${
+                selectedAccount?.id === account.id
+                  ? "bg-primary/20 text-primary"
+                  : "bg-white/10 text-foreground/70"
+              }`}>
                 {account.isAdmin ? (
-                  <Shield className="w-4 h-4 text-cyan-400" />
+                  <Shield className="w-5 h-5" />
                 ) : (
-                  <User className="w-4 h-4 text-cyan-400" />
+                  <User className="w-5 h-5" />
                 )}
               </div>
               
@@ -180,10 +189,12 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 <div className="text-sm font-medium text-foreground truncate">
                   {account.displayName}
                 </div>
-                <div className="text-xs text-muted-foreground truncate">{account.role}</div>
+                <div className="text-[11px] text-muted-foreground truncate">{account.role}</div>
               </div>
               
-              <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+              <ChevronRight className={`w-4 h-4 transition-colors flex-shrink-0 ${
+                selectedAccount?.id === account.id ? "text-primary" : "text-muted-foreground/50"
+              }`} />
             </button>
           ))}
         </div>
@@ -202,29 +213,34 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         ) : (
           // Account selected - show password form
           <div className="w-full max-w-sm mx-4">
-            <div className="rounded-xl border border-cyan-500/30 bg-slate-800/70 backdrop-blur-sm p-6">
+            <div 
+              className="rounded-2xl border border-border/50 p-6 backdrop-blur-xl"
+              style={{
+                background: 'linear-gradient(180deg, hsl(var(--glass)) 0%, hsl(var(--glass-strong)) 100%)'
+              }}
+            >
               {/* Back button */}
               <button
                 onClick={handleBack}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-cyan-400 mb-5"
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-5"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </button>
               
               {/* User info */}
-              <div className="flex items-center gap-4 mb-5 pb-5 border-b border-slate-600/50">
-                <div className="w-14 h-14 rounded-full bg-cyan-900/50 border border-cyan-500/30 flex items-center justify-center">
+              <div className="flex items-center gap-4 mb-5 pb-5 border-b border-border/30">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                   {selectedAccount.isAdmin ? (
-                    <Shield className="w-7 h-7 text-cyan-400" />
+                    <Shield className="w-7 h-7 text-primary" />
                   ) : (
-                    <User className="w-7 h-7 text-cyan-400" />
+                    <User className="w-7 h-7 text-primary" />
                   )}
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-foreground">{selectedAccount.displayName}</div>
                   <div className="text-sm text-muted-foreground">{selectedAccount.role}</div>
-                  <div className="text-xs text-cyan-400 font-mono">Clearance Level {selectedAccount.clearance}</div>
+                  <div className="text-xs text-primary/80 font-mono mt-1">Level {selectedAccount.clearance}</div>
                 </div>
               </div>
               
@@ -233,7 +249,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="password"
                         value={password}
@@ -241,13 +257,13 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                         placeholder="Enter password"
                         autoFocus
                         disabled={loading}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-700/50 border border-slate-600/50 text-foreground placeholder:text-muted-foreground/50 focus:border-cyan-500/50 focus:outline-none text-sm"
+                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-border/50 text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:bg-white/10 focus:outline-none text-sm transition-colors"
                       />
                     </div>
                   </div>
 
                   {error && (
-                    <div className="text-sm text-red-400 text-center py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <div className="text-sm text-destructive text-center py-2.5 px-3 rounded-xl bg-destructive/10 border border-destructive/20">
                       {error}
                     </div>
                   )}
@@ -255,7 +271,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 rounded-lg bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 font-medium hover:bg-cyan-500/30 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+                    className="w-full py-3 rounded-xl bg-primary/20 border border-primary/30 text-primary font-medium hover:bg-primary/30 disabled:opacity-50 flex items-center justify-center gap-2 text-sm transition-colors"
                   >
                     {loading ? (
                       <>
@@ -269,14 +285,14 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
                 </form>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground text-center">
+                  <p className="text-sm text-muted-foreground text-center py-2">
                     No password required
                   </p>
                   
                   <button
                     onClick={handleLogin}
                     disabled={loading}
-                    className="w-full py-2.5 rounded-lg bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 font-medium hover:bg-cyan-500/30 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
+                    className="w-full py-3 rounded-xl bg-primary/20 border border-primary/30 text-primary font-medium hover:bg-primary/30 disabled:opacity-50 flex items-center justify-center gap-2 text-sm transition-colors"
                   >
                     {loading ? (
                       <>
