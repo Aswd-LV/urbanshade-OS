@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sparkles, Cloud, Rocket, Shield, Monitor, Star, ArrowRight, Info, Paintbrush, Heart, Gift } from "lucide-react";
+import { Sparkles, Cloud, Rocket, Shield, Monitor, Star, ArrowRight, Info, Paintbrush, Heart, Gift, Terminal } from "lucide-react";
 import { VERSION, getShortVersion } from "@/lib/versionInfo";
 
 interface ChangelogDialogProps {
@@ -50,6 +50,40 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
   }
 
   const changelogs: Record<string, VersionData> = {
+    "3.1": {
+      icon: <Terminal className="w-5 h-5" />,
+      color: "from-green-500 to-cyan-600",
+      tagline: "DEF-DEV OVERHAUL",
+      overview: "Major DEF-DEV 3.0 improvements: FakeMod now triggers real moderation screens, expanded Admin tools with simulation triggers, and all Settings toggles are now fully functional.",
+      sections: {
+        "🔧 FakeMod Redesign": [
+          { text: "FakeMod now triggers REAL screens on main OS window", isHighlight: true },
+          { text: "Ban action shows actual BannedScreen component" },
+          { text: "Temp ban shows real TempBanPopup dialog" },
+          { text: "Warn/Mute/Kick show proper toast notifications" },
+          { text: "Visual indicator shows actions trigger on main window" },
+        ],
+        "🛠️ Admin Tab Expansion": [
+          { text: "System Modes: Maintenance, Safe Mode, Fake Update, Offline Mode", isHighlight: true },
+          { text: "Simulation Triggers: Timeout, Network Fail, Storage Full, Auth Fail, DB Error" },
+          { text: "User State: Force Logout, Force Lock, Clear Sessions, Reset Preferences" },
+          { text: "Debug Tools: Trigger OOBE, Show Changelog, Debug Overlay, Re-Disclaimer" },
+        ],
+        "⚙️ Settings Functionality": [
+          { text: "Wi-Fi toggle now functional with system state", isHighlight: true },
+          { text: "Offline Mode sets session flag for network behavior" },
+          { text: "Hardware Acceleration controls GPU rendering hints" },
+          { text: "Telemetry and Auto Updates flags are now wired" },
+          { text: "Debug Overlay shows visual indicator when enabled" },
+          { text: "All blur/transparency controls affect UI rendering" },
+        ],
+        "🎨 Visual Improvements": [
+          { text: "New CSS classes for no-blur, no-gpu, debug-overlay" },
+          { text: "Cleaner FakeMod UI with info banners" },
+          { text: "Collapsible sections in Admin tab" },
+        ],
+      }
+    },
     "3.0": {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-cyan-500 to-purple-600",

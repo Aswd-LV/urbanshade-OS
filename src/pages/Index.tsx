@@ -98,6 +98,11 @@ const Index = () => {
     return localStorage.getItem("urbanshade_disclaimer_accepted") === "true";
   });
   const [devModeOpen, setDevModeOpen] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
+  // FakeMod state
+  const [fakeBanData, setFakeBanData] = useState<{ reason: string; duration?: string; isFake: boolean } | null>(null);
+  const [fakeTempBanData, setFakeTempBanData] = useState<{ reason: string; duration: string; expiresAt?: string; isFake: boolean } | null>(null);
+  const [fakeWarnData, setFakeWarnData] = useState<{ reason: string; isFake: boolean } | null>(null);
   const [isLocked, setIsLocked] = useState(false);
 
   // Check if admin setup is complete and setup key listeners
@@ -284,6 +289,103 @@ const Index = () => {
         case "CUSTOM":
           // Handle custom commands via system bus
           systemBus.emit("CUSTOM_COMMAND", cmd.payload);
+          break;
+
+        case "LOGOUT":
+          setLoggingOut(true);
+          break;
+
+        case "LOCK":
+          setIsLocked(true);
+          break;
+
+        case "OOBE":
+          localStorage.removeItem("urbanshade_oobe_complete");
+          setOobeComplete(false);
+          break;
+
+        case "CHANGELOG":
+          setShowChangelog(true);
+          break;
+
+        case "MAINTENANCE":
+          setMaintenanceMode(cmd.payload.enable ?? true);
+          break;
+
+        case "SAFE_MODE":
+          sessionStorage.setItem("urbanshade_safe_mode", "true");
+          setSafeMode(true);
+          handleReboot();
+          break;
+
+        case "UPDATE":
+          setIsUpdating(true);
+          break;
+
+        // FakeMod commands - show REAL moderation screens with isFake flag
+        case "FAKE_BAN":
+          setFakeBanData({ 
+            reason: cmd.payload.reason || "Testing ban screen", 
+            duration: cmd.payload.duration,
+            isFake: true 
+          });
+          break;
+
+        case "FAKE_TEMP_BAN":
+          setFakeTempBanData({
+            reason: cmd.payload.reason || "Testing temp ban",
+            duration: cmd.payload.duration || "7 days",
+            expiresAt: cmd.payload.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            isFake: true
+          });
+          break;
+
+        case "FAKE_WARN":
+          setFakeWarnData({ reason: cmd.payload.reason || "Testing warning", isFake: true });
+          toast.warning(`⚠️ WARNING: ${cmd.payload.reason || "Testing warning"}`, {
+            description: "[FAKE - DEF-DEV Testing Mode]",
+            duration: 8000
+          });
+          break;
+
+        case "FAKE_MUTE":
+          toast.error(`🔇 MUTED: ${cmd.payload.reason || "Testing mute"}`, {
+            description: `Duration: ${cmd.payload.duration || "30 minutes"} [FAKE - DEF-DEV Testing Mode]`,
+            duration: 8000
+          });
+          break;
+
+        case "FAKE_KICK":
+          toast.error(`👢 KICKED: ${cmd.payload.reason || "Testing kick"}`, {
+            description: "[FAKE - DEF-DEV Testing Mode]",
+            duration: 5000
+          });
+          // Simulate kick by showing logout briefly
+          setTimeout(() => {
+            setLoggingOut(true);
+            setTimeout(() => setLoggingOut(false), 2000);
+          }, 1000);
+          break;
+
+        // Simulation triggers
+        case "TIMEOUT":
+          toast.error("⏱️ Operation timed out", { description: "[Simulated]" });
+          break;
+
+        case "NETWORK_FAILURE":
+          toast.error("🌐 Network connection lost", { description: "[Simulated]" });
+          break;
+
+        case "STORAGE_FULL":
+          toast.error("💾 Storage quota exceeded", { description: "[Simulated]" });
+          break;
+
+        case "AUTH_FAILURE":
+          toast.error("🔐 Authentication failed", { description: "[Simulated]" });
+          break;
+
+        case "DB_ERROR":
+          toast.error(`🗄️ ${cmd.payload.message || "Database error"}`, { description: "[Simulated]" });
           break;
 
         case "HANDSHAKE_REQUEST":
@@ -806,6 +908,18 @@ const Index = () => {
     return <LockScreen onUnlock={() => setIsLocked(false)} username={username} />;
   }
 
+  // FakeMod: Show full BannedScreen when triggered from DEF-DEV
+  if (fakeBanData) {
+    return (
+      <BannedScreen 
+        reason={fakeBanData.reason} 
+        expiresAt={null}
+        isFakeBan={true}
+        onFakeBanDismiss={() => setFakeBanData(null)}
+      />
+    );
+  }
+
   return (
     <>
       {/* Temp ban banner at top of screen */}
@@ -830,7 +944,7 @@ const Index = () => {
           handleReboot();
         }}
       />
-      <ChangelogDialog />
+      <ChangelogDialog open={showChangelog} onOpenChange={setShowChangelog} />
       {maintenanceMode && <MaintenanceMode onExit={() => setMaintenanceMode(false)} />}
       {showTour && <WelcomeModal onComplete={() => setShowTour(false)} />}
       {showAdminPanel && (
@@ -850,12 +964,20 @@ const Index = () => {
         reason={banCheck.vipReason}
       />
 
-      {/* Temp ban popup (shown once, then banner persists) */}
+      {/* Real Temp ban popup (from ban check) */}
       <TempBanPopup
         open={banCheck.isBanned && banCheck.isTempBan && !banCheck.tempBanDismissed}
         onDismiss={banCheck.dismissTempBan}
         reason={banCheck.reason}
         expiresAt={banCheck.expiresAt}
+      />
+
+      {/* FakeMod: Fake Temp ban popup */}
+      <TempBanPopup
+        open={!!fakeTempBanData}
+        onDismiss={() => setFakeTempBanData(null)}
+        reason={fakeTempBanData?.reason || null}
+        expiresAt={fakeTempBanData?.expiresAt ? new Date(fakeTempBanData.expiresAt) : null}
       />
     </>
   );

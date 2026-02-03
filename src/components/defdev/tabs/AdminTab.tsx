@@ -1,6 +1,7 @@
 import { 
   Skull, Zap, RefreshCw, Power, Lock, HardDrive, AlertTriangle, 
-  Trash2, Shield, Bug, Terminal, Database, Flame
+  Trash2, Shield, Bug, Terminal, Database, Flame, Settings, LogOut,
+  WifiOff, Clock, FileText, Sparkles, MonitorPlay, CloudOff
 } from "lucide-react";
 import { commandQueue } from "@/lib/commandQueue";
 import { toast } from "sonner";
@@ -41,6 +42,10 @@ export const clearUserPenalties = () => {
 
 const AdminTab = () => {
   const [showDanger, setShowDanger] = useState(false);
+  const [showModes, setShowModes] = useState(true);
+  const [showSimulation, setShowSimulation] = useState(true);
+  const [showUserState, setShowUserState] = useState(true);
+  const [showDebug, setShowDebug] = useState(true);
 
   // Quick actions - most used
   const quickActions = [
@@ -137,6 +142,271 @@ const AdminTab = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* System Modes */}
+      <div className="border border-cyan-500/30 bg-cyan-500/5 rounded-lg overflow-hidden">
+        <button 
+          onClick={() => setShowModes(!showModes)}
+          className="w-full p-3 flex items-center justify-between hover:bg-cyan-500/10 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Settings className="w-4 h-4 text-cyan-400" />
+            <span className="text-sm font-medium text-cyan-400">System Modes</span>
+          </div>
+          <span className="text-xs text-cyan-400/50">{showModes ? '▲' : '▼'}</span>
+        </button>
+        
+        {showModes && (
+          <div className="p-3 pt-0 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { 
+                commandQueue.queueMaintenance(true);
+                toast.info('Maintenance mode enabled');
+              }}
+              className="p-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Settings className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-cyan-400">Maintenance</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueSafeMode();
+                toast.info('Safe mode queued - system will reboot');
+              }}
+              className="p-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Shield className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-cyan-400">Safe Mode</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueUpdate();
+                toast.info('Update screen queued');
+              }}
+              className="p-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <RefreshCw className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-cyan-400">Fake Update</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                localStorage.setItem('settings_offline_mode', 'true');
+                window.dispatchEvent(new Event('storage'));
+                toast.info('Offline mode enabled');
+              }}
+              className="p-3 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <CloudOff className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-cyan-400">Offline Mode</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Simulation Triggers */}
+      <div className="border border-purple-500/30 bg-purple-500/5 rounded-lg overflow-hidden">
+        <button 
+          onClick={() => setShowSimulation(!showSimulation)}
+          className="w-full p-3 flex items-center justify-between hover:bg-purple-500/10 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 text-purple-400" />
+            <span className="text-sm font-medium text-purple-400">Simulation Triggers</span>
+          </div>
+          <span className="text-xs text-purple-400/50">{showSimulation ? '▲' : '▼'}</span>
+        </button>
+        
+        {showSimulation && (
+          <div className="p-3 pt-0 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { 
+                commandQueue.queueTimeout(30000);
+                toast.error('Timeout simulation triggered');
+              }}
+              className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Clock className="w-4 h-4 text-purple-400" />
+              <span className="text-xs text-purple-400">Timeout</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueNetworkFailure();
+                toast.error('Network failure simulation triggered');
+              }}
+              className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <WifiOff className="w-4 h-4 text-purple-400" />
+              <span className="text-xs text-purple-400">Network Fail</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueStorageFull();
+                toast.error('Storage full simulation triggered');
+              }}
+              className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <HardDrive className="w-4 h-4 text-purple-400" />
+              <span className="text-xs text-purple-400">Storage Full</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueAuthFailure();
+                toast.error('Auth failure simulation triggered');
+              }}
+              className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Lock className="w-4 h-4 text-purple-400" />
+              <span className="text-xs text-purple-400">Auth Fail</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueDbError('Simulated database connection error');
+                toast.error('DB error simulation triggered');
+              }}
+              className="p-3 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 rounded col-span-2 flex items-center gap-2 transition-all"
+            >
+              <Database className="w-4 h-4 text-purple-400" />
+              <span className="text-xs text-purple-400">Database Error</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* User State */}
+      <div className="border border-blue-500/30 bg-blue-500/5 rounded-lg overflow-hidden">
+        <button 
+          onClick={() => setShowUserState(!showUserState)}
+          className="w-full p-3 flex items-center justify-between hover:bg-blue-500/10 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <LogOut className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-medium text-blue-400">User State</span>
+          </div>
+          <span className="text-xs text-blue-400/50">{showUserState ? '▲' : '▼'}</span>
+        </button>
+        
+        {showUserState && (
+          <div className="p-3 pt-0 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { 
+                commandQueue.queueLogout();
+                toast.info('Logout queued');
+              }}
+              className="p-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <LogOut className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-400">Force Logout</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueLock();
+                toast.info('Lock screen queued');
+              }}
+              className="p-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Lock className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-400">Force Lock</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                sessionStorage.clear();
+                toast.success('Session data cleared');
+              }}
+              className="p-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Trash2 className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-400">Clear Sessions</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                // Clear user preferences
+                const keysToRemove = Object.keys(localStorage).filter(k => k.startsWith('settings_'));
+                keysToRemove.forEach(k => localStorage.removeItem(k));
+                window.dispatchEvent(new Event('storage'));
+                toast.success(`Cleared ${keysToRemove.length} preference keys`);
+              }}
+              className="p-3 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Settings className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-400">Reset Prefs</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Debug Tools */}
+      <div className="border border-green-500/30 bg-green-500/5 rounded-lg overflow-hidden">
+        <button 
+          onClick={() => setShowDebug(!showDebug)}
+          className="w-full p-3 flex items-center justify-between hover:bg-green-500/10 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Bug className="w-4 h-4 text-green-400" />
+            <span className="text-sm font-medium text-green-400">Debug Tools</span>
+          </div>
+          <span className="text-xs text-green-400/50">{showDebug ? '▲' : '▼'}</span>
+        </button>
+        
+        {showDebug && (
+          <div className="p-3 pt-0 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { 
+                commandQueue.queueOobe();
+                toast.info('OOBE will show on next reload');
+              }}
+              className="p-3 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <Sparkles className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-green-400">Trigger OOBE</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                commandQueue.queueChangelog();
+                toast.info('Changelog will open on main window');
+              }}
+              className="p-3 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <FileText className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-green-400">Show Changelog</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                const current = localStorage.getItem('settings_debug_overlay') === 'true';
+                localStorage.setItem('settings_debug_overlay', (!current).toString());
+                window.dispatchEvent(new Event('storage'));
+                toast.success(`Debug overlay ${!current ? 'enabled' : 'disabled'}`);
+              }}
+              className="p-3 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <MonitorPlay className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-green-400">Debug Overlay</span>
+            </button>
+
+            <button
+              onClick={() => { 
+                localStorage.removeItem('urbanshade_disclaimer_accepted');
+                toast.info('Disclaimer will show on next reload');
+              }}
+              className="p-3 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 rounded flex items-center gap-2 transition-all"
+            >
+              <AlertTriangle className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-green-400">Re-Disclaimer</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Bugcheck Triggers */}

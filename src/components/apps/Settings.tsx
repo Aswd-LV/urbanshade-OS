@@ -133,9 +133,9 @@ const getSettingsConfig = (handlers: {
     icon: Wifi,
     description: 'Connection settings',
     settings: [
-      { key: 'wifi', label: 'Wi-Fi', description: 'Enable wireless networking', type: 'toggle', defaultValue: true },
+      { key: 'wifi', label: 'Wi-Fi', description: 'Enable wireless networking', type: 'toggle', defaultValue: true, functional: true },
       { key: 'vpn', label: 'VPN', description: 'Route traffic through VPN', type: 'toggle', defaultValue: false, icon: Lock, functional: true },
-      { key: 'offline_mode', label: 'Offline Mode', description: 'Disable all network features', type: 'toggle', defaultValue: false },
+      { key: 'offline_mode', label: 'Offline Mode', description: 'Disable all network features', type: 'toggle', defaultValue: false, functional: true },
     ]
   },
   {
@@ -144,8 +144,8 @@ const getSettingsConfig = (handlers: {
     icon: Shield,
     description: 'Security options',
     settings: [
-      { key: 'telemetry', label: 'Usage Analytics', description: 'Help improve the system', type: 'toggle', defaultValue: false },
-      { key: 'auto_updates', label: 'Automatic Updates', type: 'toggle', defaultValue: true },
+      { key: 'telemetry', label: 'Usage Analytics', description: 'Help improve the system (cosmetic)', type: 'toggle', defaultValue: false, functional: true },
+      { key: 'auto_updates', label: 'Automatic Updates', description: 'Check for updates on boot', type: 'toggle', defaultValue: true, functional: true },
       { key: 'lock_after_idle', label: 'Lock After Idle', description: 'Lock screen after inactivity', type: 'toggle', defaultValue: false, icon: Lock, functional: true },
     ]
   },
@@ -155,7 +155,7 @@ const getSettingsConfig = (handlers: {
     icon: Gauge,
     description: 'System optimization',
     settings: [
-      { key: 'hardware_acceleration', label: 'Hardware Acceleration', description: 'Use GPU for rendering', type: 'toggle', defaultValue: true },
+      { key: 'hardware_acceleration', label: 'Hardware Acceleration', description: 'Use GPU for rendering', type: 'toggle', defaultValue: true, functional: true },
       { key: 'animations', label: 'Animations', description: 'Enable UI animations', type: 'toggle', defaultValue: true, functional: true },
       { key: 'blur_effects', label: 'Blur Effects', description: 'Enable backdrop blur', type: 'toggle', defaultValue: true, icon: Sparkles, functional: true },
       { key: 'max_windows', label: 'Max Open Windows', type: 'slider', defaultValue: 10, min: 3, max: 20, functional: true },
@@ -426,6 +426,64 @@ const Settings = ({ onUpdate }: SettingsProps) => {
       (window as any).__URBANSHADE_VERBOSE__ = true;
     } else {
       delete (window as any).__URBANSHADE_VERBOSE__;
+    }
+
+    // ============ NEW FUNCTIONAL SETTINGS ============
+
+    // Wi-Fi status (visual indicator for system tray)
+    if (values.wifi === false) {
+      document.documentElement.dataset.wifiDisabled = 'true';
+      (window as any).__URBANSHADE_WIFI_DISABLED__ = true;
+    } else {
+      delete document.documentElement.dataset.wifiDisabled;
+      delete (window as any).__URBANSHADE_WIFI_DISABLED__;
+    }
+
+    // Offline mode - affects network behavior
+    if (values.offline_mode) {
+      document.documentElement.dataset.offlineMode = 'true';
+      (window as any).__URBANSHADE_OFFLINE_MODE__ = true;
+      sessionStorage.setItem('urbanshade_offline_mode', 'true');
+    } else {
+      delete document.documentElement.dataset.offlineMode;
+      delete (window as any).__URBANSHADE_OFFLINE_MODE__;
+      sessionStorage.removeItem('urbanshade_offline_mode');
+    }
+
+    // Hardware acceleration
+    if (values.hardware_acceleration) {
+      document.documentElement.classList.remove('no-gpu');
+      document.documentElement.style.setProperty('--transform-style', 'preserve-3d');
+    } else {
+      document.documentElement.classList.add('no-gpu');
+      document.documentElement.style.removeProperty('--transform-style');
+    }
+
+    // Blur effects
+    if (values.blur_effects === false) {
+      document.documentElement.classList.add('no-blur');
+    } else {
+      document.documentElement.classList.remove('no-blur');
+    }
+
+    // Transparency
+    if (values.transparency === false) {
+      document.documentElement.classList.add('no-transparency');
+    } else {
+      document.documentElement.classList.remove('no-transparency');
+    }
+
+    // Telemetry (just sets a flag - cosmetic in this OS)
+    (window as any).__URBANSHADE_TELEMETRY__ = values.telemetry === true;
+
+    // Auto updates flag
+    (window as any).__URBANSHADE_AUTO_UPDATES__ = values.auto_updates !== false;
+
+    // Debug overlay
+    if (values.debug_overlay) {
+      document.documentElement.classList.add('debug-overlay');
+    } else {
+      document.documentElement.classList.remove('debug-overlay');
     }
 
     window.dispatchEvent(new Event('storage'));
