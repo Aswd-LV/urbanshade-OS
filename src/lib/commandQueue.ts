@@ -25,6 +25,9 @@ export type CommandType =
   | "SAFE_MODE"
   | "UPDATE"
   | "LOGOUT"
+  | "LOCK"
+  | "OOBE"
+  | "CHANGELOG"
   // Simulation triggers
   | "TIMEOUT"
   | "NETWORK_FAILURE"
@@ -33,7 +36,13 @@ export type CommandType =
   | "DB_ERROR"
   // DEF-DEV Handshake
   | "HANDSHAKE_REQUEST"
-  | "HANDSHAKE_RESPONSE";
+  | "HANDSHAKE_RESPONSE"
+  // FakeMod commands - show real moderation screens
+  | "FAKE_BAN"
+  | "FAKE_TEMP_BAN"
+  | "FAKE_WARN"
+  | "FAKE_MUTE"
+  | "FAKE_KICK";
 
 export interface QueuedCommand {
   id: string;
@@ -337,6 +346,18 @@ class CommandQueue {
     return this.queue('LOGOUT', {});
   }
 
+  queueLock(): string {
+    return this.queue('LOCK', {});
+  }
+
+  queueOobe(): string {
+    return this.queue('OOBE', {});
+  }
+
+  queueChangelog(): string {
+    return this.queue('CHANGELOG', {});
+  }
+
   // === Simulation Triggers ===
 
   queueTimeout(duration: number = 30000): string {
@@ -357,6 +378,28 @@ class CommandQueue {
 
   queueDbError(message: string = 'Database connection failed'): string {
     return this.queue('DB_ERROR', { message });
+  }
+
+  // === FakeMod Commands - Trigger REAL moderation screens ===
+
+  queueFakeBan(reason: string, duration?: string): string {
+    return this.queue('FAKE_BAN', { reason, duration, isFake: true });
+  }
+
+  queueFakeTempBan(reason: string, duration: string, expiresAt?: string): string {
+    return this.queue('FAKE_TEMP_BAN', { reason, duration, expiresAt, isFake: true });
+  }
+
+  queueFakeWarn(reason: string): string {
+    return this.queue('FAKE_WARN', { reason, isFake: true });
+  }
+
+  queueFakeMute(reason: string, duration: string): string {
+    return this.queue('FAKE_MUTE', { reason, duration, isFake: true });
+  }
+
+  queueFakeKick(reason: string): string {
+    return this.queue('FAKE_KICK', { reason, isFake: true });
   }
 }
 

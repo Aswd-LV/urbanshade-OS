@@ -1,7 +1,8 @@
-import { Gavel, Ban, AlertTriangle, VolumeX, UserX, Play, Plus, Clock, X, Shield, Trash2, Download, Settings, Crown, Star, Sparkles, MessageSquare } from "lucide-react";
+import { Gavel, Ban, AlertTriangle, VolumeX, UserX, Play, Plus, Clock, Download, Sparkles, MessageSquare, MonitorPlay } from "lucide-react";
 import { useState } from "react";
 import { FakeModerationAction } from "../hooks/useDefDevState";
 import { toast } from "sonner";
+import { commandQueue } from "@/lib/commandQueue";
 
 interface FakeModTabProps {
   fakeModerationActions: FakeModerationAction[];
@@ -11,15 +12,15 @@ interface FakeModTabProps {
   dismissFakeMod: () => void;
 }
 
-const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFakeMod, activeFakeMod, dismissFakeMod }: FakeModTabProps) => {
+const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction }: FakeModTabProps) => {
   const [newAction, setNewAction] = useState<Partial<FakeModerationAction>>({ type: 'ban', reason: '', duration: '7 days' });
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
 
   const actionTypes = [
-    { type: 'ban' as const, label: 'Ban', icon: Ban, color: 'red', description: 'Permanently or temporarily ban the user' },
-    { type: 'warn' as const, label: 'Warning', icon: AlertTriangle, color: 'amber', description: 'Issue a formal warning' },
-    { type: 'mute' as const, label: 'Mute', icon: VolumeX, color: 'orange', description: 'Prevent user from sending messages' },
-    { type: 'kick' as const, label: 'Kick', icon: UserX, color: 'purple', description: 'Remove user from session' },
+    { type: 'ban' as const, label: 'Ban', icon: Ban, color: 'red', description: 'Shows full-screen BannedScreen' },
+    { type: 'warn' as const, label: 'Warning', icon: AlertTriangle, color: 'amber', description: 'Shows warning toast notification' },
+    { type: 'mute' as const, label: 'Mute', icon: VolumeX, color: 'orange', description: 'Shows mute notification' },
+    { type: 'kick' as const, label: 'Kick', icon: UserX, color: 'purple', description: 'Shows kick + logout animation' },
   ];
 
   const presetReasons = [
@@ -32,6 +33,28 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
     { id: 'advertising', reason: 'Unauthorized advertising', type: 'mute' as const, duration: '24 hours' },
     { id: 'afk', reason: 'AFK/Inactivity during critical operation', type: 'kick' as const, duration: '' },
   ];
+
+  // Trigger action on MAIN OS window using command queue
+  const triggerOnMainWindow = (action: FakeModerationAction) => {
+    switch (action.type) {
+      case 'ban':
+        commandQueue.queueFakeBan(action.reason, action.duration);
+        toast.success("Ban screen will appear on main OS window");
+        break;
+      case 'warn':
+        commandQueue.queueFakeWarn(action.reason);
+        toast.success("Warning sent to main OS window");
+        break;
+      case 'mute':
+        commandQueue.queueFakeMute(action.reason, action.duration || '30 minutes');
+        toast.success("Mute notification sent to main OS window");
+        break;
+      case 'kick':
+        commandQueue.queueFakeKick(action.reason);
+        toast.success("Kick triggered on main OS window");
+        break;
+    }
+  };
 
   const createAction = () => {
     if (!newAction.reason) {
@@ -47,7 +70,7 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
     };
     saveFakeModerationAction(action);
     setNewAction({ type: 'ban', reason: '', duration: '7 days' });
-    toast.success("Action created and saved");
+    toast.success("Action saved");
   };
 
   const applyPreset = (preset: typeof presetReasons[0]) => {
@@ -68,7 +91,7 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
       duration,
       timestamp: new Date().toISOString(),
     };
-    triggerFakeMod(action);
+    triggerOnMainWindow(action);
   };
 
   const exportActions = () => {
@@ -84,73 +107,6 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden">
-      {/* Active Fake Mod Popup - Enhanced */}
-      {activeFakeMod && (
-        <div className="absolute inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-fade-in">
-          <div className={`max-w-lg w-full rounded-2xl border-2 overflow-hidden shadow-2xl ${
-            activeFakeMod.type === 'ban' ? 'bg-gradient-to-b from-red-950 to-red-900/90 border-red-500' :
-            activeFakeMod.type === 'warn' ? 'bg-gradient-to-b from-amber-950 to-amber-900/90 border-amber-500' :
-            activeFakeMod.type === 'mute' ? 'bg-gradient-to-b from-orange-950 to-orange-900/90 border-orange-500' :
-            'bg-gradient-to-b from-purple-950 to-purple-900/90 border-purple-500'
-          }`}>
-            {/* Header */}
-            <div className={`p-4 text-center ${
-              activeFakeMod.type === 'ban' ? 'bg-red-500/20' :
-              activeFakeMod.type === 'warn' ? 'bg-amber-500/20' :
-              activeFakeMod.type === 'mute' ? 'bg-orange-500/20' : 'bg-purple-500/20'
-            }`}>
-              {activeFakeMod.type === 'ban' && <Ban className="w-20 h-20 text-red-400 mx-auto mb-3 animate-pulse" />}
-              {activeFakeMod.type === 'warn' && <AlertTriangle className="w-20 h-20 text-amber-400 mx-auto mb-3 animate-pulse" />}
-              {activeFakeMod.type === 'mute' && <VolumeX className="w-20 h-20 text-orange-400 mx-auto mb-3 animate-pulse" />}
-              {activeFakeMod.type === 'kick' && <UserX className="w-20 h-20 text-purple-400 mx-auto mb-3 animate-pulse" />}
-              
-              <h2 className="text-3xl font-black text-white mb-1 tracking-tight">
-                {activeFakeMod.type === 'ban' ? 'YOU HAVE BEEN BANNED' :
-                 activeFakeMod.type === 'warn' ? 'WARNING ISSUED' :
-                 activeFakeMod.type === 'mute' ? 'YOU HAVE BEEN MUTED' : 'YOU HAVE BEEN KICKED'}
-              </h2>
-              <p className="text-white/60 text-sm">UrbanShade Moderation System</p>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-4">
-              <div className="bg-black/30 rounded-xl p-4">
-                <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Reason</p>
-                <p className="text-white text-lg">{activeFakeMod.reason}</p>
-              </div>
-
-              {activeFakeMod.duration && (
-                <div className="flex items-center gap-3 bg-black/30 rounded-xl p-4">
-                  <Clock className="w-5 h-5 text-white/50" />
-                  <div>
-                    <p className="text-xs text-white/50 uppercase tracking-wider">Duration</p>
-                    <p className="text-white font-bold">{activeFakeMod.duration}</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 text-xs text-white/40">
-                <Shield className="w-4 h-4" />
-                <span>Action ID: {activeFakeMod.id}</span>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-4 border-t border-white/10">
-              <p className="text-center text-xs text-white/30 mb-3">
-                ⚠️ [FAKE - DEF-DEV Testing Mode] ⚠️
-              </p>
-              <button 
-                onClick={dismissFakeMod} 
-                className="w-full p-4 bg-white/10 hover:bg-white/20 rounded-xl text-white font-bold transition-all flex items-center justify-center gap-2"
-              >
-                <X className="w-5 h-5" /> Dismiss
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Content - Scrollable */}
       <div className="flex-1 overflow-auto">
         {/* Header */}
@@ -167,7 +123,7 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
                     <Sparkles className="w-3 h-3 inline mr-1" />MOD/OWNER
                   </span>
                 </h2>
-                <p className="text-xs text-slate-500">Test moderation actions without real consequences</p>
+                <p className="text-xs text-slate-500">Test moderation actions - triggers REAL screens on main window</p>
               </div>
             </div>
             <button 
@@ -178,6 +134,15 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
               <Download className="w-4 h-4" />
             </button>
           </div>
+        </div>
+
+        {/* Info Banner */}
+        <div className="mx-4 mt-4 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center gap-3">
+          <MonitorPlay className="w-5 h-5 text-cyan-400 flex-shrink-0" />
+          <p className="text-xs text-cyan-300">
+            Actions trigger on the <strong>main OS window</strong>, not inside DEF-DEV. 
+            Keep the main window visible to see the effects.
+          </p>
         </div>
 
         {/* Quick Actions */}
@@ -286,9 +251,28 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
               />
               <button 
                 onClick={createAction} 
-                className="px-6 py-3 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 rounded-xl text-white font-bold flex items-center gap-2 transition-all shadow-lg shadow-rose-500/20"
+                className="px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-xl text-white font-medium flex items-center gap-2 transition-all"
               >
                 <Plus className="w-4 h-4" /> Save
+              </button>
+              <button 
+                onClick={() => {
+                  if (!newAction.reason) {
+                    toast.error("Please enter a reason");
+                    return;
+                  }
+                  const action: FakeModerationAction = {
+                    id: `instant_${Date.now()}`,
+                    type: newAction.type || 'ban',
+                    reason: newAction.reason,
+                    duration: newAction.duration,
+                    timestamp: new Date().toISOString(),
+                  };
+                  triggerOnMainWindow(action);
+                }} 
+                className="px-6 py-3 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 rounded-xl text-white font-bold flex items-center gap-2 transition-all shadow-lg shadow-rose-500/20"
+              >
+                <Play className="w-4 h-4" /> Trigger
               </button>
             </div>
           </div>
@@ -343,9 +327,9 @@ const FakeModTab = ({ fakeModerationActions, saveFakeModerationAction, triggerFa
                       <p className="text-sm text-slate-400 truncate">{action.reason}</p>
                     </div>
                     <button 
-                      onClick={() => triggerFakeMod(action)} 
+                      onClick={() => triggerOnMainWindow(action)} 
                       className="p-3 bg-green-500/20 hover:bg-green-500/30 border border-green-500/40 rounded-xl text-green-400 transition-all"
-                      title="Trigger this action"
+                      title="Trigger on main window"
                     >
                       <Play className="w-5 h-5" />
                     </button>

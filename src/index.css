@@ -30,6 +30,36 @@
   background-color: hsl(var(--background)) !important;
 }
 
+/* No blur effects */
+.no-blur .backdrop-blur-sm,
+.no-blur .backdrop-blur-md,
+.no-blur .backdrop-blur-lg,
+.no-blur .backdrop-blur-xl {
+  backdrop-filter: none !important;
+}
+
+/* No GPU acceleration */
+.no-gpu * {
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* Debug overlay - show performance info */
+.debug-overlay::after {
+  content: 'DEBUG MODE';
+  position: fixed;
+  top: 4px;
+  right: 4px;
+  padding: 2px 8px;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  font-size: 10px;
+  font-family: monospace;
+  z-index: 99999;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
 /* Urbanshade OS Design System v3.0 */
 
 @layer base {
