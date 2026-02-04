@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, HelpCircle, MessageCircle, Search, Book, ChevronRight, Send, Bot, User, Ticket, ThumbsUp, ThumbsDown, Loader2, AlertCircle, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Card components no longer used after redesign
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
@@ -715,150 +715,151 @@ const Support = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Background pattern */}
+      <div 
+        className="fixed inset-0 pointer-events-none opacity-[0.02]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px',
+        }}
+      />
+
       {/* Header */}
-      <header className="border-b border-slate-700/50 bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {view !== 'home' ? (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="gap-2 text-slate-300 hover:text-white"
-                  onClick={() => {
-                    setView('home');
-                    setCurrentTicket(null);
-                    setChatMessages([]);
-                  }}
-                >
+      <header className="border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {view !== 'home' ? (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setView('home');
+                  setCurrentTicket(null);
+                  setChatMessages([]);
+                }}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
+            ) : (
+              <Link to="/">
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-foreground">
                   <ArrowLeft className="w-4 h-4" />
-                  Back
+                  Home
                 </Button>
-              ) : (
-                <Link to="/">
-                  <Button variant="ghost" size="sm" className="gap-2 text-slate-300 hover:text-white">
-                    <ArrowLeft className="w-4 h-4" />
-                    Back to OS
-                  </Button>
-                </Link>
-              )}
-              <div className="h-6 w-px bg-slate-700" />
-              <div className="flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-cyan-400" />
-                <h1 className="text-xl font-bold text-white">Support Center</h1>
+              </Link>
+            )}
+            <div className="h-5 w-px bg-border/50" />
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-md bg-primary/10 border border-primary/20">
+                <HelpCircle className="w-4 h-4 text-primary" />
               </div>
+              <span className="font-semibold text-sm">Support Center</span>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-6 py-12 max-w-4xl">
+      <main className="max-w-3xl mx-auto px-6 py-10 relative z-10">
         {view === 'home' && (
           <div className="space-y-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-white mb-4">How can we help you?</h2>
-              <p className="text-slate-400">Choose an option below to get started</p>
+            {/* Hero */}
+            <div className="text-center mb-10">
+              <h1 className="text-2xl font-bold mb-2">How can we help?</h1>
+              <p className="text-muted-foreground text-sm">Choose an option below or browse our FAQ</p>
             </div>
 
             {/* Open Tickets Banner */}
             {openTickets.length > 0 && currentUser && (
-              <Card className="bg-purple-900/30 border-purple-500/50 mb-6">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-white flex items-center gap-2 text-base">
-                    <Ticket className="w-5 h-5 text-purple-400" />
-                    You have {openTickets.length} open ticket{openTickets.length > 1 ? 's' : ''}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
+              <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Ticket className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium">
+                    {openTickets.length} open ticket{openTickets.length > 1 ? 's' : ''}
+                  </span>
+                </div>
+                <div className="space-y-2">
                   {openTickets.slice(0, 3).map(ticket => (
-                    <div 
+                    <button 
                       key={ticket.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 cursor-pointer transition-colors"
+                      className="w-full flex items-center justify-between p-3 rounded-lg bg-card/50 hover:bg-card border border-border/30 hover:border-border transition-all text-left"
                       onClick={() => openTicket(ticket)}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-slate-300 text-sm">
+                        <span className="text-sm text-foreground/80">
                           {ticket.subject || 'New conversation'}
                         </span>
                         {getStatusBadge(ticket.status)}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-slate-500" />
-                    </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                    </button>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card 
-                className="bg-slate-800/50 border-slate-700 hover:border-cyan-500/50 transition-all cursor-pointer group"
+            {/* Main Options */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <button 
+                className="group p-5 rounded-xl border border-border/50 bg-card/30 hover:bg-card/60 hover:border-primary/30 transition-all text-left"
                 onClick={() => setView('faq')}
               >
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
-                      <Book className="w-6 h-6 text-cyan-400" />
-                    </div>
-                    <div>
-                      <span className="block">FAQ Resources</span>
-                      <span className="text-sm font-normal text-slate-400">Browse our knowledge base</span>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-slate-500 ml-auto group-hover:text-cyan-400 transition-colors" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-slate-300">
-                  <p>Search through our comprehensive library of frequently asked questions. Find answers about accounts, features, troubleshooting, and more.</p>
-                </CardContent>
-              </Card>
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-colors">
+                    <Book className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground mb-1">FAQ Resources</h3>
+                    <p className="text-sm text-muted-foreground">Browse our knowledge base with {FAQ_LIBRARY.length} answers</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors mt-1" />
+                </div>
+              </button>
 
-              <Card 
-                className="bg-slate-800/50 border-slate-700 hover:border-purple-500/50 transition-all cursor-pointer group"
+              <button 
+                className="group p-5 rounded-xl border border-border/50 bg-card/30 hover:bg-card/60 hover:border-primary/30 transition-all text-left"
                 onClick={startNewConversation}
               >
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                      <MessageCircle className="w-6 h-6 text-purple-400" />
-                    </div>
-                    <div>
-                      <span className="block">Contact Support</span>
-                      <span className="text-sm font-normal text-slate-400">Chat with our team</span>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-slate-500 ml-auto group-hover:text-purple-400 transition-colors" />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-slate-300">
-                  <p>Need personalized help? Start a conversation with our support team. We'll get back to you as soon as possible.</p>
-                </CardContent>
-              </Card>
+                <div className="flex items-start gap-4">
+                  <div className="p-2.5 rounded-lg bg-accent/50 border border-accent/50 group-hover:bg-accent transition-colors">
+                    <MessageCircle className="w-5 h-5 text-accent-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground mb-1">Contact Support</h3>
+                    <p className="text-sm text-muted-foreground">Chat with NAVI or our team</p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors mt-1" />
+                </div>
+              </button>
             </div>
 
             {/* Quick Links */}
-            <div className="mt-12 pt-8 border-t border-slate-700">
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Links</h3>
-              <div className="flex flex-wrap gap-3">
+            <div className="pt-8 border-t border-border/30">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground/50 mb-3">Quick Links</p>
+              <div className="flex flex-wrap gap-2">
                 <Link to="/docs">
-                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-white hover:border-slate-600">
+                  <Button variant="outline" size="sm" className="border-border/50 text-muted-foreground hover:text-foreground">
                     Documentation
                   </Button>
                 </Link>
                 <Link to="/docs/troubleshooting">
-                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-white hover:border-slate-600">
-                    Troubleshooting Guide
+                  <Button variant="outline" size="sm" className="border-border/50 text-muted-foreground hover:text-foreground">
+                    Troubleshooting
                   </Button>
                 </Link>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="border-amber-500/50 text-amber-400 hover:text-amber-300 hover:border-amber-500 gap-1"
-                  onClick={() => setView('report')}
-                >
-                  <Flag className="w-3 h-3" /> Submit Report
-                </Button>
+                <Link to="/report">
+                  <Button variant="outline" size="sm" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 gap-1">
+                    <Flag className="w-3 h-3" /> Report Issue
+                  </Button>
+                </Link>
                 <Link to="/team">
-                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-white hover:border-slate-600">
-                    Meet the Team
+                  <Button variant="outline" size="sm" className="border-border/50 text-muted-foreground hover:text-foreground">
+                    Team
                   </Button>
                 </Link>
               </div>
@@ -868,22 +869,24 @@ const Support = () => {
 
         {view === 'faq' && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 mb-8">
-              <Book className="w-8 h-8 text-cyan-400" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                <Book className="w-5 h-5 text-primary" />
+              </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">FAQ Resources</h2>
-                <p className="text-slate-400">Search our knowledge base ({FAQ_LIBRARY.length} questions)</p>
+                <h2 className="text-xl font-bold">FAQ Resources</h2>
+                <p className="text-sm text-muted-foreground">{FAQ_LIBRARY.length} questions</p>
               </div>
             </div>
 
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by keyword or question..."
-                className="pl-12 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 h-12 text-lg"
+                placeholder="Search questions..."
+                className="pl-11 bg-card/50 border-border/50 focus:border-primary"
                 autoFocus
               />
             </div>
@@ -892,23 +895,22 @@ const Support = () => {
             <ScrollArea className="h-[calc(100vh-320px)]">
               <div className="space-y-3 pr-4">
                 {filteredFAQs.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400">
-                    <HelpCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <div className="text-center py-12 text-muted-foreground">
+                    <HelpCircle className="w-12 h-12 mx-auto mb-4 opacity-30" />
                     <p>No questions found matching "{searchQuery}"</p>
-                    <p className="text-sm mt-2">Try different keywords or <button onClick={startNewConversation} className="text-cyan-400 hover:underline">contact support</button></p>
+                    <p className="text-sm mt-2">
+                      Try different keywords or{' '}
+                      <button onClick={startNewConversation} className="text-primary hover:underline">
+                        contact support
+                      </button>
+                    </p>
                   </div>
                 ) : (
                   filteredFAQs.map((faq, index) => (
-                    <Card key={index} className="bg-slate-800/50 border-slate-700">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-white text-base font-medium">
-                          {faq.question}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="text-slate-300 text-sm">
-                        {faq.answer}
-                      </CardContent>
-                    </Card>
+                    <div key={index} className="p-4 rounded-lg border border-border/30 bg-card/30">
+                      <h4 className="font-medium text-foreground mb-2">{faq.question}</h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{faq.answer}</p>
+                    </div>
                   ))
                 )}
               </div>
@@ -918,104 +920,103 @@ const Support = () => {
 
         {view === 'contact' && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 mb-8">
-              <MessageCircle className="w-8 h-8 text-purple-400" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-accent/50 border border-accent/50">
+                <MessageCircle className="w-5 h-5 text-accent-foreground" />
+              </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Contact Support</h2>
-                <p className="text-slate-400">Chat with NAVI or our team</p>
+                <h2 className="text-xl font-bold">Contact Support</h2>
+                <p className="text-sm text-muted-foreground">Chat with NAVI or our team</p>
               </div>
             </div>
 
             {/* Not logged in warning */}
             {!currentUser && (
-              <Card className="bg-yellow-900/30 border-yellow-500/50 mb-4">
-                <CardContent className="flex items-center gap-3 py-4">
-                  <AlertCircle className="w-5 h-5 text-yellow-400" />
-                  <p className="text-yellow-200 text-sm">
-                    You need to be logged in to use the support chat. <Link to="/" className="underline">Go to UrbanShade OS</Link> to log in.
+              <div className="p-4 rounded-lg border border-amber-500/20 bg-amber-500/5 mb-4">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-4 h-4 text-amber-400" />
+                  <p className="text-sm text-amber-200/80">
+                    You need to be logged in to use support chat.{' '}
+                    <Link to="/" className="text-primary hover:underline">Go to UrbanShade</Link>
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {/* Chat Interface */}
-            <Card className="bg-slate-800/50 border-slate-700 h-[calc(100vh-320px)] flex flex-col">
-              <CardHeader className="border-b border-slate-700 pb-4 shrink-0">
+            <div className="rounded-xl border border-border/50 bg-card/30 h-[calc(100vh-340px)] flex flex-col">
+              <div className="px-4 py-3 border-b border-border/30 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-white" />
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center">
+                    <Bot className="w-4 h-4 text-primary-foreground" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-white">NAVI Support</p>
-                    <p className="text-xs text-slate-400">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-foreground">NAVI Support</p>
+                    <p className="text-xs text-muted-foreground truncate">
                       {assignedAdminName ? `Assigned to @${assignedAdminName}` : 'Smart FAQ + Human Escalation'}
                     </p>
                   </div>
-                  <div className="ml-auto flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     {currentTicket && getStatusBadge(currentTicket.status)}
                     {!currentTicket && (
                       <>
-                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-xs text-slate-400">Online</span>
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-xs text-muted-foreground">Online</span>
                       </>
                     )}
                   </div>
                 </div>
-              </CardHeader>
+              </div>
 
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
                   {isLoading ? (
                     <div className="flex items-center justify-center py-12">
-                      <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                      <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                     </div>
                   ) : chatMessages.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400">
-                      <Bot className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                      <p className="text-lg font-medium">Start a conversation</p>
-                      <p className="text-sm mt-2">I'll check our FAQ first - if I can't help, I'll connect you with a human!</p>
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Bot className="w-14 h-14 mx-auto mb-4 opacity-20" />
+                      <p className="font-medium">Start a conversation</p>
+                      <p className="text-sm mt-1">I'll check our FAQ first - if I can't help, I'll connect you with a human!</p>
                     </div>
                   ) : (
                     chatMessages.map((msg, index) => (
                       <div key={msg.id || index}>
-                        <div
-                          className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                        >
+                        <div className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                           {msg.role !== 'user' && (
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                               msg.role === 'admin' 
-                                ? 'bg-gradient-to-br from-purple-500 to-pink-600' 
-                                : 'bg-gradient-to-br from-cyan-500 to-blue-600'
+                                ? 'bg-gradient-to-br from-accent to-accent/60' 
+                                : 'bg-gradient-to-br from-primary to-primary/60'
                             }`}>
                               {msg.role === 'admin' ? (
-                                <User className="w-4 h-4 text-white" />
+                                <User className="w-4 h-4 text-accent-foreground" />
                               ) : (
-                                <Bot className="w-4 h-4 text-white" />
+                                <Bot className="w-4 h-4 text-primary-foreground" />
                               )}
                             </div>
                           )}
-                          <div
-                            className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                              msg.role === 'user'
-                                ? 'bg-primary text-primary-foreground rounded-br-md'
-                                : msg.role === 'admin'
-                                ? 'bg-purple-900/50 border border-purple-500/30 text-slate-100 rounded-bl-md'
-                                : 'bg-slate-700 text-slate-100 rounded-bl-md'
-                            }`}
-                          >
+                          <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                            msg.role === 'user'
+                              ? 'bg-primary text-primary-foreground rounded-br-md'
+                              : msg.role === 'admin'
+                              ? 'bg-accent/20 border border-accent/30 text-foreground rounded-bl-md'
+                              : 'bg-muted text-foreground rounded-bl-md'
+                          }`}>
                             {msg.role === 'admin' && msg.adminName && (
-                              <p className="text-xs text-purple-300 mb-1 font-medium">@{msg.adminName}</p>
+                              <p className="text-xs text-accent-foreground/70 mb-1 font-medium">@{msg.adminName}</p>
                             )}
                             <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                             <p className={`text-[10px] mt-1 ${
-                              msg.role === 'user' ? 'text-primary-foreground/60' : 'text-slate-400'
+                              msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground'
                             }`}>
                               {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                           {msg.role === 'user' && (
-                            <div className="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center shrink-0">
-                              <User className="w-4 h-4 text-white" />
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                              <User className="w-4 h-4 text-muted-foreground" />
                             </div>
                           )}
                         </div>
@@ -1026,7 +1027,7 @@ const Support = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-green-500/50 text-green-400 hover:bg-green-500/20 gap-1"
+                              className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 gap-1"
                               onClick={() => handleFeedback(true)}
                             >
                               <ThumbsUp className="w-3 h-3" />
@@ -1035,11 +1036,11 @@ const Support = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-red-500/50 text-red-400 hover:bg-red-500/20 gap-1"
+                              className="border-destructive/30 text-destructive hover:bg-destructive/10 gap-1"
                               onClick={() => handleFeedback(false)}
                             >
                               <ThumbsDown className="w-3 h-3" />
-                              No, need human help
+                              No, need human
                             </Button>
                           </div>
                         )}
@@ -1050,14 +1051,14 @@ const Support = () => {
                   {/* Typing indicator */}
                   {isTyping && (
                     <div className="flex gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
-                        <Bot className="w-4 h-4 text-white" />
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0">
+                        <Bot className="w-4 h-4 text-primary-foreground" />
                       </div>
-                      <div className="bg-slate-700 rounded-2xl rounded-bl-md px-4 py-3">
+                      <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
                         <div className="flex gap-1">
-                          <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                          <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                          <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                          <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                          <span className="w-2 h-2 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
                       </div>
                     </div>
@@ -1067,7 +1068,7 @@ const Support = () => {
                 </div>
               </ScrollArea>
 
-              <div className="p-4 border-t border-slate-700 shrink-0">
+              <div className="p-4 border-t border-border/30 shrink-0">
                 <form 
                   onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
                   className="flex gap-3"
@@ -1076,7 +1077,7 @@ const Support = () => {
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     placeholder={currentUser ? "Type your message..." : "Please log in to send messages"}
-                    className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 resize-none min-h-[44px] max-h-32"
+                    className="bg-card/50 border-border/50 text-foreground placeholder:text-muted-foreground resize-none min-h-[44px] max-h-32 focus:border-primary"
                     rows={1}
                     disabled={!currentUser}
                     onKeyDown={(e) => {
@@ -1096,21 +1097,23 @@ const Support = () => {
                   </Button>
                 </form>
               </div>
-            </Card>
+            </div>
           </div>
         )}
 
         {view === 'report' && (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 mb-8">
-              <Flag className="w-8 h-8 text-amber-400" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <Flag className="w-5 h-5 text-amber-400" />
+              </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Submit Report</h2>
-                <p className="text-slate-400">Report issues, bugs, or inappropriate behavior</p>
+                <h2 className="text-xl font-bold">Submit Report</h2>
+                <p className="text-sm text-muted-foreground">Report issues or inappropriate behavior</p>
               </div>
             </div>
-            <div className="p-6 rounded-lg bg-slate-800/50 border border-slate-700 text-center">
-              <p className="text-slate-300 mb-4">Use our dedicated reporting page for a better experience.</p>
+            <div className="p-6 rounded-lg bg-card/30 border border-border/30 text-center">
+              <p className="text-muted-foreground mb-4">Use our dedicated reporting page for a better experience.</p>
               <Link to="/report">
                 <Button className="gap-2">
                   <Flag className="w-4 h-4" /> Go to Report Page
@@ -1121,18 +1124,18 @@ const Support = () => {
         )}
 
         {/* Footer */}
-        <div className="mt-12 pt-8 border-t border-slate-700">
-          <div className="flex flex-wrap gap-4 text-sm text-slate-400">
-            <Link to="/docs" className="hover:text-white transition-colors">Documentation</Link>
+        <div className="mt-12 pt-8 border-t border-border/30">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground/60">
+            <Link to="/docs" className="hover:text-foreground transition-colors">Documentation</Link>
             <span>•</span>
-            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
             <span>•</span>
-            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
             <span>•</span>
-            <Link to="/" className="hover:text-white transition-colors">Back to UrbanShade OS</Link>
+            <Link to="/" className="hover:text-foreground transition-colors">UrbanShade OS</Link>
           </div>
-          <p className="text-xs text-slate-500 mt-4">
-            For urgent issues, contact emailbot00noreply@gmail.com directly.
+          <p className="text-[10px] text-muted-foreground/40 mt-3">
+            Urgent? Contact emailbot00noreply@gmail.com
           </p>
         </div>
       </main>
