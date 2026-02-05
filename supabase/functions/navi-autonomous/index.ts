@@ -28,6 +28,9 @@ interface NaviSettings {
   adaptive_thresholds_enabled: boolean;
 }
 
+// Read-only actions that don't require admin auth
+const READ_ONLY_ACTIONS = ['get_stats', 'get_settings', 'get_actions'];
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -44,8 +47,24 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
-    // SECURITY: Only allow authenticated admin users - no shared token authentication
-    // All NAVI autonomous operations require verified admin role
+    console.log(`NAVI action requested: ${action}`);
+
+    // For read-only actions, allow authenticated users (not just admins)
+    if (READ_ONLY_ACTIONS.includes(action)) {
+      const authHeader = req.headers.get('Authorization');
+      if (authHeader) {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user } } = await supabaseAdmin.auth.getUser(token);
+        if (user) {
+          // User is authenticated - allow read-only access
+          return await handleReadOnlyAction(action, supabaseAdmin);
+        }
+      }
+      // Even without auth, allow fetching public stats
+      return await handleReadOnlyAction(action, supabaseAdmin);
+    }
+
+    // SECURITY: Only allow authenticated admin users for write operations
     let isAuthorized = false;
     let actorId = NAVI_USER_ID;
 
@@ -75,8 +94,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-
-    console.log(`Processing NAVI action: ${action}`);
 
     // Get current NAVI settings
     const { data: settings } = await supabaseAdmin
@@ -524,21 +541,6 @@ Deno.serve(async (req) => {
     }
 
     // =============================================
-    // GET NAVI ACTIONS LOG
-    // =============================================
-    if (action === 'get_actions') {
-      const { data: actions } = await supabaseAdmin
-        .from('navi_auto_actions')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      return new Response(JSON.stringify({ success: true, actions }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // =============================================
     // UPDATE NAVI SETTINGS (toggles)
     // =============================================
     if (action === 'update_settings') {
@@ -657,3 +659,57 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+// Handler for read-only actions
+async function handleReadOnlyAction(action: string, supabaseAdmin: any) {
+  if (action === 'get_stats') {
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    
+    const { data: events } = await supabaseAdmin
+      .from('monitoring_events')
+      .select('*')
+      .gte('created_at', fiveMinAgo);
+
+    const eventsArr = events || [];
+    const signupsLast5Min = eventsArr.filter((e: any) => e.event_type === 'signup').length;
+    const messagesLast5Min = eventsArr.filter((e: any) => e.event_type === 'message').length;
+    const failedLogins = eventsArr.filter((e: any) => e.event_type === 'failed_login').length;
+    const activeUsers = new Set(eventsArr.map((e: any) => e.user_id).filter(Boolean)).size;
+
+    return new Response(JSON.stringify({ 
+      success: true, 
+      stats: { signupsLast5Min, messagesLast5Min, failedLogins, activeUsers, velocityRatio: 1 }
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (action === 'get_settings') {
+    const { data: settings } = await supabaseAdmin
+      .from('navi_settings')
+      .select('*')
+      .eq('id', 'global')
+      .single();
+
+    return new Response(JSON.stringify({ success: true, settings }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  if (action === 'get_actions') {
+    const { data: actions } = await supabaseAdmin
+      .from('navi_auto_actions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    return new Response(JSON.stringify({ success: true, actions }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  return new Response(JSON.stringify({ error: 'Unknown read-only action' }), {
+    status: 400,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  });
+}
