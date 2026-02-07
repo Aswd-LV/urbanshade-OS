@@ -1,10 +1,15 @@
 import { Monitor, BookOpen, AlertTriangle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export const MobileBlockScreen = () => {
   const navigate = useNavigate();
+  const [isHidden, setIsHidden] = useState(false);
 
+  if (isHidden) {
+    return null;
+  }
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-background via-muted to-background z-[99999] flex flex-col items-center justify-center p-6 text-center">
       {/* Grid pattern */}
@@ -92,11 +97,7 @@ export const MobileBlockScreen = () => {
             UrbanShade OS
           </div>
           <button
-            onClick={() => {
-              // Store bypass preference and reload to skip mobile block
-              sessionStorage.setItem('urbanshade_mobile_bypass', 'true');
-              window.location.reload();
-            }}
+            onClick={() => setIsHidden(true)}
             className="text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors underline underline-offset-2"
           >
             Believe this was a mistake? Click here
