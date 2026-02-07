@@ -50,6 +50,39 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
   }
 
   const changelogs: Record<string, VersionData> = {
+    "3.2": {
+      icon: <Sparkles className="w-5 h-5" />,
+      color: "from-violet-500 to-purple-600",
+      tagline: "POLISH & FUNCTIONALITY",
+      overview: "Quality-of-life improvements with mobile detection, notification history, idle lock, improved terminal tab-completion, and desktop grid enhancements.",
+      sections: {
+        "📱 Mobile Detection": [
+          { text: "Mobile users now see a dedicated block screen", isHighlight: true },
+          { text: "Docs remain accessible on mobile devices" },
+          { text: "Clear messaging about desktop-only experience" },
+        ],
+        "🔔 Notification History": [
+          { text: "New Notification History app to view all past notifications", isHighlight: true },
+          { text: "Search and filter by type (info, success, warning, error)" },
+          { text: "Filter by date range (today, week, month)" },
+          { text: "See dismissed and persistent notifications" },
+        ],
+        "🔒 Lock After Idle": [
+          { text: "Lock screen now triggers after 5 minutes of inactivity", isHighlight: true },
+          { text: "Controlled by Settings > Privacy & Security toggle" },
+          { text: "Activity tracking for mouse, keyboard, and touch" },
+        ],
+        "⌨️ Terminal Improvements": [
+          { text: "Improved tab-completion with 8 suggestions (up from 5)" },
+          { text: "Theme commands now autocomplete (theme green, theme matrix, etc.)" },
+          { text: "Better fuzzy matching for multi-word commands" },
+        ],
+        "🖥️ Desktop Grid": [
+          { text: "Fixed grid sizing for consistent icon layout" },
+          { text: "useDesktopGrid hook prepared for future drag-and-drop" },
+        ],
+      }
+    },
     "3.1": {
       icon: <Terminal className="w-5 h-5" />,
       color: "from-green-500 to-cyan-600",

@@ -11,21 +11,34 @@ interface TerminalProps {
   onCrash?: (crashType: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload") => void;
 }
 
-// All available commands for autocomplete
-const ALL_COMMANDS = [
+// All available commands for autocomplete - organized by category
+const BASE_COMMANDS = [
   'help', 'status', 'users', 'logs', 'network', 'processes', 'files', 'security',
   'pressure', 'specimens', 'zones', 'cameras', 'personnel', 'incidents', 'comms',
   'power', 'hull', 'temperature', 'backup', 'uptime', 'version', 'about', 'ping',
   'diagnostics', 'emergency', 'lockdown', 'manifest', 'scan', 'whoami', 'date',
   'echo', 'history', 'depth', 'reality', 'admin', 'secret', 'glitch', 'crash',
-  'clear', 'syscontrol', 'deepdive', 'blackbox', 'godmode', 'theme',
-  // Advanced commands
-  'sudo set bugcheck 0', 'sudo set bugcheck 1', 'sudo apt install',
-  'uur imp', 'uur inst', 'uur rm', 'uur lst', 'uur search',
-  // Crash types
+  'clear', 'syscontrol', 'deepdive', 'blackbox', 'godmode', 'theme'
+];
+
+const SUDO_COMMANDS = [
+  'sudo set bugcheck 0', 'sudo set bugcheck 1', 'sudo apt install'
+];
+
+const UUR_COMMANDS = [
+  'uur imp', 'uur inst', 'uur rm', 'uur lst', 'uur search'
+];
+
+const CRASH_COMMANDS = [
   'crash kernel', 'crash bluescreen', 'crash memory', 'crash corruption', 
   'crash overload', 'crash virus'
 ];
+
+const THEME_COMMANDS = [
+  'theme default', 'theme green', 'theme amber', 'theme white', 'theme matrix'
+];
+
+const ALL_COMMANDS = [...BASE_COMMANDS, ...SUDO_COMMANDS, ...UUR_COMMANDS, ...CRASH_COMMANDS, ...THEME_COMMANDS];
 
 type TerminalTheme = 'default' | 'green' | 'amber' | 'white' | 'matrix';
 
@@ -52,13 +65,24 @@ export const Terminal = ({ onCrash }: TerminalProps = {}) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Autocomplete suggestions
+  // Autocomplete suggestions - improved matching
   const suggestions = useMemo(() => {
     if (!input.trim()) return [];
     const lower = input.toLowerCase();
-    return ALL_COMMANDS.filter(cmd => 
+    
+    // Exact prefix match first, then fuzzy
+    const prefixMatches = ALL_COMMANDS.filter(cmd => 
       cmd.toLowerCase().startsWith(lower) && cmd.toLowerCase() !== lower
-    ).slice(0, 5);
+    );
+    
+    // For multi-word commands, also check if any word starts with input
+    const wordMatches = ALL_COMMANDS.filter(cmd => {
+      const words = cmd.toLowerCase().split(' ');
+      return words.some((word, i) => i > 0 && word.startsWith(lower)) && 
+             !prefixMatches.includes(cmd);
+    });
+    
+    return [...prefixMatches, ...wordMatches].slice(0, 8);
   }, [input]);
 
   useEffect(() => {

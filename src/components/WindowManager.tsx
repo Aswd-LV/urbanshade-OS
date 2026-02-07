@@ -60,7 +60,7 @@ import { ReactionTest } from "./apps/ReactionTest";
 import { FortuneApp } from "./apps/FortuneApp";
 import { Inventory } from "./apps/Inventory";
 import { SystemMessages } from "./apps/SystemMessages";
-
+import { NotificationHistory } from "./NotificationHistory";
 interface WindowData {
   id: string;
   app: App;
@@ -118,6 +118,8 @@ export const WindowManager = ({ windows, onClose, onFocus, onMinimize, allWindow
         return <TaskManager windows={allWindows} onCloseWindow={onCloseWindow} onCriticalKill={onCriticalKill} />;
       case "system-messages":
         return <SystemMessages />;
+      case "notification-history":
+        return <NotificationHistory />;
       case "messages":
         return <GlobalChat />;
       case "incidents":

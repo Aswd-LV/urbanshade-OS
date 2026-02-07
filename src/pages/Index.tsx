@@ -29,16 +29,22 @@ import { TempBanPopup } from "@/components/TempBanPopup";
 import { TempBanBanner } from "@/components/TempBanBanner";
 import { VipWelcomeDialog } from "@/components/VipWelcomeDialog";
 import { BootPasswordPrompt } from "@/components/BootPasswordPrompt";
+import { MobileBlockScreen } from "@/components/MobileBlockScreen";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import { systemBus } from "@/lib/systemBus";
 import { commandQueue, QueuedCommand } from "@/lib/commandQueue";
 import { useNaviSecurity } from "@/hooks/useNaviSecurity";
 import { useBanCheck } from "@/hooks/useBanCheck";
+import { useIdleLock } from "@/hooks/useIdleLock";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { requiresBootPassword, requiresAdminPassword, verifyAdminPassword } from "@/hooks/useBiosSettings";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
 
 
 const Index = () => {
+  // Mobile detection - show block screen on mobile
+  const isMobile = useIsMobile();
+  
   // NAVI AI Security System
   const naviSecurity = useNaviSecurity();
   // Ban checking system
@@ -104,6 +110,13 @@ const Index = () => {
   const [fakeTempBanData, setFakeTempBanData] = useState<{ reason: string; duration: string; expiresAt?: string; isFake: boolean } | null>(null);
   const [fakeWarnData, setFakeWarnData] = useState<{ reason: string; isFake: boolean } | null>(null);
   const [isLocked, setIsLocked] = useState(false);
+
+  // Idle lock hook
+  useIdleLock({
+    onLock: () => setIsLocked(true),
+    idleTimeMinutes: 5,
+    enabled: loggedIn && !crashed && !shuttingDown && !rebooting && !isLocked
+  });
 
   // Check if admin setup is complete and setup key listeners
   useEffect(() => {
@@ -684,6 +697,11 @@ const Index = () => {
     setLockdownMode(false);
     setLockdownProtocol("");
   };
+
+  // Mobile block - show before anything else
+  if (isMobile) {
+    return <MobileBlockScreen />;
+  }
 
   if (!disclaimerAccepted) {
     return (
