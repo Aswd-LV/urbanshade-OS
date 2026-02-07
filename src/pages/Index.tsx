@@ -42,11 +42,8 @@ import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecke
 
 
 const Index = () => {
-  // Mobile detection - show block screen on mobile (unless bypassed)
+  // Mobile detection - show block screen on mobile
   const isMobile = useIsMobile();
-  const [mobileBypass, setMobileBypass] = useState(() => {
-    return sessionStorage.getItem('urbanshade_mobile_bypass') === 'true';
-  });
   
   // NAVI AI Security System
   const naviSecurity = useNaviSecurity();
@@ -701,8 +698,8 @@ const Index = () => {
     setLockdownProtocol("");
   };
 
-  // Mobile block - show before anything else (unless bypassed)
-  if (isMobile && !mobileBypass) {
+  // Mobile block - show before anything else
+  if (isMobile) {
     return <MobileBlockScreen />;
   }
 
