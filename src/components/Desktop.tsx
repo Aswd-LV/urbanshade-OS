@@ -19,7 +19,7 @@ import { useWindowSnap, SnapZone } from "@/hooks/useWindowSnap";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { trackAppOpen, trackWindowCount, checkSessionAchievements } from "@/hooks/useAchievementTriggers";
-import { FileText, Database, Activity, Radio, FileBox, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Puzzle, Skull, Monitor, Package, Star, Download, Spade, Award, Coins, Sparkles, Dices, Timer, Cookie, Bell } from "lucide-react";
+import { FileText, Database, Activity, Radio, FileBox, Terminal, Users, Wifi, Cpu, Mail, Globe, Music, Camera, Shield, MapPin, BookOpen, Zap, Wind, Calculator as CalcIcon, Lock, FileWarning, Grid3x3, ShoppingBag, StickyNote, Palette, Volume2, CloudRain, Clock as ClockIcon, Calendar, Newspaper, Key, HardDrive, FileArchive, FileText as PdfIcon, Sheet, Presentation, Video, Image, Mic, Gamepad2, MessageSquare, VideoIcon, MailOpen, FolderUp, TerminalSquare, Network, HardDrive as DiskIcon, Settings as SettingsIcon, Activity as PerformanceIcon, ScanLine, Languages, BookOpenCheck, Globe2, MapPinned, Telescope, Beaker, Calculator as PhysicsIcon, Fingerprint, Lock as EncryptionIcon, KeyRound, Puzzle, Skull, Monitor, Package, Star, Download, Spade, Award, Coins, Sparkles, Dices, Timer, Cookie, Bell, History } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -311,6 +311,14 @@ export const Desktop = ({
       run: () => openAppById("system-messages"),
       standardInclude: true,
       searchAliases: ["warnings", "bans", "navi", "alerts", "notifications"]
+    },
+    {
+      id: "notification-history",
+      name: "Notification History",
+      icon: <History className="w-11 h-11" />,
+      run: () => openAppById("notification-history"),
+      standardInclude: true,
+      searchAliases: ["notifications", "history", "alerts", "log"]
     },
     {
       id: "incidents",
@@ -932,7 +940,13 @@ export const Desktop = ({
 
       {/* Desktop Icons - Grid layout with top padding for taskbar */}
       <div className="absolute inset-0 z-10 pt-16 px-6 pb-24 pointer-events-none">
-        <div className="grid grid-cols-[repeat(auto-fill,90px)] gap-3 pointer-events-auto">
+        <div 
+          className="grid gap-3 pointer-events-auto"
+          style={{
+            gridTemplateColumns: 'repeat(auto-fill, 90px)',
+            gridAutoRows: '100px'
+          }}
+        >
           {desktopApps.map((app) => (
             <DesktopIcon key={app.id} app={app} />
           ))}
