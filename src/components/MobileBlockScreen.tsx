@@ -87,10 +87,20 @@ export const MobileBlockScreen = () => {
         </div>
 
         {/* Footer */}
-        <div className="mt-12 pt-6 border-t border-white/10">
+        <div className="mt-12 pt-6 border-t border-white/10 space-y-4">
           <div className="text-[10px] text-muted-foreground/50 uppercase tracking-widest">
             UrbanShade OS
           </div>
+          <button
+            onClick={() => {
+              // Store bypass preference and reload to skip mobile block
+              sessionStorage.setItem('urbanshade_mobile_bypass', 'true');
+              window.location.reload();
+            }}
+            className="text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors underline underline-offset-2"
+          >
+            Believe this was a mistake? Click here
+          </button>
         </div>
       </div>
     </div>
