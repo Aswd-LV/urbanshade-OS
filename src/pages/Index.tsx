@@ -698,10 +698,7 @@ const Index = () => {
     setLockdownProtocol("");
   };
 
-  // Mobile block - show before anything else
-  if (isMobile) {
-    return <MobileBlockScreen />;
-  }
+  // Mobile block is now rendered as an overlay at the end of the component
 
   if (!disclaimerAccepted) {
     return (
@@ -997,6 +994,9 @@ const Index = () => {
         reason={fakeTempBanData?.reason || null}
         expiresAt={fakeTempBanData?.expiresAt ? new Date(fakeTempBanData.expiresAt) : null}
       />
+
+      {/* Mobile block overlay - shows on top of everything on mobile devices */}
+      {isMobile && <MobileBlockScreen />}
     </>
   );
 };
