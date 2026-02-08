@@ -1,4 +1,4 @@
-import { Monitor, BookOpen, AlertTriangle, ExternalLink } from "lucide-react";
+import { Monitor, BookOpen, AlertTriangle, ExternalLink, X, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -6,10 +6,38 @@ import { useState } from "react";
 export const MobileBlockScreen = () => {
   const navigate = useNavigate();
   const [isHidden, setIsHidden] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
+  // If bypassed, show the reminder banner instead
   if (isHidden) {
-    return null;
+    if (bannerDismissed) return null;
+    
+    return (
+      <div className="fixed bottom-4 left-4 right-4 z-[99998] animate-in slide-in-from-bottom-4 duration-300">
+        <div className="bg-amber-500/90 backdrop-blur-sm border border-amber-400/50 rounded-xl p-3 shadow-lg shadow-amber-500/20 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-amber-600/50 flex items-center justify-center shrink-0">
+            <Smartphone className="w-4 h-4 text-amber-100" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-medium text-amber-950">
+              Mobile view active
+            </p>
+            <p className="text-[10px] text-amber-900/80 truncate">
+              For the best experience, use a desktop browser
+            </p>
+          </div>
+          <button
+            onClick={() => setBannerDismissed(true)}
+            className="p-1.5 rounded-lg hover:bg-amber-600/30 transition-colors shrink-0"
+            aria-label="Dismiss reminder"
+          >
+            <X className="w-4 h-4 text-amber-900" />
+          </button>
+        </div>
+      </div>
+    );
   }
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-background via-muted to-background z-[99999] flex flex-col items-center justify-center p-6 text-center">
       {/* Grid pattern */}
@@ -39,7 +67,7 @@ export const MobileBlockScreen = () => {
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-white mb-3">
+        <h1 className="text-2xl font-bold text-foreground mb-3">
           Desktop Experience Only
         </h1>
 
@@ -51,11 +79,11 @@ export const MobileBlockScreen = () => {
         </p>
 
         {/* Features blocked */}
-        <div className="bg-white/[0.02] border border-white/10 rounded-xl p-4 mb-8">
+        <div className="bg-muted/30 border border-border/50 rounded-xl p-4 mb-8">
           <div className="text-xs text-muted-foreground mb-3 uppercase tracking-wider">
             Features require desktop
           </div>
-          <div className="grid grid-cols-2 gap-2 text-xs text-white/60">
+          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
               Window Management
@@ -92,7 +120,7 @@ export const MobileBlockScreen = () => {
         </div>
 
         {/* Footer */}
-        <div className="mt-12 pt-6 border-t border-white/10 space-y-4">
+        <div className="mt-12 pt-6 border-t border-border/50 space-y-4">
           <div className="text-[10px] text-muted-foreground/50 uppercase tracking-widest">
             UrbanShade OS
           </div>

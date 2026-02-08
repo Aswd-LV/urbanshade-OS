@@ -50,58 +50,38 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
   }
 
   const changelogs: Record<string, VersionData> = {
-    "3.2": {
-      icon: <Sparkles className="w-5 h-5" />,
-      color: "from-violet-500 to-purple-600",
-      tagline: "POLISH & FUNCTIONALITY",
-      overview: "Quality-of-life improvements with mobile detection, notification history, idle lock, improved terminal tab-completion, and desktop grid enhancements.",
+    "3.1": {
+      icon: <Terminal className="w-5 h-5" />,
+      color: "from-green-500 to-cyan-600",
+      tagline: "DEF-DEV & POLISH UPDATE",
+      overview: "Major DEF-DEV improvements with real moderation screen integration, massively expanded Admin tools, all Settings toggles are now fully functional, plus quality-of-life improvements with mobile detection, notification history, idle lock, and terminal enhancements.",
       sections: {
         "📱 Mobile Detection": [
           { text: "Mobile users now see a dedicated block screen", isHighlight: true },
           { text: "Docs remain accessible on mobile devices" },
-          { text: "Clear messaging about desktop-only experience" },
+          { text: "Bypass option with reminder banner for desktop experience" },
         ],
         "🔔 Notification History": [
           { text: "New Notification History app to view all past notifications", isHighlight: true },
           { text: "Search and filter by type (info, success, warning, error)" },
           { text: "Filter by date range (today, week, month)" },
-          { text: "See dismissed and persistent notifications" },
         ],
         "🔒 Lock After Idle": [
           { text: "Lock screen now triggers after 5 minutes of inactivity", isHighlight: true },
           { text: "Controlled by Settings > Privacy & Security toggle" },
           { text: "Activity tracking for mouse, keyboard, and touch" },
         ],
-        "⌨️ Terminal Improvements": [
-          { text: "Improved tab-completion with 8 suggestions (up from 5)" },
-          { text: "Theme commands now autocomplete (theme green, theme matrix, etc.)" },
-          { text: "Better fuzzy matching for multi-word commands" },
-        ],
-        "🖥️ Desktop Grid": [
-          { text: "Fixed grid sizing for consistent icon layout" },
-          { text: "useDesktopGrid hook prepared for future drag-and-drop" },
-        ],
-      }
-    },
-    "3.1": {
-      icon: <Terminal className="w-5 h-5" />,
-      color: "from-green-500 to-cyan-600",
-      tagline: "DEF-DEV OVERHAUL",
-      overview: "Major DEF-DEV improvements with real moderation screen integration, massively expanded Admin tools, and all Settings toggles are now fully functional with system-wide effects.",
-      sections: {
         "🔧 FakeMod Integration": [
           { text: "FakeMod now triggers REAL screens on main OS window", isHighlight: true },
           { text: "Ban action shows the actual BannedScreen component" },
           { text: "Temp ban displays real TempBanPopup with duration countdown" },
           { text: "Warn/Mute/Kick trigger proper toast notifications" },
-          { text: "Info banner explains actions appear on main window" },
         ],
         "🛠️ Admin Tab Expansion": [
           { text: "System Modes: Maintenance, Safe Mode, Fake Update, Offline simulation", isHighlight: true },
           { text: "Simulation Triggers: Timeout, Network Fail, Storage Full, Auth Fail, DB Error" },
           { text: "User State: Force Logout, Force Lock, Clear Sessions, Reset Preferences" },
           { text: "Debug Tools: Re-trigger OOBE, Show Changelog, Debug Overlay, Re-Disclaimer" },
-          { text: "Collapsible sections for better organization" },
         ],
         "⚙️ All Settings Now Functional": [
           { text: "Every toggle in Settings now has real system effects", isHighlight: true },
@@ -110,14 +90,16 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
           { text: "Hardware Acceleration controls GPU rendering hints" },
           { text: "Transparency & Blur toggles affect all UI elements" },
           { text: "Reduce Motion respects animation preferences" },
-          { text: "Telemetry and Auto Updates flags are now wired" },
-          { text: "Lock After Idle stores timeout preference" },
-          { text: "Debug Overlay shows FPS/performance info when enabled" },
+        ],
+        "⌨️ Terminal Improvements": [
+          { text: "Improved tab-completion with 8 suggestions (up from 5)" },
+          { text: "Theme commands now autocomplete (theme green, theme matrix, etc.)" },
+          { text: "Better fuzzy matching for multi-word commands" },
         ],
         "🎨 Technical Improvements": [
           { text: "New CSS utility classes: no-blur, no-gpu, debug-overlay" },
           { text: "GPU rendering hints via transform-style preserve-3d" },
-          { text: "Reduced motion class disables all animations" },
+          { text: "Desktop grid system prepared for future drag-and-drop" },
           { text: "Command queue system for cross-window communication" },
         ],
       }
@@ -146,7 +128,6 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
           { text: "Advanced sorting: Rating, Downloads, Size, Date, Name" },
           { text: "New Lifestyle category with gradient backgrounds" },
           { text: "Direct 'Open' button to launch apps after installation" },
-          { text: "Category-specific gradient backgrounds for app cards" },
         ],
         "🖥️ Interface Improvements": [
           { text: "Task Manager with mini graphs for CPU/memory usage" },
@@ -154,7 +135,6 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
           { text: "Admin broadcasts now use custom toast notifications" },
           { text: "DEF-DEV Console opens correctly from Settings" },
           { text: "Documentation Hub redesign with tag-based search" },
-          { text: "DocTOC component for section navigation" },
         ],
         "🏆 Battle Pass & Economy": [
           { text: "100 levels with XP progression and passive earning" },
@@ -168,20 +148,12 @@ export const ChangelogDialog = ({ open: controlledOpen, onOpenChange }: Changelo
           { text: "Manual handshake to connect with main OS" },
           { text: "5 new pressure-inspired themes" },
           { text: "Window animations: open, close, minimize, maximize" },
-          { text: "Event Recorder & Replay system" },
         ],
         "🎮 Games & Apps": [
           { text: "Containment Breach: 5 nights, 8 subjects, camera system" },
           { text: "UCG with bot difficulty levels and score tracking" },
           { text: "12 new Battle Pass exclusive themes" },
           { text: "10 new achievements (48 total)" },
-        ],
-        "🔧 Technical": [
-          { text: "Security Cameras and Facility Map redesign" },
-          { text: "CRT effects, radar scanner, shared components" },
-          { text: "Virtual desktops with proper window assignment" },
-          { text: "Animation speed control in Settings" },
-          { text: "Taskbar position options (bottom, top, left, right)" },
         ],
       }
     },
