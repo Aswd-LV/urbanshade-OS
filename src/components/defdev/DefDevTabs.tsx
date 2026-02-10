@@ -1,4 +1,4 @@
-import { Terminal, Activity, Send, Database, HardDrive, Shield, Skull, Cloud, Gavel, Cpu, Globe, Zap, Power } from "lucide-react";
+import { Terminal, Activity, Send, Database, HardDrive, Shield, Skull, Gavel, Cpu, Globe, Zap } from "lucide-react";
 import { TabId } from "./hooks/useDefDevState";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ interface DefDevTabsProps {
   crashEntry: boolean;
 }
 
-// Decluttered tabs - grouped into categories
+// Streamlined tabs - grouped into categories
 const TAB_GROUPS = [
   {
     label: "Core",
@@ -23,17 +23,15 @@ const TAB_GROUPS = [
   {
     label: "Diagnostics",
     tabs: [
-      { id: "bugchecks" as TabId, label: "Bugchecks", icon: Shield, color: "text-red-400" },
-      { id: "crashes" as TabId, label: "Crashes", icon: Skull, color: "text-rose-400" },
+      { id: "bugchecks" as TabId, label: "Crashes", icon: Shield, color: "text-red-400" },
       { id: "performance" as TabId, label: "Performance", icon: Cpu, color: "text-teal-400" },
       { id: "network" as TabId, label: "Network", icon: Globe, color: "text-sky-400" },
     ]
   },
   {
-    label: "System",
+    label: "Data",
     tabs: [
       { id: "storage" as TabId, label: "Storage", icon: Database, color: "text-blue-400" },
-      { id: "boot" as TabId, label: "Boot", icon: Power, color: "text-violet-400" },
       { id: "events" as TabId, label: "Events", icon: Zap, color: "text-yellow-400" },
     ]
   },
@@ -41,7 +39,6 @@ const TAB_GROUPS = [
     label: "Tools",
     tabs: [
       { id: "images" as TabId, label: "Recovery", icon: HardDrive, color: "text-orange-400" },
-      { id: "supabase" as TabId, label: "Supabase", icon: Cloud, color: "text-emerald-400" },
       { id: "fakemod" as TabId, label: "FakeMod", icon: Gavel, color: "text-rose-400" },
       { id: "admin" as TabId, label: "Admin", icon: Skull, color: "text-amber-400" },
     ]
