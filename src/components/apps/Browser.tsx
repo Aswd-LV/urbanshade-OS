@@ -35,6 +35,7 @@ export const Browser = () => {
               { url: "operations.urbanshade.local", title: "Operations", desc: "Daily schedules", color: "primary" },
               { url: "docs.urbanshade.local", title: "Documentation", desc: "System guides", color: "blue" },
               { url: "uur.urbanshade.local", title: "UUR Repository", desc: "Community packages", color: "cyan" },
+              { url: "enhance.urbanshade.local", title: "✨ Enhanced Experience", desc: "Install as app", color: "green" },
             ].map(link => (
               <button
                 key={link.url}
@@ -44,12 +45,15 @@ export const Browser = () => {
                     ? "bg-cyan-500/5 border-cyan-500/20 hover:bg-cyan-500/10" 
                     : link.color === "blue"
                     ? "bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10"
+                    : link.color === "green"
+                    ? "bg-green-500/5 border-green-500/20 hover:bg-green-500/10"
                     : "bg-muted/20 border-border/30 hover:bg-muted/30"
                 }`}
               >
                 <h3 className={`font-bold text-sm mb-1 ${
                   link.color === "cyan" ? "text-cyan-400" : 
-                  link.color === "blue" ? "text-blue-400" : "text-primary"
+                  link.color === "blue" ? "text-blue-400" : 
+                  link.color === "green" ? "text-green-400" : "text-primary"
                 }`}>{link.title}</h3>
                 <p className="text-xs text-muted-foreground">{link.desc}</p>
               </button>
@@ -364,6 +368,165 @@ export const Browser = () => {
               <div className="text-muted-foreground text-xs">
                 Open the UUR Manager app from Desktop for a GUI experience.
               </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    "enhance.urbanshade.local": {
+      url: "enhance.urbanshade.local",
+      title: "Enhanced Experience - Install as App",
+      content: (
+        <div className="p-6 max-w-3xl mx-auto">
+          {/* Hero */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-primary mb-2">✨ Enhanced Experience</h1>
+            <p className="text-muted-foreground text-sm mb-4">
+              Install UrbanShade OS as a standalone app for the best experience — no browser search bar, better performance, and native-app feel.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { icon: "🖥️", label: "No address bar", desc: "Full immersion, no browser UI clutter" },
+                { icon: "⚡", label: "Better FPS", desc: "Improved rendering performance" },
+                { icon: "📌", label: "Desktop shortcut", desc: "Launch from taskbar or desktop" },
+                { icon: "🎮", label: "Native feel", desc: "Behaves like a real application" },
+              ].map((b, i) => (
+                <div key={i} className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-center">
+                  <div className="text-xl mb-1">{b.icon}</div>
+                  <div className="text-xs font-bold text-primary">{b.label}</div>
+                  <div className="text-[10px] text-muted-foreground">{b.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Steps */}
+          <h2 className="text-lg font-bold text-primary mb-4">How to Install (Chrome)</h2>
+
+          {/* Step 1 */}
+          <div className="mb-6">
+            <div className="text-sm font-bold mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">1</span>
+              Click the three-dot menu in Chrome
+            </div>
+            <div className="flex justify-center">
+              <div className="bg-[#292b2f] rounded-lg p-1 inline-flex items-center gap-1 border border-[#3c3f44]">
+                <div className="w-7 h-7 rounded flex items-center justify-center hover:bg-[#3c3f44] text-[#e8eaed] cursor-default">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="3" r="1.2"/><circle cx="8" cy="8" r="1.2"/><circle cx="8" cy="13" r="1.2"/></svg>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground text-center mt-2">Look for ⋮ in the top-right corner of your browser</p>
+          </div>
+
+          {/* Step 2 — Chrome menu mockup */}
+          <div className="mb-6">
+            <div className="text-sm font-bold mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">2</span>
+              Find "Save, share, and copy"
+            </div>
+            <div className="flex justify-center">
+              <div className="bg-[#292b2f] rounded-lg border border-[#3c3f44] w-[260px] py-1.5 text-[#e8eaed] text-[13px] shadow-xl select-none">
+                {[
+                  { label: "New tab", shortcut: "Ctrl+T" },
+                  { label: "New window", shortcut: "Ctrl+N" },
+                  { label: "New Incognito window", shortcut: "Ctrl+Shift+N" },
+                ].map((item, i) => (
+                  <div key={i} className="flex justify-between px-3 py-1 hover:bg-[#3c3f44]">
+                    <span>{item.label}</span>
+                    <span className="text-[#9aa0a6] text-[11px]">{item.shortcut}</span>
+                  </div>
+                ))}
+                <div className="border-t border-[#3c3f44] my-1" />
+                {["Passwords and autofill", "History", "Downloads", "Bookmarks and lists", "Tab groups", "Extensions", "Clear browsing data..."].map((item, i) => (
+                  <div key={i} className="flex justify-between px-3 py-1 hover:bg-[#3c3f44]">
+                    <span>{item}</span>
+                    {item === "History" && <span className="text-[#9aa0a6] text-[11px]">▸</span>}
+                    {item === "Bookmarks and lists" && <span className="text-[#9aa0a6] text-[11px]">▸</span>}
+                    {item === "Extensions" && <span className="text-[#9aa0a6] text-[11px]">▸</span>}
+                  </div>
+                ))}
+                <div className="border-t border-[#3c3f44] my-1" />
+                <div className="px-3 py-1 hover:bg-[#3c3f44] flex justify-between">
+                  <span>Zoom</span>
+                  <span className="text-[#9aa0a6] text-[11px]">100%</span>
+                </div>
+                <div className="border-t border-[#3c3f44] my-1" />
+                {["Print...", "Search with Google Lens", "Translate...", "Find and edit"].map((item, i) => (
+                  <div key={i} className="px-3 py-1 hover:bg-[#3c3f44]">{item}</div>
+                ))}
+                {/* HIGHLIGHTED */}
+                <div className="px-3 py-1 bg-blue-500/20 border-l-2 border-blue-400 text-blue-300 font-medium flex justify-between">
+                  <span>Save, share, and copy</span>
+                  <span className="text-blue-400 text-[11px]">▸</span>
+                </div>
+                <div className="border-t border-[#3c3f44] my-1" />
+                {["More tools", "Help", "Settings", "Exit"].map((item, i) => (
+                  <div key={i} className="px-3 py-1 hover:bg-[#3c3f44]">{item}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Step 3 — Submenu mockup */}
+          <div className="mb-6">
+            <div className="text-sm font-bold mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">3</span>
+              Click "Create shortcut..."
+            </div>
+            <div className="flex justify-center">
+              <div className="bg-[#292b2f] rounded-lg border border-[#3c3f44] w-[220px] py-1.5 text-[#e8eaed] text-[13px] shadow-xl select-none">
+                <div className="px-3 py-1 hover:bg-[#3c3f44]">Cast...</div>
+                <div className="px-3 py-1 hover:bg-[#3c3f44] flex justify-between">
+                  <span>Save page as...</span>
+                  <span className="text-[#9aa0a6] text-[11px]">Ctrl+S</span>
+                </div>
+                {/* HIGHLIGHTED */}
+                <div className="px-3 py-1 bg-blue-500/20 border-l-2 border-blue-400 text-blue-300 font-medium">
+                  Create shortcut...
+                </div>
+                <div className="px-3 py-1 hover:bg-[#3c3f44]">Copy link</div>
+                <div className="border-t border-[#3c3f44] my-1" />
+                <div className="px-3 py-1 text-[#9aa0a6]/50">Send to your devices</div>
+                <div className="px-3 py-1 text-[#9aa0a6]/50">QR Code</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Step 4 — Checkbox note */}
+          <div className="mb-8">
+            <div className="text-sm font-bold mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">4</span>
+              Check "Open as window" and confirm
+            </div>
+            <div className="flex justify-center">
+              <div className="bg-[#292b2f] rounded-lg border border-[#3c3f44] w-[300px] p-4 shadow-xl select-none">
+                <div className="text-[#e8eaed] text-sm font-medium mb-3">Create shortcut?</div>
+                <div className="bg-[#202124] rounded px-3 py-1.5 text-[#e8eaed] text-[13px] mb-3 border border-[#3c3f44]">
+                  UrbanShade OS
+                </div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-4 h-4 rounded-sm bg-blue-500 flex items-center justify-center">
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" strokeWidth="2"><path d="M2 5l2 2 4-4"/></svg>
+                  </div>
+                  <span className="text-[#e8eaed] text-[13px]">Open as window</span>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <div className="px-4 py-1.5 rounded text-[13px] text-[#8ab4f8] hover:bg-[#8ab4f8]/10 cursor-default">Cancel</div>
+                  <div className="px-4 py-1.5 rounded text-[13px] bg-[#8ab4f8] text-[#202124] font-medium cursor-default">Create</div>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground text-center mt-2">⚠️ Make sure "Open as window" is checked!</p>
+          </div>
+
+          {/* Other browsers */}
+          <div className="p-4 rounded-lg bg-muted/20 border border-border/30">
+            <h3 className="font-bold text-sm mb-2">Other Browsers</h3>
+            <div className="text-sm text-muted-foreground space-y-1.5">
+              <div><strong>Microsoft Edge:</strong> Click ⋯ → Apps → Install this site as an app</div>
+              <div><strong>Firefox:</strong> Not natively supported — use Chrome or Edge for the best experience</div>
+              <div><strong>Opera / Brave:</strong> Same steps as Chrome (Chromium-based)</div>
             </div>
           </div>
         </div>
