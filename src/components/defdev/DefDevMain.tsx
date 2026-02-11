@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { X, AlertOctagon } from "lucide-react";
+import { X, AlertOctagon, Zap } from "lucide-react";
+import { saveState } from "@/lib/persistence";
 import { toast } from "sonner";
 import { actionDispatcher } from "@/lib/actionDispatcher";
 import DefDevTabs from "./DefDevTabs";
@@ -232,6 +233,12 @@ const DefDevMain = () => {
 
   // Not enabled state
   if (!devModeEnabled) {
+    const handleManualEnable = () => {
+      saveState("settings_developer_mode", true);
+      setDevModeEnabled(true);
+      toast.success("Developer Mode manually enabled");
+    };
+
     return (
       <div className="fixed inset-0 bg-slate-950 flex items-center justify-center">
         <div className="text-center max-w-md p-8">
@@ -242,12 +249,21 @@ const DefDevMain = () => {
           <p className="text-gray-400 mb-6">
             Developer Mode is not enabled on this system. Enable it in Settings → Developer Options or during installation.
           </p>
-          <button
-            onClick={() => window.location.href = "/"}
-            className="px-6 py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 rounded-lg text-cyan-400"
-          >
-            Return to System
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={handleManualEnable}
+              className="px-6 py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 rounded-lg text-amber-400 flex items-center justify-center gap-2"
+            >
+              <Zap className="w-4 h-4" />
+              Manual Handshake (Enable Dev Mode)
+            </button>
+            <button
+              onClick={() => window.location.href = "/"}
+              className="px-6 py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 rounded-lg text-cyan-400"
+            >
+              Return to System
+            </button>
+          </div>
         </div>
       </div>
     );
