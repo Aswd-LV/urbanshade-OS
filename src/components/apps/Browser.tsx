@@ -673,7 +673,7 @@ export const Browser = () => {
   const [inputUrl, setInputUrl] = useState("urbanshade.local");
   const [history, setHistory] = useState<string[]>(["urbanshade.local"]);
   const [historyIndex, setHistoryIndex] = useState(0);
-  const [bookmarks] = useState(["urbanshade.local", "docs.urbanshade.local", "uur.urbanshade.local"]);
+  const [bookmarks, setBookmarks] = useState(["urbanshade.local", "docs.urbanshade.local", "uur.urbanshade.local"]);
   const [isVPNConnected, setIsVPNConnected] = useState(false);
   const [isDarkVPN, setIsDarkVPN] = useState(false);
 
@@ -742,96 +742,116 @@ export const Browser = () => {
   const currentPage = pages[currentUrl] || pages["urbanshade.local"];
 
   return (
-    <div className="flex flex-col h-full bg-background/50">
-      {/* Browser Toolbar */}
-      <div className="border-b border-border/30 bg-muted/10">
-        {/* Navigation Bar */}
-        <div className="flex items-center gap-2 p-2">
-          <div className="flex items-center gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={goBack}
-              disabled={historyIndex === 0}
-              className="w-8 h-8 p-0"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={goForward}
-              disabled={historyIndex === history.length - 1}
-              className="w-8 h-8 p-0"
-            >
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => navigate(currentUrl)}
-              className="w-8 h-8 p-0"
-            >
-              <RotateCw className="w-4 h-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => navigate("urbanshade.local")}
-              className="w-8 h-8 p-0"
-            >
-              <Home className="w-4 h-4" />
-            </Button>
-          </div>
-
-          {/* URL Bar */}
-          <form onSubmit={handleNavigate} className="flex-1 flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-1.5 rounded-lg bg-background/50 border border-border/30">
-              <Lock className="w-3.5 h-3.5 text-green-400" />
-              <input
-                type="text"
-                value={inputUrl}
-                onChange={(e) => setInputUrl(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-sm font-mono"
-                placeholder="Enter URL..."
-              />
-            </div>
-            <Button size="sm" type="submit" className="h-8">
-              Go
-            </Button>
-          </form>
+    <div className="flex flex-col h-full bg-background">
+      {/* Tab Bar */}
+      <div className="flex items-center gap-0 bg-muted/20 px-1 pt-1">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-background rounded-t-lg border border-b-0 border-border/20 text-xs max-w-[200px]">
+          <Globe className="w-3.5 h-3.5 text-primary shrink-0" />
+          <span className="truncate">{currentPage.title}</span>
         </div>
+        <div className="flex-1" />
+      </div>
 
-        {/* Bookmarks Bar */}
-        <div className="flex items-center gap-1 px-2 pb-2">
-          {bookmarks.map(url => (
-            <button
-              key={url}
-              onClick={() => navigate(url)}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-all ${
-                currentUrl === url 
-                  ? "bg-primary/10 text-primary" 
-                  : "hover:bg-muted/30 text-muted-foreground"
-              }`}
-            >
-              <Star className="w-3 h-3" />
-              {url.replace(".urbanshade.local", "").replace("urbanshade.local", "Home")}
+      {/* Navigation + URL Bar */}
+      <div className="flex items-center gap-1.5 px-2 py-1.5 bg-background border-b border-border/20">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={goBack}
+          disabled={historyIndex === 0}
+          className="w-7 h-7 p-0 rounded-full hover:bg-muted/40"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={goForward}
+          disabled={historyIndex === history.length - 1}
+          className="w-7 h-7 p-0 rounded-full hover:bg-muted/40"
+        >
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => navigate(currentUrl)}
+          className="w-7 h-7 p-0 rounded-full hover:bg-muted/40"
+        >
+          <RotateCw className="w-3.5 h-3.5" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => navigate("urbanshade.local")}
+          className="w-7 h-7 p-0 rounded-full hover:bg-muted/40"
+        >
+          <Home className="w-3.5 h-3.5" />
+        </Button>
+
+        {/* URL Bar */}
+        <form onSubmit={handleNavigate} className="flex-1 flex items-center">
+          <div className="flex-1 flex items-center gap-2 px-3 py-1 rounded-full bg-muted/30 border border-border/10 hover:bg-muted/40 focus-within:bg-muted/50 focus-within:border-primary/30 transition-colors">
+            <Lock className="w-3 h-3 text-green-400 shrink-0" />
+            <input
+              type="text"
+              value={inputUrl}
+              onChange={(e) => setInputUrl(e.target.value)}
+              onFocus={(e) => e.target.select()}
+              className="flex-1 bg-transparent outline-none text-xs font-mono py-0.5"
+              placeholder="Enter URL..."
+            />
+            <button type="submit" className="hover:text-primary transition-colors">
+              <Search className="w-3 h-3 text-muted-foreground" />
             </button>
-          ))}
-        </div>
+          </div>
+        </form>
+
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => {
+            const url = currentUrl;
+            if (!bookmarks.includes(url)) {
+              setBookmarks(prev => [...prev, url]);
+              toast.success("Bookmark added");
+            }
+          }}
+          className="w-7 h-7 p-0 rounded-full hover:bg-muted/40"
+        >
+          <Star className={`w-3.5 h-3.5 ${bookmarks.includes(currentUrl) ? 'fill-primary text-primary' : ''}`} />
+        </Button>
+      </div>
+
+      {/* Bookmarks Bar */}
+      <div className="flex items-center gap-0.5 px-2 py-1 bg-background/80 border-b border-border/10 overflow-x-auto">
+        {bookmarks.map(url => (
+          <button
+            key={url}
+            onClick={() => navigate(url)}
+            className={`flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] whitespace-nowrap transition-all ${
+              currentUrl === url 
+                ? "bg-primary/15 text-primary font-medium" 
+                : "hover:bg-muted/30 text-muted-foreground"
+            }`}
+          >
+            <Globe className="w-3 h-3 shrink-0 opacity-50" />
+            {url.replace(".urbanshade.local", "").replace("urbanshade.local", "Home")}
+          </button>
+        ))}
       </div>
 
       {/* Page Content */}
-      <ScrollArea className="flex-1 bg-background/30">
+      <ScrollArea className="flex-1">
         {currentPage.content}
       </ScrollArea>
 
       {/* Status Bar */}
-      <div className="h-6 px-3 border-t border-border/30 bg-muted/10 flex items-center justify-between text-xs text-muted-foreground">
-        <span>{currentPage.title}</span>
-        <span className="flex items-center gap-1">
-          <Lock className="w-3 h-3 text-green-400" />
-          Secure Connection
+      <div className="h-5 px-3 border-t border-border/10 bg-muted/10 flex items-center justify-between text-[10px] text-muted-foreground/70">
+        <span className="truncate">{currentPage.url}</span>
+        <span className="flex items-center gap-1 shrink-0">
+          <Lock className="w-2.5 h-2.5 text-green-400/70" />
+          Secure
         </span>
       </div>
     </div>
