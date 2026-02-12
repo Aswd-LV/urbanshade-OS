@@ -534,6 +534,19 @@ const ModerationPanel = () => {
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   
+  // Bulk selection state
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [showBulkWarnDialog, setShowBulkWarnDialog] = useState(false);
+  const [showBulkBanDialog, setShowBulkBanDialog] = useState(false);
+  const [bulkWarnReason, setBulkWarnReason] = useState("");
+  const [bulkBanReason, setBulkBanReason] = useState("");
+  const [bulkBanDuration, setBulkBanDuration] = useState<"1h" | "24h" | "7d" | "30d" | "perm">("24h");
+  
+  // Logs filtering state
+  const [logActionFilter, setLogActionFilter] = useState<string>("all");
+  const [logDateFilter, setLogDateFilter] = useState<string>("all");
+  const [logSearch, setLogSearch] = useState("");
+  
   // Status management
   const [statuses, setStatuses] = useState<StatusEntry[]>([]);
   const [statusLoading, setStatusLoading] = useState(false);
@@ -1284,6 +1297,114 @@ const ModerationPanel = () => {
     }
   };
 
+  // Bulk action handlers
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUserIds(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedUserIds.size === filteredUsers.length) {
+      setSelectedUserIds(new Set());
+    } else {
+      setSelectedUserIds(new Set(filteredUsers.map(u => u.user_id)));
+    }
+  };
+
+  const handleBulkWarn = async () => {
+    if (!bulkWarnReason.trim() || selectedUserIds.size === 0) return;
+    if (isDemoMode) {
+      const updatedUsers = users.map(u => 
+        selectedUserIds.has(u.user_id)
+          ? { ...u, warningsCount: u.warningsCount + 1, warnings: [...u.warnings, { id: `demo-${Date.now()}-${u.id}`, reason: bulkWarnReason, created_at: new Date().toISOString() }] }
+          : u
+      );
+      setUsers(updatedUsers);
+      toast.success(`[DEMO] Warned ${selectedUserIds.size} users`);
+    } else {
+      try {
+        const response = await supabase.functions.invoke('admin-actions', {
+          body: { action: 'bulk_warn', targetUserIds: Array.from(selectedUserIds), reason: bulkWarnReason }
+        });
+        if (response.error) throw response.error;
+        toast.success(`Warned ${selectedUserIds.size} users`);
+        fetchUsers();
+      } catch { toast.error("Bulk warn failed"); }
+    }
+    setActivities(prev => [{ id: Date.now().toString(), type: "warning", message: `Bulk warned ${selectedUserIds.size} users: ${bulkWarnReason}`, timestamp: new Date() }, ...prev]);
+    setShowBulkWarnDialog(false);
+    setBulkWarnReason("");
+    setSelectedUserIds(new Set());
+  };
+
+  const handleBulkBan = async () => {
+    if (!bulkBanReason.trim() || selectedUserIds.size === 0) return;
+    if (isDemoMode) {
+      const updatedUsers = users.map(u => 
+        selectedUserIds.has(u.user_id)
+          ? { ...u, isBanned: true, banInfo: { action_type: 'ban', reason: bulkBanReason, expires_at: null, is_fake: false } }
+          : u
+      );
+      setUsers(updatedUsers);
+      toast.success(`[DEMO] Banned ${selectedUserIds.size} users`);
+    } else {
+      try {
+        const response = await supabase.functions.invoke('admin-actions', {
+          body: { action: 'bulk_ban', targetUserIds: Array.from(selectedUserIds), reason: bulkBanReason, duration: bulkBanDuration !== 'perm' ? bulkBanDuration : null, isPermanent: bulkBanDuration === 'perm' }
+        });
+        if (response.error) throw response.error;
+        toast.success(`Banned ${selectedUserIds.size} users`);
+        fetchUsers();
+      } catch { toast.error("Bulk ban failed"); }
+    }
+    setActivities(prev => [{ id: Date.now().toString(), type: "ban", message: `Bulk banned ${selectedUserIds.size} users: ${bulkBanReason}`, timestamp: new Date() }, ...prev]);
+    setShowBulkBanDialog(false);
+    setBulkBanReason("");
+    setSelectedUserIds(new Set());
+  };
+
+  const handleBulkVip = async () => {
+    if (selectedUserIds.size === 0) return;
+    if (isDemoMode) {
+      const updatedUsers = users.map(u => selectedUserIds.has(u.user_id) ? { ...u, isVip: true } : u);
+      setUsers(updatedUsers);
+      toast.success(`[DEMO] VIP granted to ${selectedUserIds.size} users`);
+    } else {
+      try {
+        const response = await supabase.functions.invoke('admin-actions', {
+          body: { action: 'bulk_vip', targetUserIds: Array.from(selectedUserIds) }
+        });
+        if (response.error) throw response.error;
+        toast.success(`VIP granted to ${selectedUserIds.size} users`);
+        fetchUsers();
+      } catch { toast.error("Bulk VIP failed"); }
+    }
+    setActivities(prev => [{ id: Date.now().toString(), type: "op", message: `Bulk VIP granted to ${selectedUserIds.size} users`, timestamp: new Date() }, ...prev]);
+    setSelectedUserIds(new Set());
+  };
+
+  // Filtered logs
+  const filteredLogs = logs.filter(log => {
+    const matchesAction = logActionFilter === 'all' || log.action_type === logActionFilter;
+    const matchesSearch = !logSearch || (log.reason?.toLowerCase().includes(logSearch.toLowerCase()));
+    let matchesDate = true;
+    if (logDateFilter !== 'all') {
+      const logDate = new Date(log.created_at);
+      const now = new Date();
+      const diffMs = now.getTime() - logDate.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+      if (logDateFilter === '1h') matchesDate = diffHours <= 1;
+      else if (logDateFilter === '24h') matchesDate = diffHours <= 24;
+      else if (logDateFilter === '7d') matchesDate = diffHours <= 168;
+      else if (logDateFilter === '30d') matchesDate = diffHours <= 720;
+    }
+    return matchesAction && matchesSearch && matchesDate;
+  });
+
   const filteredUsers = users.filter(u => {
     const matchesSearch = u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (u.display_name?.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -1424,82 +1545,24 @@ const ModerationPanel = () => {
         {/* Sidebar Navigation */}
         <div className="w-56 flex-shrink-0">
           <div className="sticky top-6 p-2 rounded-xl bg-slate-900/50 border border-slate-800 space-y-1">
-            <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider">Navigation</div>
+            <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider">Users</div>
             
-            <SidebarNavItem 
-              icon={Users} 
-              label="Personnel" 
-              count={users.length}
-              active={activeTab === 'users'} 
-              onClick={() => setActiveTab('users')} 
-              color="cyan"
-            />
-            <SidebarNavItem 
-              icon={FileText} 
-              label="Logs" 
-              active={activeTab === 'logs'} 
-              onClick={() => { setActiveTab('logs'); fetchLogs(); }} 
-              color="cyan"
-            />
-            <SidebarNavItem 
-              icon={Server} 
-              label="Zone Control" 
-              active={activeTab === 'status'} 
-              onClick={() => { setActiveTab('status'); fetchStatuses(); }} 
-              color="cyan"
-            />
-            <SidebarNavItem 
-              icon={Shield} 
-              label="Authorities" 
-              active={activeTab === 'authorities'} 
-              onClick={() => setActiveTab('authorities')} 
-              color="purple"
-            />
-            <SidebarNavItem 
-              icon={BarChart3} 
-              label="Stats" 
-              active={activeTab === 'stats'} 
-              onClick={() => setActiveTab('stats')} 
-              color="blue"
-            />
-            <SidebarNavItem 
-              icon={MessageSquare} 
-              label="Support Tickets" 
-              active={activeTab === 'support'} 
-              onClick={() => setActiveTab('support')} 
-              color="purple"
-            />
-            <SidebarNavItem 
-              icon={Flag} 
-              label="Reports" 
-              active={activeTab === 'reports'} 
-              onClick={() => setActiveTab('reports')} 
-              color="amber"
-            />
-            <SidebarNavItem 
-              icon={Bot} 
-              label="NAVI Config" 
-              active={activeTab === 'navi-config'} 
-              onClick={() => setActiveTab('navi-config')} 
-              color="amber"
-            />
-            <SidebarNavItem 
-              icon={Zap} 
-              label="Test Emergency" 
-              active={activeTab === 'test-emergency'} 
-              onClick={() => { setActiveTab('test-emergency'); fetchTestEmergencyStatus(); }} 
-              color="red"
-            />
+            <SidebarNavItem icon={Users} label="Personnel" count={users.length} active={activeTab === 'users'} onClick={() => setActiveTab('users')} color="cyan" />
+            <SidebarNavItem icon={Flag} label="Reports" active={activeTab === 'reports'} onClick={() => setActiveTab('reports')} color="amber" />
+            <SidebarNavItem icon={MessageSquare} label="Support Tickets" active={activeTab === 'support'} onClick={() => setActiveTab('support')} color="purple" />
             
-            <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider mt-4">Communication</div>
+            <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider mt-3">System</div>
             
-            <SidebarNavItem 
-              icon={Hash} 
-              label="Chat" 
-              active={activeTab === 'chat'} 
-              onClick={() => setActiveTab('chat')} 
-              color="cyan"
-            />
+            <SidebarNavItem icon={Server} label="Zone Control" active={activeTab === 'status'} onClick={() => { setActiveTab('status'); fetchStatuses(); }} color="cyan" />
+            <SidebarNavItem icon={Shield} label="Authorities" active={activeTab === 'authorities'} onClick={() => setActiveTab('authorities')} color="purple" />
+            <SidebarNavItem icon={BarChart3} label="Stats" active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} color="blue" />
+            <SidebarNavItem icon={FileText} label="Logs" active={activeTab === 'logs'} onClick={() => { setActiveTab('logs'); fetchLogs(); }} color="cyan" />
+            
+            <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider mt-3">NAVI</div>
+            
+            <SidebarNavItem icon={Bot} label="NAVI Config" active={activeTab === 'navi-config'} onClick={() => setActiveTab('navi-config')} color="amber" />
+            <SidebarNavItem icon={Hash} label="Chat" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} color="cyan" />
+            <SidebarNavItem icon={Zap} label="Test Emergency" active={activeTab === 'test-emergency'} onClick={() => { setActiveTab('test-emergency'); fetchTestEmergencyStatus(); }} color="red" />
           </div>
         </div>
 
@@ -1607,13 +1670,57 @@ const ModerationPanel = () => {
                 </div>
               </div>
 
+              {/* Select All + Bulk Actions Bar */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={selectedUserIds.size === filteredUsers.length && filteredUsers.length > 0}
+                    onChange={handleSelectAll}
+                    className="rounded border-slate-600 bg-slate-900"
+                  />
+                  <span className="font-mono text-xs">
+                    {selectedUserIds.size > 0 ? `${selectedUserIds.size} selected` : 'Select All'}
+                  </span>
+                </label>
+                {selectedUserIds.size > 0 && (
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedUserIds(new Set())} className="text-slate-400 text-xs">
+                    Clear Selection
+                  </Button>
+                )}
+              </div>
+
+              {/* Floating Bulk Actions Bar */}
+              {selectedUserIds.size >= 2 && (
+                <div className="sticky top-0 z-10 p-3 rounded-lg bg-cyan-950/80 backdrop-blur border-2 border-cyan-500/40 flex items-center justify-between animate-in slide-in-from-top-2">
+                  <span className="text-cyan-400 font-mono text-sm font-bold">
+                    {selectedUserIds.size} USERS SELECTED
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" onClick={() => setShowBulkWarnDialog(true)} className="bg-amber-600 hover:bg-amber-500 gap-1">
+                      <AlertTriangle className="w-3 h-3" /> Warn All ({selectedUserIds.size})
+                    </Button>
+                    <Button size="sm" onClick={() => setShowBulkBanDialog(true)} className="bg-red-600 hover:bg-red-500 gap-1">
+                      <Ban className="w-3 h-3" /> Ban All ({selectedUserIds.size})
+                    </Button>
+                    <Button size="sm" onClick={handleBulkVip} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-1">
+                      <Star className="w-3 h-3" /> VIP All ({selectedUserIds.size})
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => setSelectedUserIds(new Set())} className="text-slate-400">
+                      <XCircle className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* User List */}
               <div className="space-y-2">
                 {filteredUsers.map(user => (
                   <div 
                     key={user.id}
-                    onClick={() => { setSelectedUser(user); setShowUserDetails(true); }}
                     className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:scale-[1.01] ${
+                      selectedUserIds.has(user.user_id) ? 'ring-2 ring-cyan-500/50' : ''
+                    } ${
                       user.isBanned 
                         ? 'bg-gradient-to-r from-red-950/30 to-slate-950 border-red-500/30 hover:border-red-500/50' 
                         : user.warningsCount > 0
@@ -1623,41 +1730,58 @@ const ModerationPanel = () => {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold ${
-                          user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
-                          user.role === 'moderator' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
-                          'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
-                        }`}>
-                          {user.username[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">{user.display_name || user.username}</span>
-                            <span className="text-xs text-slate-500 font-mono">@{user.username}</span>
+                        <input
+                          type="checkbox"
+                          checked={selectedUserIds.has(user.user_id)}
+                          onChange={(e) => { e.stopPropagation(); toggleUserSelection(user.user_id); }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="rounded border-slate-600 bg-slate-900 flex-shrink-0"
+                        />
+                        <div 
+                          className="flex items-center gap-4 flex-1"
+                          onClick={() => { setSelectedUser(user); setShowUserDetails(true); }}
+                        >
+                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold ${
+                            user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
+                            user.role === 'moderator' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                            'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                          }`}>
+                            {user.username[0].toUpperCase()}
                           </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className={`px-2 py-0.5 rounded text-xs font-mono border ${
-                              user.role === 'admin' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
-                              user.role === 'moderator' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
-                              'bg-slate-800 text-slate-400 border-slate-700'
-                            }`}>
-                              {user.role?.toUpperCase() || 'USER'}
-                            </span>
-                            {user.isBanned && (
-                              <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-xs font-mono flex items-center gap-1 border border-red-500/30">
-                                <Ban className="w-3 h-3" /> BANNED
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold">{user.display_name || user.username}</span>
+                              <span className="text-xs text-slate-500 font-mono">@{user.username}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`px-2 py-0.5 rounded text-xs font-mono border ${
+                                user.role === 'admin' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                                user.role === 'moderator' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
+                                'bg-slate-800 text-slate-400 border-slate-700'
+                              }`}>
+                                {user.role?.toUpperCase() || 'USER'}
                               </span>
-                            )}
-                            {user.warningsCount > 0 && (
-                              <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-xs font-mono flex items-center gap-1 border border-amber-500/30">
-                                <AlertTriangle className="w-3 h-3" /> {user.warningsCount}
-                              </span>
-                            )}
+                              {user.isBanned && (
+                                <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-xs font-mono flex items-center gap-1 border border-red-500/30">
+                                  <Ban className="w-3 h-3" /> BANNED
+                                </span>
+                              )}
+                              {user.warningsCount > 0 && (
+                                <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-xs font-mono flex items-center gap-1 border border-amber-500/30">
+                                  <AlertTriangle className="w-3 h-3" /> {user.warningsCount}
+                                </span>
+                              )}
+                              {user.isVip && (
+                                <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 text-xs font-mono flex items-center gap-1 border border-purple-500/30">
+                                  <Star className="w-3 h-3" /> VIP
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3" onClick={() => { setSelectedUser(user); setShowUserDetails(true); }}>
                         <span className="text-xs text-slate-500 font-mono">
                           {new Date(user.created_at).toLocaleDateString()}
                         </span>
@@ -1672,33 +1796,94 @@ const ModerationPanel = () => {
 
           {/* Logs Tab */}
           {activeTab === 'logs' && (
-            <div className="space-y-2">
-              {logs.length === 0 ? (
-                <div className="text-center py-16 text-slate-500">
-                  <FileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <p className="font-mono">No moderation logs recorded</p>
+            <div className="space-y-4">
+              {/* Filters Row */}
+              <div className="flex gap-3 flex-wrap">
+                <div className="relative flex-1 min-w-[200px] max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                  <Input
+                    value={logSearch}
+                    onChange={(e) => setLogSearch(e.target.value)}
+                    placeholder="Search by reason..."
+                    className="pl-10 bg-slate-900/50 border-slate-700 font-mono text-sm"
+                  />
                 </div>
-              ) : (
-                logs.map(log => (
-                  <div key={log.id} className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1 rounded text-xs font-mono font-bold ${
-                          log.action_type === 'warn' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                          log.action_type.includes('ban') ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                          'bg-slate-800 text-slate-400 border border-slate-700'
-                        }`}>
-                          {log.action_type.toUpperCase()}
-                        </span>
-                        <span className="text-slate-300">{log.reason || 'No reason provided'}</span>
-                      </div>
-                      <span className="text-xs text-slate-500 font-mono">
-                        {new Date(log.created_at).toLocaleString()}
-                      </span>
-                    </div>
+                <Select value={logActionFilter} onValueChange={setLogActionFilter}>
+                  <SelectTrigger className="w-40 bg-slate-900/50 border-slate-700 text-sm">
+                    <SelectValue placeholder="Action type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-700">
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="warn">Warn</SelectItem>
+                    <SelectItem value="ban">Ban</SelectItem>
+                    <SelectItem value="unban">Unban</SelectItem>
+                    <SelectItem value="op">OP</SelectItem>
+                    <SelectItem value="deop">De-OP</SelectItem>
+                    <SelectItem value="grant_vip">Grant VIP</SelectItem>
+                    <SelectItem value="revoke_vip">Revoke VIP</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={logDateFilter} onValueChange={setLogDateFilter}>
+                  <SelectTrigger className="w-36 bg-slate-900/50 border-slate-700 text-sm">
+                    <SelectValue placeholder="Time range" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-700">
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="1h">Last Hour</SelectItem>
+                    <SelectItem value="24h">Last 24h</SelectItem>
+                    <SelectItem value="7d">Last 7 Days</SelectItem>
+                    <SelectItem value="30d">Last 30 Days</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-xs text-slate-500 font-mono self-center">
+                  {filteredLogs.length} result{filteredLogs.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
+              {/* Log entries */}
+              <div className="space-y-2">
+                {filteredLogs.length === 0 ? (
+                  <div className="text-center py-16 text-slate-500">
+                    <FileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                    <p className="font-mono">{logs.length === 0 ? 'No moderation logs recorded' : 'No logs match your filters'}</p>
                   </div>
-                ))
-              )}
+                ) : (
+                  filteredLogs.map(log => {
+                    const actionColors: Record<string, string> = {
+                      warn: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                      ban: 'bg-red-500/20 text-red-400 border-red-500/30',
+                      unban: 'bg-green-500/20 text-green-400 border-green-500/30',
+                      op: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+                      deop: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+                      grant_vip: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
+                      revoke_vip: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+                    };
+                    const colorClass = actionColors[log.action_type] || 'bg-slate-800 text-slate-400 border-slate-700';
+                    
+                    return (
+                      <div key={log.id} className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <span className={`px-3 py-1 rounded text-xs font-mono font-bold border flex-shrink-0 ${colorClass}`}>
+                              {log.action_type.toUpperCase()}
+                            </span>
+                            <div className="min-w-0">
+                              <span className="text-slate-300 block truncate">{log.reason || 'No reason provided'}</span>
+                              <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 font-mono">
+                                {log.created_by && <span>by {log.created_by.slice(0, 8)}...</span>}
+                                {log.target_user_id && <span>→ {log.target_user_id.slice(0, 8)}...</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-xs text-slate-500 font-mono flex-shrink-0 ml-3">
+                            {new Date(log.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
           )}
 
@@ -2354,6 +2539,91 @@ const ModerationPanel = () => {
               className="bg-amber-600 hover:bg-amber-500"
             >
               Remove Warning
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Warn Dialog */}
+      <Dialog open={showBulkWarnDialog} onOpenChange={setShowBulkWarnDialog}>
+        <DialogContent className="bg-slate-950 border-amber-500/30">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-400 font-mono">
+              <AlertTriangle className="w-5 h-5" />
+              BULK WARNING — {selectedUserIds.size} USERS
+            </DialogTitle>
+            <DialogDescription className="font-mono text-slate-400">
+              Issue the same warning to all {selectedUserIds.size} selected users.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={bulkWarnReason}
+            onChange={(e) => setBulkWarnReason(e.target.value)}
+            placeholder="Enter warning reason..."
+            rows={3}
+            className="bg-slate-900 border-slate-700 font-mono"
+          />
+          {isDemoMode && (
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <p className="text-xs text-amber-400 font-mono flex items-center gap-2">
+                <Eye className="w-3 h-3" /> DEMO MODE: This action won't affect the cloud
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkWarnDialog(false)} className="border-slate-700">Cancel</Button>
+            <Button onClick={handleBulkWarn} disabled={!bulkWarnReason.trim()} className="bg-amber-600 hover:bg-amber-500">
+              {isDemoMode && '[DEMO] '}Warn {selectedUserIds.size} Users
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Ban Dialog */}
+      <Dialog open={showBulkBanDialog} onOpenChange={setShowBulkBanDialog}>
+        <DialogContent className="bg-slate-950 border-red-500/30">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-400 font-mono">
+              <Ban className="w-5 h-5" />
+              BULK BAN — {selectedUserIds.size} USERS
+            </DialogTitle>
+            <DialogDescription className="font-mono text-slate-400">
+              Ban all {selectedUserIds.size} selected users with the same reason.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={bulkBanReason}
+            onChange={(e) => setBulkBanReason(e.target.value)}
+            placeholder="Enter ban reason..."
+            rows={3}
+            className="bg-slate-900 border-slate-700 font-mono"
+          />
+          <div>
+            <label className="text-sm font-mono mb-2 block text-slate-400">DURATION</label>
+            <Select value={bulkBanDuration} onValueChange={(v: any) => setBulkBanDuration(v)}>
+              <SelectTrigger className="bg-slate-900 border-slate-700">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700">
+                <SelectItem value="1h">1 Hour</SelectItem>
+                <SelectItem value="24h">24 Hours</SelectItem>
+                <SelectItem value="7d">7 Days</SelectItem>
+                <SelectItem value="30d">30 Days</SelectItem>
+                <SelectItem value="perm">Permanent</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {isDemoMode && (
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <p className="text-xs text-amber-400 font-mono flex items-center gap-2">
+                <Eye className="w-3 h-3" /> DEMO MODE: This action won't affect the cloud
+              </p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkBanDialog(false)} className="border-slate-700">Cancel</Button>
+            <Button onClick={handleBulkBan} disabled={!bulkBanReason.trim()} className="bg-red-600 hover:bg-red-500">
+              {isDemoMode && '[DEMO] '}Ban {selectedUserIds.size} Users
             </Button>
           </DialogFooter>
         </DialogContent>
