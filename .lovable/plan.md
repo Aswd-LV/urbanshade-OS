@@ -1,36 +1,53 @@
-
-
-## Add "Enhanced Experience" Tutorial Page to Browser
+## Expand Moderation Panel: Functional Depth Improvements
 
 ### Overview
-Add a new internal page at `enhance.urbanshade.local` in the Browser app that guides users through installing UrbanShade OS as a Progressive Web App (PWA). This removes the browser search bar and improves performance -- a better experience overall.
 
-### What the page will contain
+Instead of adding more tabs, this plan makes existing features work better -- following the "more that FUNCTION" principle. Three key improvements to the `/moderation` panel.
 
-**1. Hero section** explaining the benefits:
-- No search bar / address bar clutter
-- Better performance (improved FPS)
-- Feels like a native app
-- Quick access from desktop/taskbar
+### Changes
 
-**2. Step-by-step instructions with recreated UI mockups (in English)**
+**1. Multi-Select + Bulk Actions Bar (Personnel tab)**
 
-Based on the reference screenshots, the tutorial will include CSS-recreated mockups of Chrome's menu:
+The backend already supports `bulk_warn`, `bulk_ban`, and `bulk_vip` but there's zero UI for it. Add:
 
-- **Step 1**: Click the three-dot menu (top-right of Chrome)
-- **Step 2**: A recreated Chrome menu showing items like "New tab", "New window", "New incognito window", then below a section with "Passwords and autofill", "History", "Downloads", "Bookmarks and lists", "Tab groups", "Extensions", "Clear browsing data...", then "Zoom", then "Print...", "Search with Google Lens", "Translate...", "Find and edit", **"Save, share, and copy"** (highlighted), then "More tools", "Help", "Settings", "Exit"
-- **Step 3**: The "Save, share, and copy" submenu expanded showing **"Cast..."**, **"Save page as... (Ctrl+S)"**, **"Create shortcut..."** (highlighted as the key action), **"Copy link"**, and greyed out items
-- **Step 4**: A note about checking "Open as window" in the shortcut dialog
+- Checkbox on each user row for multi-select
+- "Select All" / "Deselect All" controls
+- A floating action bar that appears when 2+ users are selected, showing:
+  - "Warn All (X)" button
+  - "Ban All (X)" button  
+  - "Grant VIP All (X)" button
+  - Clear selection button
+- Bulk action dialogs (reusing existing warn/ban dialog patterns)
 
-**3. Additional tips** section for other browsers (Edge has "Install as app" directly in the menu).
+**2. Enhanced Logs Tab with Filters**
 
-### Technical changes
+Current logs tab just lists everything with no way to filter. Add:
 
-**`src/components/apps/Browser.tsx`**:
-- Add a new page entry `"enhance.urbanshade.local"` in the `pages` record
-- The page content will be a self-contained JSX guide with CSS-drawn mockups of the Chrome menu UI (dark theme, matching the screenshots but in English)
-- Add a link to the new page from the intranet homepage (`urbanshade.local`) and optionally from `docs.urbanshade.local`
+- Filter by action type (warn, ban, unban, op, deop, etc.)
+- Filter by date range (last hour, 24h, 7d, 30d, all)
+- Search by reason text
+- Show the admin who performed the action and the target user (currently just shows raw data)
+- Color-coded action type badges (already partially there)
 
-### No version bump needed
-This is a minor content addition to the Browser app, not a feature update warranting a changelog entry.
+**3. Sidebar Tab Categories**
 
+Organize the 10 tabs into labeled groups for clarity:
+
+- **Users**: Personnel, Reports, Support Tickets
+- **System**: Zone Control, Authorities, Stats, Logs
+- **NAVI**: NAVI Config, Chat, Test Emergency
+
+### Technical Details
+
+**File: `src/pages/ModerationPanel.tsx**`
+
+1. **Bulk selection state**: Add `selectedUserIds` as `useState<Set<string>>`, checkbox toggle per row, floating bar component
+2. **Bulk action handlers**: Wire to existing edge function actions (`bulk_warn`, `bulk_ban`, `bulk_vip`) with confirmation dialogs
+3. **Logs filtering**: Add filter state (`logActionFilter`, `logDateFilter`, `logSearch`), apply to logs array before rendering, add filter UI row above logs list
+4. **Sidebar restructure**: Group the `SidebarNavItem` calls under category headers ("Users", "System", "NAVI") -- same pattern as the existing "Communication" separator already in the code
+
+### No database or edge function changes needed
+
+All bulk actions and log fetching are already supported server-side. This is purely a frontend improvement.
+
+Extra I'd like: add more management options
