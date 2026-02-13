@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { useNaviAutonomous, requestNotificationPermission, sendPushNotification, ThreatLevel } from "@/hooks/useNaviAutonomous";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -66,6 +66,7 @@ export const NaviAutonomousPanel = () => {
   const display = getThreatLevelDisplay(threatLevel);
 
   return (
+    <TooltipProvider>
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-border/50">
@@ -265,6 +266,7 @@ export const NaviAutonomousPanel = () => {
         </ScrollArea>
       </div>
     </div>
+    </TooltipProvider>
   );
 };
 
