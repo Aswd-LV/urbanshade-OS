@@ -46,6 +46,8 @@ Deno.serve(async (req) => {
       .select('role')
       .eq('user_id', user.id)
       .in('role', ['admin', 'creator'])
+      .order('role', { ascending: true })
+      .limit(1)
       .maybeSingle();
 
     if (!roleData) {
