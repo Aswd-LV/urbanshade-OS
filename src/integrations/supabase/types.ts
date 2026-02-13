@@ -41,6 +41,57 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_notes: {
+        Row: {
+          author_id: string
+          created_at: string | null
+          id: string
+          note: string
+          target_user_id: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string | null
+          id?: string
+          note: string
+          target_user_id: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string | null
+          id?: string
+          note?: string
+          target_user_id?: string
+        }
+        Relationships: []
+      }
+      admin_pins: {
+        Row: {
+          created_at: string | null
+          failed_attempts: number | null
+          locked_until: string | null
+          pin_hash: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          failed_attempts?: number | null
+          locked_until?: string | null
+          pin_hash: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          failed_attempts?: number | null
+          locked_until?: string | null
+          pin_hash?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       battlepass_seasons: {
         Row: {
           created_at: string | null
@@ -1353,7 +1404,7 @@ export type Database = {
       record_navi_metrics: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user" | "creator"
+      app_role: "admin" | "moderator" | "user" | "creator" | "trial_admin"
       ticket_status:
         | "open"
         | "pending_human"
@@ -1487,7 +1538,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user", "creator"],
+      app_role: ["admin", "moderator", "user", "creator", "trial_admin"],
       ticket_status: [
         "open",
         "pending_human",

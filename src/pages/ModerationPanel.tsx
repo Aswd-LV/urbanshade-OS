@@ -1,5 +1,5 @@
-// Moderation Panel v3.0 - Sidebar Navigation
-import { useState, useEffect } from "react";
+// Moderation Panel v3.2 - PIN 2FA, Trial Admin, Extended Management
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Shield, Users, AlertTriangle, Ban, Clock, Search, RefreshCw, XCircle, 
@@ -8,7 +8,8 @@ import {
   Settings, Database, Wifi, Globe, Server, ChevronDown, ChevronRight,
   TriangleAlert, ShieldAlert, ShieldCheck, Filter, Download, Trash2,
   MessageSquare, Bell, Volume2, VolumeX, Cpu, HardDrive, Crown, Megaphone,
-  UserCog, Send, Star, Sparkles, Bot, BarChart3, Hash, Flag
+  UserCog, Send, Star, Sparkles, Bot, BarChart3, Hash, Flag, KeyRound,
+  StickyNote, LogOut, RotateCcw, ShieldQuestion, BadgeCheck
 } from "lucide-react";
 import { NaviAuthoritiesTab } from "@/components/moderation/NaviAuthoritiesTab";
 import { NaviAutonomousPanel } from "@/components/moderation/NaviAutonomousPanel";
@@ -22,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,6 +64,14 @@ interface ActivityLog {
   timestamp: Date;
 }
 
+interface AdminNote {
+  id: string;
+  target_user_id: string;
+  author_id: string;
+  note: string;
+  created_at: string;
+}
+
 const routeLabels: Record<string, string> = {
   'main': 'Main Site',
   'docs': 'Documentation',
@@ -78,85 +88,51 @@ const personnelRankColors: Record<string, string> = {
   "Admin": "text-red-500 bg-red-500/20 border-red-500/30",
 };
 
+const adminRoleBadge: Record<string, { label: string; color: string }> = {
+  'creator': { label: 'CREATOR', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+  'admin': { label: 'ADMIN', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+  'trial_admin': { label: 'TRIAL ADMIN', color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
+};
+
 // Demo data for non-admin viewers
 const DEMO_USERS: UserData[] = [
   {
-    id: "demo-1",
-    user_id: "demo-user-1",
-    username: "DemoUser",
-    display_name: "Demo Test User",
-    role: "user",
-    clearance: 1,
-    isBanned: false,
-    warningsCount: 0,
-    warnings: [],
-    created_at: new Date().toISOString(),
-    isVip: false,
+    id: "demo-1", user_id: "demo-user-1", username: "DemoUser", display_name: "Demo Test User",
+    role: "user", clearance: 1, isBanned: false, warningsCount: 0, warnings: [],
+    created_at: new Date().toISOString(), isVip: false,
   },
   {
-    id: "demo-2",
-    user_id: "demo-user-2",
-    username: "BannedDemo",
-    display_name: "Banned Demo User",
-    role: "user",
-    clearance: 1,
-    isBanned: true,
-    banInfo: {
-      action_type: "ban",
-      reason: "Demo ban - This is a test account",
-      expires_at: null,
-      is_fake: false,
-    },
+    id: "demo-2", user_id: "demo-user-2", username: "BannedDemo", display_name: "Banned Demo User",
+    role: "user", clearance: 1, isBanned: true,
+    banInfo: { action_type: "ban", reason: "Demo ban - This is a test account", expires_at: null, is_fake: false },
     warningsCount: 2,
     warnings: [
       { id: "demo-warn-1", reason: "Demo warning 1", created_at: new Date().toISOString() },
       { id: "demo-warn-2", reason: "Demo warning 2", created_at: new Date().toISOString() },
     ],
-    created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
-    isVip: false,
+    created_at: new Date(Date.now() - 86400000 * 7).toISOString(), isVip: false,
   },
   {
-    id: "demo-3",
-    user_id: "demo-user-3",
-    username: "WarnedDemo",
-    display_name: "Warned Demo User",
-    role: "user",
-    clearance: 2,
-    isBanned: false,
-    warningsCount: 1,
+    id: "demo-3", user_id: "demo-user-3", username: "WarnedDemo", display_name: "Warned Demo User",
+    role: "user", clearance: 2, isBanned: false, warningsCount: 1,
     warnings: [{ id: "demo-warn-3", reason: "Demo warning", created_at: new Date().toISOString() }],
-    created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
-    isVip: false,
+    created_at: new Date(Date.now() - 86400000 * 3).toISOString(), isVip: false,
   },
   {
-    id: "demo-4",
-    user_id: "demo-user-4",
-    username: "DemoAdmin",
-    display_name: "Demo Admin User",
-    role: "admin",
-    clearance: 5,
-    isBanned: false,
-    warningsCount: 0,
-    warnings: [],
-    created_at: new Date(Date.now() - 86400000 * 30).toISOString(),
-    isVip: false,
+    id: "demo-4", user_id: "demo-user-4", username: "DemoAdmin", display_name: "Demo Admin User",
+    role: "admin", clearance: 5, isBanned: false, warningsCount: 0, warnings: [],
+    created_at: new Date(Date.now() - 86400000 * 30).toISOString(), isVip: false,
   },
   {
-    id: "demo-5",
-    user_id: "demo-user-5",
-    username: "DemoVIP",
-    display_name: "Demo VIP User",
-    role: "user",
-    clearance: 3,
-    isBanned: false,
-    warningsCount: 0,
-    warnings: [],
-    created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
-    isVip: true,
+    id: "demo-5", user_id: "demo-user-5", username: "DemoVIP", display_name: "Demo VIP User",
+    role: "user", clearance: 3, isBanned: false, warningsCount: 0, warnings: [],
+    created_at: new Date(Date.now() - 86400000 * 14).toISOString(), isVip: true,
   },
 ];
 
-// Hadal Blacksite themed status card
+// =============================================
+// Status Card Component
+// =============================================
 const StatusCard = ({ status, onUpdate }: { status: StatusEntry; onUpdate: (id: string, status: string, message: string | null) => void }) => {
   const [editing, setEditing] = useState(false);
   const [newStatus, setNewStatus] = useState(status.status);
@@ -251,8 +227,13 @@ const StatusCard = ({ status, onUpdate }: { status: StatusEntry; onUpdate: (id: 
   );
 };
 
-// User details panel
-const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop, onVip, onRevokeVip, onRemoveWarning, isDemo, isCreator }: { 
+// =============================================
+// User Details Panel (Extended)
+// =============================================
+const UserDetailsPanel = ({ 
+  user, onClose, onWarn, onBan, onUnban, onOp, onDeop, onVip, onRevokeVip, onRemoveWarning, 
+  isDemo, isCreator, adminRole, onSetClearance, onForceLogout, onResetPassword, onSetTrialAdmin, onPromoteTrial
+}: { 
   user: UserData; 
   onClose: () => void;
   onWarn: () => void;
@@ -265,17 +246,65 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
   onRemoveWarning: (warningId: string) => void;
   isDemo: boolean;
   isCreator: boolean;
+  adminRole: string;
+  onSetClearance: (clearance: number) => void;
+  onForceLogout: () => void;
+  onResetPassword: () => void;
+  onSetTrialAdmin: () => void;
+  onPromoteTrial: () => void;
 }) => {
   const rank = user.personnelRank || (user.role === 'admin' ? 'Admin' : user.isVip ? 'VIP' : 'Staff');
+  const isTrialAdmin = adminRole === 'trial_admin';
+  const [notes, setNotes] = useState<AdminNote[]>([]);
+  const [newNote, setNewNote] = useState('');
+  const [notesLoading, setNotesLoading] = useState(false);
+
+  // Fetch notes
+  useEffect(() => {
+    if (isDemo) return;
+    const fetchNotes = async () => {
+      setNotesLoading(true);
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        const response = await fetch(
+          `https://oukxkpihsyikamzldiek.supabase.co/functions/v1/admin-actions?action=get_notes&target_user_id=${user.user_id}`,
+          { headers: { 'Authorization': `Bearer ${session.session?.access_token}`, 'Content-Type': 'application/json' } }
+        );
+        const result = await response.json();
+        setNotes(result.notes || []);
+      } catch (e) { console.error('Failed to load notes:', e); }
+      finally { setNotesLoading(false); }
+    };
+    fetchNotes();
+  }, [user.user_id, isDemo]);
+
+  const handleAddNote = async () => {
+    if (!newNote.trim()) return;
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'add_note', targetUserId: user.user_id, note: newNote }
+      });
+      if (response.error) throw response.error;
+      if (response.data?.note) setNotes(prev => [response.data.note, ...prev]);
+      setNewNote('');
+      toast.success('Note added');
+    } catch { toast.error('Failed to add note'); }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      await supabase.functions.invoke('admin-actions', { body: { action: 'delete_note', noteId } });
+      setNotes(prev => prev.filter(n => n.id !== noteId));
+      toast.success('Note deleted');
+    } catch { toast.error('Failed to delete note'); }
+  };
   
   return (
     <div className="fixed inset-y-0 right-0 w-96 bg-slate-950 border-l-2 border-cyan-500/30 shadow-2xl shadow-cyan-500/10 z-50 flex flex-col">
-      {/* Demo Mode Banner */}
       {isDemo && (
         <div className="px-4 py-2 bg-amber-500/20 border-b border-amber-500/30">
           <div className="flex items-center gap-2 text-amber-400 text-xs font-mono">
-            <Eye className="w-3 h-3" />
-            DEMO MODE - Actions won't affect cloud
+            <Eye className="w-3 h-3" /> DEMO MODE - Actions won't affect cloud
           </div>
         </div>
       )}
@@ -329,7 +358,19 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 rounded bg-slate-900/50 border border-slate-800">
               <div className="text-xs text-slate-500 font-mono mb-1">CLEARANCE</div>
-              <div className="font-bold text-cyan-400">LEVEL {user.clearance || 1}</div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-cyan-400">LEVEL {user.clearance || 1}</span>
+                {!isTrialAdmin && (
+                  <Select value={String(user.clearance || 1)} onValueChange={(v) => onSetClearance(parseInt(v))}>
+                    <SelectTrigger className="h-6 w-14 text-xs bg-slate-800 border-slate-700 p-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-slate-700">
+                      {[1,2,3,4,5].map(c => <SelectItem key={c} value={String(c)}>L{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
             <div className="p-3 rounded bg-slate-900/50 border border-slate-800">
               <div className="text-xs text-slate-500 font-mono mb-1">USER ID</div>
@@ -340,6 +381,23 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
               <div className="font-mono text-sm">{new Date(user.created_at).toLocaleString()}</div>
             </div>
           </div>
+
+          {/* Extended Actions */}
+          {!isTrialAdmin && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-mono text-slate-400 flex items-center gap-2">
+                <Settings className="w-3 h-3" /> MANAGEMENT
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="outline" className="border-slate-700 text-xs gap-1" onClick={onForceLogout}>
+                  <LogOut className="w-3 h-3" /> Force Logout
+                </Button>
+                <Button size="sm" variant="outline" className="border-slate-700 text-xs gap-1" onClick={onResetPassword}>
+                  <RotateCcw className="w-3 h-3" /> Reset Pass
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Warnings history */}
           {user.warnings.length > 0 && (
@@ -354,8 +412,7 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
                     <p className="text-xs text-slate-500 mt-1">{new Date(w.created_at).toLocaleDateString()}</p>
                     <Button
                       onClick={(e) => { e.stopPropagation(); onRemoveWarning(w.id); }}
-                      size="sm"
-                      variant="ghost"
+                      size="sm" variant="ghost"
                       className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition-opacity"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -379,69 +436,107 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
               </div>
             </div>
           )}
+
+          {/* Admin Notes */}
+          {!isDemo && (
+            <div>
+              <h4 className="text-xs font-mono text-slate-400 mb-2 flex items-center gap-2">
+                <StickyNote className="w-3 h-3" /> ADMIN NOTES
+              </h4>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    placeholder="Add a note..."
+                    className="bg-slate-900 border-slate-700 text-sm font-mono"
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
+                  />
+                  <Button size="sm" onClick={handleAddNote} className="bg-cyan-600 hover:bg-cyan-500" disabled={!newNote.trim()}>
+                    <Send className="w-3 h-3" />
+                  </Button>
+                </div>
+                {notesLoading ? (
+                  <p className="text-xs text-slate-500 font-mono">Loading notes...</p>
+                ) : notes.length === 0 ? (
+                  <p className="text-xs text-slate-500 font-mono">No notes yet</p>
+                ) : (
+                  notes.map(n => (
+                    <div key={n.id} className="p-2 rounded bg-slate-900/50 border border-slate-800 text-sm group relative">
+                      <p className="text-slate-300 font-mono text-xs">{n.note}</p>
+                      <p className="text-xs text-slate-600 mt-1">{new Date(n.created_at).toLocaleString()}</p>
+                      <Button
+                        onClick={() => handleDeleteNote(n.id)}
+                        size="sm" variant="ghost"
+                        className="absolute top-1 right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-400"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </ScrollArea>
 
       {/* Actions */}
       <div className="p-4 border-t border-slate-800 space-y-2">
-        {user.role !== 'admin' ? (
+        {user.role !== 'admin' && user.role !== 'creator' ? (
           <>
             <div className="grid grid-cols-2 gap-2">
-              <Button 
-                onClick={onWarn}
-                className="bg-amber-600 hover:bg-amber-500 gap-1"
-              >
+              <Button onClick={onWarn} className="bg-amber-600 hover:bg-amber-500 gap-1">
                 <AlertTriangle className="w-4 h-4" /> Warn
               </Button>
               {user.isBanned ? (
-                <Button 
-                  onClick={onUnban}
-                  className="bg-green-600 hover:bg-green-500 gap-1"
-                >
+                <Button onClick={onUnban} className="bg-green-600 hover:bg-green-500 gap-1">
                   <CheckCircle className="w-4 h-4" /> Unban
                 </Button>
               ) : (
-                <Button 
-                  onClick={onBan}
-                  className="bg-red-600 hover:bg-red-500 gap-1"
-                >
+                <Button onClick={onBan} className="bg-red-600 hover:bg-red-500 gap-1">
                   <Ban className="w-4 h-4" /> Ban
                 </Button>
               )}
             </div>
             
-            {/* VIP Button */}
-            {!user.isVip ? (
-              <Button 
-                onClick={onVip}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-2"
-              >
-                <Star className="w-4 h-4" /> Grant VIP Status
-              </Button>
-            ) : (
-              <Button 
-                onClick={onRevokeVip}
-                className="w-full bg-slate-600 hover:bg-slate-500 gap-2"
-              >
-                <Star className="w-4 h-4" /> Revoke VIP Status
-              </Button>
+            {/* VIP (not for trial admins) */}
+            {!isTrialAdmin && (
+              !user.isVip ? (
+                <Button onClick={onVip} className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-2">
+                  <Star className="w-4 h-4" /> Grant VIP Status
+                </Button>
+              ) : (
+                <Button onClick={onRevokeVip} className="w-full bg-slate-600 hover:bg-slate-500 gap-2">
+                  <Star className="w-4 h-4" /> Revoke VIP Status
+                </Button>
+              )
             )}
             
-            {/* OP Button */}
-            <Button 
-              onClick={onOp}
-              className="w-full bg-purple-600 hover:bg-purple-500 gap-2"
-            >
-              <Crown className="w-4 h-4" /> Grant Admin (OP)
-            </Button>
+            {/* OP (not for trial admins) */}
+            {!isTrialAdmin && (
+              <Button onClick={onOp} className="w-full bg-purple-600 hover:bg-purple-500 gap-2">
+                <Crown className="w-4 h-4" /> Grant Admin (OP)
+              </Button>
+            )}
+
+            {/* Trial Admin grant (full admins/creators only) */}
+            {!isTrialAdmin && user.role !== 'trial_admin' && (
+              <Button onClick={onSetTrialAdmin} variant="outline" className="w-full border-orange-500/30 text-orange-400 hover:bg-orange-500/10 gap-2">
+                <ShieldQuestion className="w-4 h-4" /> Grant Trial Admin
+              </Button>
+            )}
+
+            {/* Promote trial admin (full admins/creators only) */}
+            {!isTrialAdmin && user.role === 'trial_admin' && (
+              <Button onClick={onPromoteTrial} className="w-full bg-orange-600 hover:bg-orange-500 gap-2">
+                <BadgeCheck className="w-4 h-4" /> Promote to Full Admin
+              </Button>
+            )}
           </>
         ) : (
-          /* Demote button for admins - available to creators only (or in demo mode) */
           (isDemo || isCreator) && (
-            <Button 
-              onClick={onDeop}
-              className="w-full bg-orange-600 hover:bg-orange-500 gap-2"
-            >
+            <Button onClick={onDeop} className="w-full bg-orange-600 hover:bg-orange-500 gap-2">
               <UserCog className="w-4 h-4" /> Demote Admin (De-OP)
             </Button>
           )
@@ -451,7 +546,9 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
   );
 };
 
-// Live activity feed
+// =============================================
+// Activity Feed
+// =============================================
 const ActivityFeed = ({ activities }: { activities: ActivityLog[] }) => {
   const getActivityIcon = (type: ActivityLog["type"]) => {
     switch (type) {
@@ -480,19 +577,8 @@ const ActivityFeed = ({ activities }: { activities: ActivityLog[] }) => {
 };
 
 // Sidebar Navigation Item
-const SidebarNavItem = ({ 
-  icon: Icon, 
-  label, 
-  count,
-  active, 
-  onClick, 
-  color = 'cyan' 
-}: { 
-  icon: any; 
-  label: string; 
-  count?: number;
-  active: boolean; 
-  onClick: () => void;
+const SidebarNavItem = ({ icon: Icon, label, count, active, onClick, color = 'cyan' }: { 
+  icon: any; label: string; count?: number; active: boolean; onClick: () => void;
   color?: 'cyan' | 'purple' | 'blue' | 'amber' | 'red';
 }) => {
   const colorClasses = {
@@ -519,12 +605,277 @@ const SidebarNavItem = ({
   );
 };
 
+// =============================================
+// PIN Prompt Screen
+// =============================================
+const PinPromptScreen = ({ onVerified, hasPin }: { onVerified: () => void; hasPin: boolean }) => {
+  const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [isSetup, setIsSetup] = useState(!hasPin);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [attemptsLeft, setAttemptsLeft] = useState(3);
+
+  const handleVerify = async () => {
+    if (pin.length < 4) return;
+    setLoading(true);
+    setError('');
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'verify_pin', pin }
+      });
+      if (response.data?.verified) {
+        onVerified();
+      } else {
+        setAttemptsLeft(response.data?.attemptsLeft ?? 0);
+        if (response.data?.locked) {
+          setError('Account locked for 15 minutes due to too many failed attempts.');
+        } else {
+          setError(`Invalid PIN. ${response.data?.attemptsLeft ?? 0} attempts remaining.`);
+        }
+        setPin('');
+      }
+    } catch (e) {
+      setError('Failed to verify PIN');
+    } finally { setLoading(false); }
+  };
+
+  const handleSetup = async () => {
+    if (pin.length < 4 || pin !== confirmPin) {
+      setError('PINs must match and be 4-6 digits');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'set_pin', pin }
+      });
+      if (response.error) throw response.error;
+      toast.success('PIN set successfully');
+      onVerified();
+    } catch (e) {
+      setError('Failed to set PIN');
+    } finally { setLoading(false); }
+  };
+
+  const handleSkip = () => {
+    onVerified();
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="max-w-sm w-full p-8 rounded-xl bg-slate-900/50 border-2 border-cyan-500/30 shadow-2xl shadow-cyan-500/10">
+        <div className="text-center mb-6">
+          <div className="relative inline-block mb-4">
+            <KeyRound className="w-12 h-12 text-cyan-400" />
+            <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-full" />
+          </div>
+          <h2 className="text-xl font-bold font-mono text-cyan-400">
+            {isSetup ? 'SET UP PIN' : 'ENTER PIN'}
+          </h2>
+          <p className="text-xs text-slate-500 font-mono mt-1">
+            {isSetup ? 'Create a 4-6 digit PIN for panel access' : 'Enter your moderation PIN to continue'}
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <InputOTP maxLength={6} value={pin} onChange={setPin}>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
+
+          {isSetup && (
+            <>
+              <p className="text-xs text-slate-500 font-mono text-center">Confirm PIN:</p>
+              <div className="flex justify-center">
+                <InputOTP maxLength={6} value={confirmPin} onChange={setConfirmPin}>
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+            </>
+          )}
+
+          {error && (
+            <p className="text-xs text-red-400 font-mono text-center">{error}</p>
+          )}
+
+          <Button 
+            onClick={isSetup ? handleSetup : handleVerify}
+            disabled={loading || pin.length < 4}
+            className="w-full bg-cyan-600 hover:bg-cyan-500 font-mono"
+          >
+            {loading ? 'Processing...' : isSetup ? 'Set PIN' : 'Verify'}
+          </Button>
+
+          {isSetup && (
+            <Button onClick={handleSkip} variant="ghost" className="w-full text-slate-500 text-xs font-mono">
+              Skip for now
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// =============================================
+// Security Tab Component
+// =============================================
+const SecurityTab = () => {
+  const [hasPin, setHasPin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [newPin, setNewPin] = useState('');
+  const [confirmNewPin, setConfirmNewPin] = useState('');
+  const [settingPin, setSettingPin] = useState(false);
+
+  useEffect(() => {
+    const checkPin = async () => {
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        const response = await fetch(
+          `https://oukxkpihsyikamzldiek.supabase.co/functions/v1/admin-actions?action=check_pin_status`,
+          { headers: { 'Authorization': `Bearer ${session.session?.access_token}`, 'Content-Type': 'application/json' } }
+        );
+        const result = await response.json();
+        setHasPin(result.hasPin);
+      } catch (e) { console.error(e); }
+      finally { setLoading(false); }
+    };
+    checkPin();
+  }, []);
+
+  const handleSetPin = async () => {
+    if (newPin.length < 4 || newPin !== confirmNewPin) {
+      toast.error('PINs must match and be 4-6 digits');
+      return;
+    }
+    setSettingPin(true);
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'set_pin', pin: newPin }
+      });
+      if (response.error) throw response.error;
+      toast.success('PIN updated');
+      setHasPin(true);
+      setNewPin('');
+      setConfirmNewPin('');
+    } catch { toast.error('Failed to set PIN'); }
+    finally { setSettingPin(false); }
+  };
+
+  const handleRemovePin = async () => {
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'remove_pin' }
+      });
+      if (response.error) throw response.error;
+      toast.success('PIN removed');
+      setHasPin(false);
+    } catch { toast.error('Failed to remove PIN'); }
+  };
+
+  if (loading) return <p className="text-slate-500 font-mono text-sm">Loading security settings...</p>;
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold font-mono text-cyan-400 flex items-center gap-2">
+        <KeyRound className="w-5 h-5" /> Security Settings
+      </h2>
+      
+      <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800 space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-mono font-bold text-sm">Moderation PIN</h3>
+            <p className="text-xs text-slate-500 font-mono">Required to access the moderation panel</p>
+          </div>
+          <span className={`px-2 py-1 rounded text-xs font-mono border ${hasPin ? 'bg-green-500/20 text-green-400 border-green-500/30' : 'bg-slate-800 text-slate-400 border-slate-700'}`}>
+            {hasPin ? 'ENABLED' : 'DISABLED'}
+          </span>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-mono text-slate-400 block mb-1">{hasPin ? 'Change PIN' : 'Set new PIN'} (4-6 digits)</label>
+            <div className="flex justify-center">
+              <InputOTP maxLength={6} value={newPin} onChange={setNewPin}>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-mono text-slate-400 block mb-1">Confirm PIN</label>
+            <div className="flex justify-center">
+              <InputOTP maxLength={6} value={confirmNewPin} onChange={setConfirmNewPin}>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleSetPin} disabled={settingPin || newPin.length < 4} className="bg-cyan-600 hover:bg-cyan-500 gap-1 flex-1">
+              <Save className="w-3 h-3" /> {hasPin ? 'Update PIN' : 'Set PIN'}
+            </Button>
+            {hasPin && (
+              <Button onClick={handleRemovePin} variant="outline" className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+                Remove
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
+        <h3 className="font-mono font-bold text-sm mb-2">Security Info</h3>
+        <ul className="text-xs text-slate-500 font-mono space-y-1">
+          <li>• PIN is hashed server-side (SHA-256)</li>
+          <li>• 3 failed attempts = 15 minute lockout</li>
+          <li>• PIN is required on every panel access</li>
+          <li>• Only you can set/change/remove your PIN</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+// =============================================
+// MAIN COMPONENT
+// =============================================
 const ModerationPanel = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCreator, setIsCreator] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [adminRole, setAdminRole] = useState<string>('admin');
   const [users, setUsers] = useState<UserData[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
@@ -533,6 +884,11 @@ const ModerationPanel = () => {
   const [logs, setLogs] = useState<any[]>([]);
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  
+  // PIN state
+  const [pinVerified, setPinVerified] = useState(false);
+  const [pinCheckDone, setPinCheckDone] = useState(false);
+  const [hasPinSet, setHasPinSet] = useState(false);
   
   // Bulk selection state
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
@@ -551,7 +907,7 @@ const ModerationPanel = () => {
   const [statuses, setStatuses] = useState<StatusEntry[]>([]);
   const [statusLoading, setStatusLoading] = useState(false);
   
-  // Activity feed (simulated)
+  // Activity feed
   const [activities, setActivities] = useState<ActivityLog[]>([
     { id: "1", type: "system", message: "NAVI: Moderation panel accessed", timestamp: new Date() },
     { id: "2", type: "system", message: "NAVI: Security scan completed - no threats", timestamp: new Date(Date.now() - 60000) },
@@ -586,6 +942,8 @@ const ModerationPanel = () => {
   const [testEmergencyCooldown, setTestEmergencyCooldown] = useState<Date | null>(null);
   const [testEmergencyLoading, setTestEmergencyLoading] = useState(false);
 
+  const isTrialAdmin = adminRole === 'trial_admin';
+
   // Check admin status and fetch data
   useEffect(() => {
     const checkAdminAndFetch = async () => {
@@ -594,34 +952,22 @@ const ModerationPanel = () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          // No session - enter demo mode
           setIsDemoMode(true);
           setUsers(DEMO_USERS);
-          setActivities(prev => [{
-            id: Date.now().toString(),
-            type: "system",
-            message: "DEMO MODE: Not logged in - using test data",
-            timestamp: new Date()
-          }, ...prev]);
+          setPinCheckDone(true);
+          setPinVerified(true);
           setIsLoading(false);
           return;
         }
 
-        const response = await supabase.functions.invoke('admin-actions', {
-          method: 'GET'
-        });
+        const response = await supabase.functions.invoke('admin-actions', { method: 'GET' });
 
         if (response.error) {
           if (response.error.message?.includes('403') || response.error.message?.includes('Access denied')) {
-            // Not admin - enter demo mode
             setIsDemoMode(true);
             setUsers(DEMO_USERS);
-            setActivities(prev => [{
-              id: Date.now().toString(),
-              type: "system",
-              message: "DEMO MODE: Not authorized - using test data",
-              timestamp: new Date()
-            }, ...prev]);
+            setPinCheckDone(true);
+            setPinVerified(true);
             toast.info("Demo mode - actions won't affect cloud");
             setIsLoading(false);
             return;
@@ -631,27 +977,40 @@ const ModerationPanel = () => {
 
         setIsAdmin(true);
         setIsCreator(response.data.isCreator || false);
+        setAdminRole(response.data.adminRole || 'admin');
         setUsers(response.data.users || []);
         
-        // Add activity
+        // Check PIN status
+        const pinResponse = await fetch(
+          `https://oukxkpihsyikamzldiek.supabase.co/functions/v1/admin-actions?action=check_pin_status`,
+          { headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' } }
+        );
+        const pinResult = await pinResponse.json();
+        setHasPinSet(pinResult.hasPin);
+        
+        if (pinResult.hasPin) {
+          if (pinResult.isLocked) {
+            toast.error('PIN locked for 15 minutes due to failed attempts');
+          }
+          setPinVerified(false);
+        } else {
+          // No PIN set - show setup prompt
+          setPinVerified(false);
+        }
+        setPinCheckDone(true);
+        
         setActivities(prev => [{
-          id: Date.now().toString(),
-          type: "system",
-          message: `Admin authenticated - ${response.data.users?.length || 0} users loaded`,
+          id: Date.now().toString(), type: "system",
+          message: `Admin authenticated (${response.data.adminRole}) - ${response.data.users?.length || 0} users loaded`,
           timestamp: new Date()
         }, ...prev]);
         
       } catch (error: any) {
         console.error("Admin check error:", error);
-        // Enter demo mode on error
         setIsDemoMode(true);
         setUsers(DEMO_USERS);
-        setActivities(prev => [{
-          id: Date.now().toString(),
-          type: "system",
-          message: "DEMO MODE: Connection error - using test data",
-          timestamp: new Date()
-        }, ...prev]);
+        setPinCheckDone(true);
+        setPinVerified(true);
         toast.info("Demo mode enabled");
       } finally {
         setIsLoading(false);
@@ -668,69 +1027,41 @@ const ModerationPanel = () => {
       const response = await supabase.functions.invoke('admin-actions', {
         body: { action: 'get_active_test_emergency' }
       });
-      if (response.data?.emergency) {
-        setActiveTestEmergency(response.data.emergency);
-      } else {
-        setActiveTestEmergency(null);
-      }
+      if (response.data?.emergency) setActiveTestEmergency(response.data.emergency);
+      else setActiveTestEmergency(null);
       
-      // Check cooldown
       const cooldownResponse = await supabase.functions.invoke('admin-actions', {
         body: { action: 'get_test_emergency_cooldown' }
       });
-      if (cooldownResponse.data?.onCooldown) {
-        setTestEmergencyCooldown(new Date(cooldownResponse.data.nextAvailable));
-      } else {
-        setTestEmergencyCooldown(null);
-      }
-    } catch (error) {
-      console.error("Test emergency status error:", error);
-    }
+      if (cooldownResponse.data?.onCooldown) setTestEmergencyCooldown(new Date(cooldownResponse.data.nextAvailable));
+      else setTestEmergencyCooldown(null);
+    } catch (error) { console.error("Test emergency status error:", error); }
   };
 
   useEffect(() => {
-    if (!isDemoMode && isAdmin) {
-      fetchTestEmergencyStatus();
-    }
-  }, [isDemoMode, isAdmin]);
+    if (!isDemoMode && isAdmin && pinVerified) fetchTestEmergencyStatus();
+  }, [isDemoMode, isAdmin, pinVerified]);
 
   const fetchUsers = async () => {
     try {
       const response = await supabase.functions.invoke('admin-actions', { method: 'GET' });
       if (response.data?.users) {
         setUsers(response.data.users);
-        setActivities(prev => [{
-          id: Date.now().toString(),
-          type: "system",
-          message: "User data refreshed",
-          timestamp: new Date()
-        }, ...prev]);
+        setActivities(prev => [{ id: Date.now().toString(), type: "system", message: "User data refreshed", timestamp: new Date() }, ...prev]);
       }
-    } catch (error) {
-      console.error("Fetch error:", error);
-    }
+    } catch (error) { console.error("Fetch error:", error); }
   };
 
   const fetchLogs = async () => {
     try {
-      // Use query params for GET requests
       const { data: session } = await supabase.auth.getSession();
       const response = await fetch(
         `https://oukxkpihsyikamzldiek.supabase.co/functions/v1/admin-actions?action=logs`,
-        {
-          headers: {
-            'Authorization': `Bearer ${session.session?.access_token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+        { headers: { 'Authorization': `Bearer ${session.session?.access_token}`, 'Content-Type': 'application/json' } }
       );
       const result = await response.json();
-      if (result?.logs) {
-        setLogs(result.logs);
-      }
-    } catch (error) {
-      console.error("Fetch logs error:", error);
-    }
+      if (result?.logs) setLogs(result.logs);
+    } catch (error) { console.error("Fetch logs error:", error); }
   };
 
   const fetchStatuses = async () => {
@@ -772,6 +1103,10 @@ const ModerationPanel = () => {
       toast.error("Failed to update status");
     }
   };
+
+  // =============================================
+  // ACTION HANDLERS
+  // =============================================
 
   const handleWarn = async () => {
     if (!selectedUser || !warnReason) return;
@@ -1229,13 +1564,63 @@ const ModerationPanel = () => {
     }
   };
 
-  // Handle test emergency start
+  // Extended management handlers
+  const handleSetClearance = async (clearance: number) => {
+    if (!selectedUser) return;
+    if (isDemoMode) { toast.success(`[DEMO] Clearance set to ${clearance}`); return; }
+    try {
+      const response = await supabase.functions.invoke('admin-actions', { body: { action: 'set_clearance', targetUserId: selectedUser.user_id, clearance } });
+      if (response.error) throw response.error;
+      toast.success(`Clearance set to Level ${clearance}`);
+      fetchUsers();
+    } catch { toast.error('Failed to set clearance'); }
+  };
+
+  const handleForceLogout = async () => {
+    if (!selectedUser) return;
+    if (isDemoMode) { toast.success('[DEMO] Force logout'); return; }
+    try {
+      const response = await supabase.functions.invoke('admin-actions', { body: { action: 'force_logout', targetUserId: selectedUser.user_id } });
+      if (response.error) throw response.error;
+      toast.success(`Force logged out ${selectedUser.username}`);
+    } catch { toast.error('Failed to force logout'); }
+  };
+
+  const handleResetPassword = async () => {
+    if (!selectedUser) return;
+    if (isDemoMode) { toast.success('[DEMO] Password reset sent'); return; }
+    try {
+      const response = await supabase.functions.invoke('admin-actions', { body: { action: 'reset_password', targetUserId: selectedUser.user_id } });
+      if (response.error) throw response.error;
+      toast.success(`Password reset sent for ${selectedUser.username}`);
+    } catch { toast.error('Failed to reset password'); }
+  };
+
+  const handleSetTrialAdmin = async () => {
+    if (!selectedUser) return;
+    if (isDemoMode) { toast.success(`[DEMO] Trial admin granted to ${selectedUser.username}`); return; }
+    try {
+      const response = await supabase.functions.invoke('admin-actions', { body: { action: 'set_trial_admin', targetUserId: selectedUser.user_id } });
+      if (response.error) throw response.error;
+      toast.success(`Trial admin granted to ${selectedUser.username}`);
+      setShowUserDetails(false); fetchUsers();
+    } catch { toast.error('Failed to grant trial admin'); }
+  };
+
+  const handlePromoteTrial = async () => {
+    if (!selectedUser) return;
+    if (isDemoMode) { toast.success(`[DEMO] Promoted ${selectedUser.username} to full admin`); return; }
+    try {
+      const response = await supabase.functions.invoke('admin-actions', { body: { action: 'promote_trial', targetUserId: selectedUser.user_id } });
+      if (response.error) throw response.error;
+      toast.success(`Promoted ${selectedUser.username} to full admin`);
+      setShowUserDetails(false); fetchUsers();
+    } catch { toast.error('Failed to promote'); }
+  };
+
+  // Test emergency handlers
   const handleStartTestEmergency = async () => {
-    if (isDemoMode) {
-      toast.info("[DEMO] Test emergency would be started");
-      return;
-    }
-    
+    if (isDemoMode) { toast.info("[DEMO] Test emergency would be started"); return; }
     setTestEmergencyLoading(true);
     try {
       const response = await supabase.functions.invoke('admin-actions', {
@@ -1268,7 +1653,6 @@ const ModerationPanel = () => {
     }
   };
 
-  // Handle test emergency end
   const handleEndTestEmergency = async () => {
     if (!activeTestEmergency || isDemoMode) return;
     
@@ -1383,7 +1767,6 @@ const ModerationPanel = () => {
         fetchUsers();
       } catch { toast.error("Bulk VIP failed"); }
     }
-    setActivities(prev => [{ id: Date.now().toString(), type: "op", message: `Bulk VIP granted to ${selectedUserIds.size} users`, timestamp: new Date() }, ...prev]);
     setSelectedUserIds(new Set());
   };
 
@@ -1395,8 +1778,7 @@ const ModerationPanel = () => {
     if (logDateFilter !== 'all') {
       const logDate = new Date(log.created_at);
       const now = new Date();
-      const diffMs = now.getTime() - logDate.getTime();
-      const diffHours = diffMs / (1000 * 60 * 60);
+      const diffHours = (now.getTime() - logDate.getTime()) / (1000 * 60 * 60);
       if (logDateFilter === '1h') matchesDate = diffHours <= 1;
       else if (logDateFilter === '24h') matchesDate = diffHours <= 24;
       else if (logDateFilter === '7d') matchesDate = diffHours <= 168;
@@ -1416,6 +1798,7 @@ const ModerationPanel = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  // Loading screen
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -1431,103 +1814,96 @@ const ModerationPanel = () => {
     );
   }
 
+  // PIN gate (only for real admins, not demo)
+  if (!isDemoMode && pinCheckDone && !pinVerified) {
+    return <PinPromptScreen onVerified={() => setPinVerified(true)} hasPin={hasPinSet} />;
+  }
+
+  // Get ban duration options based on role
+  const banDurationOptions = isTrialAdmin 
+    ? (['1h', '24h'] as const) 
+    : (['1h', '24h', '7d', '30d', 'perm'] as const);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-[#0a0f1a] to-slate-950 text-foreground">
       {/* Demo Mode Banner */}
       {isDemoMode && (
         <div className="bg-amber-500/20 border-b-2 border-amber-500/30 px-6 py-4">
-          <div className="max-w-[1800px] mx-auto">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-3 text-amber-400">
-                <div className="p-2 rounded-lg bg-amber-500/20 border border-amber-500/30">
-                  <Eye className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="font-bold text-lg font-mono">DEMO MODE ACTIVE</span>
-                  <p className="text-xs text-amber-400/70 font-mono">You're viewing a preview of the moderation panel</p>
-                </div>
+          <div className="max-w-[1800px] mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Eye className="w-6 h-6 text-amber-400" />
+              <div>
+                <h3 className="font-bold text-amber-400 font-mono">DEMO MODE</h3>
+                <p className="text-sm text-amber-300/70 font-mono">Changes are local only - not synced to cloud</p>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.location.href = '/acc-manage/general'}
-                className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
-              >
-                Login as Admin
-              </Button>
             </div>
-            <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
-              <p className="text-xs text-slate-400 font-mono">
-                <strong className="text-amber-400">⚠️ Notice:</strong> You are not logged in as an admin. 
-                This is a demonstration view with sample data. Any actions you take here (warn, ban, OP, etc.) 
-                will only affect the demo data and <strong>will NOT be saved</strong> to the cloud. 
-                To manage real users, please log in with an admin account.
-              </p>
-            </div>
+            <span className="px-3 py-1 rounded bg-amber-500/30 text-amber-400 font-mono text-xs">NOT AUTHENTICATED</span>
           </div>
         </div>
       )}
       
       {/* Hadal Blacksite Header */}
-      <div className="border-b-2 border-cyan-500/30 bg-gradient-to-r from-slate-950 via-cyan-950/20 to-slate-950">
-        <div className="max-w-[1800px] mx-auto px-6 py-4">
+      <div className="border-b-2 border-cyan-500/20 bg-gradient-to-r from-slate-950 via-cyan-950/20 to-slate-950">
+        <div className="max-w-[1800px] mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-cyan-500/20 to-slate-900 border-2 border-cyan-500/40 flex items-center justify-center">
-                  <Shield className="w-7 h-7 text-cyan-400" />
-                </div>
-                {lockdownActive && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse" />
-                )}
+                <Shield className="w-10 h-10 text-cyan-400" />
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-cyan-400 font-mono tracking-wider">HADAL BLACKSITE</h1>
-                  {isDemoMode && (
-                    <span className="px-2 py-0.5 rounded text-xs font-mono bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                      DEMO
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold font-mono text-cyan-400">MODERATION PANEL</h1>
+                  {adminRole && adminRoleBadge[adminRole] && !isDemoMode && (
+                    <span className={`px-2 py-0.5 rounded text-xs font-mono border ${adminRoleBadge[adminRole].color}`}>
+                      {adminRoleBadge[adminRole].label}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 font-mono">MODERATION CONTROL CENTER</p>
+                <p className="text-sm text-slate-500 font-mono">Hadal Blacksite Control System v3.2</p>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
               {/* NAVI Message Button */}
-              <Button 
-                onClick={() => setShowNaviMessageDialog(true)}
-                className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 gap-2"
-              >
-                <Bot className="w-4 h-4" /> NAVI Message
-              </Button>
+              {!isTrialAdmin && (
+                <Button 
+                  onClick={() => setShowNaviMessageDialog(true)}
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 gap-2"
+                >
+                  <Bot className="w-4 h-4" /> NAVI Message
+                </Button>
+              )}
               
               {/* Broadcast Button */}
-              <Button 
-                onClick={() => setShowBroadcastDialog(true)}
-                variant="outline" 
-                className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 gap-2"
-              >
-                <Megaphone className="w-4 h-4" /> Broadcast
-              </Button>
+              {!isTrialAdmin && (
+                <Button 
+                  onClick={() => setShowBroadcastDialog(true)}
+                  variant="outline" 
+                  className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 gap-2"
+                >
+                  <Megaphone className="w-4 h-4" /> Broadcast
+                </Button>
+              )}
               
               {/* Lock Site Status */}
-              {lockdownActive ? (
-                <Button 
-                  onClick={handleLiftLockdown}
-                  className="bg-red-600 hover:bg-red-500 gap-2 animate-pulse"
-                >
-                  <Lock className="w-4 h-4" /> SITE LOCKED
-                </Button>
-              ) : (
-                <Button 
-                  onClick={() => setShowLockdownDialog(true)}
-                  variant="outline" 
-                  className="border-red-500/30 text-red-400 hover:bg-red-500/10 gap-2"
-                >
-                  <AlertOctagon className="w-4 h-4" /> Lock Site
-                </Button>
+              {!isTrialAdmin && (
+                lockdownActive ? (
+                  <Button 
+                    onClick={handleLiftLockdown}
+                    className="bg-red-600 hover:bg-red-500 gap-2 animate-pulse"
+                  >
+                    <Lock className="w-4 h-4" /> SITE LOCKED
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={() => setShowLockdownDialog(true)}
+                    variant="outline" 
+                    className="border-red-500/30 text-red-400 hover:bg-red-500/10 gap-2"
+                  >
+                    <AlertOctagon className="w-4 h-4" /> Lock Site
+                  </Button>
+                )
               )}
               
               <Button variant="outline" onClick={isDemoMode ? () => setUsers(DEMO_USERS) : fetchUsers} className="gap-2 border-slate-700">
@@ -1557,12 +1933,17 @@ const ModerationPanel = () => {
             <SidebarNavItem icon={Shield} label="Authorities" active={activeTab === 'authorities'} onClick={() => setActiveTab('authorities')} color="purple" />
             <SidebarNavItem icon={BarChart3} label="Stats" active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} color="blue" />
             <SidebarNavItem icon={FileText} label="Logs" active={activeTab === 'logs'} onClick={() => { setActiveTab('logs'); fetchLogs(); }} color="cyan" />
+            <SidebarNavItem icon={KeyRound} label="Security" active={activeTab === 'security'} onClick={() => setActiveTab('security')} color="amber" />
             
-            <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider mt-3">NAVI</div>
-            
-            <SidebarNavItem icon={Bot} label="NAVI Config" active={activeTab === 'navi-config'} onClick={() => setActiveTab('navi-config')} color="amber" />
-            <SidebarNavItem icon={Hash} label="Chat" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} color="cyan" />
-            <SidebarNavItem icon={Zap} label="Test Emergency" active={activeTab === 'test-emergency'} onClick={() => { setActiveTab('test-emergency'); fetchTestEmergencyStatus(); }} color="red" />
+            {/* NAVI section (hidden for trial admins) */}
+            {!isTrialAdmin && (
+              <>
+                <div className="px-3 py-2 text-xs font-mono text-slate-500 uppercase tracking-wider mt-3">NAVI</div>
+                <SidebarNavItem icon={Bot} label="NAVI Config" active={activeTab === 'navi-config'} onClick={() => setActiveTab('navi-config')} color="amber" />
+                <SidebarNavItem icon={Hash} label="Chat" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} color="cyan" />
+                <SidebarNavItem icon={Zap} label="Test Emergency" active={activeTab === 'test-emergency'} onClick={() => { setActiveTab('test-emergency'); fetchTestEmergencyStatus(); }} color="red" />
+              </>
+            )}
           </div>
         </div>
 
@@ -1589,6 +1970,7 @@ const ModerationPanel = () => {
                   <SelectContent className="bg-slate-900 border-slate-700">
                     <SelectItem value="all">All Roles</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="trial_admin">Trial Admin</SelectItem>
                     <SelectItem value="moderator">Moderator</SelectItem>
                     <SelectItem value="user">User</SelectItem>
                   </SelectContent>
@@ -1623,51 +2005,23 @@ const ModerationPanel = () => {
 
               {/* Stats Row */}
               <div className="grid grid-cols-5 gap-4">
-                <div className="p-4 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <Users className="w-5 h-5 text-cyan-400" />
-                    <div>
-                      <div className="text-2xl font-bold text-cyan-400 font-mono">{users.length}</div>
-                      <div className="text-xs text-slate-500 font-mono">TOTAL</div>
+                {[
+                  { icon: Users, value: users.length, label: "TOTAL", color: "text-cyan-400" },
+                  { icon: Ban, value: users.filter(u => u.isBanned).length, label: "BANNED", color: "text-red-400" },
+                  { icon: AlertTriangle, value: users.reduce((acc, u) => acc + u.warningsCount, 0), label: "WARNINGS", color: "text-amber-400" },
+                  { icon: ShieldCheck, value: users.filter(u => !u.isBanned && u.warningsCount === 0).length, label: "CLEAN", color: "text-green-400" },
+                  { icon: Shield, value: users.filter(u => u.role === 'admin' || u.role === 'trial_admin').length, label: "STAFF", color: "text-purple-400" },
+                ].map((stat, i) => (
+                  <div key={i} className="p-4 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                      <div>
+                        <div className={`text-2xl font-bold ${stat.color} font-mono`}>{stat.value}</div>
+                        <div className="text-xs text-slate-500 font-mono">{stat.label}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="p-4 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <Ban className="w-5 h-5 text-red-400" />
-                    <div>
-                      <div className="text-2xl font-bold text-red-400 font-mono">{users.filter(u => u.isBanned).length}</div>
-                      <div className="text-xs text-slate-500 font-mono">BANNED</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="w-5 h-5 text-amber-400" />
-                    <div>
-                      <div className="text-2xl font-bold text-amber-400 font-mono">{users.reduce((acc, u) => acc + u.warningsCount, 0)}</div>
-                      <div className="text-xs text-slate-500 font-mono">WARNINGS</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="w-5 h-5 text-green-400" />
-                    <div>
-                      <div className="text-2xl font-bold text-green-400 font-mono">{users.filter(u => !u.isBanned && u.warningsCount === 0).length}</div>
-                      <div className="text-xs text-slate-500 font-mono">CLEAN</div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 rounded-lg bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800">
-                  <div className="flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-purple-400" />
-                    <div>
-                      <div className="text-2xl font-bold text-purple-400 font-mono">{users.filter(u => u.role === 'admin').length}</div>
-                      <div className="text-xs text-slate-500 font-mono">ADMINS</div>
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
 
               {/* Select All + Bulk Actions Bar */}
@@ -1703,9 +2057,11 @@ const ModerationPanel = () => {
                     <Button size="sm" onClick={() => setShowBulkBanDialog(true)} className="bg-red-600 hover:bg-red-500 gap-1">
                       <Ban className="w-3 h-3" /> Ban All ({selectedUserIds.size})
                     </Button>
-                    <Button size="sm" onClick={handleBulkVip} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-1">
-                      <Star className="w-3 h-3" /> VIP All ({selectedUserIds.size})
-                    </Button>
+                    {!isTrialAdmin && (
+                      <Button size="sm" onClick={handleBulkVip} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-1">
+                        <Star className="w-3 h-3" /> VIP All ({selectedUserIds.size})
+                      </Button>
+                    )}
                     <Button size="sm" variant="ghost" onClick={() => setSelectedUserIds(new Set())} className="text-slate-400">
                       <XCircle className="w-4 h-4" />
                     </Button>
@@ -1742,7 +2098,8 @@ const ModerationPanel = () => {
                           onClick={() => { setSelectedUser(user); setShowUserDetails(true); }}
                         >
                           <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-lg font-bold ${
-                            user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
+                            user.role === 'admin' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                            user.role === 'trial_admin' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
                             user.role === 'moderator' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
                             'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
                           }`}>
@@ -1756,10 +2113,11 @@ const ModerationPanel = () => {
                             <div className="flex items-center gap-2 mt-1">
                               <span className={`px-2 py-0.5 rounded text-xs font-mono border ${
                                 user.role === 'admin' ? 'bg-red-500/20 text-red-400 border-red-500/30' :
+                                user.role === 'trial_admin' ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' :
                                 user.role === 'moderator' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
                                 'bg-slate-800 text-slate-400 border-slate-700'
                               }`}>
-                                {user.role?.toUpperCase() || 'USER'}
+                                {user.role === 'trial_admin' ? 'TRIAL ADMIN' : user.role?.toUpperCase() || 'USER'}
                               </span>
                               {user.isBanned && (
                                 <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-xs font-mono flex items-center gap-1 border border-red-500/30">
@@ -1809,18 +2167,17 @@ const ModerationPanel = () => {
                   />
                 </div>
                 <Select value={logActionFilter} onValueChange={setLogActionFilter}>
-                  <SelectTrigger className="w-40 bg-slate-900/50 border-slate-700 text-sm">
+                  <SelectTrigger className="w-44 bg-slate-900/50 border-slate-700 text-sm">
                     <SelectValue placeholder="Action type" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-900 border-slate-700">
                     <SelectItem value="all">All Actions</SelectItem>
-                    <SelectItem value="warn">Warn</SelectItem>
-                    <SelectItem value="ban">Ban</SelectItem>
-                    <SelectItem value="unban">Unban</SelectItem>
-                    <SelectItem value="op">OP</SelectItem>
-                    <SelectItem value="deop">De-OP</SelectItem>
-                    <SelectItem value="grant_vip">Grant VIP</SelectItem>
-                    <SelectItem value="revoke_vip">Revoke VIP</SelectItem>
+                    <SelectItem value="warn">Warnings</SelectItem>
+                    <SelectItem value="temp_ban">Temp Bans</SelectItem>
+                    <SelectItem value="perm_ban">Perm Bans</SelectItem>
+                    <SelectItem value="unban">Unbans</SelectItem>
+                    <SelectItem value="ip_ban">IP Bans</SelectItem>
+                    <SelectItem value="warning_removed">Removed Warnings</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={logDateFilter} onValueChange={setLogDateFilter}>
@@ -1835,78 +2192,67 @@ const ModerationPanel = () => {
                     <SelectItem value="30d">Last 30 Days</SelectItem>
                   </SelectContent>
                 </Select>
-                <span className="text-xs text-slate-500 font-mono self-center">
-                  {filteredLogs.length} result{filteredLogs.length !== 1 ? 's' : ''}
+                <span className="self-center text-xs font-mono text-slate-500">
+                  {filteredLogs.length} entries
                 </span>
               </div>
 
               {/* Log entries */}
               <div className="space-y-2">
-                {filteredLogs.length === 0 ? (
-                  <div className="text-center py-16 text-slate-500">
-                    <FileText className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                    <p className="font-mono">{logs.length === 0 ? 'No moderation logs recorded' : 'No logs match your filters'}</p>
-                  </div>
-                ) : (
-                  filteredLogs.map(log => {
-                    const actionColors: Record<string, string> = {
-                      warn: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-                      ban: 'bg-red-500/20 text-red-400 border-red-500/30',
-                      unban: 'bg-green-500/20 text-green-400 border-green-500/30',
-                      op: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-                      deop: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-                      grant_vip: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
-                      revoke_vip: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-                    };
-                    const colorClass = actionColors[log.action_type] || 'bg-slate-800 text-slate-400 border-slate-700';
-                    
-                    return (
-                      <div key={log.id} className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <span className={`px-3 py-1 rounded text-xs font-mono font-bold border flex-shrink-0 ${colorClass}`}>
-                              {log.action_type.toUpperCase()}
-                            </span>
-                            <div className="min-w-0">
-                              <span className="text-slate-300 block truncate">{log.reason || 'No reason provided'}</span>
-                              <div className="flex items-center gap-2 mt-1 text-xs text-slate-500 font-mono">
-                                {log.created_by && <span>by {log.created_by.slice(0, 8)}...</span>}
-                                {log.target_user_id && <span>→ {log.target_user_id.slice(0, 8)}...</span>}
-                              </div>
-                            </div>
-                          </div>
-                          <span className="text-xs text-slate-500 font-mono flex-shrink-0 ml-3">
-                            {new Date(log.created_at).toLocaleString()}
-                          </span>
-                        </div>
+                {filteredLogs.map(log => (
+                  <div key={log.id} className={`p-3 rounded-lg border font-mono text-sm ${
+                    log.action_type === 'perm_ban' ? 'bg-red-950/30 border-red-500/30' :
+                    log.action_type === 'temp_ban' ? 'bg-orange-950/30 border-orange-500/30' :
+                    log.action_type === 'warn' ? 'bg-amber-950/20 border-amber-500/20' :
+                    log.action_type === 'unban' ? 'bg-green-950/20 border-green-500/20' :
+                    'bg-slate-900/50 border-slate-800'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                          log.action_type === 'perm_ban' ? 'bg-red-500/20 text-red-400' :
+                          log.action_type === 'temp_ban' ? 'bg-orange-500/20 text-orange-400' :
+                          log.action_type === 'warn' ? 'bg-amber-500/20 text-amber-400' :
+                          log.action_type === 'unban' ? 'bg-green-500/20 text-green-400' :
+                          'bg-slate-800 text-slate-400'
+                        }`}>{log.action_type?.toUpperCase()}</span>
+                        <span className="text-slate-300">{log.reason || 'No reason'}</span>
+                        {log.is_fake && <span className="text-purple-400 text-xs">(FAKE)</span>}
                       </div>
-                    );
-                  })
-                )}
+                      <span className="text-xs text-slate-500">{new Date(log.created_at).toLocaleString()}</span>
+                    </div>
+                    {log.target_user_id && <div className="text-xs text-slate-500 mt-1">Target: {log.target_user_id.slice(0, 8)}...</div>}
+                  </div>
+                ))}
+                {filteredLogs.length === 0 && <p className="text-center text-slate-500 font-mono text-sm py-8">No logs found</p>}
               </div>
             </div>
           )}
 
           {/* Zone Control Tab */}
           {activeTab === 'status' && (
-            <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold font-mono text-cyan-400 flex items-center gap-2"><Server className="w-5 h-5" /> Zone Control</h2>
               {statusLoading ? (
-                <div className="col-span-2 text-center py-16">
-                  <RefreshCw className="w-8 h-8 mx-auto mb-4 animate-spin text-cyan-400" />
-                  <p className="font-mono text-slate-500">Loading zone status...</p>
-                </div>
+                <p className="text-slate-500 font-mono text-sm animate-pulse">Loading zones...</p>
               ) : statuses.length === 0 ? (
-                <div className="col-span-2 text-center py-16">
-                  <Server className="w-16 h-16 mx-auto mb-4 opacity-30 text-slate-500" />
-                  <p className="font-mono text-slate-500">No zones configured</p>
-                  <p className="text-xs text-slate-600 mt-2">Add site_status entries in database</p>
-                </div>
+                <p className="text-slate-500 font-mono text-sm">No zones configured</p>
               ) : (
-                statuses.map(status => (
-                  <StatusCard key={status.id} status={status} onUpdate={updateStatus} />
-                ))
+                <div className="grid grid-cols-2 gap-4">
+                  {statuses.map(s => <StatusCard key={s.id} status={s} onUpdate={updateStatus} />)}
+                </div>
               )}
             </div>
+          )}
+
+          {/* Reports Tab */}
+          {activeTab === 'reports' && (
+            <ReportsTab isDemo={isDemoMode} />
+          )}
+
+          {/* Support Tickets Tab */}
+          {activeTab === 'support' && (
+            <SupportTicketsTab isDemo={isDemoMode} />
           )}
 
           {/* Authorities Tab */}
@@ -1917,16 +2263,6 @@ const ModerationPanel = () => {
           {/* Stats Tab */}
           {activeTab === 'stats' && (
             <StatsTab users={users} />
-          )}
-
-          {/* Support Tickets Tab */}
-          {activeTab === 'support' && (
-            <SupportTicketsTab isDemo={isDemoMode} />
-          )}
-
-          {/* Reports Tab */}
-          {activeTab === 'reports' && (
-            <ReportsTab isDemo={isDemoMode} />
           )}
 
           {/* NAVI Config Tab (formerly Autonomous) */}
@@ -2027,6 +2363,12 @@ const ModerationPanel = () => {
           onRemoveWarning={(warningId) => { setSelectedWarningId(warningId); setShowRemoveWarningDialog(true); }}
           isDemo={isDemoMode}
           isCreator={isCreator}
+          adminRole={adminRole}
+          onSetClearance={handleSetClearance}
+          onForceLogout={handleForceLogout}
+          onResetPassword={handleResetPassword}
+          onSetTrialAdmin={handleSetTrialAdmin}
+          onPromoteTrial={handlePromoteTrial}
         />
       )}
 
@@ -2075,7 +2417,7 @@ const ModerationPanel = () => {
             <div>
               <label className="text-sm font-mono mb-2 block text-slate-400">DURATION</label>
               <div className="flex flex-wrap gap-2">
-                {(['1h', '24h', '7d', '30d', 'perm'] as const).map(d => (
+                {banDurationOptions.map(d => (
                   <Button
                     key={d}
                     variant={banDuration === d ? "default" : "outline"}
