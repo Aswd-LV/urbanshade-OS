@@ -533,6 +533,13 @@ const UserDetailsPanel = ({
                 <BadgeCheck className="w-4 h-4" /> Promote to Full Admin
               </Button>
             )}
+
+            {/* Revoke trial admin (full admins/creators only) */}
+            {!isTrialAdmin && user.role === 'trial_admin' && (
+              <Button onClick={onDeop} variant="outline" className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 gap-2">
+                <UserCog className="w-4 h-4" /> Revoke Trial Admin
+              </Button>
+            )}
           </>
         ) : (
           (isDemo || isCreator) && (
@@ -2263,6 +2270,11 @@ const ModerationPanel = () => {
           {/* Stats Tab */}
           {activeTab === 'stats' && (
             <StatsTab users={users} />
+          )}
+
+          {/* Security Tab */}
+          {activeTab === 'security' && (
+            <SecurityTab />
           )}
 
           {/* NAVI Config Tab (formerly Autonomous) */}
