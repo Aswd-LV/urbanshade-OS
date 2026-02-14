@@ -1,4 +1,4 @@
-// Moderation Panel v3.2 - PIN 2FA, Trial Admin, Extended Management
+// Moderation Panel v3.3 - Creator Controls, Access Logs, Enhanced Security
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -9,7 +9,7 @@ import {
   TriangleAlert, ShieldAlert, ShieldCheck, Filter, Download, Trash2,
   MessageSquare, Bell, Volume2, VolumeX, Cpu, HardDrive, Crown, Megaphone,
   UserCog, Send, Star, Sparkles, Bot, BarChart3, Hash, Flag, KeyRound,
-  StickyNote, LogOut, RotateCcw, ShieldQuestion, BadgeCheck
+  StickyNote, LogOut, RotateCcw, ShieldQuestion, BadgeCheck, Wrench, Flame
 } from "lucide-react";
 import { NaviAuthoritiesTab } from "@/components/moderation/NaviAuthoritiesTab";
 import { NaviAutonomousPanel } from "@/components/moderation/NaviAutonomousPanel";
@@ -744,12 +744,14 @@ const PinPromptScreen = ({ onVerified, hasPin }: { onVerified: () => void; hasPi
 // =============================================
 // Security Tab Component
 // =============================================
-const SecurityTab = () => {
+const SecurityTab = ({ isCreator, users }: { isCreator: boolean; users: UserData[] }) => {
   const [hasPin, setHasPin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newPin, setNewPin] = useState('');
   const [confirmNewPin, setConfirmNewPin] = useState('');
   const [settingPin, setSettingPin] = useState(false);
+  const [roster, setRoster] = useState<any[]>([]);
+  const [rosterLoading, setRosterLoading] = useState(false);
 
   useEffect(() => {
     const checkPin = async () => {
@@ -765,7 +767,22 @@ const SecurityTab = () => {
       finally { setLoading(false); }
     };
     checkPin();
+    fetchRoster();
   }, []);
+
+  const fetchRoster = async () => {
+    setRosterLoading(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const response = await fetch(
+        `https://oukxkpihsyikamzldiek.supabase.co/functions/v1/admin-actions?action=admin_roster`,
+        { headers: { 'Authorization': `Bearer ${session.session?.access_token}`, 'Content-Type': 'application/json' } }
+      );
+      const result = await response.json();
+      setRoster(result.roster || []);
+    } catch (e) { console.error(e); }
+    finally { setRosterLoading(false); }
+  };
 
   const handleSetPin = async () => {
     if (newPin.length < 4 || newPin !== confirmNewPin) {
@@ -797,6 +814,18 @@ const SecurityTab = () => {
     } catch { toast.error('Failed to remove PIN'); }
   };
 
+  const handleForceResetPin = async (targetUserId: string, username: string) => {
+    if (!confirm(`Force reset PIN for @${username}? They will need to set up a new PIN.`)) return;
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action: 'force_reset_pin', targetUserId }
+      });
+      if (response.error) throw response.error;
+      toast.success(`PIN reset for @${username}`);
+      fetchRoster();
+    } catch { toast.error('Failed to reset PIN'); }
+  };
+
   if (loading) return <p className="text-slate-500 font-mono text-sm">Loading security settings...</p>;
 
   return (
@@ -805,6 +834,7 @@ const SecurityTab = () => {
         <KeyRound className="w-5 h-5" /> Security Settings
       </h2>
       
+      {/* PIN Management */}
       <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800 space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -860,6 +890,71 @@ const SecurityTab = () => {
         </div>
       </div>
 
+      {/* Admin Roster */}
+      <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-mono font-bold text-sm flex items-center gap-2">
+            <Shield className="w-4 h-4 text-cyan-400" /> Admin Roster
+          </h3>
+          <Button size="sm" variant="ghost" onClick={fetchRoster} className="text-slate-400">
+            <RefreshCw className={`w-3 h-3 ${rosterLoading ? 'animate-spin' : ''}`} />
+          </Button>
+        </div>
+        
+        {rosterLoading ? (
+          <p className="text-xs text-slate-500 font-mono">Loading roster...</p>
+        ) : roster.length === 0 ? (
+          <p className="text-xs text-slate-500 font-mono">No admins found</p>
+        ) : (
+          <div className="space-y-2">
+            {roster.map((admin: any) => (
+              <div key={admin.user_id} className="flex items-center justify-between p-3 rounded-lg bg-slate-950/50 border border-slate-800">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded flex items-center justify-center text-sm font-bold ${
+                    admin.role === 'creator' ? 'bg-yellow-500/20 text-yellow-400' :
+                    admin.role === 'admin' ? 'bg-red-500/20 text-red-400' :
+                    'bg-orange-500/20 text-orange-400'
+                  }`}>
+                    {(admin.username || '?')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">{admin.display_name || admin.username}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                        adminRoleBadge[admin.role]?.color || 'bg-slate-800 text-slate-400'
+                      }`}>
+                        {adminRoleBadge[admin.role]?.label || admin.role?.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="text-[10px] text-slate-500 font-mono">@{admin.username}</span>
+                      <span className={`text-[10px] font-mono ${admin.has_pin ? 'text-green-400' : 'text-slate-600'}`}>
+                        PIN: {admin.has_pin ? '✓' : '✗'}
+                      </span>
+                      <span className={`text-[10px] font-mono ${admin.is_online ? 'text-green-400' : 'text-slate-600'}`}>
+                        {admin.is_online ? '● Online' : '○ Offline'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                {isCreator && admin.role !== 'creator' && (
+                  <div className="flex gap-1">
+                    {admin.has_pin && (
+                      <Button size="sm" variant="ghost" onClick={() => handleForceResetPin(admin.user_id, admin.username)} 
+                        className="text-red-400 hover:bg-red-500/10 text-xs h-7 px-2">
+                        Reset PIN
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Security Info */}
       <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800">
         <h3 className="font-mono font-bold text-sm mb-2">Security Info</h3>
         <ul className="text-xs text-slate-500 font-mono space-y-1">
@@ -867,7 +962,178 @@ const SecurityTab = () => {
           <li>• 3 failed attempts = 15 minute lockout</li>
           <li>• PIN is required on every panel access</li>
           <li>• Only you can set/change/remove your PIN</li>
+          <li>• Access attempts are logged to the audit trail</li>
         </ul>
+      </div>
+    </div>
+  );
+};
+
+// =============================================
+// Access Log Tab Component
+// =============================================
+const AccessLogTab = () => {
+  const [accessLogs, setAccessLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { fetchLogs(); }, []);
+
+  const fetchLogs = async () => {
+    setLoading(true);
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const response = await fetch(
+        `https://oukxkpihsyikamzldiek.supabase.co/functions/v1/admin-actions?action=access_logs&limit=100`,
+        { headers: { 'Authorization': `Bearer ${session.session?.access_token}`, 'Content-Type': 'application/json' } }
+      );
+      const result = await response.json();
+      setAccessLogs(result.accessLogs || []);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  const getActionStyle = (action: string) => {
+    switch (action) {
+      case 'pin_verify_success': return { label: 'PIN OK', color: 'bg-green-500/20 text-green-400 border-green-500/30' };
+      case 'pin_verify_fail': return { label: 'PIN FAIL', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+      case 'pin_set': return { label: 'PIN SET', color: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' };
+      case 'pin_removed': return { label: 'PIN DEL', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' };
+      case 'force_pin_reset': return { label: 'FORCE RST', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+      case 'delete_all_pins': return { label: 'ALL PINS DEL', color: 'bg-red-500/20 text-red-400 border-red-500/30' };
+      default: return { label: action.toUpperCase(), color: 'bg-slate-800 text-slate-400 border-slate-700' };
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold font-mono text-cyan-400 flex items-center gap-2">
+          <Activity className="w-5 h-5" /> Access Log
+        </h2>
+        <Button size="sm" variant="outline" onClick={fetchLogs} className="border-slate-700 gap-1">
+          <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} /> Refresh
+        </Button>
+      </div>
+
+      {loading ? (
+        <p className="text-slate-500 font-mono text-sm animate-pulse">Loading access logs...</p>
+      ) : accessLogs.length === 0 ? (
+        <p className="text-slate-500 font-mono text-sm text-center py-8">No access logs yet</p>
+      ) : (
+        <div className="space-y-2">
+          {accessLogs.map((log: any) => {
+            const style = getActionStyle(log.action);
+            return (
+              <div key={log.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-800 font-mono text-sm">
+                <span className="text-xs text-slate-500 min-w-[140px]">
+                  {new Date(log.created_at).toLocaleString()}
+                </span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${style.color}`}>
+                  {style.label}
+                </span>
+                <span className="text-slate-300 text-xs">@{log.username}</span>
+                {log.metadata && Object.keys(log.metadata).length > 0 && (
+                  <span className="text-[10px] text-slate-600 truncate">
+                    {JSON.stringify(log.metadata)}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// =============================================
+// Creator Tools Tab Component
+// =============================================
+const CreatorToolsTab = ({ onRefreshUsers }: { onRefreshUsers: () => void }) => {
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const executeCreatorAction = async (action: string, confirmMsg: string) => {
+    if (!confirm(confirmMsg)) return;
+    setActionLoading(action);
+    try {
+      const response = await supabase.functions.invoke('admin-actions', {
+        body: { action }
+      });
+      if (response.error) throw response.error;
+      toast.success(`${action.replace(/_/g, ' ')} completed`);
+      onRefreshUsers();
+    } catch (e: any) {
+      toast.error(e?.message || `Failed: ${action}`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold font-mono text-yellow-400 flex items-center gap-2">
+        <Crown className="w-5 h-5" /> Creator Tools
+      </h2>
+
+      {/* System Overrides */}
+      <div className="p-4 rounded-lg bg-slate-900/50 border border-slate-800 space-y-4">
+        <h3 className="font-mono font-bold text-sm flex items-center gap-2">
+          <Wrench className="w-4 h-4 text-cyan-400" /> System Overrides
+        </h3>
+        <div className="grid grid-cols-2 gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => executeCreatorAction('clear_all_bans', '⚠️ Clear ALL active bans? This cannot be undone.')}
+            disabled={actionLoading === 'clear_all_bans'}
+            className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 gap-2 justify-start"
+          >
+            <Ban className="w-4 h-4" /> Clear All Bans
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => executeCreatorAction('clear_all_warnings', '⚠️ Clear ALL active warnings? This cannot be undone.')}
+            disabled={actionLoading === 'clear_all_warnings'}
+            className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 gap-2 justify-start"
+          >
+            <AlertTriangle className="w-4 h-4" /> Clear All Warnings
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => executeCreatorAction('reset_navi_defaults', '⚠️ Reset ALL NAVI settings to defaults?')}
+            disabled={actionLoading === 'reset_navi_defaults'}
+            className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 gap-2 justify-start"
+          >
+            <Bot className="w-4 h-4" /> Reset NAVI Defaults
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={() => executeCreatorAction('revoke_all_trial_admins', '⚠️ Revoke ALL trial admin roles?')}
+            disabled={actionLoading === 'revoke_all_trial_admins'}
+            className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10 gap-2 justify-start"
+          >
+            <UserCog className="w-4 h-4" /> Revoke All Trial Admins
+          </Button>
+        </div>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="p-4 rounded-lg bg-red-950/20 border-2 border-red-500/30 space-y-4">
+        <h3 className="font-mono font-bold text-sm flex items-center gap-2 text-red-400">
+          <Flame className="w-4 h-4" /> Danger Zone
+        </h3>
+        <p className="text-xs text-slate-500 font-mono">
+          These actions are irreversible and affect all admins. Use with extreme caution.
+        </p>
+        <div className="space-y-2">
+          <Button 
+            variant="outline"
+            onClick={() => executeCreatorAction('delete_all_pins', '🚨 DELETE ALL ADMIN PINs? Every admin will need to re-setup their PIN.')}
+            disabled={actionLoading === 'delete_all_pins'}
+            className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 gap-2 justify-start"
+          >
+            <KeyRound className="w-4 h-4" /> Delete All Admin PINs
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -1939,7 +2205,8 @@ const ModerationPanel = () => {
             <SidebarNavItem icon={Server} label="Zone Control" active={activeTab === 'status'} onClick={() => { setActiveTab('status'); fetchStatuses(); }} color="cyan" />
             <SidebarNavItem icon={Shield} label="Authorities" active={activeTab === 'authorities'} onClick={() => setActiveTab('authorities')} color="purple" />
             <SidebarNavItem icon={BarChart3} label="Stats" active={activeTab === 'stats'} onClick={() => setActiveTab('stats')} color="blue" />
-            <SidebarNavItem icon={FileText} label="Logs" active={activeTab === 'logs'} onClick={() => { setActiveTab('logs'); fetchLogs(); }} color="cyan" />
+            <SidebarNavItem icon={FileText} label="Mod Logs" active={activeTab === 'logs'} onClick={() => { setActiveTab('logs'); fetchLogs(); }} color="cyan" />
+            <SidebarNavItem icon={Activity} label="Access Log" active={activeTab === 'access-log'} onClick={() => setActiveTab('access-log')} color="cyan" />
             <SidebarNavItem icon={KeyRound} label="Security" active={activeTab === 'security'} onClick={() => setActiveTab('security')} color="amber" />
             
             {/* NAVI section (hidden for trial admins) */}
@@ -1949,6 +2216,14 @@ const ModerationPanel = () => {
                 <SidebarNavItem icon={Bot} label="NAVI Config" active={activeTab === 'navi-config'} onClick={() => setActiveTab('navi-config')} color="amber" />
                 <SidebarNavItem icon={Hash} label="Chat" active={activeTab === 'chat'} onClick={() => setActiveTab('chat')} color="cyan" />
                 <SidebarNavItem icon={Zap} label="Test Emergency" active={activeTab === 'test-emergency'} onClick={() => { setActiveTab('test-emergency'); fetchTestEmergencyStatus(); }} color="red" />
+              </>
+            )}
+
+            {/* Creator section */}
+            {isCreator && (
+              <>
+                <div className="px-3 py-2 text-xs font-mono text-yellow-500 uppercase tracking-wider mt-3">Creator</div>
+                <SidebarNavItem icon={Crown} label="Creator Tools" active={activeTab === 'creator-tools'} onClick={() => setActiveTab('creator-tools')} color="amber" />
               </>
             )}
           </div>
@@ -2274,7 +2549,17 @@ const ModerationPanel = () => {
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <SecurityTab />
+            <SecurityTab isCreator={isCreator} users={users} />
+          )}
+
+          {/* Access Log Tab */}
+          {activeTab === 'access-log' && (
+            <AccessLogTab />
+          )}
+
+          {/* Creator Tools Tab */}
+          {activeTab === 'creator-tools' && isCreator && (
+            <CreatorToolsTab onRefreshUsers={fetchUsers} />
           )}
 
           {/* NAVI Config Tab (formerly Autonomous) */}
@@ -2347,17 +2632,7 @@ const ModerationPanel = () => {
           )}
         </div>
 
-        {/* Activity Feed Sidebar */}
-        <div className="w-80 flex-shrink-0">
-          <div className="sticky top-6 p-4 rounded-lg bg-slate-900/50 border border-slate-800">
-            <h3 className="font-bold text-slate-300 mb-4 flex items-center gap-2 font-mono text-sm">
-              <Activity className="w-4 h-4 text-cyan-400" /> LIVE ACTIVITY
-            </h3>
-            <ScrollArea className="h-[600px]">
-              <ActivityFeed activities={activities} />
-            </ScrollArea>
-          </div>
-        </div>
+        {/* Activity feed moved to Access Log tab */}
       </div>
 
       {/* User Details Panel */}
