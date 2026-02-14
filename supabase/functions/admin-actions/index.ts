@@ -271,6 +271,80 @@ Deno.serve(async (req) => {
         });
       }
 
+      // =============================================
+      // ADMIN ROSTER (GET)
+      // =============================================
+      if (action === 'admin_roster') {
+        const { data: admins, error } = await supabaseAdmin
+          .from('user_roles')
+          .select('user_id, role, granted_at, granted_by')
+          .in('role', ['admin', 'creator', 'trial_admin'])
+          .order('granted_at', { ascending: false });
+
+        if (error) throw error;
+
+        // Get profiles for these admins
+        const adminIds = admins?.map(a => a.user_id) || [];
+        const { data: profiles } = await supabaseAdmin
+          .from('profiles')
+          .select('user_id, username, display_name, last_seen, is_online')
+          .in('user_id', adminIds);
+
+        // Get PIN status for each admin
+        const { data: pins } = await supabaseAdmin
+          .from('admin_pins')
+          .select('user_id, updated_at')
+          .in('user_id', adminIds);
+
+        const roster = admins?.map(a => {
+          const profile = profiles?.find(p => p.user_id === a.user_id);
+          const pin = pins?.find(p => p.user_id === a.user_id);
+          return {
+            ...a,
+            username: profile?.username || 'Unknown',
+            display_name: profile?.display_name,
+            last_seen: profile?.last_seen,
+            is_online: profile?.is_online,
+            has_pin: !!pin,
+            pin_updated: pin?.updated_at
+          };
+        }) || [];
+
+        return new Response(JSON.stringify({ roster }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // =============================================
+      // ACCESS LOGS (GET)
+      // =============================================
+      if (action === 'access_logs') {
+        const limit = parseInt(url.searchParams.get('limit') || '50');
+        const { data: accessLogs, error } = await supabaseAdmin
+          .from('admin_access_log')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        if (error) throw error;
+
+        // Get usernames for the logs
+        const userIds = [...new Set(accessLogs?.map(l => l.user_id) || [])];
+        const { data: profiles } = await supabaseAdmin
+          .from('profiles')
+          .select('user_id, username')
+          .in('user_id', userIds);
+
+        const logsWithNames = accessLogs?.map(l => ({
+          ...l,
+          username: profiles?.find(p => p.user_id === l.user_id)?.username || 'Unknown'
+        })) || [];
+
+        return new Response(JSON.stringify({ accessLogs: logsWithNames }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
       return new Response(JSON.stringify({ error: 'Invalid GET action' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -291,7 +365,7 @@ Deno.serve(async (req) => {
       console.log(`Processing action: ${action} (role: ${adminRole})`);
 
       // =============================================
-      // PIN ACTIONS
+      // PIN ACTIONS (with access logging)
       // =============================================
 
       if (action === 'set_pin') {
@@ -315,6 +389,9 @@ Deno.serve(async (req) => {
 
         if (error) throw error;
         console.log(`Admin ${user.id} set/updated PIN`);
+
+        // Log access
+        await supabaseAdmin.from('admin_access_log').insert({ user_id: user.id, action: 'pin_set' });
 
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -360,6 +437,9 @@ Deno.serve(async (req) => {
             .update({ failed_attempts: 0, locked_until: null })
             .eq('user_id', user.id);
 
+          // Log success
+          await supabaseAdmin.from('admin_access_log').insert({ user_id: user.id, action: 'pin_verify_success' });
+
           return new Response(JSON.stringify({ success: true, verified: true }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
@@ -376,6 +456,12 @@ Deno.serve(async (req) => {
             .from('admin_pins')
             .update(lockoutData)
             .eq('user_id', user.id);
+
+          // Log failure
+          await supabaseAdmin.from('admin_access_log').insert({ 
+            user_id: user.id, action: 'pin_verify_fail', 
+            metadata: { attempts: newAttempts, locked: newAttempts >= 3 } 
+          });
 
           return new Response(JSON.stringify({ 
             success: false, 
@@ -396,6 +482,9 @@ Deno.serve(async (req) => {
 
         if (error) throw error;
         console.log(`Admin ${user.id} removed PIN`);
+
+        // Log
+        await supabaseAdmin.from('admin_access_log').insert({ user_id: user.id, action: 'pin_removed' });
 
         return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -1364,6 +1453,132 @@ Deno.serve(async (req) => {
         }
 
         return new Response(JSON.stringify({ success: true, onCooldown: false }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // =============================================
+      // CREATOR-ONLY ACTIONS
+      // =============================================
+
+      if (action === 'force_reset_pin') {
+        if (!isCreator) {
+          return new Response(JSON.stringify({ error: 'Creator only' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        const { targetUserId } = body;
+        const { error } = await supabaseAdmin.from('admin_pins').delete().eq('user_id', targetUserId);
+        if (error) throw error;
+
+        await supabaseAdmin.from('admin_access_log').insert({ 
+          user_id: user.id, action: 'force_pin_reset', 
+          metadata: { target: targetUserId } 
+        });
+
+        console.log(`Creator ${user.id} force-reset PIN for ${targetUserId}`);
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'clear_all_bans') {
+        if (!isCreator) {
+          return new Response(JSON.stringify({ error: 'Creator only' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        const { error } = await supabaseAdmin
+          .from('moderation_actions')
+          .update({ is_active: false })
+          .in('action_type', ['temp_ban', 'perm_ban', 'ban'])
+          .eq('is_active', true);
+        if (error) throw error;
+
+        console.log(`Creator ${user.id} cleared all active bans`);
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'clear_all_warnings') {
+        if (!isCreator) {
+          return new Response(JSON.stringify({ error: 'Creator only' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        const { error } = await supabaseAdmin
+          .from('moderation_actions')
+          .update({ is_active: false })
+          .eq('action_type', 'warn')
+          .eq('is_active', true);
+        if (error) throw error;
+
+        console.log(`Creator ${user.id} cleared all active warnings`);
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'revoke_all_trial_admins') {
+        if (!isCreator) {
+          return new Response(JSON.stringify({ error: 'Creator only' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        const { data: deleted, error } = await supabaseAdmin
+          .from('user_roles')
+          .delete()
+          .eq('role', 'trial_admin')
+          .select();
+        if (error) throw error;
+
+        console.log(`Creator ${user.id} revoked all trial admins (${deleted?.length || 0})`);
+        return new Response(JSON.stringify({ success: true, count: deleted?.length || 0 }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'delete_all_pins') {
+        if (!isCreator) {
+          return new Response(JSON.stringify({ error: 'Creator only' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        // Delete all PINs except the creator's own
+        const { error } = await supabaseAdmin
+          .from('admin_pins')
+          .delete()
+          .neq('user_id', user.id);
+        if (error) throw error;
+
+        await supabaseAdmin.from('admin_access_log').insert({ 
+          user_id: user.id, action: 'delete_all_pins' 
+        });
+
+        console.log(`Creator ${user.id} deleted all admin PINs`);
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (action === 'reset_navi_defaults') {
+        if (!isCreator) {
+          return new Response(JSON.stringify({ error: 'Creator only' }), {
+            status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        const defaults = {
+          disable_signups: false, read_only_mode: false, maintenance_mode: false,
+          disable_messages: false, vip_only_mode: false, lockdown_mode: false,
+          maintenance_message: null, auto_lockdown_enabled: true, auto_temp_ban_enabled: true,
+          auto_warn_enabled: true, updated_at: new Date().toISOString(), updated_by: user.id
+        };
+        const { error } = await supabaseAdmin.from('navi_settings').update(defaults).eq('id', 'global');
+        if (error) throw error;
+
+        console.log(`Creator ${user.id} reset NAVI to defaults`);
+        return new Response(JSON.stringify({ success: true }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }

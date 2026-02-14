@@ -1,11 +1,11 @@
 {
   "major": 3,
-  "minor": 2,
+  "minor": 3,
   "patch": 0,
-  "codename": "Moderation Fortification Update",
-  "build": 8306,
-  "fullVersion": "3.2",
-  "displayVersion": "V3.2",
-  "shortVersion": "3.2",
-  "releaseDate": "2026-02-13"
+  "codename": "Creator Control Update",
+  "build": 8307,
+  "fullVersion": "3.3",
+  "displayVersion": "V3.3",
+  "shortVersion": "3.3",
+  "releaseDate": "2026-02-14"
 }
