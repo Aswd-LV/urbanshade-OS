@@ -1,36 +1,58 @@
 
-## Fix: Security Tab Blank + Trial Admin Demotion
 
-Two bugs to fix in `src/pages/ModerationPanel.tsx`:
+## Moderation Panel Polish -- V3.3.1
 
-### Bug 1: Security Tab Shows Nothing
+A set of quality-of-life improvements and missing features for the moderation panel.
 
-The `SecurityTab` component is fully implemented (lines 740-867) with PIN management UI, but it is never rendered in the main content area. The sidebar button sets `activeTab` to `'security'`, but there is no corresponding `{activeTab === 'security' && <SecurityTab />}` block alongside the other tab renders.
+### 1. Fix Version Display
 
-**Fix:** Add the missing render block after the Stats tab (around line 2266):
-```jsx
-{activeTab === 'security' && (
-  <SecurityTab />
-)}
-```
+The header on line 2136 still shows "v3.2" instead of "v3.3". Simple text fix.
 
-### Bug 2: Cannot Demote Trial Admins
+### 2. User List Enhancements
 
-The `UserDetailsPanel` action buttons have a condition on line 486: `user.role !== 'admin' && user.role !== 'creator'`. Trial admins (`role === 'trial_admin'`) pass this check and land in the "non-admin" branch, which shows Promote but no Demote/Revoke button.
+Currently the user list only shows username, role badge, and registration date. Improvements:
 
-**Fix:** Add a "Revoke Trial Admin" button in the non-admin branch, visible when `user.role === 'trial_admin'` and the current admin is not a trial admin themselves. This button will call the existing `handleDeop` function (which sends `action: 'deop'` to the edge function, already capable of demoting any role).
+- **Show avatar/initials** with the user's actual `avatar_url` from profiles (if available), falling back to the initial letter
+- **Show "last seen"** timestamp (already available as `lastActive` in the `UserData` interface but not displayed)
+- **Show online status** indicator (green dot for online users)
+- **Show clearance level** badge inline
 
-The button will appear next to "Promote to Full Admin":
-```jsx
-{!isTrialAdmin && user.role === 'trial_admin' && (
-  <Button onClick={onDeop} variant="outline" className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10 gap-2">
-    <UserCog className="w-4 h-4" /> Revoke Trial Admin
-  </Button>
-)}
-```
+### 3. Access Log Filtering
 
-### Files Modified
-- `src/pages/ModerationPanel.tsx` only (two small edits)
+The Access Log tab currently has no search or filtering -- just a raw list. Add:
 
-### No backend changes needed
-The `deop` action in the edge function already handles demoting any admin role back to user.
+- **Search box** to filter by username or action
+- **Action type filter** dropdown (PIN OK, PIN FAIL, PIN SET, etc.)
+- **Date range filter** (Last hour, 24h, 7d, All time)
+- **Export button** to download logs as JSON
+
+### 4. Mod Logs: Show Admin Who Acted
+
+Currently mod log entries show the action type, reason, and target user ID but not *who* performed the action. The `moderation_actions` table has a `created_by` column. Fetch and display the admin's username next to each log entry.
+
+### 5. Direct Message from User Panel
+
+Add a "Send Message" button in the `UserDetailsPanel` that lets an admin send a direct NAVI message to that specific user (using the existing `navi_message` action with a single target).
+
+### 6. Stats Tab: Trial Admin Count
+
+The Stats tab only counts `role === 'admin'` for the "Admins" stat card. It should also count `trial_admin` roles, or show them separately.
+
+### 7. Quick User Count in Header
+
+Show a small "X users online" indicator in the header bar next to the refresh button, using data already fetched.
+
+---
+
+### Technical Details
+
+**Files modified:**
+- `src/pages/ModerationPanel.tsx` -- all UI changes (version fix, user list improvements, access log filters, DM button, online count in header)
+- `src/components/moderation/StatsTab.tsx` -- count trial admins separately
+
+**No backend changes needed** -- all data fields already exist in the responses.
+
+**No new dependencies** -- uses existing components (Input, Select, Button).
+
+### Changelog Entry
+V3.3.1 -- Panel polish: user list shows avatars/online status/clearance, access log filtering, mod logs show acting admin, direct message from user panel, stats count trial admins.
